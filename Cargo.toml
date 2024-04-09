@@ -1,0 +1,5 @@
+[workspace]
+
+members = ["egonlang-core"]
+
+resolver = "2"
