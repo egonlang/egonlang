@@ -1,3 +1,7 @@
+mod errors;
+mod lexer;
+mod span;
+
 pub fn add(left: usize, right: usize) -> usize {
     left + right
 }
