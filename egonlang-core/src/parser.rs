@@ -7,13 +7,13 @@ use lalrpop_util::ParseError;
 use crate::ast::Module;
 use crate::errors::{Error, ErrorS, SyntaxError};
 
-pub type Parser = grammar::ModuleParser;
-
 lalrpop_mod!(
     #[allow(clippy::all)]
     grammar,
-    "/egonlang.rs"
+    "/grammar.rs"
 );
+
+pub type Parser = grammar::ModuleParser;
 
 /// Return if a string source has a valid EOF
 pub fn is_complete(source: &str) -> bool {
