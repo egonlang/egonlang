@@ -1,0 +1,82 @@
+// This grammar has been adapted from
+// https://craftinginterpreters.com/appendix-i.html#syntax-grammar.
+
+use lalrpop_util::ParseError;
+use crate::errors::ErrorS;
+
+use crate::{ast, lexer, span};
+
+grammar<'err>(
+    errors: &'err mut Vec<ParseError<usize, lexer::Token, ErrorS>>
+);
+
+pub Module: ast::Module = <stmts:Spanned<Stmt>*> => ast::Module { <> };
+
+StmtS = Spanned<Stmt>;
+
+// Statements
+// https://en.wikipedia.org/wiki/Dangling_else#Avoiding_the_conflict_in_LR_parsers
+Stmt: ast::Stmt = {
+    StmtExpr,
+    <e:!> => {
+        errors.push(e.error);
+        ast::Stmt::Error
+    },
+}
+
+StmtExpr: ast::Stmt = <value:ExprS> ";" =>
+    ast::Stmt::Expr(ast::StmtExpr { <> });
+
+// Expressions
+ExprS = Spanned<Expr>;
+
+Expr = {
+    ExprBlock,
+    ExprPrimary
+};
+
+ExprBlock: ast::Expr = {
+    "{" <stmts:(<StmtS>)*> <return_expr:(ExprS)?> "}" => ast::Expr::Block(Box::new(ast::ExprBlock {
+        stmts,
+        return_expr
+    }))
+}
+
+ExprPrimary: ast::Expr = {
+    // Literals
+    string => ast::Expr::Literal(ast::ExprLiteral::String(<>)),
+    number => ast::Expr::Literal(ast::ExprLiteral::Number(<>)),
+
+    // Variables
+    ExprIdentifier,
+}
+
+ExprIdentifier: ast::Expr = <name:identifier> =>
+    ast::Expr::Identifier(ast::ExprIdentifier {
+        identifier: ast::Identifier {
+            name
+        }
+    });
+
+/// Utilities
+
+// A statement or expression and it's location/range in the source code
+// Used for error reporting and diagnostic messages
+Spanned<T>: span::Spanned<T> = <l:@L> <t:T> <r:@R> => (t, l..r);
+
+extern {
+    type Location = usize;
+    type Error = ErrorS;
+
+    enum lexer::Token {
+        // Single-character tokens.
+        "{" => lexer::Token::BracketOpen,
+        "}" => lexer::Token::BracketClose,
+        ";" => lexer::Token::Semicolon,
+
+        // Literals.
+        identifier => lexer::Token::Identifier(<String>),
+        string => lexer::Token::String(<String>),
+        number => lexer::Token::Number(<f64>),
+    }
+}

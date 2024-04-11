@@ -1,5 +1,6 @@
 {
     "rust-analyzer.linkedProjects": [
+        "./egonlang-core/Cargo.toml",
         "./egonlang-core/Cargo.toml"
     ]
 }

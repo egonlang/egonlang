@@ -12,8 +12,19 @@ pub enum Error {
 
 #[derive(Debug, Error, Eq, PartialEq)]
 pub enum SyntaxError {
+    #[error("extraneous input: {token:?}")]
+    ExtraToken { token: String },
+    #[error("invalid input")]
+    InvalidToken,
     #[error("unexpected input")]
     UnexpectedInput { token: String },
+    #[error("unexpected end of file")]
+    UnrecognizedEOF { expected: Vec<String> },
+    #[error("unexpected {token:?}")]
+    UnrecognizedToken {
+        token: String,
+        expected: Vec<String>,
+    },
     #[error("unterminated string")]
     UnterminatedString,
 }

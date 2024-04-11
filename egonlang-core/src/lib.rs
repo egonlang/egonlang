@@ -1,5 +1,7 @@
+mod ast;
 mod errors;
 mod lexer;
+mod parser;
 mod span;
 
 pub fn add(left: usize, right: usize) -> usize {
