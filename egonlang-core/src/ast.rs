@@ -42,6 +42,7 @@ pub enum Expr {
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum ExprLiteral {
+    Bool(bool),
     Number(f64),
     String(String),
 }

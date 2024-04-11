@@ -47,6 +47,10 @@ ExprPrimary: ast::Expr = {
     string => ast::Expr::Literal(ast::ExprLiteral::String(<>)),
     number => ast::Expr::Literal(ast::ExprLiteral::Number(<>)),
 
+    // Keywords
+    "true" => ast::Expr::Literal(ast::ExprLiteral::Bool(true)),
+    "false" => ast::Expr::Literal(ast::ExprLiteral::Bool(false)),
+
     // Variables
     ExprIdentifier,
 }
@@ -73,6 +77,10 @@ extern {
         "{" => lexer::Token::BracketOpen,
         "}" => lexer::Token::BracketClose,
         ";" => lexer::Token::Semicolon,
+
+        // Keywords
+        "true" => lexer::Token::True,
+        "false" => lexer::Token::False,
 
         // Literals.
         identifier => lexer::Token::Identifier(<String>),

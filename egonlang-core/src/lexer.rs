@@ -76,6 +76,12 @@ pub enum Token {
     #[token("}")]
     BracketClose,
 
+    // Keywords
+    #[token("true")]
+    True,
+    #[token("false")]
+    False,
+
     // Literals.
     #[regex("[a-zA-Z_][a-zA-Z0-9_]*", lex_identifier)]
     Identifier(String),
@@ -147,6 +153,10 @@ mod lexer_tests {
         "foo",
         vec![Ok((0, Token::Identifier("foo".to_string()), 3))]
     );
+
+    lexer_test!(lex_boolean_true, "true", vec![Ok((0, Token::True, 4))]);
+
+    lexer_test!(lex_boolean_false, "false", vec![Ok((0, Token::False, 5))]);
 
     lexer_test!(
         lex_multiple_expressions_numbers,
@@ -327,7 +337,7 @@ mod lexer_tests {
 
     lexer_test!(
         lex_brackets_pair_containing_multiple_expressions,
-        r#"{ foo; 123; "bar" }"#,
+        r#"{ foo; 123; "bar"; true; false; }"#,
         vec![
             Ok((0, Token::BracketOpen, 1)),
             Ok((2, Token::Identifier("foo".to_string()), 5)),
@@ -335,7 +345,12 @@ mod lexer_tests {
             Ok((7, Token::Number(123f64), 10)),
             Ok((10, Token::Semicolon, 11)),
             Ok((12, Token::String("bar".to_string()), 17)),
-            Ok((18, Token::BracketClose, 19)),
+            Ok((17, Token::Semicolon, 18)),
+            Ok((19, Token::True, 23)),
+            Ok((23, Token::Semicolon, 24)),
+            Ok((25, Token::False, 30)),
+            Ok((30, Token::Semicolon, 31)),
+            Ok((32, Token::BracketClose, 33)),
         ]
     );
 

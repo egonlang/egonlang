@@ -141,6 +141,28 @@ mod parser_tests {
     );
 
     parser_test!(
+        parse_error_with_bare_true_expression,
+        r#"true"#,
+        Err(vec![(
+            Error::SyntaxError(SyntaxError::UnrecognizedEOF {
+                expected: vec!["\";\"".to_string(), "\"}\"".to_string()]
+            }),
+            4..4
+        )])
+    );
+
+    parser_test!(
+        parse_error_with_bare_false_expression,
+        r#"false"#,
+        Err(vec![(
+            Error::SyntaxError(SyntaxError::UnrecognizedEOF {
+                expected: vec!["\";\"".to_string(), "\"}\"".to_string()]
+            }),
+            5..5
+        )])
+    );
+
+    parser_test!(
         parse_error_with_bare_block_expression,
         r#"{}"#,
         Err(vec![(
@@ -198,8 +220,34 @@ mod parser_tests {
     );
 
     parser_test!(
+        parse_true_statement,
+        "true;",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Expr(StmtExpr {
+                    value: (Expr::Literal(ExprLiteral::Bool(true)), 0..4),
+                }),
+                0..5
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_false_statement,
+        "false;",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Expr(StmtExpr {
+                    value: (Expr::Literal(ExprLiteral::Bool(false)), 0..5),
+                }),
+                0..6
+            )]
+        })
+    );
+
+    parser_test!(
         parse_multiple_statements,
-        r#"foo;123;"bar";"#,
+        r#"foo;123;"bar";true;false;"#,
         Ok(Module {
             stmts: vec![
                 (
@@ -226,6 +274,18 @@ mod parser_tests {
                         value: (Expr::Literal(ExprLiteral::String("bar".to_string())), 8..13),
                     }),
                     8..14
+                ),
+                (
+                    Stmt::Expr(StmtExpr {
+                        value: (Expr::Literal(ExprLiteral::Bool(true)), 14..18),
+                    }),
+                    14..19
+                ),
+                (
+                    Stmt::Expr(StmtExpr {
+                        value: (Expr::Literal(ExprLiteral::Bool(false)), 19..24),
+                    }),
+                    19..25
                 ),
             ]
         })
