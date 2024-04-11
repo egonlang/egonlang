@@ -68,8 +68,8 @@ extern {
 
     enum lexer::Token {
         // Single-character tokens.
-        "{" => lexer::Token::BracketOpen,
-        "}" => lexer::Token::BracketClose,
+        "{" => lexer::Token::BraceOpen,
+        "}" => lexer::Token::BraceClose,
         ";" => lexer::Token::Semicolon,
 
         // Keywords

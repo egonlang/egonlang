@@ -72,9 +72,9 @@ pub enum Token {
     #[token(";")]
     Semicolon,
     #[token("{")]
-    BracketOpen,
+    BraceOpen,
     #[token("}")]
-    BracketClose,
+    BraceClose,
 
     // Keywords
     #[token("true")]
@@ -234,112 +234,103 @@ mod lexer_tests {
     );
 
     lexer_test!(
-        lex_brackets_only_open,
+        lex_braces_only_open,
         "{",
-        vec![Ok((0, Token::BracketOpen, 1))]
+        vec![Ok((0, Token::BraceOpen, 1))]
     );
 
     lexer_test!(
-        lex_brackets_only_close,
+        lex_braces_only_close,
         "}",
-        vec![Ok((0, Token::BracketClose, 1))]
+        vec![Ok((0, Token::BraceClose, 1))]
     );
 
     lexer_test!(
-        lex_brackets_empty_pair,
+        lex_braces_empty_pair,
         "{}",
-        vec![
-            Ok((0, Token::BracketOpen, 1)),
-            Ok((1, Token::BracketClose, 2))
-        ]
+        vec![Ok((0, Token::BraceOpen, 1)), Ok((1, Token::BraceClose, 2))]
     );
 
     lexer_test!(
-        lex_brackets_inverted_pair,
+        lex_braces_inverted_pair,
         "}{",
-        vec![
-            Ok((0, Token::BracketClose, 1)),
-            Ok((1, Token::BracketOpen, 2))
-        ]
+        vec![Ok((0, Token::BraceClose, 1)), Ok((1, Token::BraceOpen, 2))]
     );
 
     lexer_test!(
-        lex_brackets_nested_empty_pair,
+        lex_braces_nested_empty_pair,
         "{{}}",
         vec![
-            Ok((0, Token::BracketOpen, 1)),
-            Ok((1, Token::BracketOpen, 2)),
-            Ok((2, Token::BracketClose, 3)),
-            Ok((3, Token::BracketClose, 4))
+            Ok((0, Token::BraceOpen, 1)),
+            Ok((1, Token::BraceOpen, 2)),
+            Ok((2, Token::BraceClose, 3)),
+            Ok((3, Token::BraceClose, 4))
         ]
     );
 
     lexer_test!(
-        lex_brackets_empty_pair_with_newlines,
+        lex_braces_empty_pair_with_newlines,
         "\n{\n}\n",
-        vec![
-            Ok((1, Token::BracketOpen, 2)),
-            Ok((3, Token::BracketClose, 4))
-        ]
+        vec![Ok((1, Token::BraceOpen, 2)), Ok((3, Token::BraceClose, 4))]
     );
 
     lexer_test!(
-        lex_brackets_empty_pair_with_semicolons,
+        lex_braces_empty_pair_with_semicolons,
         ";{;};",
         vec![
             Ok((0, Token::Semicolon, 1)),
-            Ok((1, Token::BracketOpen, 2)),
+            Ok((1, Token::BraceOpen, 2)),
             Ok((2, Token::Semicolon, 3)),
-            Ok((3, Token::BracketClose, 4)),
+            Ok((3, Token::BraceClose, 4)),
             Ok((4, Token::Semicolon, 5))
         ]
     );
 
     lexer_test!(
-        lex_brackets_pair_containing_number_expression,
+        lex_braces_pair_containing_number_expression,
         "{ 123 }",
         vec![
-            Ok((0, Token::BracketOpen, 1)),
+            Ok((0, Token::BraceOpen, 1)),
             Ok((2, Token::Number(123f64), 5)),
-            Ok((6, Token::BracketClose, 7))
+            Ok((6, Token::BraceClose, 7))
         ]
     );
 
     lexer_test!(
-        lex_brackets_pair_containing_string_expression,
+        lex_braces_pair_containing_string_expression,
         r#"{ "foo" }"#,
         vec![
-            Ok((0, Token::BracketOpen, 1)),
+            Ok((0, Token::BraceOpen, 1)),
             Ok((2, Token::String("foo".to_string()), 7)),
-            Ok((8, Token::BracketClose, 9))
+            Ok((8, Token::BraceClose, 9))
         ]
     );
 
     lexer_test!(
-        lex_brackets_pair_containing_string_expression_with_brackets,
+        lex_braces_pair_containing_string_expression_with_braces,
         r#"{ "f{o}o" }"#,
         vec![
-            Ok((0, Token::BracketOpen, 1)),
+            Ok((0, Token::BraceOpen, 1)),
             Ok((2, Token::String("f{o}o".to_string()), 9)),
-            Ok((10, Token::BracketClose, 11))
+            Ok((10, Token::BraceClose, 11))
         ]
     );
 
     lexer_test!(
-        lex_brackets_pair_containing_identifier_expression,
+        lex_braces_pair_containing_identifier_expression,
         r#"{ foo }"#,
         vec![
-            Ok((0, Token::BracketOpen, 1)),
+            Ok((0, Token::BraceOpen, 1)),
             Ok((2, Token::Identifier("foo".to_string()), 5)),
-            Ok((6, Token::BracketClose, 7))
+            Ok((6, Token::BraceClose, 7))
         ]
     );
 
     lexer_test!(
-        lex_brackets_pair_containing_multiple_expressions,
+        lex_braces_pair_containing_multiple_expressions,
         r#"{ foo; 123; "bar"; true; false; }"#,
         vec![
-            Ok((0, Token::BracketOpen, 1)),
+            Ok((0, Token::BraceOpen, 1)),
             Ok((2, Token::Identifier("foo".to_string()), 5)),
             Ok((5, Token::Semicolon, 6)),
             Ok((7, Token::Number(123f64), 10)),
@@ -350,21 +341,21 @@ mod lexer_tests {
             Ok((23, Token::Semicolon, 24)),
             Ok((25, Token::False, 30)),
             Ok((30, Token::Semicolon, 31)),
-            Ok((32, Token::BracketClose, 33)),
+            Ok((32, Token::BraceClose, 33)),
         ]
     );
 
     lexer_test!(
-        lex_brackets_pair_containing_backet_pairs,
+        lex_braces_pair_containing_backet_pairs,
         r#"{{};{}};"#,
         vec![
-            Ok((0, Token::BracketOpen, 1)),
-            Ok((1, Token::BracketOpen, 2)),
-            Ok((2, Token::BracketClose, 3)),
+            Ok((0, Token::BraceOpen, 1)),
+            Ok((1, Token::BraceOpen, 2)),
+            Ok((2, Token::BraceClose, 3)),
             Ok((3, Token::Semicolon, 4)),
-            Ok((4, Token::BracketOpen, 5)),
-            Ok((5, Token::BracketClose, 6)),
-            Ok((6, Token::BracketClose, 7)),
+            Ok((4, Token::BraceOpen, 5)),
+            Ok((5, Token::BraceClose, 6)),
+            Ok((6, Token::BraceClose, 7)),
             Ok((7, Token::Semicolon, 8)),
         ]
     );
