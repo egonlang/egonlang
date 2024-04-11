@@ -41,6 +41,9 @@ pub enum Expr {
     Block(Box<ExprBlock>),
     List(ExprList),
     Tuple(ExprTuple),
+    Infix(Box<ExprInfix>),
+    Prefix(Box<ExprPrefix>),
+    Assign(Box<ExprAssign>),
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -74,4 +77,46 @@ pub struct ExprList {
 #[derive(Clone, Debug, PartialEq, Default)]
 pub struct ExprTuple {
     pub items: Vec<ExprS>,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct ExprInfix {
+    pub lt: ExprS,
+    pub op: OpInfix,
+    pub rt: ExprS,
+}
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub enum OpInfix {
+    Add,
+    Subtract,
+    Multiply,
+    Divide,
+    Modulus,
+    Less,
+    LessEqual,
+    Greater,
+    GreaterEqual,
+    Equal,
+    NotEqual,
+    LogicAnd,
+    LogicOr,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct ExprPrefix {
+    pub op: OpPrefix,
+    pub rt: ExprS,
+}
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub enum OpPrefix {
+    Negate,
+    Not,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct ExprAssign {
+    pub identifier: Identifier,
+    pub value: ExprS,
 }

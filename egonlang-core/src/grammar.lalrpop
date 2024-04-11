@@ -26,13 +26,69 @@ StmtExpr: ast::Stmt = <value:ExprS> ";" =>
 // Expressions
 ExprS = Spanned<Expr>;
 
-Expr = {
-    ExprBlock,
-    ExprPrimary,
-    ExprList,
-    ExprTuple,
+Expr = ExprAssign;
+
+ExprAssign = {
+    <name:identifier> "=" <value:ExprS> =>
+        ast::Expr::Assign(Box::new(ast::ExprAssign {
+            identifier: ast::Identifier { name },
+            value,
+        })),
+    ExprLogicOr
+}
+
+ExprLogicOr = ExprInfix<ExprLogicOr, OpLogicOr, ExprLogicAnd>;
+OpLogicOr: ast::OpInfix = "or" => ast::OpInfix::LogicOr;
+
+ExprLogicAnd = ExprInfix<ExprLogicAnd, OpLogicAnd, ExprEquality>;
+OpLogicAnd: ast::OpInfix = "and" => ast::OpInfix::LogicAnd;
+
+ExprEquality = ExprInfix<ExprEquality, OpEquality, ExprComparison>;
+OpEquality: ast::OpInfix = {
+    "==" => ast::OpInfix::Equal,
+    "!=" => ast::OpInfix::NotEqual,
+}
+
+ExprComparison = ExprInfix<ExprComparison, OpComparison, ExprTerm>;
+OpComparison: ast::OpInfix = {
+    ">" => ast::OpInfix::Greater,
+    ">=" => ast::OpInfix::GreaterEqual,
+    "<" => ast::OpInfix::Less,
+    "<=" => ast::OpInfix::LessEqual,
+}
+
+ExprTerm = ExprInfix<ExprTerm, OpTerm, ExprFactor>;
+OpTerm: ast::OpInfix = {
+    "+" => ast::OpInfix::Add,
+    "-" => ast::OpInfix::Subtract,
+}
+
+ExprFactor = ExprInfix<ExprFactor, OpFactor, ExprPrefix>;
+OpFactor: ast::OpInfix = {
+    "*" => ast::OpInfix::Multiply,
+    "/" => ast::OpInfix::Divide,
+    "%" => ast::OpInfix::Modulus,
+}
+
+ExprInfix<Lt, Op, Rt>: ast::Expr = {
+    <lt:Spanned<Lt>> <op:Op> <rt:Spanned<Rt>> =>
+        ast::Expr::Infix(Box::new(ast::ExprInfix { <> })),
+    Rt,
+}
+
+ExprPrefix: ast::Expr = {
+    <op:OpPrefix> <rt:Spanned<ExprPrefix>> =>
+        ast::Expr::Prefix(Box::new(ast::ExprPrefix { <> })),
     ExprUnit,
-};
+    ExprTuple,
+    ExprList,
+    ExprBlock,
+    ExprPrimary
+}
+OpPrefix: ast::OpPrefix = {
+    "-" => ast::OpPrefix::Negate,
+    "!" => ast::OpPrefix::Not,
+}
 
 ExprUnit: ast::Expr = "(" ")" => ast::Expr::Unit;
 
@@ -104,9 +160,26 @@ extern {
         ";" => lexer::Token::Semicolon,
         "," => lexer::Token::Comma,
 
+        "-" => lexer::Token::Minus,
+        "+" => lexer::Token::Plus,
+        "/" => lexer::Token::Slash,
+        "%" => lexer::Token::Modulus,
+        "*" => lexer::Token::Asterisk,
+
+        "!" => lexer::Token::Bang,
+        "!=" => lexer::Token::BangEqual,
+        "=" => lexer::Token::Equal,
+        "==" => lexer::Token::EqualEqual,
+        ">" => lexer::Token::Greater,
+        ">=" => lexer::Token::GreaterEqual,
+        "<" => lexer::Token::Less,
+        "<=" => lexer::Token::LessEqual,
+
         // Keywords
         "true" => lexer::Token::True,
         "false" => lexer::Token::False,
+        "and" => lexer::Token::And,
+        "or" => lexer::Token::Or,
 
         // Literals.
         identifier => lexer::Token::Identifier(<String>),

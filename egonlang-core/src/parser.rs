@@ -91,8 +91,8 @@ mod parser_tests {
     use pretty_assertions::assert_eq;
 
     use crate::ast::{
-        Expr, ExprBlock, ExprIdentifier, ExprList, ExprLiteral, ExprTuple, Identifier, Module,
-        Stmt, StmtExpr,
+        Expr, ExprAssign, ExprBlock, ExprIdentifier, ExprInfix, ExprList, ExprLiteral, ExprTuple,
+        Identifier, Module, OpInfix, Stmt, StmtExpr,
     };
 
     use crate::errors::{Error, SyntaxError};
@@ -114,10 +114,23 @@ mod parser_tests {
         Err(vec![(
             Error::SyntaxError(SyntaxError::UnrecognizedEOF {
                 expected: vec![
+                    "\"!=\"".to_string(),
+                    "\"%\"".to_string(),
                     "\")\"".to_string(),
+                    "\"*\"".to_string(),
+                    "\"+\"".to_string(),
                     "\",\"".to_string(),
+                    "\"-\"".to_string(),
+                    "\"/\"".to_string(),
                     "\";\"".to_string(),
+                    "\"<\"".to_string(),
+                    "\"<=\"".to_string(),
+                    "\"==\"".to_string(),
+                    "\">\"".to_string(),
+                    "\">=\"".to_string(),
                     "\"]\"".to_string(),
+                    "\"and\"".to_string(),
+                    "\"or\"".to_string(),
                     "\"}\"".to_string()
                 ]
             }),
@@ -131,10 +144,23 @@ mod parser_tests {
         Err(vec![(
             Error::SyntaxError(SyntaxError::UnrecognizedEOF {
                 expected: vec![
+                    "\"!=\"".to_string(),
+                    "\"%\"".to_string(),
                     "\")\"".to_string(),
+                    "\"*\"".to_string(),
+                    "\"+\"".to_string(),
                     "\",\"".to_string(),
+                    "\"-\"".to_string(),
+                    "\"/\"".to_string(),
                     "\";\"".to_string(),
+                    "\"<\"".to_string(),
+                    "\"<=\"".to_string(),
+                    "\"==\"".to_string(),
+                    "\">\"".to_string(),
+                    "\">=\"".to_string(),
                     "\"]\"".to_string(),
+                    "\"and\"".to_string(),
+                    "\"or\"".to_string(),
                     "\"}\"".to_string()
                 ]
             }),
@@ -148,10 +174,24 @@ mod parser_tests {
         Err(vec![(
             Error::SyntaxError(SyntaxError::UnrecognizedEOF {
                 expected: vec![
+                    "\"!=\"".to_string(),
+                    "\"%\"".to_string(),
                     "\")\"".to_string(),
+                    "\"*\"".to_string(),
+                    "\"+\"".to_string(),
                     "\",\"".to_string(),
+                    "\"-\"".to_string(),
+                    "\"/\"".to_string(),
                     "\";\"".to_string(),
+                    "\"<\"".to_string(),
+                    "\"<=\"".to_string(),
+                    "\"=\"".to_string(),
+                    "\"==\"".to_string(),
+                    "\">\"".to_string(),
+                    "\">=\"".to_string(),
                     "\"]\"".to_string(),
+                    "\"and\"".to_string(),
+                    "\"or\"".to_string(),
                     "\"}\"".to_string()
                 ]
             }),
@@ -165,10 +205,23 @@ mod parser_tests {
         Err(vec![(
             Error::SyntaxError(SyntaxError::UnrecognizedEOF {
                 expected: vec![
+                    "\"!=\"".to_string(),
+                    "\"%\"".to_string(),
                     "\")\"".to_string(),
+                    "\"*\"".to_string(),
+                    "\"+\"".to_string(),
                     "\",\"".to_string(),
+                    "\"-\"".to_string(),
+                    "\"/\"".to_string(),
                     "\";\"".to_string(),
+                    "\"<\"".to_string(),
+                    "\"<=\"".to_string(),
+                    "\"==\"".to_string(),
+                    "\">\"".to_string(),
+                    "\">=\"".to_string(),
                     "\"]\"".to_string(),
+                    "\"and\"".to_string(),
+                    "\"or\"".to_string(),
                     "\"}\"".to_string()
                 ]
             }),
@@ -182,10 +235,23 @@ mod parser_tests {
         Err(vec![(
             Error::SyntaxError(SyntaxError::UnrecognizedEOF {
                 expected: vec![
+                    "\"!=\"".to_string(),
+                    "\"%\"".to_string(),
                     "\")\"".to_string(),
+                    "\"*\"".to_string(),
+                    "\"+\"".to_string(),
                     "\",\"".to_string(),
+                    "\"-\"".to_string(),
+                    "\"/\"".to_string(),
                     "\";\"".to_string(),
+                    "\"<\"".to_string(),
+                    "\"<=\"".to_string(),
+                    "\"==\"".to_string(),
+                    "\">\"".to_string(),
+                    "\">=\"".to_string(),
                     "\"]\"".to_string(),
+                    "\"and\"".to_string(),
+                    "\"or\"".to_string(),
                     "\"}\"".to_string()
                 ]
             }),
@@ -199,10 +265,23 @@ mod parser_tests {
         Err(vec![(
             Error::SyntaxError(SyntaxError::UnrecognizedEOF {
                 expected: vec![
+                    "\"!=\"".to_string(),
+                    "\"%\"".to_string(),
                     "\")\"".to_string(),
+                    "\"*\"".to_string(),
+                    "\"+\"".to_string(),
                     "\",\"".to_string(),
+                    "\"-\"".to_string(),
+                    "\"/\"".to_string(),
                     "\";\"".to_string(),
+                    "\"<\"".to_string(),
+                    "\"<=\"".to_string(),
+                    "\"==\"".to_string(),
+                    "\">\"".to_string(),
+                    "\">=\"".to_string(),
                     "\"]\"".to_string(),
+                    "\"and\"".to_string(),
+                    "\"or\"".to_string(),
                     "\"}\"".to_string()
                 ]
             }),
@@ -216,10 +295,23 @@ mod parser_tests {
         Err(vec![(
             Error::SyntaxError(SyntaxError::UnrecognizedEOF {
                 expected: vec![
+                    "\"!=\"".to_string(),
+                    "\"%\"".to_string(),
                     "\")\"".to_string(),
+                    "\"*\"".to_string(),
+                    "\"+\"".to_string(),
                     "\",\"".to_string(),
+                    "\"-\"".to_string(),
+                    "\"/\"".to_string(),
                     "\";\"".to_string(),
+                    "\"<\"".to_string(),
+                    "\"<=\"".to_string(),
+                    "\"==\"".to_string(),
+                    "\">\"".to_string(),
+                    "\">=\"".to_string(),
                     "\"]\"".to_string(),
+                    "\"and\"".to_string(),
+                    "\"or\"".to_string(),
                     "\"}\"".to_string()
                 ]
             }),
@@ -621,7 +713,9 @@ mod parser_tests {
             Error::SyntaxError(SyntaxError::UnrecognizedToken {
                 token: ",".to_string(),
                 expected: vec![
+                    "\"!\"".to_string(),
                     "\"(\"".to_string(),
+                    "\"-\"".to_string(),
                     "\"[\"".to_string(),
                     "\"]\"".to_string(),
                     "\"false\"".to_string(),
@@ -686,7 +780,9 @@ mod parser_tests {
             Error::SyntaxError(SyntaxError::UnrecognizedToken {
                 token: "]".to_string(),
                 expected: vec![
+                    "\"!\"".to_string(),
                     "\"(\"".to_string(),
+                    "\"-\"".to_string(),
                     "\"[\"".to_string(),
                     "\"false\"".to_string(),
                     "\"true\"".to_string(),
@@ -768,8 +864,10 @@ mod parser_tests {
             Error::SyntaxError(SyntaxError::UnrecognizedToken {
                 token: ",".to_string(),
                 expected: vec![
+                    "\"!\"".to_string(),
                     "\"(\"".to_string(),
                     "\")\"".to_string(),
+                    "\"-\"".to_string(),
                     "\"[\"".to_string(),
                     "\"false\"".to_string(),
                     "\"true\"".to_string(),
@@ -831,6 +929,290 @@ mod parser_tests {
                     value: (Expr::Literal(ExprLiteral::Number(1f64)), 0..3)
                 }),
                 0..4
+            )]
+        })
+    );
+
+    macro_rules! parser_infix_test {
+        ($test_name:ident, $input:expr, $expected:expr) => {
+            parser_test!(
+                $test_name,
+                $input,
+                Ok(Module {
+                    stmts: vec![(
+                        Stmt::Expr(StmtExpr {
+                            value: (
+                                Expr::Infix(Box::new(ExprInfix {
+                                    lt: (
+                                        Expr::Identifier(ExprIdentifier {
+                                            identifier: Identifier {
+                                                name: "a".to_string()
+                                            }
+                                        }),
+                                        0..1
+                                    ),
+                                    op: $expected,
+                                    rt: (
+                                        Expr::Identifier(ExprIdentifier {
+                                            identifier: Identifier {
+                                                name: "b".to_string()
+                                            }
+                                        }),
+                                        4..5
+                                    )
+                                })),
+                                0..5
+                            )
+                        }),
+                        0..6
+                    )]
+                })
+            );
+        };
+    }
+
+    parser_infix_test!(parse_infix_expression_add, "a + b;", OpInfix::Add);
+
+    parser_infix_test!(parse_infix_expression_subtract, "a - b;", OpInfix::Subtract);
+
+    parser_infix_test!(parse_infix_expression_multiply, "a * b;", OpInfix::Multiply);
+
+    parser_infix_test!(parse_infix_expression_divide, "a / b;", OpInfix::Divide);
+
+    parser_infix_test!(parse_infix_expression_modulus, "a % b;", OpInfix::Modulus);
+
+    parser_infix_test!(parse_infix_expression_gt, "a > b;", OpInfix::Greater);
+
+    parser_infix_test!(parse_infix_expression_lt, "a < b;", OpInfix::Less);
+
+    parser_test!(
+        parse_assign_expression,
+        "a = b;",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Expr(StmtExpr {
+                    value: (
+                        Expr::Assign(Box::new(ExprAssign {
+                            identifier: Identifier {
+                                name: "a".to_string()
+                            },
+                            value: (
+                                Expr::Identifier(ExprIdentifier {
+                                    identifier: Identifier {
+                                        name: "b".to_string()
+                                    }
+                                }),
+                                4..5
+                            )
+                        })),
+                        0..5
+                    )
+                }),
+                0..6
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_infix_expression_equals,
+        "a == b;",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Expr(StmtExpr {
+                    value: (
+                        Expr::Infix(Box::new(ExprInfix {
+                            lt: (
+                                Expr::Identifier(ExprIdentifier {
+                                    identifier: Identifier {
+                                        name: "a".to_string()
+                                    }
+                                }),
+                                0..1
+                            ),
+                            op: OpInfix::Equal,
+                            rt: (
+                                Expr::Identifier(ExprIdentifier {
+                                    identifier: Identifier {
+                                        name: "b".to_string()
+                                    }
+                                }),
+                                5..6
+                            )
+                        })),
+                        0..6
+                    )
+                }),
+                0..7
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_infix_expression_not_equals,
+        "a != b;",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Expr(StmtExpr {
+                    value: (
+                        Expr::Infix(Box::new(ExprInfix {
+                            lt: (
+                                Expr::Identifier(ExprIdentifier {
+                                    identifier: Identifier {
+                                        name: "a".to_string()
+                                    }
+                                }),
+                                0..1
+                            ),
+                            op: OpInfix::NotEqual,
+                            rt: (
+                                Expr::Identifier(ExprIdentifier {
+                                    identifier: Identifier {
+                                        name: "b".to_string()
+                                    }
+                                }),
+                                5..6
+                            )
+                        })),
+                        0..6
+                    )
+                }),
+                0..7
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_infix_expression_gte,
+        "a >= b;",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Expr(StmtExpr {
+                    value: (
+                        Expr::Infix(Box::new(ExprInfix {
+                            lt: (
+                                Expr::Identifier(ExprIdentifier {
+                                    identifier: Identifier {
+                                        name: "a".to_string()
+                                    }
+                                }),
+                                0..1
+                            ),
+                            op: OpInfix::GreaterEqual,
+                            rt: (
+                                Expr::Identifier(ExprIdentifier {
+                                    identifier: Identifier {
+                                        name: "b".to_string()
+                                    }
+                                }),
+                                5..6
+                            )
+                        })),
+                        0..6
+                    )
+                }),
+                0..7
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_infix_expression_lte,
+        "a <= b;",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Expr(StmtExpr {
+                    value: (
+                        Expr::Infix(Box::new(ExprInfix {
+                            lt: (
+                                Expr::Identifier(ExprIdentifier {
+                                    identifier: Identifier {
+                                        name: "a".to_string()
+                                    }
+                                }),
+                                0..1
+                            ),
+                            op: OpInfix::LessEqual,
+                            rt: (
+                                Expr::Identifier(ExprIdentifier {
+                                    identifier: Identifier {
+                                        name: "b".to_string()
+                                    }
+                                }),
+                                5..6
+                            )
+                        })),
+                        0..6
+                    )
+                }),
+                0..7
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_infix_expression_and,
+        "a and b;",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Expr(StmtExpr {
+                    value: (
+                        Expr::Infix(Box::new(ExprInfix {
+                            lt: (
+                                Expr::Identifier(ExprIdentifier {
+                                    identifier: Identifier {
+                                        name: "a".to_string()
+                                    }
+                                }),
+                                0..1
+                            ),
+                            op: OpInfix::LogicAnd,
+                            rt: (
+                                Expr::Identifier(ExprIdentifier {
+                                    identifier: Identifier {
+                                        name: "b".to_string()
+                                    }
+                                }),
+                                6..7
+                            )
+                        })),
+                        0..7
+                    )
+                }),
+                0..8
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_infix_expression_or,
+        "a or b;",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Expr(StmtExpr {
+                    value: (
+                        Expr::Infix(Box::new(ExprInfix {
+                            lt: (
+                                Expr::Identifier(ExprIdentifier {
+                                    identifier: Identifier {
+                                        name: "a".to_string()
+                                    }
+                                }),
+                                0..1
+                            ),
+                            op: OpInfix::LogicOr,
+                            rt: (
+                                Expr::Identifier(ExprIdentifier {
+                                    identifier: Identifier {
+                                        name: "b".to_string()
+                                    }
+                                }),
+                                5..6
+                            )
+                        })),
+                        0..6
+                    )
+                }),
+                0..7
             )]
         })
     );

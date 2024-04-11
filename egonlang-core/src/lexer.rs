@@ -86,11 +86,42 @@ pub enum Token {
     #[token(")")]
     ParanClose,
 
+    #[token("-")]
+    Minus,
+    #[token("+")]
+    Plus,
+    #[token("/")]
+    Slash,
+    #[token("*")]
+    Asterisk,
+    #[token("%")]
+    Modulus,
+    #[token("!")]
+    Bang,
+    #[token("!=")]
+    BangEqual,
+    #[token("=")]
+    Equal,
+    #[token("==")]
+    EqualEqual,
+    #[token(">")]
+    Greater,
+    #[token(">=")]
+    GreaterEqual,
+    #[token("<")]
+    Less,
+    #[token("<=")]
+    LessEqual,
+
     // Keywords
     #[token("true")]
     True,
     #[token("false")]
     False,
+    #[token("and")]
+    And,
+    #[token("or")]
+    Or,
 
     // Literals.
     #[regex("[a-zA-Z_][a-zA-Z0-9_]*", lex_identifier)]
@@ -422,6 +453,187 @@ mod lexer_tests {
             Ok((9, Token::Identifier("c".to_string()), 10)),
             Ok((10, Token::Comma, 11)),
             Ok((11, Token::BracketClose, 12)),
+        ]
+    );
+
+    lexer_test!(
+        lex_prefix_bang,
+        "!a",
+        vec![
+            Ok((0, Token::Bang, 1)),
+            Ok((1, Token::Identifier("a".to_string()), 2))
+        ]
+    );
+
+    lexer_test!(
+        lex_prefix_minus,
+        "-a",
+        vec![
+            Ok((0, Token::Minus, 1)),
+            Ok((1, Token::Identifier("a".to_string()), 2))
+        ]
+    );
+
+    lexer_test!(
+        lex_infix_plus,
+        "a+b",
+        vec![
+            Ok((0, Token::Identifier("a".to_string()), 1)),
+            Ok((1, Token::Plus, 2)),
+            Ok((2, Token::Identifier("b".to_string()), 3))
+        ]
+    );
+
+    lexer_test!(
+        lex_infix_minus,
+        "a-b",
+        vec![
+            Ok((0, Token::Identifier("a".to_string()), 1)),
+            Ok((1, Token::Minus, 2)),
+            Ok((2, Token::Identifier("b".to_string()), 3))
+        ]
+    );
+
+    lexer_test!(
+        lex_infix_multiply,
+        "a*b",
+        vec![
+            Ok((0, Token::Identifier("a".to_string()), 1)),
+            Ok((1, Token::Asterisk, 2)),
+            Ok((2, Token::Identifier("b".to_string()), 3))
+        ]
+    );
+
+    lexer_test!(
+        lex_infix_divide,
+        "a/b",
+        vec![
+            Ok((0, Token::Identifier("a".to_string()), 1)),
+            Ok((1, Token::Slash, 2)),
+            Ok((2, Token::Identifier("b".to_string()), 3))
+        ]
+    );
+
+    lexer_test!(
+        lex_infix_modulus,
+        "a%b",
+        vec![
+            Ok((0, Token::Identifier("a".to_string()), 1)),
+            Ok((1, Token::Modulus, 2)),
+            Ok((2, Token::Identifier("b".to_string()), 3))
+        ]
+    );
+
+    lexer_test!(
+        lex_infix_equal,
+        "a=b",
+        vec![
+            Ok((0, Token::Identifier("a".to_string()), 1)),
+            Ok((1, Token::Equal, 2)),
+            Ok((2, Token::Identifier("b".to_string()), 3))
+        ]
+    );
+
+    lexer_test!(
+        lex_infix_bang_equal,
+        "a!=b",
+        vec![
+            Ok((0, Token::Identifier("a".to_string()), 1)),
+            Ok((1, Token::BangEqual, 3)),
+            Ok((3, Token::Identifier("b".to_string()), 4))
+        ]
+    );
+
+    lexer_test!(
+        lex_infix_equal_equal,
+        "a==b",
+        vec![
+            Ok((0, Token::Identifier("a".to_string()), 1)),
+            Ok((1, Token::EqualEqual, 3)),
+            Ok((3, Token::Identifier("b".to_string()), 4))
+        ]
+    );
+
+    lexer_test!(
+        lex_infix_gt,
+        "a>b",
+        vec![
+            Ok((0, Token::Identifier("a".to_string()), 1)),
+            Ok((1, Token::Greater, 2)),
+            Ok((2, Token::Identifier("b".to_string()), 3))
+        ]
+    );
+
+    lexer_test!(
+        lex_infix_lt,
+        "a<b",
+        vec![
+            Ok((0, Token::Identifier("a".to_string()), 1)),
+            Ok((1, Token::Less, 2)),
+            Ok((2, Token::Identifier("b".to_string()), 3))
+        ]
+    );
+
+    lexer_test!(
+        lex_infix_gte,
+        "a>=b",
+        vec![
+            Ok((0, Token::Identifier("a".to_string()), 1)),
+            Ok((1, Token::GreaterEqual, 3)),
+            Ok((3, Token::Identifier("b".to_string()), 4))
+        ]
+    );
+
+    lexer_test!(
+        lex_infix_lte,
+        "a<=b",
+        vec![
+            Ok((0, Token::Identifier("a".to_string()), 1)),
+            Ok((1, Token::LessEqual, 3)),
+            Ok((3, Token::Identifier("b".to_string()), 4))
+        ]
+    );
+
+    lexer_test!(
+        lex_infix_with_prefix,
+        "a - -b",
+        vec![
+            Ok((0, Token::Identifier("a".to_string()), 1)),
+            Ok((2, Token::Minus, 3)),
+            Ok((4, Token::Minus, 5)),
+            Ok((5, Token::Identifier("b".to_string()), 6))
+        ]
+    );
+
+    lexer_test!(
+        lex_infix_with_infix,
+        "a - b + c",
+        vec![
+            Ok((0, Token::Identifier("a".to_string()), 1)),
+            Ok((2, Token::Minus, 3)),
+            Ok((4, Token::Identifier("b".to_string()), 5)),
+            Ok((6, Token::Plus, 7)),
+            Ok((8, Token::Identifier("c".to_string()), 9))
+        ]
+    );
+
+    lexer_test!(
+        lex_infix_and,
+        "a and b",
+        vec![
+            Ok((0, Token::Identifier("a".to_string()), 1)),
+            Ok((2, Token::And, 5)),
+            Ok((6, Token::Identifier("b".to_string()), 7))
+        ]
+    );
+
+    lexer_test!(
+        lex_infix_or,
+        "a or b",
+        vec![
+            Ok((0, Token::Identifier("a".to_string()), 1)),
+            Ok((2, Token::Or, 4)),
+            Ok((5, Token::Identifier("b".to_string()), 6))
         ]
     );
 }
