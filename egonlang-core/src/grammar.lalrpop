@@ -29,8 +29,14 @@ ExprS = Spanned<Expr>;
 Expr = {
     ExprBlock,
     ExprPrimary,
-    ExprList
+    ExprList,
+    ExprTuple,
+    ExprUnit,
 };
+
+ExprUnit: ast::Expr = "(" ")" => ast::Expr::Unit;
+
+ExprTuple: ast::Expr = "(" <items:SeperatedTrailing<",">> ")" => ast::Expr::Tuple(ast::ExprTuple {<>});
 
 ExprList: ast::Expr = "[" <items:Seperated<",">> "]" => ast::Expr::List(ast::ExprList {<>});
 
@@ -53,6 +59,9 @@ ExprPrimary: ast::Expr = {
 
     // Variables
     ExprIdentifier,
+
+    // Grouping
+    "(" <Expr> ")",
 }
 
 ExprIdentifier: ast::Expr = <name:identifier> =>
@@ -67,12 +76,18 @@ ExprIdentifier: ast::Expr = <name:identifier> =>
 Spanned<T>: span::Spanned<T> = <l:@L> <t:T> <r:@R> => (t, l..r);
 
 Seperated<T>: Vec<ast::ExprS> = {
-    <first:ExprS> <mut args:(T <ExprS>)*> <trailing_seperator:(T)?> => {
+    <first:ExprS> <mut args:(T <ExprS>)*> => {
         args.insert(0, first);
         args
     },
     () => Vec::new(),
 }
+
+SeperatedTrailing<T>: Vec<ast::ExprS> =
+    <first:ExprS> <mut args:(T <ExprS>)*> <trailing_seperator:T> => {
+        args.insert(0, first);
+        args
+    };
 
 extern {
     type Location = usize;
@@ -84,6 +99,8 @@ extern {
         "}" => lexer::Token::BraceClose,
         "[" => lexer::Token::BracketOpen,
         "]" => lexer::Token::BracketClose,
+        "(" => lexer::Token::ParanOpen,
+        ")" => lexer::Token::ParanClose,
         ";" => lexer::Token::Semicolon,
         "," => lexer::Token::Comma,
 

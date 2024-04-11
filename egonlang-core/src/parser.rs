@@ -91,7 +91,8 @@ mod parser_tests {
     use pretty_assertions::assert_eq;
 
     use crate::ast::{
-        Expr, ExprBlock, ExprIdentifier, ExprList, ExprLiteral, Identifier, Module, Stmt, StmtExpr,
+        Expr, ExprBlock, ExprIdentifier, ExprList, ExprLiteral, ExprTuple, Identifier, Module,
+        Stmt, StmtExpr,
     };
 
     use crate::errors::{Error, SyntaxError};
@@ -113,6 +114,7 @@ mod parser_tests {
         Err(vec![(
             Error::SyntaxError(SyntaxError::UnrecognizedEOF {
                 expected: vec![
+                    "\")\"".to_string(),
                     "\",\"".to_string(),
                     "\";\"".to_string(),
                     "\"]\"".to_string(),
@@ -129,6 +131,7 @@ mod parser_tests {
         Err(vec![(
             Error::SyntaxError(SyntaxError::UnrecognizedEOF {
                 expected: vec![
+                    "\")\"".to_string(),
                     "\",\"".to_string(),
                     "\";\"".to_string(),
                     "\"]\"".to_string(),
@@ -145,6 +148,7 @@ mod parser_tests {
         Err(vec![(
             Error::SyntaxError(SyntaxError::UnrecognizedEOF {
                 expected: vec![
+                    "\")\"".to_string(),
                     "\",\"".to_string(),
                     "\";\"".to_string(),
                     "\"]\"".to_string(),
@@ -161,6 +165,7 @@ mod parser_tests {
         Err(vec![(
             Error::SyntaxError(SyntaxError::UnrecognizedEOF {
                 expected: vec![
+                    "\")\"".to_string(),
                     "\",\"".to_string(),
                     "\";\"".to_string(),
                     "\"]\"".to_string(),
@@ -177,6 +182,7 @@ mod parser_tests {
         Err(vec![(
             Error::SyntaxError(SyntaxError::UnrecognizedEOF {
                 expected: vec![
+                    "\")\"".to_string(),
                     "\",\"".to_string(),
                     "\";\"".to_string(),
                     "\"]\"".to_string(),
@@ -193,6 +199,7 @@ mod parser_tests {
         Err(vec![(
             Error::SyntaxError(SyntaxError::UnrecognizedEOF {
                 expected: vec![
+                    "\")\"".to_string(),
                     "\",\"".to_string(),
                     "\";\"".to_string(),
                     "\"]\"".to_string(),
@@ -209,6 +216,7 @@ mod parser_tests {
         Err(vec![(
             Error::SyntaxError(SyntaxError::UnrecognizedEOF {
                 expected: vec![
+                    "\")\"".to_string(),
                     "\",\"".to_string(),
                     "\";\"".to_string(),
                     "\"]\"".to_string(),
@@ -547,7 +555,7 @@ mod parser_tests {
 
     parser_test!(
         parse_blocks_with_multiple_statements_and_return_expression,
-        r#"{foo;123;"bar"};"#,
+        r#"{foo;123;();"bar"};"#,
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
@@ -572,17 +580,23 @@ mod parser_tests {
                                         value: (Expr::Literal(ExprLiteral::Number(123f64)), 5..8)
                                     }),
                                     5..9
+                                ),
+                                (
+                                    Stmt::Expr(StmtExpr {
+                                        value: (Expr::Unit, 9..11)
+                                    }),
+                                    9..12
                                 )
                             ],
                             return_expr: Some((
                                 Expr::Literal(ExprLiteral::String("bar".to_string())),
-                                9..14
+                                12..17
                             ))
                         })),
-                        0..15
+                        0..18
                     )
                 }),
-                0..16
+                0..19
             )]
         })
     );
@@ -598,6 +612,28 @@ mod parser_tests {
                 0..3
             )]
         })
+    );
+
+    parser_test!(
+        parse_list_empty_with_comma,
+        "[,];",
+        Err(vec![(
+            Error::SyntaxError(SyntaxError::UnrecognizedToken {
+                token: ",".to_string(),
+                expected: vec![
+                    "\"(\"".to_string(),
+                    "\"[\"".to_string(),
+                    "\"]\"".to_string(),
+                    "\"false\"".to_string(),
+                    "\"true\"".to_string(),
+                    "\"{\"".to_string(),
+                    "identifier".to_string(),
+                    "number".to_string(),
+                    "string".to_string(),
+                ]
+            }),
+            1..2
+        )])
     );
 
     parser_test!(
@@ -646,49 +682,27 @@ mod parser_tests {
     parser_test!(
         parse_list_with_items_and_trailing_commas,
         "[a, b, c,];",
-        Ok(Module {
-            stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    value: (
-                        Expr::List(ExprList {
-                            items: vec![
-                                (
-                                    Expr::Identifier(ExprIdentifier {
-                                        identifier: Identifier {
-                                            name: "a".to_string()
-                                        }
-                                    }),
-                                    1..2
-                                ),
-                                (
-                                    Expr::Identifier(ExprIdentifier {
-                                        identifier: Identifier {
-                                            name: "b".to_string()
-                                        }
-                                    }),
-                                    4..5
-                                ),
-                                (
-                                    Expr::Identifier(ExprIdentifier {
-                                        identifier: Identifier {
-                                            name: "c".to_string()
-                                        }
-                                    }),
-                                    7..8
-                                )
-                            ]
-                        }),
-                        0..10
-                    )
-                }),
-                0..11
-            )]
-        })
+        Err(vec![(
+            Error::SyntaxError(SyntaxError::UnrecognizedToken {
+                token: "]".to_string(),
+                expected: vec![
+                    "\"(\"".to_string(),
+                    "\"[\"".to_string(),
+                    "\"false\"".to_string(),
+                    "\"true\"".to_string(),
+                    "\"{\"".to_string(),
+                    "identifier".to_string(),
+                    "number".to_string(),
+                    "string".to_string(),
+                ]
+            }),
+            9..10
+        )])
     );
 
     parser_test!(
         parse_list_with_nested_list,
-        "[a, [b], c,];",
+        "[a, [b], c];",
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
@@ -726,10 +740,97 @@ mod parser_tests {
                                 )
                             ]
                         }),
-                        0..12
+                        0..11
                     )
                 }),
-                0..13
+                0..12
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_unit,
+        "();",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Expr(StmtExpr {
+                    value: (Expr::Unit, 0..2)
+                }),
+                0..3
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_tuple_empty,
+        "(,);",
+        Err(vec![(
+            Error::SyntaxError(SyntaxError::UnrecognizedToken {
+                token: ",".to_string(),
+                expected: vec![
+                    "\"(\"".to_string(),
+                    "\")\"".to_string(),
+                    "\"[\"".to_string(),
+                    "\"false\"".to_string(),
+                    "\"true\"".to_string(),
+                    "\"{\"".to_string(),
+                    "identifier".to_string(),
+                    "number".to_string(),
+                    "string".to_string(),
+                ]
+            }),
+            1..2
+        )])
+    );
+
+    parser_test!(
+        parse_tuple_one_item,
+        "(1,);",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Expr(StmtExpr {
+                    value: (
+                        Expr::Tuple(ExprTuple {
+                            items: vec![(Expr::Literal(ExprLiteral::Number(1f64)), 1..2)]
+                        }),
+                        0..4
+                    )
+                }),
+                0..5
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_tuple_two_items,
+        "(1, 2,);",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Expr(StmtExpr {
+                    value: (
+                        Expr::Tuple(ExprTuple {
+                            items: vec![
+                                (Expr::Literal(ExprLiteral::Number(1f64)), 1..2),
+                                (Expr::Literal(ExprLiteral::Number(2f64)), 4..5)
+                            ]
+                        }),
+                        0..7
+                    )
+                }),
+                0..8
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_grouping_expression,
+        "(1);",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Expr(StmtExpr {
+                    value: (Expr::Literal(ExprLiteral::Number(1f64)), 0..3)
+                }),
+                0..4
             )]
         })
     );

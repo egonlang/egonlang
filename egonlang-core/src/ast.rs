@@ -35,10 +35,12 @@ pub struct StmtExpr {
 /// Expressions
 #[derive(Clone, Debug, PartialEq)]
 pub enum Expr {
+    Unit,
     Literal(ExprLiteral),
     Identifier(ExprIdentifier),
     Block(Box<ExprBlock>),
     List(ExprList),
+    Tuple(ExprTuple),
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -66,5 +68,10 @@ pub struct ExprBlock {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ExprList {
+    pub items: Vec<ExprS>,
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct ExprTuple {
     pub items: Vec<ExprS>,
 }

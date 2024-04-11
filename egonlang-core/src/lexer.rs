@@ -81,6 +81,10 @@ pub enum Token {
     BracketOpen,
     #[token("]")]
     BracketClose,
+    #[token("(")]
+    ParanOpen,
+    #[token(")")]
+    ParanClose,
 
     // Keywords
     #[token("true")]
