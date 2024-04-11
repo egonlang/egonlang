@@ -2,5 +2,5 @@ mod ast;
 mod diagnostics;
 mod errors;
 mod lexer;
-mod parser;
+pub mod parser;
 mod span;

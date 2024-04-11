@@ -1,0 +1,3 @@
+"foo
+
+// out: SyntaxError: unterminated string
