@@ -38,6 +38,7 @@ pub enum Expr {
     Literal(ExprLiteral),
     Identifier(ExprIdentifier),
     Block(Box<ExprBlock>),
+    List(ExprList),
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -61,4 +62,9 @@ pub struct Identifier {
 pub struct ExprBlock {
     pub stmts: Vec<StmtS>,
     pub return_expr: Option<ExprS>,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct ExprList {
+    pub items: Vec<ExprS>,
 }

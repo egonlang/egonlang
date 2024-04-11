@@ -71,10 +71,16 @@ pub enum Token {
     // Single-character tokens.
     #[token(";")]
     Semicolon,
+    #[token(",")]
+    Comma,
     #[token("{")]
     BraceOpen,
     #[token("}")]
     BraceClose,
+    #[token("[")]
+    BracketOpen,
+    #[token("]")]
+    BracketClose,
 
     // Keywords
     #[token("true")]
@@ -357,6 +363,61 @@ mod lexer_tests {
             Ok((5, Token::BraceClose, 6)),
             Ok((6, Token::BraceClose, 7)),
             Ok((7, Token::Semicolon, 8)),
+        ]
+    );
+
+    lexer_test!(
+        lex_brackets_empty_pair,
+        "[]",
+        vec![
+            Ok((0, Token::BracketOpen, 1)),
+            Ok((1, Token::BracketClose, 2)),
+        ]
+    );
+
+    lexer_test!(
+        lex_brackets_with_items,
+        "[a, b, c]",
+        vec![
+            Ok((0, Token::BracketOpen, 1)),
+            Ok((1, Token::Identifier("a".to_string()), 2)),
+            Ok((2, Token::Comma, 3)),
+            Ok((4, Token::Identifier("b".to_string()), 5)),
+            Ok((5, Token::Comma, 6)),
+            Ok((7, Token::Identifier("c".to_string()), 8)),
+            Ok((8, Token::BracketClose, 9)),
+        ]
+    );
+
+    lexer_test!(
+        lex_brackets_with_items_trailing_comma,
+        "[a, b, c,]",
+        vec![
+            Ok((0, Token::BracketOpen, 1)),
+            Ok((1, Token::Identifier("a".to_string()), 2)),
+            Ok((2, Token::Comma, 3)),
+            Ok((4, Token::Identifier("b".to_string()), 5)),
+            Ok((5, Token::Comma, 6)),
+            Ok((7, Token::Identifier("c".to_string()), 8)),
+            Ok((8, Token::Comma, 9)),
+            Ok((9, Token::BracketClose, 10)),
+        ]
+    );
+
+    lexer_test!(
+        lex_brackets_with_items_nested_brackets,
+        "[a, [b], c,]",
+        vec![
+            Ok((0, Token::BracketOpen, 1)),
+            Ok((1, Token::Identifier("a".to_string()), 2)),
+            Ok((2, Token::Comma, 3)),
+            Ok((4, Token::BracketOpen, 5)),
+            Ok((5, Token::Identifier("b".to_string()), 6)),
+            Ok((6, Token::BracketClose, 7)),
+            Ok((7, Token::Comma, 8)),
+            Ok((9, Token::Identifier("c".to_string()), 10)),
+            Ok((10, Token::Comma, 11)),
+            Ok((11, Token::BracketClose, 12)),
         ]
     );
 }

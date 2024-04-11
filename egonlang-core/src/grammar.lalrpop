@@ -28,15 +28,19 @@ ExprS = Spanned<Expr>;
 
 Expr = {
     ExprBlock,
-    ExprPrimary
+    ExprPrimary,
+    ExprList
 };
 
-ExprBlock: ast::Expr = {
-    "{" <stmts:(<StmtS>)*> <return_expr:(ExprS)?> "}" => ast::Expr::Block(Box::new(ast::ExprBlock {
-        stmts,
-        return_expr
-    }))
-}
+ExprList: ast::Expr = "[" <items:Seperated<",">> "]" => ast::Expr::List(ast::ExprList {<>});
+
+ExprBlock: ast::Expr = "{" <stmts:(<StmtS>)*> <return_expr:(ExprS)?> "}" =>
+    ast::Expr::Block(Box::new(
+        ast::ExprBlock {
+            stmts,
+            return_expr
+        }
+    ));
 
 ExprPrimary: ast::Expr = {
     // Literals
@@ -62,6 +66,14 @@ ExprIdentifier: ast::Expr = <name:identifier> =>
 
 Spanned<T>: span::Spanned<T> = <l:@L> <t:T> <r:@R> => (t, l..r);
 
+Seperated<T>: Vec<ast::ExprS> = {
+    <first:ExprS> <mut args:(T <ExprS>)*> <trailing_seperator:(T)?> => {
+        args.insert(0, first);
+        args
+    },
+    () => Vec::new(),
+}
+
 extern {
     type Location = usize;
     type Error = ErrorS;
@@ -70,7 +82,10 @@ extern {
         // Single-character tokens.
         "{" => lexer::Token::BraceOpen,
         "}" => lexer::Token::BraceClose,
+        "[" => lexer::Token::BracketOpen,
+        "]" => lexer::Token::BracketClose,
         ";" => lexer::Token::Semicolon,
+        "," => lexer::Token::Comma,
 
         // Keywords
         "true" => lexer::Token::True,
