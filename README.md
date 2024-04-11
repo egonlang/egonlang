@@ -1,1 +1,1 @@
-# egon
+# The Egon Language

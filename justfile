@@ -10,7 +10,7 @@ build-release:
 clean:
     cargo clean
 
-fmt:
+format:
     cargo fmt --all
 
 lint:
