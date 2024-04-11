@@ -338,4 +338,19 @@ mod lexer_tests {
             Ok((18, Token::BracketClose, 19)),
         ]
     );
+
+    lexer_test!(
+        lex_brackets_pair_containing_backet_pairs,
+        r#"{{};{}};"#,
+        vec![
+            Ok((0, Token::BracketOpen, 1)),
+            Ok((1, Token::BracketOpen, 2)),
+            Ok((2, Token::BracketClose, 3)),
+            Ok((3, Token::Semicolon, 4)),
+            Ok((4, Token::BracketOpen, 5)),
+            Ok((5, Token::BracketClose, 6)),
+            Ok((6, Token::BracketClose, 7)),
+            Ok((7, Token::Semicolon, 8)),
+        ]
+    );
 }
