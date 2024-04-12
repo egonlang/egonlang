@@ -26,16 +26,17 @@ StmtExpr: ast::Stmt = <value:ExprS> ";" =>
 // Expressions
 ExprS = Spanned<Expr>;
 
-Expr = ExprAssign;
+Expr: ast::Expr = {
+    ExprLogicOr,
+    ExprAssign
+};
 
-ExprAssign = {
+ExprAssign: ast::Expr = 
     <name:identifier> "=" <value:ExprS> =>
         ast::Expr::Assign(Box::new(ast::ExprAssign {
             identifier: ast::Identifier { name },
             value,
-        })),
-    ExprLogicOr
-}
+        }));
 
 ExprLogicOr = ExprInfix<ExprLogicOr, OpLogicOr, ExprLogicAnd>;
 OpLogicOr: ast::OpInfix = "or" => ast::OpInfix::LogicOr;
@@ -79,30 +80,21 @@ ExprInfix<Lt, Op, Rt>: ast::Expr = {
 ExprPrefix: ast::Expr = {
     <op:OpPrefix> <rt:Spanned<ExprPrefix>> =>
         ast::Expr::Prefix(Box::new(ast::ExprPrefix { <> })),
-    ExprUnit,
-    ExprTuple,
-    ExprList,
-    ExprBlock,
-    ExprPrimary
+    ExprSimple
 }
 OpPrefix: ast::OpPrefix = {
     "-" => ast::OpPrefix::Negate,
     "!" => ast::OpPrefix::Not,
 }
 
-ExprUnit: ast::Expr = "(" ")" => ast::Expr::Unit;
+ExprSimple: ast::Expr = {
+    ExprTuple,
+    ExprList,
+    ExprPrimary,
+}
 
 ExprTuple: ast::Expr = "(" <items:SeperatedTrailing<",">> ")" => ast::Expr::Tuple(ast::ExprTuple {<>});
-
 ExprList: ast::Expr = "[" <items:Seperated<",">> "]" => ast::Expr::List(ast::ExprList {<>});
-
-ExprBlock: ast::Expr = "{" <stmts:(<StmtS>)*> <return_expr:(ExprS)?> "}" =>
-    ast::Expr::Block(Box::new(
-        ast::ExprBlock {
-            stmts,
-            return_expr
-        }
-    ));
 
 ExprPrimary: ast::Expr = {
     // Literals
@@ -116,8 +108,15 @@ ExprPrimary: ast::Expr = {
     // Variables
     ExprIdentifier,
 
+    // Unit
+    ExprUnit,
+    
+    // Blocks
+    ExprBlock,
+
     // Grouping
     "(" <Expr> ")",
+
 }
 
 ExprIdentifier: ast::Expr = <name:identifier> =>
@@ -127,9 +126,21 @@ ExprIdentifier: ast::Expr = <name:identifier> =>
         }
     });
 
+ExprUnit: ast::Expr = "(" ")" =>
+    ast::Expr::Unit;
+
+ExprBlock: ast::Expr = "{" <stmts:(<StmtS>)*> <return_expr:(ExprS)?> "}" =>
+    ast::Expr::Block(Box::new(
+        ast::ExprBlock {
+            stmts,
+            return_expr
+        }
+    ));
+
 /// Utilities
 
-Spanned<T>: span::Spanned<T> = <l:@L> <t:T> <r:@R> => (t, l..r);
+Spanned<T>: span::Spanned<T> = <l:@L> <t:T> <r:@R> =>
+    (t, l..r);
 
 Seperated<T>: Vec<ast::ExprS> = {
     <first:ExprS> <mut args:(T <ExprS>)*> => {
