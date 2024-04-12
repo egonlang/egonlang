@@ -14,13 +14,14 @@ StmtS = Spanned<Stmt>;
 // Statements
 Stmt: ast::Stmt = {
     StmtExpr,
+    <expr:Spanned<IfExpr>> => ast::Stmt::Expr(ast::StmtExpr { <> }),
     <e:!> => {
         errors.push(e.error);
         ast::Stmt::Error
     },
 }
 
-StmtExpr: ast::Stmt = <value:ExprS> ";" =>
+StmtExpr: ast::Stmt = <expr:ExprS> ";" =>
     ast::Stmt::Expr(ast::StmtExpr { <> });
 
 // Expressions
@@ -31,12 +32,38 @@ Expr: ast::Expr = {
     ExprAssign
 };
 
-ExprAssign: ast::Expr = 
+IfExpr: ast::Expr = {
+    // if .. else ..
+    "if" <cond:Spanned<ExprLogicOr>> <then:Spanned<ExprBlock>> 
+    <else_:("else" <Spanned<ExprBlock>>)?>
+    => {
+        ast::Expr::If(Box::new(ast::ExprIf { <> }))
+    },
+
+    // if .. else if ..
+    "if" <cond:Spanned<ExprLogicOr>> <then:Spanned<ExprBlock>> 
+    <else_:("else" <Spanned<IfExpr>>)>
+    => {
+        ast::Expr::If(Box::new(ast::ExprIf { 
+            cond,
+            then,
+            else_: Some(else_)
+         }))
+    },
+}
+
+ExprAssign: ast::Expr = {
     <name:identifier> "=" <value:ExprS> =>
         ast::Expr::Assign(Box::new(ast::ExprAssign {
             identifier: ast::Identifier { name },
             value,
-        }));
+        })),
+    <name:identifier> "=" <value:Spanned<IfExpr>> =>
+        ast::Expr::Assign(Box::new(ast::ExprAssign {
+            identifier: ast::Identifier { name },
+            value,
+        }))
+}
 
 ExprLogicOr = ExprInfix<ExprLogicOr, OpLogicOr, ExprLogicAnd>;
 OpLogicOr: ast::OpInfix = "or" => ast::OpInfix::LogicOr;
@@ -191,6 +218,8 @@ extern {
         "false" => lexer::Token::False,
         "and" => lexer::Token::And,
         "or" => lexer::Token::Or,
+        "if" => lexer::Token::If,
+        "else" => lexer::Token::Else,
 
         // Literals.
         identifier => lexer::Token::Identifier(<String>),
