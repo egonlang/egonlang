@@ -91,8 +91,8 @@ mod parser_tests {
     use pretty_assertions::assert_eq;
 
     use crate::ast::{
-        Expr, ExprAssign, ExprBlock, ExprIdentifier, ExprInfix, ExprList, ExprLiteral, ExprTuple,
-        Identifier, Module, OpInfix, Stmt, StmtExpr,
+        Expr, ExprAssign, ExprBlock, ExprIdentifier, ExprIf, ExprInfix, ExprList, ExprLiteral,
+        ExprTuple, Identifier, Module, OpInfix, Stmt, StmtExpr,
     };
 
     use crate::errors::{Error, SyntaxError};
@@ -131,7 +131,8 @@ mod parser_tests {
                     "\"]\"".to_string(),
                     "\"and\"".to_string(),
                     "\"or\"".to_string(),
-                    "\"}\"".to_string()
+                    "\"{\"".to_string(),
+                    "\"}\"".to_string(),
                 ]
             }),
             3..3
@@ -161,7 +162,8 @@ mod parser_tests {
                     "\"]\"".to_string(),
                     "\"and\"".to_string(),
                     "\"or\"".to_string(),
-                    "\"}\"".to_string()
+                    "\"{\"".to_string(),
+                    "\"}\"".to_string(),
                 ]
             }),
             5..5
@@ -192,7 +194,7 @@ mod parser_tests {
                     "\"]\"".to_string(),
                     "\"and\"".to_string(),
                     "\"or\"".to_string(),
-                    "\"}\"".to_string()
+                    "\"}\"".to_string(),
                 ]
             }),
             3..3
@@ -222,7 +224,8 @@ mod parser_tests {
                     "\"]\"".to_string(),
                     "\"and\"".to_string(),
                     "\"or\"".to_string(),
-                    "\"}\"".to_string()
+                    "\"{\"".to_string(),
+                    "\"}\"".to_string(),
                 ]
             }),
             4..4
@@ -252,7 +255,8 @@ mod parser_tests {
                     "\"]\"".to_string(),
                     "\"and\"".to_string(),
                     "\"or\"".to_string(),
-                    "\"}\"".to_string()
+                    "\"{\"".to_string(),
+                    "\"}\"".to_string(),
                 ]
             }),
             5..5
@@ -282,7 +286,8 @@ mod parser_tests {
                     "\"]\"".to_string(),
                     "\"and\"".to_string(),
                     "\"or\"".to_string(),
-                    "\"}\"".to_string()
+                    "\"{\"".to_string(),
+                    "\"}\"".to_string(),
                 ]
             }),
             2..2
@@ -312,7 +317,8 @@ mod parser_tests {
                     "\"]\"".to_string(),
                     "\"and\"".to_string(),
                     "\"or\"".to_string(),
-                    "\"}\"".to_string()
+                    "\"{\"".to_string(),
+                    "\"}\"".to_string(),
                 ]
             }),
             2..2
@@ -325,7 +331,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (Expr::Literal(ExprLiteral::Number(123f64)), 0..3),
+                    expr: (Expr::Literal(ExprLiteral::Number(123f64)), 0..3),
                 }),
                 0..4
             )]
@@ -338,7 +344,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (Expr::Literal(ExprLiteral::String("foo".to_string())), 0..5),
+                    expr: (Expr::Literal(ExprLiteral::String("foo".to_string())), 0..5),
                 }),
                 0..6
             )]
@@ -351,7 +357,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (
+                    expr: (
                         Expr::Identifier(ExprIdentifier {
                             identifier: Identifier {
                                 name: "foo".to_string()
@@ -371,7 +377,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (Expr::Literal(ExprLiteral::Bool(true)), 0..4),
+                    expr: (Expr::Literal(ExprLiteral::Bool(true)), 0..4),
                 }),
                 0..5
             )]
@@ -384,7 +390,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (Expr::Literal(ExprLiteral::Bool(false)), 0..5),
+                    expr: (Expr::Literal(ExprLiteral::Bool(false)), 0..5),
                 }),
                 0..6
             )]
@@ -398,7 +404,7 @@ mod parser_tests {
             stmts: vec![
                 (
                     Stmt::Expr(StmtExpr {
-                        value: (
+                        expr: (
                             Expr::Identifier(ExprIdentifier {
                                 identifier: Identifier {
                                     name: "foo".to_string()
@@ -411,25 +417,25 @@ mod parser_tests {
                 ),
                 (
                     Stmt::Expr(StmtExpr {
-                        value: (Expr::Literal(ExprLiteral::Number(123f64)), 4..7),
+                        expr: (Expr::Literal(ExprLiteral::Number(123f64)), 4..7),
                     }),
                     4..8
                 ),
                 (
                     Stmt::Expr(StmtExpr {
-                        value: (Expr::Literal(ExprLiteral::String("bar".to_string())), 8..13),
+                        expr: (Expr::Literal(ExprLiteral::String("bar".to_string())), 8..13),
                     }),
                     8..14
                 ),
                 (
                     Stmt::Expr(StmtExpr {
-                        value: (Expr::Literal(ExprLiteral::Bool(true)), 14..18),
+                        expr: (Expr::Literal(ExprLiteral::Bool(true)), 14..18),
                     }),
                     14..19
                 ),
                 (
                     Stmt::Expr(StmtExpr {
-                        value: (Expr::Literal(ExprLiteral::Bool(false)), 19..24),
+                        expr: (Expr::Literal(ExprLiteral::Bool(false)), 19..24),
                     }),
                     19..25
                 ),
@@ -443,7 +449,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (
+                    expr: (
                         Expr::Block(Box::from(ExprBlock {
                             stmts: vec![],
                             return_expr: None
@@ -462,7 +468,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (
+                    expr: (
                         Expr::Block(Box::new(ExprBlock {
                             stmts: vec![],
                             return_expr: Some((Expr::Literal(ExprLiteral::Number(123f64)), 1..4))
@@ -481,7 +487,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (
+                    expr: (
                         Expr::Block(Box::new(ExprBlock {
                             stmts: vec![],
                             return_expr: Some((
@@ -503,7 +509,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (
+                    expr: (
                         Expr::Block(Box::new(ExprBlock {
                             stmts: vec![],
                             return_expr: Some((
@@ -529,11 +535,11 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (
+                    expr: (
                         Expr::Block(Box::new(ExprBlock {
                             stmts: vec![(
                                 Stmt::Expr(StmtExpr {
-                                    value: (
+                                    expr: (
                                         Expr::Identifier(ExprIdentifier {
                                             identifier: Identifier {
                                                 name: "foo".to_string()
@@ -560,11 +566,11 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (
+                    expr: (
                         Expr::Block(Box::new(ExprBlock {
                             stmts: vec![(
                                 Stmt::Expr(StmtExpr {
-                                    value: (
+                                    expr: (
                                         Expr::Block(Box::new(ExprBlock {
                                             stmts: vec![],
                                             return_expr: None
@@ -590,7 +596,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (
+                    expr: (
                         Expr::Block(Box::new(ExprBlock {
                             stmts: vec![],
                             return_expr: Some((
@@ -615,11 +621,11 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (
+                    expr: (
                         Expr::Block(Box::new(ExprBlock {
                             stmts: vec![(
                                 Stmt::Expr(StmtExpr {
-                                    value: (
+                                    expr: (
                                         Expr::Block(Box::new(ExprBlock {
                                             stmts: vec![],
                                             return_expr: None
@@ -651,12 +657,12 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (
+                    expr: (
                         Expr::Block(Box::new(ExprBlock {
                             stmts: vec![
                                 (
                                     Stmt::Expr(StmtExpr {
-                                        value: (
+                                        expr: (
                                             Expr::Identifier(ExprIdentifier {
                                                 identifier: Identifier {
                                                     name: "foo".to_string()
@@ -669,13 +675,13 @@ mod parser_tests {
                                 ),
                                 (
                                     Stmt::Expr(StmtExpr {
-                                        value: (Expr::Literal(ExprLiteral::Number(123f64)), 5..8)
+                                        expr: (Expr::Literal(ExprLiteral::Number(123f64)), 5..8)
                                     }),
                                     5..9
                                 ),
                                 (
                                     Stmt::Expr(StmtExpr {
-                                        value: (Expr::Unit, 9..11)
+                                        expr: (Expr::Unit, 9..11)
                                     }),
                                     9..12
                                 )
@@ -699,7 +705,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (Expr::List(ExprList { items: vec![] }), 0..2)
+                    expr: (Expr::List(ExprList { items: vec![] }), 0..2)
                 }),
                 0..3
             )]
@@ -736,7 +742,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (
+                    expr: (
                         Expr::List(ExprList {
                             items: vec![
                                 (
@@ -802,7 +808,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (
+                    expr: (
                         Expr::List(ExprList {
                             items: vec![
                                 (
@@ -850,7 +856,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (Expr::Unit, 0..2)
+                    expr: (Expr::Unit, 0..2)
                 }),
                 0..3
             )]
@@ -887,7 +893,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (
+                    expr: (
                         Expr::Tuple(ExprTuple {
                             items: vec![(Expr::Literal(ExprLiteral::Number(1f64)), 1..2)]
                         }),
@@ -905,7 +911,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (
+                    expr: (
                         Expr::Tuple(ExprTuple {
                             items: vec![
                                 (Expr::Literal(ExprLiteral::Number(1f64)), 1..2),
@@ -926,7 +932,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (Expr::Literal(ExprLiteral::Number(1f64)), 0..3)
+                    expr: (Expr::Literal(ExprLiteral::Number(1f64)), 0..3)
                 }),
                 0..4
             )]
@@ -941,7 +947,7 @@ mod parser_tests {
                 Ok(Module {
                     stmts: vec![(
                         Stmt::Expr(StmtExpr {
-                            value: (
+                            expr: (
                                 Expr::Infix(Box::new(ExprInfix {
                                     lt: (
                                         Expr::Identifier(ExprIdentifier {
@@ -991,7 +997,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (
+                    expr: (
                         Expr::Assign(Box::new(ExprAssign {
                             identifier: Identifier {
                                 name: "a".to_string()
@@ -1019,7 +1025,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (
+                    expr: (
                         Expr::Infix(Box::new(ExprInfix {
                             lt: (
                                 Expr::Identifier(ExprIdentifier {
@@ -1053,7 +1059,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (
+                    expr: (
                         Expr::Infix(Box::new(ExprInfix {
                             lt: (
                                 Expr::Identifier(ExprIdentifier {
@@ -1087,7 +1093,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (
+                    expr: (
                         Expr::Infix(Box::new(ExprInfix {
                             lt: (
                                 Expr::Identifier(ExprIdentifier {
@@ -1121,7 +1127,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (
+                    expr: (
                         Expr::Infix(Box::new(ExprInfix {
                             lt: (
                                 Expr::Identifier(ExprIdentifier {
@@ -1155,7 +1161,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (
+                    expr: (
                         Expr::Infix(Box::new(ExprInfix {
                             lt: (
                                 Expr::Identifier(ExprIdentifier {
@@ -1189,7 +1195,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    value: (
+                    expr: (
                         Expr::Infix(Box::new(ExprInfix {
                             lt: (
                                 Expr::Identifier(ExprIdentifier {
@@ -1215,5 +1221,372 @@ mod parser_tests {
                 0..7
             )]
         })
+    );
+
+    parser_test!(
+        parse_if_cond_no_params,
+        "if true {}",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Expr(StmtExpr {
+                    expr: (
+                        Expr::If(Box::new(ExprIf {
+                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 3..7),
+                            then: (
+                                Expr::Block(Box::new(ExprBlock {
+                                    stmts: vec![],
+                                    return_expr: None
+                                })),
+                                8..10
+                            ),
+                            else_: None
+                        })),
+                        0..10
+                    )
+                }),
+                0..10
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_if_cond_params,
+        "if (true) {}",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Expr(StmtExpr {
+                    expr: (
+                        Expr::If(Box::new(ExprIf {
+                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 3..9),
+                            then: (
+                                Expr::Block(Box::new(ExprBlock {
+                                    stmts: vec![],
+                                    return_expr: None
+                                })),
+                                10..12
+                            ),
+                            else_: None
+                        })),
+                        0..12
+                    )
+                }),
+                0..12
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_if_else,
+        "if true {} else {}",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Expr(StmtExpr {
+                    expr: (
+                        Expr::If(Box::new(ExprIf {
+                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 3..7),
+                            then: (
+                                Expr::Block(Box::new(ExprBlock {
+                                    stmts: vec![],
+                                    return_expr: None
+                                })),
+                                8..10
+                            ),
+                            else_: Some((
+                                Expr::Block(Box::new(ExprBlock {
+                                    stmts: vec![],
+                                    return_expr: None
+                                })),
+                                16..18
+                            ))
+                        })),
+                        0..18
+                    )
+                }),
+                0..18
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_if_elif,
+        "if true {} else if true {}",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Expr(StmtExpr {
+                    expr: (
+                        Expr::If(Box::new(ExprIf {
+                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 3..7),
+                            then: (
+                                Expr::Block(Box::new(ExprBlock {
+                                    stmts: vec![],
+                                    return_expr: None
+                                })),
+                                8..10
+                            ),
+                            else_: Some((
+                                Expr::If(Box::new(ExprIf {
+                                    cond: (Expr::Literal(ExprLiteral::Bool(true)), 19..23),
+                                    then: (
+                                        Expr::Block(Box::new(ExprBlock {
+                                            stmts: vec![],
+                                            return_expr: None
+                                        })),
+                                        24..26
+                                    ),
+                                    else_: None
+                                })),
+                                16..26
+                            ))
+                        })),
+                        0..26
+                    )
+                }),
+                0..26
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_if_elif_else,
+        "if true {} else if true {} else {}",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Expr(StmtExpr {
+                    expr: (
+                        Expr::If(Box::new(ExprIf {
+                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 3..7),
+                            then: (
+                                Expr::Block(Box::new(ExprBlock {
+                                    stmts: vec![],
+                                    return_expr: None
+                                })),
+                                8..10
+                            ),
+                            else_: Some((
+                                Expr::If(Box::new(ExprIf {
+                                    cond: (Expr::Literal(ExprLiteral::Bool(true)), 19..23),
+                                    then: (
+                                        Expr::Block(Box::new(ExprBlock {
+                                            stmts: vec![],
+                                            return_expr: None
+                                        })),
+                                        24..26
+                                    ),
+                                    else_: Some((
+                                        Expr::Block(Box::new(ExprBlock {
+                                            stmts: vec![],
+                                            return_expr: None
+                                        })),
+                                        32..34
+                                    ))
+                                })),
+                                16..34
+                            ))
+                        })),
+                        0..34
+                    )
+                }),
+                0..34
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_if_elif_elif_else,
+        "if true {} else if true {} else if true {} else {}",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Expr(StmtExpr {
+                    expr: (
+                        Expr::If(Box::new(ExprIf {
+                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 3..7),
+                            then: (
+                                Expr::Block(Box::new(ExprBlock {
+                                    stmts: vec![],
+                                    return_expr: None
+                                })),
+                                8..10
+                            ),
+                            else_: Some((
+                                Expr::If(Box::new(ExprIf {
+                                    cond: (Expr::Literal(ExprLiteral::Bool(true)), 19..23),
+                                    then: (
+                                        Expr::Block(Box::new(ExprBlock {
+                                            stmts: vec![],
+                                            return_expr: None
+                                        })),
+                                        24..26
+                                    ),
+                                    else_: Some((
+                                        Expr::If(Box::new(ExprIf {
+                                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 35..39),
+                                            then: (
+                                                Expr::Block(Box::new(ExprBlock {
+                                                    stmts: vec![],
+                                                    return_expr: None
+                                                })),
+                                                40..42
+                                            ),
+                                            else_: Some((
+                                                Expr::Block(Box::new(ExprBlock {
+                                                    stmts: vec![],
+                                                    return_expr: None
+                                                })),
+                                                48..50
+                                            ))
+                                        })),
+                                        32..50
+                                    ))
+                                })),
+                                16..50
+                            ))
+                        })),
+                        0..50
+                    )
+                }),
+                0..50
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_if_elif_else_with_exprs_as_then_else,
+        "if true 123 else if true 456 else 789",
+        Err(vec![
+            (
+                Error::SyntaxError(SyntaxError::UnrecognizedToken {
+                    token: "123".to_string(),
+                    expected: vec![
+                        "\"!=\"".to_string(),
+                        "\"%\"".to_string(),
+                        "\")\"".to_string(),
+                        "\"*\"".to_string(),
+                        "\"+\"".to_string(),
+                        "\",\"".to_string(),
+                        "\"-\"".to_string(),
+                        "\"/\"".to_string(),
+                        "\";\"".to_string(),
+                        "\"<\"".to_string(),
+                        "\"<=\"".to_string(),
+                        "\"==\"".to_string(),
+                        "\">\"".to_string(),
+                        "\">=\"".to_string(),
+                        "\"]\"".to_string(),
+                        "\"and\"".to_string(),
+                        "\"or\"".to_string(),
+                        "\"{\"".to_string(),
+                        "\"}\"".to_string(),
+                    ]
+                }),
+                8..11
+            ),
+            (
+                Error::SyntaxError(SyntaxError::UnrecognizedToken {
+                    token: "else".to_string(),
+                    expected: vec![
+                        "\"!=\"".to_string(),
+                        "\"%\"".to_string(),
+                        "\")\"".to_string(),
+                        "\"*\"".to_string(),
+                        "\"+\"".to_string(),
+                        "\",\"".to_string(),
+                        "\"-\"".to_string(),
+                        "\"/\"".to_string(),
+                        "\";\"".to_string(),
+                        "\"<\"".to_string(),
+                        "\"<=\"".to_string(),
+                        "\"==\"".to_string(),
+                        "\">\"".to_string(),
+                        "\">=\"".to_string(),
+                        "\"]\"".to_string(),
+                        "\"and\"".to_string(),
+                        "\"or\"".to_string(),
+                        "\"{\"".to_string(),
+                        "\"}\"".to_string(),
+                    ]
+                }),
+                12..16
+            ),
+            (
+                Error::SyntaxError(SyntaxError::UnrecognizedToken {
+                    token: "456".to_string(),
+                    expected: vec![
+                        "\"!=\"".to_string(),
+                        "\"%\"".to_string(),
+                        "\")\"".to_string(),
+                        "\"*\"".to_string(),
+                        "\"+\"".to_string(),
+                        "\",\"".to_string(),
+                        "\"-\"".to_string(),
+                        "\"/\"".to_string(),
+                        "\";\"".to_string(),
+                        "\"<\"".to_string(),
+                        "\"<=\"".to_string(),
+                        "\"==\"".to_string(),
+                        "\">\"".to_string(),
+                        "\">=\"".to_string(),
+                        "\"]\"".to_string(),
+                        "\"and\"".to_string(),
+                        "\"or\"".to_string(),
+                        "\"{\"".to_string(),
+                        "\"}\"".to_string(),
+                    ]
+                }),
+                25..28
+            ),
+            (
+                Error::SyntaxError(SyntaxError::UnrecognizedToken {
+                    token: "else".to_string(),
+                    expected: vec![
+                        "\"!=\"".to_string(),
+                        "\"%\"".to_string(),
+                        "\")\"".to_string(),
+                        "\"*\"".to_string(),
+                        "\"+\"".to_string(),
+                        "\",\"".to_string(),
+                        "\"-\"".to_string(),
+                        "\"/\"".to_string(),
+                        "\";\"".to_string(),
+                        "\"<\"".to_string(),
+                        "\"<=\"".to_string(),
+                        "\"==\"".to_string(),
+                        "\">\"".to_string(),
+                        "\">=\"".to_string(),
+                        "\"]\"".to_string(),
+                        "\"and\"".to_string(),
+                        "\"or\"".to_string(),
+                        "\"{\"".to_string(),
+                        "\"}\"".to_string(),
+                    ]
+                }),
+                29..33
+            ),
+            (
+                Error::SyntaxError(SyntaxError::UnrecognizedEOF {
+                    expected: vec![
+                        "\"!=\"".to_string(),
+                        "\"%\"".to_string(),
+                        "\")\"".to_string(),
+                        "\"*\"".to_string(),
+                        "\"+\"".to_string(),
+                        "\",\"".to_string(),
+                        "\"-\"".to_string(),
+                        "\"/\"".to_string(),
+                        "\";\"".to_string(),
+                        "\"<\"".to_string(),
+                        "\"<=\"".to_string(),
+                        "\"==\"".to_string(),
+                        "\">\"".to_string(),
+                        "\">=\"".to_string(),
+                        "\"]\"".to_string(),
+                        "\"and\"".to_string(),
+                        "\"or\"".to_string(),
+                        "\"{\"".to_string(),
+                        "\"}\"".to_string(),
+                    ]
+                }),
+                37..37
+            )
+        ])
     );
 }

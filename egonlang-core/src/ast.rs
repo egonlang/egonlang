@@ -29,7 +29,7 @@ impl Debug for Stmt {
 /// An expression statement evaluates an expression and discards the result.
 #[derive(Clone, Debug, PartialEq)]
 pub struct StmtExpr {
-    pub value: ExprS,
+    pub expr: ExprS,
 }
 
 /// Expressions
@@ -44,6 +44,7 @@ pub enum Expr {
     Infix(Box<ExprInfix>),
     Prefix(Box<ExprPrefix>),
     Assign(Box<ExprAssign>),
+    If(Box<ExprIf>),
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -119,4 +120,11 @@ pub enum OpPrefix {
 pub struct ExprAssign {
     pub identifier: Identifier,
     pub value: ExprS,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct ExprIf {
+    pub cond: ExprS,
+    pub then: ExprS,
+    pub else_: Option<ExprS>,
 }

@@ -122,6 +122,12 @@ pub enum Token {
     And,
     #[token("or")]
     Or,
+    #[token("if")]
+    If,
+    #[token("else")]
+    Else,
+    #[token("elif")]
+    ElIf,
 
     // Literals.
     #[regex("[a-zA-Z_][a-zA-Z0-9_]*", lex_identifier)]
@@ -634,6 +640,78 @@ mod lexer_tests {
             Ok((0, Token::Identifier("a".to_string()), 1)),
             Ok((2, Token::Or, 4)),
             Ok((5, Token::Identifier("b".to_string()), 6))
+        ]
+    );
+
+    lexer_test!(
+        lex_if_cond_no_parans,
+        "if true {}",
+        vec![
+            Ok((0, Token::If, 2)),
+            Ok((3, Token::True, 7)),
+            Ok((8, Token::BraceOpen, 9)),
+            Ok((9, Token::BraceClose, 10))
+        ]
+    );
+
+    lexer_test!(
+        lex_if_cond_parans,
+        "if (true) {}",
+        vec![
+            Ok((0, Token::If, 2)),
+            Ok((3, Token::ParanOpen, 4)),
+            Ok((4, Token::True, 8)),
+            Ok((8, Token::ParanClose, 9)),
+            Ok((10, Token::BraceOpen, 11)),
+            Ok((11, Token::BraceClose, 12))
+        ]
+    );
+
+    lexer_test!(
+        lex_if_else,
+        "if true {} else {}",
+        vec![
+            Ok((0, Token::If, 2)),
+            Ok((3, Token::True, 7)),
+            Ok((8, Token::BraceOpen, 9)),
+            Ok((9, Token::BraceClose, 10)),
+            Ok((11, Token::Else, 15)),
+            Ok((16, Token::BraceOpen, 17)),
+            Ok((17, Token::BraceClose, 18)),
+        ]
+    );
+
+    lexer_test!(
+        lex_if_else_expr_then_else,
+        "if true { 123 } else { 456 }",
+        vec![
+            Ok((0, Token::If, 2)),
+            Ok((3, Token::True, 7)),
+            Ok((8, Token::BraceOpen, 9)),
+            Ok((10, Token::Number(123f64), 13)),
+            Ok((14, Token::BraceClose, 15)),
+            Ok((16, Token::Else, 20)),
+            Ok((21, Token::BraceOpen, 22)),
+            Ok((23, Token::Number(456f64), 26)),
+            Ok((27, Token::BraceClose, 28)),
+        ]
+    );
+
+    lexer_test!(
+        lex_if_elif,
+        "if true { 123 } else if true { 456 }",
+        vec![
+            Ok((0, Token::If, 2)),
+            Ok((3, Token::True, 7)),
+            Ok((8, Token::BraceOpen, 9)),
+            Ok((10, Token::Number(123f64), 13)),
+            Ok((14, Token::BraceClose, 15)),
+            Ok((16, Token::Else, 20)),
+            Ok((21, Token::If, 23)),
+            Ok((24, Token::True, 28)),
+            Ok((29, Token::BraceOpen, 30)),
+            Ok((31, Token::Number(456f64), 34)),
+            Ok((35, Token::BraceClose, 36)),
         ]
     );
 }

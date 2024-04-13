@@ -1,0 +1,3 @@
+if true false else true
+
+// out: SyntaxError: unexpected "false"

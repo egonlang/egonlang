@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 pub struct Diagnoser {}
 
 impl Diagnoser {
+    #[allow(dead_code)]
     pub fn get_diagnostics(source: &str) -> Vec<Diagnosis> {
         match crate::parser::parse(source, 0) {
             Ok(_) => vec![],
@@ -23,6 +24,7 @@ impl Diagnoser {
         }
     }
 
+    #[allow(dead_code)]
     fn get_range(source: &str, span: &Span) -> DiagnosisRange {
         DiagnosisRange {
             start: Diagnoser::get_position(source, span.start),
@@ -30,6 +32,7 @@ impl Diagnoser {
         }
     }
 
+    #[allow(dead_code)]
     fn get_position(source: &str, idx: usize) -> DiagnosisPosition {
         let before = &source[..idx];
         let line = before.lines().count().checked_sub(1).unwrap_or_default();
@@ -56,9 +59,13 @@ pub struct Diagnosis {
 #[serde(transparent)]
 pub struct DiagnosisSeverity(i32);
 impl DiagnosisSeverity {
+    #[allow(dead_code)]
     pub const ERROR: DiagnosisSeverity = DiagnosisSeverity(1);
+    #[allow(dead_code)]
     pub const WARNING: DiagnosisSeverity = DiagnosisSeverity(2);
+    #[allow(dead_code)]
     pub const INFORMATION: DiagnosisSeverity = DiagnosisSeverity(3);
+    #[allow(dead_code)]
     pub const HINT: DiagnosisSeverity = DiagnosisSeverity(4);
 }
 
@@ -69,6 +76,7 @@ pub struct DiagnosisPosition {
 }
 
 impl DiagnosisPosition {
+    #[allow(dead_code)]
     pub fn new(line: u32, character: u32) -> DiagnosisPosition {
         DiagnosisPosition { line, character }
     }
@@ -83,6 +91,7 @@ pub struct DiagnosisRange {
 }
 
 impl DiagnosisRange {
+    #[allow(dead_code)]
     pub fn new(start: DiagnosisPosition, end: DiagnosisPosition) -> DiagnosisRange {
         DiagnosisRange { start, end }
     }
