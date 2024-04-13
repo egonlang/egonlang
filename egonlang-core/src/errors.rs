@@ -18,7 +18,7 @@ pub enum SyntaxError {
     InvalidToken,
     #[error("unexpected input")]
     UnexpectedInput { token: String },
-    #[error("unexpected end of file")]
+    #[error("unexpected end of file; expected: {expected:?}")]
     UnrecognizedEOF { expected: Vec<String> },
     #[error("unexpected {token:?}; expected: {expected:?}")]
     UnrecognizedToken {
