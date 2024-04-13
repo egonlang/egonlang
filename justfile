@@ -21,6 +21,9 @@ verify:
     just test
     just lint
 
+verify-with-logs:
+    just verify 2>err.log 1>out.log
+
 test *args:
     cargo nextest run --workspace {{args}}
 

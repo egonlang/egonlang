@@ -191,7 +191,6 @@ mod parser_tests {
                     "\"==\"".to_string(),
                     "\">\"".to_string(),
                     "\">=\"".to_string(),
-                    "\"]\"".to_string(),
                     "\"and\"".to_string(),
                     "\"or\"".to_string(),
                     "\"}\"".to_string(),

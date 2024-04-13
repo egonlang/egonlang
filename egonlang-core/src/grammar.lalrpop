@@ -13,16 +13,15 @@ StmtS = Spanned<Stmt>;
 
 // Statements
 Stmt: ast::Stmt = {
-    StmtExpr,
-    <expr:Spanned<IfExpr>> => ast::Stmt::Expr(ast::StmtExpr { <> }),
+    <expr:ExprS> ";" =>
+        ast::Stmt::Expr(ast::StmtExpr { <> }),
+    <expr:Spanned<ExprIf>> =>
+        ast::Stmt::Expr(ast::StmtExpr { <> }),
     <e:!> => {
         errors.push(e.error);
         ast::Stmt::Error
     },
 }
-
-StmtExpr: ast::Stmt = <expr:ExprS> ";" =>
-    ast::Stmt::Expr(ast::StmtExpr { <> });
 
 // Expressions
 ExprS = Spanned<Expr>;
@@ -32,7 +31,7 @@ Expr: ast::Expr = {
     ExprAssign
 };
 
-IfExpr: ast::Expr = {
+ExprIf: ast::Expr = {
     // if .. else ..
     "if" <cond:Spanned<ExprLogicOr>> <then:Spanned<ExprBlock>> 
     <else_:("else" <Spanned<ExprBlock>>)?>
@@ -42,7 +41,7 @@ IfExpr: ast::Expr = {
 
     // if .. else if ..
     "if" <cond:Spanned<ExprLogicOr>> <then:Spanned<ExprBlock>> 
-    <else_:("else" <Spanned<IfExpr>>)>
+    <else_:("else" <Spanned<ExprIf>>)>
     => {
         ast::Expr::If(Box::new(ast::ExprIf { 
             cond,
@@ -58,7 +57,7 @@ ExprAssign: ast::Expr = {
             identifier: ast::Identifier { name },
             value,
         })),
-    <name:identifier> "=" <value:Spanned<IfExpr>> =>
+    <name:identifier> "=" <value:Spanned<ExprIf>> =>
         ast::Expr::Assign(Box::new(ast::ExprAssign {
             identifier: ast::Identifier { name },
             value,
@@ -120,8 +119,14 @@ ExprSimple: ast::Expr = {
     ExprPrimary,
 }
 
-ExprTuple: ast::Expr = "(" <items:SeperatedTrailing<",">> ")" => ast::Expr::Tuple(ast::ExprTuple {<>});
-ExprList: ast::Expr = "[" <items:Seperated<",">> "]" => ast::Expr::List(ast::ExprList {<>});
+ExprTuple: ast::Expr = {
+    "(" <items:SeperatedTrailing<Spanned<ExprLogicOr>, ",">> ")" => 
+        ast::Expr::Tuple(ast::ExprTuple {<>}),
+}
+ExprList: ast::Expr = {
+    "[" <items:Seperated<Spanned<ExprLogicOr>, ",">> "]" =>
+        ast::Expr::List(ast::ExprList {<>}),
+    }
 
 ExprPrimary: ast::Expr = {
     // Literals
@@ -169,16 +174,16 @@ ExprBlock: ast::Expr = "{" <stmts:(<StmtS>)*> <return_expr:(ExprS)?> "}" =>
 Spanned<T>: span::Spanned<T> = <l:@L> <t:T> <r:@R> =>
     (t, l..r);
 
-Seperated<T>: Vec<ast::ExprS> = {
-    <first:ExprS> <mut args:(T <ExprS>)*> => {
+Seperated<E, T>: Vec<ast::ExprS> = {
+    <first:E> <mut args:(T <E>)*> => {
         args.insert(0, first);
         args
     },
     () => Vec::new(),
 }
 
-SeperatedTrailing<T>: Vec<ast::ExprS> =
-    <first:ExprS> <mut args:(T <ExprS>)*> <trailing_seperator:T> => {
+SeperatedTrailing<E, T>: Vec<ast::ExprS> =
+    <first:E> <mut args:(T <E>)*> <trailing_seperator:T> => {
         args.insert(0, first);
         args
     };
