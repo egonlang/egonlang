@@ -59,7 +59,6 @@ pub struct Diagnosis {
 #[serde(transparent)]
 pub struct DiagnosisSeverity(i32);
 impl DiagnosisSeverity {
-    #[allow(dead_code)]
     pub const ERROR: DiagnosisSeverity = DiagnosisSeverity(1);
     #[allow(dead_code)]
     pub const WARNING: DiagnosisSeverity = DiagnosisSeverity(2);

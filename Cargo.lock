@@ -118,6 +118,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "egonlang-cli"
+version = "0.1.0"
+dependencies = [
+ "egonlang-core",
+]
+
+[[package]]
 name = "egonlang-core"
 version = "0.1.0"
 dependencies = [

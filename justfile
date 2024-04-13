@@ -10,6 +10,9 @@ build-release:
 clean:
     cargo clean
 
+cli *args:
+    cargo run egon {{args}}
+
 format:
     cargo fmt --all
 

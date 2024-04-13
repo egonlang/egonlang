@@ -1,0 +1,29 @@
+use std::{env, path::PathBuf};
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+    let command = args.get(2).expect("No command passed: lex, parse");
+    let path = args.get(3).expect("No path argument passed");
+    let pathbuf = PathBuf::from(path);
+    let content = std::fs::read_to_string(path).expect("Unable to read file");
+
+    match command.as_str() {
+        "parse" => {
+            let module = egonlang_core::parser::parse(&content, 0).expect("There were errors");
+
+            println!("Path:\n\n{:?}\n", std::fs::canonicalize(pathbuf).unwrap());
+            println!("Input:\n\n{content}\n");
+            println!("Module:\n\n{module:#?}");
+        }
+        "lex" => {
+            let tokens = egonlang_core::lexer::Lexer::new(&content).collect::<Vec<_>>();
+
+            println!("Path:\n\n{:?}\n", std::fs::canonicalize(pathbuf).unwrap());
+            println!("Input:\n\n{content}\n");
+            println!("Tokens:\n\n{tokens:#?}");
+        }
+        _ => {
+            println!("Please pass a command: lex, parse")
+        }
+    }
+}
