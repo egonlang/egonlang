@@ -3,7 +3,13 @@
 ## Requirements
 
 - [rust](https://www.rust-lang.org/)
+- [nextest](https://nexte.st/)
 - [just](https://just.systems/)
+
+## Technologies
+
+- [lalrpop](https://lalrpop.github.io/lalrpop/)
+- [logos](https://docs.rs/logos/latest/logos/)
 
 ## Build, test, verify, etc...
 
