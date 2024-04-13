@@ -32,3 +32,9 @@ test *args:
 
 clean-git-branches:
     git branch -d $(git branch --merged=main | grep -v main) && git fetch --prune
+
+build-docker:
+    docker build -t egonlang/egonlang:0.1.0 .
+
+run-docker +args:
+    docker run --rm --read-only -v "/$PWD":/home/egon:ro -it egonlang/egonlang:0.1.0 egon -- {{args}}
