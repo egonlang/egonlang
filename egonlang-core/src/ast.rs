@@ -46,6 +46,7 @@ pub enum Expr {
     Assign(Box<ExprAssign>),
     If(Box<ExprIf>),
     Fn(Box<ExprFn>),
+    Range(ExprRange),
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -134,4 +135,21 @@ pub struct ExprIf {
 pub struct ExprFn {
     pub params: Vec<ExprS>,
     pub body: ExprS,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct ExprRange {
+    pub start: Option<Spanned<ExprLiteral>>,
+    pub end: Option<Spanned<ExprLiteral>>,
+    pub inclusive_end: bool,
+}
+
+impl Default for ExprRange {
+    fn default() -> Self {
+        Self {
+            start: None,
+            end: None,
+            inclusive_end: false,
+        }
+    }
 }

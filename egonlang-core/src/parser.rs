@@ -92,7 +92,7 @@ mod parser_tests {
 
     use crate::ast::{
         Expr, ExprAssign, ExprBlock, ExprIdentifier, ExprIf, ExprInfix, ExprList, ExprLiteral,
-        ExprTuple, Identifier, Module, OpInfix, Stmt, StmtExpr,
+        ExprRange, ExprTuple, Identifier, Module, OpInfix, Stmt, StmtExpr,
     };
 
     use crate::errors::{Error, SyntaxError};
@@ -121,6 +121,7 @@ mod parser_tests {
                     "\"+\"".to_string(),
                     "\",\"".to_string(),
                     "\"-\"".to_string(),
+                    "\"..\"".to_string(),
                     "\"/\"".to_string(),
                     "\";\"".to_string(),
                     "\"<\"".to_string(),
@@ -704,6 +705,7 @@ mod parser_tests {
                     "\"!\"".to_string(),
                     "\"(\"".to_string(),
                     "\"-\"".to_string(),
+                    "\"..\"".to_string(),
                     "\"[\"".to_string(),
                     "\"]\"".to_string(),
                     "\"false\"".to_string(),
@@ -773,6 +775,7 @@ mod parser_tests {
                     "\"!\"".to_string(),
                     "\"(\"".to_string(),
                     "\"-\"".to_string(),
+                    "\"..\"".to_string(),
                     "\"[\"".to_string(),
                     "\"false\"".to_string(),
                     "\"if\"".to_string(),
@@ -859,6 +862,7 @@ mod parser_tests {
                     "\"!\"".to_string(),
                     "\"(\"".to_string(),
                     "\"-\"".to_string(),
+                    "\"..\"".to_string(),
                     "\"[\"".to_string(),
                     "\"false\"".to_string(),
                     "\"if\"".to_string(),
@@ -1472,6 +1476,7 @@ mod parser_tests {
                         "\"+\"".to_string(),
                         "\",\"".to_string(),
                         "\"-\"".to_string(),
+                        "\"..\"".to_string(),
                         "\"/\"".to_string(),
                         "\";\"".to_string(),
                         "\"<\"".to_string(),
@@ -1505,6 +1510,7 @@ mod parser_tests {
                         "\"+\"".to_string(),
                         "\",\"".to_string(),
                         "\"-\"".to_string(),
+                        "\"..\"".to_string(),
                         "\"/\"".to_string(),
                         "\";\"".to_string(),
                         "\"<\"".to_string(),
@@ -1530,6 +1536,7 @@ mod parser_tests {
                         "\"+\"".to_string(),
                         "\",\"".to_string(),
                         "\"-\"".to_string(),
+                        "\"..\"".to_string(),
                         "\"/\"".to_string(),
                         "\";\"".to_string(),
                         "\"<\"".to_string(),
@@ -1546,5 +1553,45 @@ mod parser_tests {
                 41..41
             )
         ])
+    );
+
+    parser_test!(
+        parse_range_start_and_end,
+        "0..10;",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Expr(StmtExpr {
+                    expr: (
+                        Expr::Range(ExprRange {
+                            start: Some((ExprLiteral::Number(0f64), 0..1)),
+                            end: Some((ExprLiteral::Number(10f64), 3..5)),
+                            inclusive_end: false
+                        }),
+                        0..5
+                    )
+                }),
+                0..6
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_range_start_and_inclusive_end,
+        "0..=10;",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Expr(StmtExpr {
+                    expr: (
+                        Expr::Range(ExprRange {
+                            start: Some((ExprLiteral::Number(0f64), 0..1)),
+                            end: Some((ExprLiteral::Number(10f64), 4..6)),
+                            inclusive_end: true
+                        }),
+                        0..6
+                    )
+                }),
+                0..7
+            )]
+        })
     );
 }

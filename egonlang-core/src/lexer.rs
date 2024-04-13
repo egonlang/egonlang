@@ -86,6 +86,8 @@ pub enum Token {
     ParanClose,
     #[token("=>")]
     FatArrow,
+    #[token("..")]
+    DotDot,
 
     // Binary Ops
     #[token("-")]
@@ -164,6 +166,8 @@ fn lex_identifier(lexer: &mut logos::Lexer<Token>) -> String {
 
 #[cfg(test)]
 mod lexer_tests {
+    use std::vec;
+
     use pretty_assertions::assert_eq;
 
     use super::*;
@@ -716,6 +720,27 @@ mod lexer_tests {
             Ok((29, Token::BraceOpen, 30)),
             Ok((31, Token::Number(456f64), 34)),
             Ok((35, Token::BraceClose, 36)),
+        ]
+    );
+
+    lexer_test!(
+        lex_range_start_and_end,
+        "0..10",
+        vec![
+            Ok((0, Token::Number(0f64), 1)),
+            Ok((1, Token::DotDot, 3)),
+            Ok((3, Token::Number(10f64), 5))
+        ]
+    );
+
+    lexer_test!(
+        lex_range_start_and_inclusive_end,
+        "0..=10",
+        vec![
+            Ok((0, Token::Number(0f64), 1)),
+            Ok((1, Token::DotDot, 3)),
+            Ok((3, Token::Equal, 4)),
+            Ok((4, Token::Number(10f64), 6))
         ]
     );
 }
