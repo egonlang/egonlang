@@ -15,8 +15,6 @@ StmtS = Spanned<Stmt>;
 Stmt: ast::Stmt = {
     <expr:ExprS> ";" =>
         ast::Stmt::Expr(ast::StmtExpr { <> }),
-    <expr:Spanned<ExprIf>> =>
-        ast::Stmt::Expr(ast::StmtExpr { <> }),
     <e:!> => {
         errors.push(e.error);
         ast::Stmt::Error
@@ -27,20 +25,29 @@ Stmt: ast::Stmt = {
 ExprS = Spanned<Expr>;
 
 Expr: ast::Expr = {
-    ExprLogicOr,
-    ExprAssign
+    ExprAssign,
+    ExprBlock
 };
+
+ExprAssign: ast::Expr = {
+    <name:identifier> "=" <value:ExprS> =>
+        ast::Expr::Assign(Box::new(ast::ExprAssign {
+            identifier: ast::Identifier { name },
+            value,
+        })),
+    ExprIf,
+}
 
 ExprIf: ast::Expr = {
     // if .. else ..
-    "if" <cond:Spanned<ExprLogicOr>> <then:Spanned<ExprBlock>> 
+    "if" "(" <cond:Spanned<ExprLogicOr>> ")" <then:Spanned<ExprBlock>> 
     <else_:("else" <Spanned<ExprBlock>>)?>
     => {
         ast::Expr::If(Box::new(ast::ExprIf { <> }))
     },
 
     // if .. else if ..
-    "if" <cond:Spanned<ExprLogicOr>> <then:Spanned<ExprBlock>> 
+    "if" "(" <cond:Spanned<ExprLogicOr>> ")" <then:Spanned<ExprBlock>> 
     <else_:("else" <Spanned<ExprIf>>)>
     => {
         ast::Expr::If(Box::new(ast::ExprIf { 
@@ -49,19 +56,7 @@ ExprIf: ast::Expr = {
             else_: Some(else_)
          }))
     },
-}
-
-ExprAssign: ast::Expr = {
-    <name:identifier> "=" <value:ExprS> =>
-        ast::Expr::Assign(Box::new(ast::ExprAssign {
-            identifier: ast::Identifier { name },
-            value,
-        })),
-    <name:identifier> "=" <value:Spanned<ExprIf>> =>
-        ast::Expr::Assign(Box::new(ast::ExprAssign {
-            identifier: ast::Identifier { name },
-            value,
-        }))
+    ExprLogicOr
 }
 
 ExprLogicOr = ExprInfix<ExprLogicOr, OpLogicOr, ExprLogicAnd>;
@@ -114,37 +109,31 @@ OpPrefix: ast::OpPrefix = {
 }
 
 ExprSimple: ast::Expr = {
-    ExprTuple,
-    ExprList,
-    ExprPrimary,
+    ExprList
+};
+
+ExprList: ast::Expr = {
+    "[" <items:Seperated<Spanned<Expr>, ",">> "]" =>
+        ast::Expr::List(ast::ExprList {<>}),
+        ExprTuple
 }
 
 ExprTuple: ast::Expr = {
-    "(" <items:SeperatedTrailing<Spanned<ExprLogicOr>, ",">> ")" => 
+    "(" <items:SeperatedTrailing<Spanned<Expr>, ",">> ")" => 
         ast::Expr::Tuple(ast::ExprTuple {<>}),
+        ExprPrimary,
 }
-ExprList: ast::Expr = {
-    "[" <items:Seperated<Spanned<ExprLogicOr>, ",">> "]" =>
-        ast::Expr::List(ast::ExprList {<>}),
-    }
 
 ExprPrimary: ast::Expr = {
     // Literals
     string => ast::Expr::Literal(ast::ExprLiteral::String(<>)),
     number => ast::Expr::Literal(ast::ExprLiteral::Number(<>)),
-
-    // Keywords
+    "void" => ast::Expr::Unit,
     "true" => ast::Expr::Literal(ast::ExprLiteral::Bool(true)),
     "false" => ast::Expr::Literal(ast::ExprLiteral::Bool(false)),
 
     // Variables
     ExprIdentifier,
-
-    // Unit
-    ExprUnit,
-    
-    // Blocks
-    ExprBlock,
 
     // Grouping
     "(" <Expr> ")",
@@ -158,21 +147,27 @@ ExprIdentifier: ast::Expr = <name:identifier> =>
         }
     });
 
-ExprUnit: ast::Expr = "(" ")" =>
-    ast::Expr::Unit;
-
-ExprBlock: ast::Expr = "{" <stmts:(<StmtS>)*> <return_expr:(ExprS)?> "}" =>
+ExprBlock: ast::Expr = {
+    "{" <stmts:(<StmtS>)*> <return_expr:(ExprS)?> "}" =>
     ast::Expr::Block(Box::new(
         ast::ExprBlock {
             stmts,
             return_expr
         }
-    ));
+    )),
+}
 
 /// Utilities
 
 Spanned<T>: span::Spanned<T> = <l:@L> <t:T> <r:@R> =>
     (t, l..r);
+
+SeperatedNoDefault<E, T>: Vec<ast::ExprS> = {
+    <first:E> <mut args:(T <E>)+> => {
+        args.insert(0, first);
+        args
+    },
+}
 
 Seperated<E, T>: Vec<ast::ExprS> = {
     <first:E> <mut args:(T <E>)*> => {
@@ -193,7 +188,6 @@ extern {
     type Error = ErrorS;
 
     enum lexer::Token {
-        // Single-character tokens.
         "{" => lexer::Token::BraceOpen,
         "}" => lexer::Token::BraceClose,
         "[" => lexer::Token::BracketOpen,
@@ -202,6 +196,7 @@ extern {
         ")" => lexer::Token::ParanClose,
         ";" => lexer::Token::Semicolon,
         "," => lexer::Token::Comma,
+        "=>" => lexer::Token::FatArrow,
 
         "-" => lexer::Token::Minus,
         "+" => lexer::Token::Plus,
@@ -225,6 +220,8 @@ extern {
         "or" => lexer::Token::Or,
         "if" => lexer::Token::If,
         "else" => lexer::Token::Else,
+        "fn" => lexer::Token::Fn,
+        "void" => lexer::Token::Void,
 
         // Literals.
         identifier => lexer::Token::Identifier(<String>),

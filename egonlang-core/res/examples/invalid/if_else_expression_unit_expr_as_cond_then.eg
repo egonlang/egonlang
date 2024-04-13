@@ -1,3 +1,3 @@
-if () ()
+if void void
 
-// out: SyntaxError: unexpected "("
+// out: SyntaxError: unexpected "void"; expected: ["\"(\""]

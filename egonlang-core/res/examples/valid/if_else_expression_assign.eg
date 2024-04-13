@@ -1,1 +1,1 @@
-a = if 1 < 2 { b } else { c };
+a = if (1 < 2) { b } else { c };

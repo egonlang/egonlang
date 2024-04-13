@@ -68,7 +68,6 @@ impl<'a> Iterator for Lexer<'a> {
 
 #[derive(Clone, Debug, Logos, PartialEq)]
 pub enum Token {
-    // Single-character tokens.
     #[token(";")]
     Semicolon,
     #[token(",")]
@@ -85,7 +84,10 @@ pub enum Token {
     ParanOpen,
     #[token(")")]
     ParanClose,
+    #[token("=>")]
+    FatArrow,
 
+    // Binary Ops
     #[token("-")]
     Minus,
     #[token("+")]
@@ -114,6 +116,8 @@ pub enum Token {
     LessEqual,
 
     // Keywords
+    #[token("void")]
+    Void,
     #[token("true")]
     True,
     #[token("false")]
@@ -126,8 +130,8 @@ pub enum Token {
     If,
     #[token("else")]
     Else,
-    #[token("elif")]
-    ElIf,
+    #[token("fn")]
+    Fn,
 
     // Literals.
     #[regex("[a-zA-Z_][a-zA-Z0-9_]*", lex_identifier)]

@@ -45,6 +45,7 @@ pub enum Expr {
     Prefix(Box<ExprPrefix>),
     Assign(Box<ExprAssign>),
     If(Box<ExprIf>),
+    Fn(Box<ExprFn>),
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -127,4 +128,10 @@ pub struct ExprIf {
     pub cond: ExprS,
     pub then: ExprS,
     pub else_: Option<ExprS>,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct ExprFn {
+    pub params: Vec<ExprS>,
+    pub body: ExprS,
 }

@@ -1,0 +1,3 @@
+if true { false }
+
+// out: SyntaxError: unexpected "true"; expected: ["\"(\""]
