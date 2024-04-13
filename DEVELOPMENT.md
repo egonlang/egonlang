@@ -11,6 +11,11 @@
 - [lalrpop](https://lalrpop.github.io/lalrpop/)
 - [logos](https://docs.rs/logos/latest/logos/)
 
+## Project Structure
+
+- [egonlang-core](./egonlang-core/): Library responsible lexing, and parsing egon code
+- [egonlang-cli](./egonlang-cli/): Command line tool to lex and parse egon code files 
+
 ## Build, test, verify, etc...
 
 | Command                        | Description                                                                              |
