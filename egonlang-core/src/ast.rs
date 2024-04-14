@@ -39,6 +39,7 @@ pub struct StmtExpr {
 pub struct StmtAssign {
     pub identifier: Identifier,
     pub type_identifier: Option<Identifier>,
+    pub is_const: bool,
     pub value: Option<ExprS>,
 }
 

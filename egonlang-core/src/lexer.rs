@@ -138,6 +138,8 @@ pub enum Token {
     Fn,
     #[token("let")]
     Let,
+    #[token("const")]
+    Const,
 
     // Literals.
     #[regex("[a-zA-Z_][a-zA-Z0-9_]*", lex_identifier)]
@@ -785,14 +787,50 @@ mod lexer_tests {
     );
 
     lexer_test!(
-        lex_let_decl_typed_without_assign,
-        "let a: Number;",
+        lex_const_decl_typed_without_assign,
+        "const a: Number;",
         vec![
-            Ok((0, Token::Let, 3)),
-            Ok((4, Token::Identifier("a".to_string()), 5)),
-            Ok((5, Token::Colon, 6)),
-            Ok((7, Token::Identifier("Number".to_string()), 13)),
+            Ok((0, Token::Const, 5)),
+            Ok((6, Token::Identifier("a".to_string()), 7)),
+            Ok((7, Token::Colon, 8)),
+            Ok((9, Token::Identifier("Number".to_string()), 15)),
+            Ok((15, Token::Semicolon, 16)),
+        ]
+    );
+
+    lexer_test!(
+        lex_const_decl_with_assign,
+        "const a = 123;",
+        vec![
+            Ok((0, Token::Const, 5)),
+            Ok((6, Token::Identifier("a".to_string()), 7)),
+            Ok((8, Token::Equal, 9)),
+            Ok((10, Token::Number(123f64), 13)),
             Ok((13, Token::Semicolon, 14)),
+        ]
+    );
+
+    lexer_test!(
+        lex_const_decl_typed_with_assign,
+        "const a: Number = 123;",
+        vec![
+            Ok((0, Token::Const, 5)),
+            Ok((6, Token::Identifier("a".to_string()), 7)),
+            Ok((7, Token::Colon, 8)),
+            Ok((9, Token::Identifier("Number".to_string()), 15)),
+            Ok((16, Token::Equal, 17)),
+            Ok((18, Token::Number(123f64), 21)),
+            Ok((21, Token::Semicolon, 22)),
+        ]
+    );
+
+    lexer_test!(
+        lex_const_decl_without_assign,
+        "const a;",
+        vec![
+            Ok((0, Token::Const, 5)),
+            Ok((6, Token::Identifier("a".to_string()), 7)),
+            Ok((7, Token::Semicolon, 8)),
         ]
     );
 }

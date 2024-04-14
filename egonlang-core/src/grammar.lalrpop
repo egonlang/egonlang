@@ -17,13 +17,24 @@ Decl = {
 DeclLetVar: ast::Stmt = <assign:StmtAssign> =>
     ast::Stmt::Assign(<>);
 
-StmtAssign: ast::StmtAssign = "let" <name:identifier> <type_identifier:(":" <identifier>)?> <value:("=" <ExprS>)?> ";" => ast::StmtAssign {
-    identifier: ast::Identifier {
-        name,
+StmtAssign: ast::StmtAssign = {
+    "let" <name:identifier> <type_identifier:(":" <identifier>)?> <value:("=" <ExprS>)?> ";" => ast::StmtAssign {
+        identifier: ast::Identifier {
+            name,
+        },
+        type_identifier: type_identifier.map(|name| ast::Identifier { name }),
+        is_const: false,
+        value,
     },
-    type_identifier: type_identifier.map(|name| ast::Identifier { name }),
-    value,
-};
+    "const" <name:identifier> <type_identifier:(":" <identifier>)?> <value:("=" <ExprS>)?> ";" => ast::StmtAssign {
+        identifier: ast::Identifier {
+            name,
+        },
+        type_identifier: type_identifier.map(|name| ast::Identifier { name }),
+        is_const: true,
+        value,
+    },
+}
 
 StmtS = Spanned<Stmt>;
 
@@ -250,6 +261,7 @@ extern {
         "fn" => lexer::Token::Fn,
         "void" => lexer::Token::Void,
         "let" => lexer::Token::Let,
+        "const" => lexer::Token::Const,
 
         // Literals.
         identifier => lexer::Token::Identifier(<String>),

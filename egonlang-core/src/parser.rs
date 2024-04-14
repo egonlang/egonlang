@@ -1605,6 +1605,7 @@ mod parser_tests {
                         name: "a".to_string()
                     },
                     type_identifier: None,
+                    is_const: false,
                     value: Some((ast::Expr::Literal(ExprLiteral::Number(123f64)), 8..11))
                 }),
                 0..12
@@ -1622,6 +1623,7 @@ mod parser_tests {
                         name: "a".to_string()
                     },
                     type_identifier: None,
+                    is_const: false,
                     value: Some((
                         ast::Expr::Assign(Box::new(ExprAssign {
                             identifier: Identifier {
@@ -1649,6 +1651,7 @@ mod parser_tests {
                     type_identifier: Some(Identifier {
                         name: "Number".to_string()
                     }),
+                    is_const: false,
                     value: Some((
                         ast::Expr::Assign(Box::new(ExprAssign {
                             identifier: Identifier {
@@ -1676,6 +1679,7 @@ mod parser_tests {
                     type_identifier: Some(Identifier {
                         name: "Number".to_string()
                     }),
+                    is_const: false,
                     value: Some((ast::Expr::Literal(ExprLiteral::Number(123f64)), 16..19))
                 }),
                 0..20
@@ -1693,6 +1697,7 @@ mod parser_tests {
                         name: "a".to_string()
                     },
                     type_identifier: None,
+                    is_const: false,
                     value: None
                 }),
                 0..6
@@ -1712,6 +1717,7 @@ mod parser_tests {
                     type_identifier: Some(Identifier {
                         name: "Number".to_string()
                     }),
+                    is_const: false,
                     value: None
                 }),
                 0..14
@@ -1729,6 +1735,7 @@ mod parser_tests {
                         name: "a".to_string()
                     },
                     type_identifier: None,
+                    is_const: false,
                     value: Some((
                         Expr::If(Box::new(ExprIf {
                             cond: (Expr::Literal(ExprLiteral::Bool(true)), 12..16),

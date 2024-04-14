@@ -1,0 +1,3 @@
+const;
+
+// out: SyntaxError: unexpected ";"; expected: ["identifier"]
