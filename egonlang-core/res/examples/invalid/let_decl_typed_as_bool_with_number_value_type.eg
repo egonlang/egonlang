@@ -1,0 +1,3 @@
+let a: Bool = 123;
+
+// out: TypeError: mismatched types: expected type `Bool` but received `Number`

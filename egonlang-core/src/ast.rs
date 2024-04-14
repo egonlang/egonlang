@@ -1,5 +1,5 @@
 use crate::span::Spanned;
-use std::fmt::{self, Debug, Formatter};
+use std::fmt::{self, Debug, Display, Formatter};
 
 /// Modules are units of code (e.g. variables, functions)
 #[derive(Debug, Default, PartialEq)]
@@ -65,6 +65,16 @@ pub enum ExprLiteral {
     Bool(bool),
     Number(f64),
     String(String),
+}
+
+impl Display for ExprLiteral {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            ExprLiteral::Bool(_) => f.write_fmt(format_args!("Bool")),
+            ExprLiteral::Number(_) => f.write_fmt(format_args!("Number")),
+            ExprLiteral::String(_) => f.write_fmt(format_args!("String")),
+        }
+    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]

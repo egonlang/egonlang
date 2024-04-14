@@ -8,6 +8,8 @@ pub type ErrorS = Spanned<Error>;
 pub enum Error {
     #[error("SyntaxError: {0}")]
     SyntaxError(SyntaxError),
+    #[error("TypeError: {0}")]
+    TypeError(TypeError),
 }
 
 #[derive(Debug, Error, Eq, PartialEq)]
@@ -33,6 +35,12 @@ pub enum SyntaxError {
     UninitializedUntypedLet { name: String },
 }
 
+#[derive(Debug, Error, Eq, PartialEq)]
+pub enum TypeError {
+    #[error("mismatched types: expected type `{expected}` but received `{actual}`")]
+    MismatchType { expected: String, actual: String },
+}
+
 macro_rules! impl_from_error {
     ($($error:tt),+) => {$(
         impl From<$error> for Error {
@@ -44,3 +52,4 @@ macro_rules! impl_from_error {
 }
 
 impl_from_error!(SyntaxError);
+impl_from_error!(TypeError);

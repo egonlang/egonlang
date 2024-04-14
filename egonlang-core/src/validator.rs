@@ -36,21 +36,45 @@ impl Validator {
         match stmt {
             Stmt::Expr(stmt_expr) => self.visit_expr(&stmt_expr.expr),
             Stmt::Assign(stmt_assign) => {
-                if stmt_assign.value.is_none() {
-                    let name = stmt_assign.identifier.name.clone();
+                let name = stmt_assign.identifier.name.clone();
 
-                    if stmt_assign.is_const {
+                // const declarations
+                if stmt_assign.is_const {
+                    if stmt_assign.value.is_none() {
                         return Err(vec![(
                             Error::SyntaxError(SyntaxError::UninitializedConst { name }),
                             span.clone(),
                         )]);
-                    } else if stmt_assign.type_identifier.is_none() {
-                        return Err(vec![(
-                            Error::SyntaxError(SyntaxError::UninitializedUntypedLet { name }),
-                            span.clone(),
-                        )]);
                     }
-                };
+                }
+
+                // let declarations
+                if stmt_assign.type_identifier.is_none() && stmt_assign.value.is_none() {
+                    return Err(vec![(
+                        Error::SyntaxError(SyntaxError::UninitializedUntypedLet { name }),
+                        span.clone(),
+                    )]);
+                }
+
+                if stmt_assign.type_identifier.is_some() && stmt_assign.value.is_some() {
+                    let identifier = stmt_assign.type_identifier.clone().unwrap();
+                    let type_identifier = identifier.name;
+                    let value = stmt_assign.value.clone().unwrap();
+
+                    if let (Expr::Literal(literal_expr), span) = value {
+                        let value_type = literal_expr.to_string();
+
+                        if type_identifier != value_type {
+                            return Err(vec![(
+                                Error::TypeError(crate::errors::TypeError::MismatchType {
+                                    expected: type_identifier,
+                                    actual: value_type,
+                                }),
+                                span.clone(),
+                            )]);
+                        }
+                    }
+                }
 
                 Ok(())
             }
@@ -67,7 +91,10 @@ impl Validator {
 mod parser_tests {
     use pretty_assertions::assert_eq;
 
-    use crate::{errors::Error, parser::parse};
+    use crate::{
+        errors::{Error, TypeError},
+        parser::parse,
+    };
 
     use super::Validator;
 
@@ -123,5 +150,17 @@ mod parser_tests {
         validate_let_declaration_requires_type_or_value_with_type,
         "let a: Number;",
         Ok(())
+    );
+
+    validator_test!(
+        validate_let_declarations_with_value_and_type_must_match,
+        "let a: Number = \"foo\";",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "Number".to_string(),
+                actual: "String".to_string()
+            }),
+            16..21
+        )])
     );
 }
