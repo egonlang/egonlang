@@ -1604,9 +1604,29 @@ mod parser_tests {
                     identifier: Identifier {
                         name: "a".to_string()
                     },
+                    type_identifier: None,
                     value: Some((ast::Expr::Literal(ExprLiteral::Number(123f64)), 8..11))
                 }),
                 0..12
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_let_decl_typed_with_assign,
+        "let a: Number = 123;",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Assign(StmtAssign {
+                    identifier: Identifier {
+                        name: "a".to_string()
+                    },
+                    type_identifier: Some(Identifier {
+                        name: "Number".to_string()
+                    }),
+                    value: Some((ast::Expr::Literal(ExprLiteral::Number(123f64)), 16..19))
+                }),
+                0..20
             )]
         })
     );
@@ -1620,9 +1640,29 @@ mod parser_tests {
                     identifier: Identifier {
                         name: "a".to_string()
                     },
+                    type_identifier: None,
                     value: None
                 }),
                 0..6
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_let_decl_typed_without_assign,
+        "let a: Number;",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Assign(StmtAssign {
+                    identifier: Identifier {
+                        name: "a".to_string()
+                    },
+                    type_identifier: Some(Identifier {
+                        name: "Number".to_string()
+                    }),
+                    value: None
+                }),
+                0..14
             )]
         })
     );
@@ -1636,6 +1676,7 @@ mod parser_tests {
                     identifier: Identifier {
                         name: "a".to_string()
                     },
+                    type_identifier: None,
                     value: Some((
                         Expr::If(Box::new(ExprIf {
                             cond: (Expr::Literal(ExprLiteral::Bool(true)), 12..16),

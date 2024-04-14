@@ -17,10 +17,11 @@ Decl = {
 DeclLetVar: ast::Stmt = <assign:StmtAssign> =>
     ast::Stmt::Assign(<>);
 
-StmtAssign: ast::StmtAssign = "let" <name:identifier> <value:("=" <ExprS>)?> ";" => ast::StmtAssign {
+StmtAssign: ast::StmtAssign = "let" <name:identifier> <type_identifier:(":" <identifier>)?> <value:("=" <ExprS>)?> ";" => ast::StmtAssign {
     identifier: ast::Identifier {
         name,
     },
+    type_identifier: type_identifier.map(|name| ast::Identifier { name }),
     value,
 };
 
@@ -222,6 +223,7 @@ extern {
         "," => lexer::Token::Comma,
         "=>" => lexer::Token::FatArrow,
         ".." => lexer::Token::DotDot,
+        ":" => lexer::Token::Colon,
 
         "-" => lexer::Token::Minus,
         "+" => lexer::Token::Plus,

@@ -88,6 +88,8 @@ pub enum Token {
     FatArrow,
     #[token("..")]
     DotDot,
+    #[token(":")]
+    Colon,
 
     // Binary Ops
     #[token("-")]
@@ -755,6 +757,42 @@ mod lexer_tests {
             Ok((6, Token::Equal, 7)),
             Ok((8, Token::Number(123f64), 11)),
             Ok((11, Token::Semicolon, 12)),
+        ]
+    );
+
+    lexer_test!(
+        lex_let_decl_typed_with_assign,
+        "let a: Number = 123;",
+        vec![
+            Ok((0, Token::Let, 3)),
+            Ok((4, Token::Identifier("a".to_string()), 5)),
+            Ok((5, Token::Colon, 6)),
+            Ok((7, Token::Identifier("Number".to_string()), 13)),
+            Ok((14, Token::Equal, 15)),
+            Ok((16, Token::Number(123f64), 19)),
+            Ok((19, Token::Semicolon, 20)),
+        ]
+    );
+
+    lexer_test!(
+        lex_let_decl_without_assign,
+        "let a;",
+        vec![
+            Ok((0, Token::Let, 3)),
+            Ok((4, Token::Identifier("a".to_string()), 5)),
+            Ok((5, Token::Semicolon, 6)),
+        ]
+    );
+
+    lexer_test!(
+        lex_let_decl_typed_without_assign,
+        "let a: Number;",
+        vec![
+            Ok((0, Token::Let, 3)),
+            Ok((4, Token::Identifier("a".to_string()), 5)),
+            Ok((5, Token::Colon, 6)),
+            Ok((7, Token::Identifier("Number".to_string()), 13)),
+            Ok((13, Token::Semicolon, 14)),
         ]
     );
 }

@@ -38,6 +38,7 @@ pub struct StmtExpr {
 #[derive(Clone, Debug, PartialEq)]
 pub struct StmtAssign {
     pub identifier: Identifier,
+    pub type_identifier: Option<Identifier>,
     pub value: Option<ExprS>,
 }
 
