@@ -27,6 +27,10 @@ pub enum SyntaxError {
     },
     #[error("unterminated string")]
     UnterminatedString,
+    #[error("const `{name}` missing value. consts must be declared with a value")]
+    UninitializedConst { name: String },
+    #[error("let `{name}` missing value and type. lets require at least a type or declared with a value")]
+    UninitializedUntypedLet { name: String },
 }
 
 macro_rules! impl_from_error {

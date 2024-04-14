@@ -1,0 +1,3 @@
+const a;
+
+// out: SyntaxError: const `a` missing value. consts must be declared with a value
