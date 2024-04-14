@@ -148,19 +148,9 @@ pub struct ExprFn {
     pub body: ExprS,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct ExprRange {
     pub start: Option<Spanned<ExprLiteral>>,
     pub end: Option<Spanned<ExprLiteral>>,
     pub inclusive_end: bool,
-}
-
-impl Default for ExprRange {
-    fn default() -> Self {
-        Self {
-            start: None,
-            end: None,
-            inclusive_end: false,
-        }
-    }
 }

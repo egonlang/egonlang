@@ -25,14 +25,15 @@ impl Validator {
         Err(all_errs)
     }
 
-    fn visit_ident(&mut self, ident: &Spanned<Identifier>) -> Result<(), Vec<ErrorS>> {
+    #[allow(dead_code)]
+    fn visit_ident(&mut self, _ident: &Spanned<Identifier>) -> Result<(), Vec<ErrorS>> {
         Ok(())
     }
 
     fn visit_stmt(&mut self, stmt: &Spanned<Stmt>) -> Result<(), Vec<ErrorS>> {
         let (stmt, span) = stmt;
 
-        return match stmt {
+        match stmt {
             Stmt::Expr(stmt_expr) => self.visit_expr(&stmt_expr.expr),
             Stmt::Assign(stmt_assign) => {
                 if stmt_assign.value.is_none() {
@@ -54,10 +55,10 @@ impl Validator {
                 Ok(())
             }
             Stmt::Error => todo!(),
-        };
+        }
     }
 
-    fn visit_expr(&mut self, expr: &Spanned<Expr>) -> Result<(), Vec<ErrorS>> {
+    fn visit_expr(&mut self, _expr: &Spanned<Expr>) -> Result<(), Vec<ErrorS>> {
         Ok(())
     }
 }
