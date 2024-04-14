@@ -1,5 +1,5 @@
 use crate::span::Spanned;
-use std::fmt::{self, Debug, Display, Formatter};
+use std::fmt::{self, Debug, Formatter};
 
 /// Modules are units of code (e.g. variables, functions)
 #[derive(Debug, Default, PartialEq)]
@@ -60,21 +60,36 @@ pub enum Expr {
     Range(ExprRange),
 }
 
+impl Expr {
+    pub fn get_type_identifier(self) -> String {
+        match self {
+            Expr::Unit => "Void".to_string(),
+            Expr::Literal(literal) => match literal {
+                ExprLiteral::Bool(_) => "Bool".to_string(),
+                ExprLiteral::Number(_) => "Number".to_string(),
+                ExprLiteral::String(_) => "String".to_string(),
+            },
+            Expr::Identifier(_) => todo!(),
+            Expr::Block(block) => block
+                .return_expr
+                .map_or("Void".to_string(), |(expr, _)| expr.get_type_identifier()),
+            Expr::List(_) => "List".to_string(),
+            Expr::Tuple(_) => "Tuple".to_string(),
+            Expr::Infix(_) => todo!(),
+            Expr::Prefix(_) => todo!(),
+            Expr::Assign(_) => todo!(),
+            Expr::If(_) => todo!(),
+            Expr::Fn(_) => "Fn".to_string(),
+            Expr::Range(_) => "Range".to_string(),
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum ExprLiteral {
     Bool(bool),
     Number(f64),
     String(String),
-}
-
-impl Display for ExprLiteral {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        match self {
-            ExprLiteral::Bool(_) => f.write_fmt(format_args!("Bool")),
-            ExprLiteral::Number(_) => f.write_fmt(format_args!("Number")),
-            ExprLiteral::String(_) => f.write_fmt(format_args!("String")),
-        }
-    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]

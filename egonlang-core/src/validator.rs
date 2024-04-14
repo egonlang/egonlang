@@ -60,19 +60,16 @@ impl Validator {
                     let identifier = stmt_assign.type_identifier.clone().unwrap();
                     let type_identifier = identifier.name;
                     let value = stmt_assign.value.clone().unwrap();
+                    let value_type = value.0.get_type_identifier();
 
-                    if let (Expr::Literal(literal_expr), span) = value {
-                        let value_type = literal_expr.to_string();
-
-                        if type_identifier != value_type {
-                            return Err(vec![(
-                                Error::TypeError(crate::errors::TypeError::MismatchType {
-                                    expected: type_identifier,
-                                    actual: value_type,
-                                }),
-                                span.clone(),
-                            )]);
-                        }
+                    if type_identifier != value_type {
+                        return Err(vec![(
+                            Error::TypeError(crate::errors::TypeError::MismatchType {
+                                expected: type_identifier,
+                                actual: value_type,
+                            }),
+                            span.clone(),
+                        )]);
                     }
                 }
 
@@ -160,7 +157,61 @@ mod parser_tests {
                 expected: "Number".to_string(),
                 actual: "String".to_string()
             }),
-            16..21
+            0..22
         )])
+    );
+
+    validator_test!(
+        validate_let_decl_typed_as_number_with_range_value_type,
+        "let a: Number = 0..10;",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "Number".to_string(),
+                actual: "Range".to_string()
+            }),
+            0..22
+        )])
+    );
+
+    validator_test!(
+        validate_let_decl_typed_as_number_with_list_value_type,
+        "let a: Number = [1, 2, 3];",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "Number".to_string(),
+                actual: "List".to_string()
+            }),
+            0..26
+        )])
+    );
+
+    validator_test!(
+        validate_let_decl_typed_as_tuple_with_tuple_value_type,
+        "let a: Tuple = (1, 2, 3,);",
+        Ok(())
+    );
+
+    validator_test!(
+        validate_let_decl_with_value_as_block_with_returning_expr,
+        "let a: Number = { 123 };",
+        Ok(())
+    );
+
+    validator_test!(
+        validate_let_decl_with_value_as_block_with_returning_expr_mismatch_types,
+        "let a: Number = { \"foo\" };",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "Number".to_string(),
+                actual: "String".to_string()
+            }),
+            0..26
+        )])
+    );
+
+    validator_test!(
+        validate_let_decl_with_value_as_block_without_returning_expr,
+        "let a: Void = { 123; };",
+        Ok(())
     );
 }
