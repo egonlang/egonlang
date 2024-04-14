@@ -1,5 +1,7 @@
 use std::{env, path::PathBuf};
 
+use egonlang_core::validator::Validator;
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     let command = args.get(2).expect("No command passed: lex, parse");
@@ -9,7 +11,8 @@ fn main() {
 
     match command.as_str() {
         "parse" => {
-            let module = egonlang_core::parser::parse(&content, 0).expect("There were errors");
+            let module = egonlang_core::parser::parse(&content, 0)
+                .and_then(|module| Validator::default().validate(&module));
 
             println!("Path:\n\n{:?}\n", std::fs::canonicalize(pathbuf).unwrap());
             println!("Input:\n\n{content}\n");
