@@ -1613,6 +1613,58 @@ mod parser_tests {
     );
 
     parser_test!(
+        parse_let_decl_with_assign_chain,
+        "let a = b = 123;",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Assign(StmtAssign {
+                    identifier: Identifier {
+                        name: "a".to_string()
+                    },
+                    type_identifier: None,
+                    value: Some((
+                        ast::Expr::Assign(Box::new(ExprAssign {
+                            identifier: Identifier {
+                                name: "b".to_string()
+                            },
+                            value: (Expr::Literal(ExprLiteral::Number(123f64)), 12..15)
+                        })),
+                        8..15
+                    ))
+                }),
+                0..16
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_let_decl_typed_with_assign_chain,
+        "let a: Number = b = 123;",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Assign(StmtAssign {
+                    identifier: Identifier {
+                        name: "a".to_string()
+                    },
+                    type_identifier: Some(Identifier {
+                        name: "Number".to_string()
+                    }),
+                    value: Some((
+                        ast::Expr::Assign(Box::new(ExprAssign {
+                            identifier: Identifier {
+                                name: "b".to_string()
+                            },
+                            value: (Expr::Literal(ExprLiteral::Number(123f64)), 20..23)
+                        })),
+                        16..23
+                    ))
+                }),
+                0..24
+            )]
+        })
+    );
+
+    parser_test!(
         parse_let_decl_typed_with_assign,
         "let a: Number = 123;",
         Ok(Module {
