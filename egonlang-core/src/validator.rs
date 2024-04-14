@@ -30,33 +30,31 @@ impl Validator {
     }
 
     fn visit_stmt(&mut self, stmt: &Spanned<Stmt>) -> Result<(), Vec<ErrorS>> {
-        if let (stmt, span) = stmt {
-            return match stmt {
-                Stmt::Expr(stmt_expr) => self.visit_expr(&stmt_expr.expr),
-                Stmt::Assign(stmt_assign) => {
-                    if let None = stmt_assign.value {
-                        let name = stmt_assign.identifier.name.clone();
+        let (stmt, span) = stmt;
 
-                        if stmt_assign.is_const {
-                            return Err(vec![(
-                                Error::SyntaxError(SyntaxError::UninitializedConst { name }),
-                                span.clone(),
-                            )]);
-                        } else if stmt_assign.type_identifier.is_none() {
-                            return Err(vec![(
-                                Error::SyntaxError(SyntaxError::UninitializedUntypedLet { name }),
-                                span.clone(),
-                            )]);
-                        }
-                    };
+        return match stmt {
+            Stmt::Expr(stmt_expr) => self.visit_expr(&stmt_expr.expr),
+            Stmt::Assign(stmt_assign) => {
+                if stmt_assign.value.is_none() {
+                    let name = stmt_assign.identifier.name.clone();
 
-                    Ok(())
-                }
-                Stmt::Error => todo!(),
-            };
+                    if stmt_assign.is_const {
+                        return Err(vec![(
+                            Error::SyntaxError(SyntaxError::UninitializedConst { name }),
+                            span.clone(),
+                        )]);
+                    } else if stmt_assign.type_identifier.is_none() {
+                        return Err(vec![(
+                            Error::SyntaxError(SyntaxError::UninitializedUntypedLet { name }),
+                            span.clone(),
+                        )]);
+                    }
+                };
+
+                Ok(())
+            }
+            Stmt::Error => todo!(),
         };
-
-        Ok(())
     }
 
     fn visit_expr(&mut self, expr: &Spanned<Expr>) -> Result<(), Vec<ErrorS>> {

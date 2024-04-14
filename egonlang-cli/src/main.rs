@@ -13,7 +13,7 @@ fn main() {
             let content = std::fs::read_to_string(path).expect("Unable to read file");
 
             let module = egonlang_core::parser::parse(&content, 0)
-                .and_then(|module| Validator::default().validate(&module));
+                .and_then(|module| Validator.validate(&module));
 
             println!("Path:\n\n{:?}\n", std::fs::canonicalize(pathbuf).unwrap());
             println!("Input:\n\n{content}\n");
