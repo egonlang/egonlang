@@ -97,6 +97,12 @@ mod parser_tests {
     );
 
     validator_test!(
+        validate_const_declaration_requires_value_with_value,
+        "const a = 123;",
+        Ok(())
+    );
+
+    validator_test!(
         validate_let_declaration_requires_type_or_value,
         "let a;",
         Err(vec![(
@@ -105,5 +111,17 @@ mod parser_tests {
             }),
             0..6
         )])
+    );
+
+    validator_test!(
+        validate_let_declaration_requires_type_or_value_with_value,
+        "let a = 123;",
+        Ok(())
+    );
+
+    validator_test!(
+        validate_let_declaration_requires_type_or_value_with_type,
+        "let a: Number;",
+        Ok(())
     );
 }
