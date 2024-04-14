@@ -1,0 +1,3 @@
+(let a = 123;);
+
+// out: SyntaxError: unexpected "let"; expected: ["\"!\"", "\"(\"", "\"-\"", "\"..\"", "\"[\"", "\"false\"", "\"if\"", "\"true\"", "\"void\"", "\"{\"", "identifier", "number", "string"]

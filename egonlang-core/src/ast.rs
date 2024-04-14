@@ -14,6 +14,7 @@ pub type ExprS = Spanned<Expr>;
 #[derive(Clone, PartialEq)]
 pub enum Stmt {
     Expr(StmtExpr),
+    Assign(StmtAssign),
     Error,
 }
 
@@ -21,6 +22,7 @@ impl Debug for Stmt {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
             Self::Expr(arg0) => f.write_fmt(format_args!("{:#?}", arg0)),
+            Self::Assign(arg0) => f.write_fmt(format_args!("{:#?}", arg0)),
             Self::Error => write!(f, "Error"),
         }
     }
@@ -30,6 +32,13 @@ impl Debug for Stmt {
 #[derive(Clone, Debug, PartialEq)]
 pub struct StmtExpr {
     pub expr: ExprS,
+}
+
+/// Statement that sets `var.name` to `value`
+#[derive(Clone, Debug, PartialEq)]
+pub struct StmtAssign {
+    pub identifier: Identifier,
+    pub value: Option<ExprS>,
 }
 
 /// Expressions

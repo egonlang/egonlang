@@ -91,8 +91,8 @@ mod parser_tests {
     use pretty_assertions::assert_eq;
 
     use crate::ast::{
-        Expr, ExprAssign, ExprBlock, ExprIdentifier, ExprIf, ExprInfix, ExprList, ExprLiteral,
-        ExprRange, ExprTuple, Identifier, Module, OpInfix, Stmt, StmtExpr,
+        self, Expr, ExprAssign, ExprBlock, ExprIdentifier, ExprIf, ExprInfix, ExprList,
+        ExprLiteral, ExprRange, ExprTuple, Identifier, Module, OpInfix, Stmt, StmtAssign, StmtExpr,
     };
 
     use crate::errors::{Error, SyntaxError};
@@ -1591,6 +1591,79 @@ mod parser_tests {
                     )
                 }),
                 0..7
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_let_decl_with_assign,
+        "let a = 123;",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Assign(StmtAssign {
+                    identifier: Identifier {
+                        name: "a".to_string()
+                    },
+                    value: Some((ast::Expr::Literal(ExprLiteral::Number(123f64)), 8..11))
+                }),
+                0..12
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_let_decl_without_assign,
+        "let a;",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Assign(StmtAssign {
+                    identifier: Identifier {
+                        name: "a".to_string()
+                    },
+                    value: None
+                }),
+                0..6
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_let_decl_with_assign_from_if_else_expr,
+        "let a = if (true) { 123 } else { 456 };",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Assign(StmtAssign {
+                    identifier: Identifier {
+                        name: "a".to_string()
+                    },
+                    value: Some((
+                        Expr::If(Box::new(ExprIf {
+                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 12..16),
+                            then: (
+                                Expr::Block(Box::new(ExprBlock {
+                                    stmts: vec![],
+                                    return_expr: Some((
+                                        Expr::Literal(ExprLiteral::Number(123f64)),
+                                        20..23
+                                    ))
+                                })),
+                                18..25
+                            ),
+                            else_: Some((
+                                Expr::Block(Box::new(ExprBlock {
+                                    stmts: vec![],
+                                    return_expr: Some((
+                                        Expr::Literal(ExprLiteral::Number(456f64)),
+                                        33..36
+                                    ))
+                                })),
+                                31..38
+                            ))
+                        })),
+                        8..38
+                    ))
+                }),
+                0..39
             )]
         })
     );

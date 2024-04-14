@@ -7,7 +7,22 @@ grammar<'err>(
     errors: &'err mut Vec<ParseError<usize, lexer::Token, ErrorS>>
 );
 
-pub Module: ast::Module = <stmts:Spanned<Stmt>*> => ast::Module { <> };
+pub Module: ast::Module = <stmts:Spanned<Decl>*> => ast::Module { <> };
+
+Decl = {
+    DeclLetVar,
+    Stmt,
+}
+
+DeclLetVar: ast::Stmt = <assign:StmtAssign> =>
+    ast::Stmt::Assign(<>);
+
+StmtAssign: ast::StmtAssign = "let" <name:identifier> <value:("=" <ExprS>)?> ";" => ast::StmtAssign {
+    identifier: ast::Identifier {
+        name,
+    },
+    value,
+};
 
 StmtS = Spanned<Stmt>;
 
@@ -157,7 +172,7 @@ ExprRange: ast::Expr = <start:Spanned<number>?> ".." <inclusive_end:"="?> <end:S
     });
 
 ExprBlock: ast::Expr = {
-    "{" <stmts:(<StmtS>)*> <return_expr:(ExprS)?> "}" =>
+    "{" <stmts:(<Spanned<Decl>>)*> <return_expr:(ExprS)?> "}" =>
     ast::Expr::Block(Box::new(
         ast::ExprBlock {
             stmts,
@@ -232,6 +247,7 @@ extern {
         "else" => lexer::Token::Else,
         "fn" => lexer::Token::Fn,
         "void" => lexer::Token::Void,
+        "let" => lexer::Token::Let,
 
         // Literals.
         identifier => lexer::Token::Identifier(<String>),

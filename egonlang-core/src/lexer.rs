@@ -134,6 +134,8 @@ pub enum Token {
     Else,
     #[token("fn")]
     Fn,
+    #[token("let")]
+    Let,
 
     // Literals.
     #[regex("[a-zA-Z_][a-zA-Z0-9_]*", lex_identifier)]
@@ -741,6 +743,18 @@ mod lexer_tests {
             Ok((1, Token::DotDot, 3)),
             Ok((3, Token::Equal, 4)),
             Ok((4, Token::Number(10f64), 6))
+        ]
+    );
+
+    lexer_test!(
+        lex_let_decl_with_assign,
+        "let a = 123;",
+        vec![
+            Ok((0, Token::Let, 3)),
+            Ok((4, Token::Identifier("a".to_string()), 5)),
+            Ok((6, Token::Equal, 7)),
+            Ok((8, Token::Number(123f64), 11)),
+            Ok((11, Token::Semicolon, 12)),
         ]
     );
 }
