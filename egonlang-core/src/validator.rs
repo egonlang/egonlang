@@ -49,24 +49,24 @@ impl Validator {
                 }
 
                 // let declarations
-                if stmt_assign.type_identifier.is_none() && stmt_assign.value.is_none() {
+                if stmt_assign.type_expr.is_none() && stmt_assign.value.is_none() {
                     return Err(vec![(
                         Error::SyntaxError(SyntaxError::UninitializedUntypedLet { name }),
                         span.clone(),
                     )]);
                 }
 
-                if stmt_assign.type_identifier.is_some() && stmt_assign.value.is_some() {
-                    let identifier = stmt_assign.type_identifier.clone().unwrap();
-                    let type_identifier = identifier.name;
+                if stmt_assign.type_expr.is_some() && stmt_assign.value.is_some() {
+                    let (type_expr, _) = stmt_assign.type_expr.clone().unwrap();
+                    let type_identifier = type_expr.get_type_expr();
                     let value = stmt_assign.value.clone().unwrap();
-                    let value_type = value.0.get_type_identifier();
+                    let value_type = value.0.get_type_expr();
 
                     if type_identifier != value_type {
                         return Err(vec![(
                             Error::TypeError(crate::errors::TypeError::MismatchType {
-                                expected: type_identifier,
-                                actual: value_type,
+                                expected: type_identifier.to_string(),
+                                actual: value_type.to_string(),
                             }),
                             span.clone(),
                         )]);
@@ -90,14 +90,14 @@ impl Validator {
 
                 let (first_item, _) = list.items.first().unwrap().clone();
 
-                let first_item_type_ident = &first_item.get_type_identifier();
+                let first_item_type_ident = &first_item.get_type_expr();
 
                 let remaining_items: Vec<ExprS> = list.items.clone().into_iter().skip(1).collect();
 
                 let mut errs = vec![];
 
                 for (item_expr, item_span) in remaining_items {
-                    let item_expr_type_ident = &item_expr.get_type_identifier();
+                    let item_expr_type_ident = &item_expr.get_type_expr();
 
                     if item_expr_type_ident != first_item_type_ident {
                         errs.push((
@@ -252,13 +252,129 @@ mod parser_tests {
 
     validator_test!(
         validate_list_items_with_mixed_types,
-        "[1, 2, \"foo\"];",
+        "[
+            1,
+            2,
+            \"foo\",
+            { void },
+            0..10,
+            false,
+            if (true) { \"red\" } else { \"blue\" }
+        ];",
+        Err(vec![
+            (
+                Error::TypeError(TypeError::MismatchType {
+                    expected: "Number".to_string(),
+                    actual: "String".to_string()
+                }),
+                44..49
+            ),
+            (
+                Error::TypeError(TypeError::MismatchType {
+                    expected: "Number".to_string(),
+                    actual: "Void".to_string()
+                }),
+                63..71
+            ),
+            (
+                Error::TypeError(TypeError::MismatchType {
+                    expected: "Number".to_string(),
+                    actual: "Range".to_string()
+                }),
+                85..90
+            ),
+            (
+                Error::TypeError(TypeError::MismatchType {
+                    expected: "Number".to_string(),
+                    actual: "Bool".to_string()
+                }),
+                104..109
+            ),
+            (
+                Error::TypeError(TypeError::MismatchType {
+                    expected: "Number".to_string(),
+                    actual: "String".to_string()
+                }),
+                123..158
+            )
+        ])
+    );
+
+    validator_test!(
+        validate_assign_mismatch_types_block_returning_string,
+        "let a: Void = { \"foo\" };",
         Err(vec![(
             Error::TypeError(TypeError::MismatchType {
-                expected: "Number".to_string(),
+                expected: "Void".to_string(),
                 actual: "String".to_string()
             }),
-            7..12
+            0..24
+        )])
+    );
+
+    validator_test!(
+        validate_assign_mismatch_types_block_returning_number,
+        "let a: Void = { 123 };",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "Void".to_string(),
+                actual: "Number".to_string()
+            }),
+            0..22
+        )])
+    );
+
+    validator_test!(
+        validate_assign_mismatch_types_block_returning_void,
+        "let a: Void = { void };",
+        Ok(())
+    );
+
+    validator_test!(
+        validate_assign_mismatch_types_block_returning_list,
+        "let a: Void = { [1, 2, 3] };",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "Void".to_string(),
+                actual: "List".to_string()
+            }),
+            0..28
+        )])
+    );
+
+    validator_test!(
+        validate_assign_mismatch_types_block_returning_tuple,
+        "let a: Void = { (1, 2, 3,) };",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "Void".to_string(),
+                actual: "Tuple".to_string()
+            }),
+            0..29
+        )])
+    );
+
+    validator_test!(
+        validate_assign_mismatch_types_block_returning_bool,
+        "let a: Void = { false };",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "Void".to_string(),
+                actual: "Bool".to_string()
+            }),
+            0..24
+        )])
+    );
+
+    validator_test!(
+        validate_assign_mismatch_types_nested_block_returning_number,
+        "let a: Void = { { 123 } };",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "Void".to_string(),
+                actual: "Number".to_string()
+            }),
+            0..26
         )])
     );
 }

@@ -92,7 +92,8 @@ mod parser_tests {
 
     use crate::ast::{
         self, Expr, ExprAssign, ExprBlock, ExprIdentifier, ExprIf, ExprInfix, ExprList,
-        ExprLiteral, ExprRange, ExprTuple, Identifier, Module, OpInfix, Stmt, StmtAssign, StmtExpr,
+        ExprLiteral, ExprRange, ExprTuple, ExprType, Identifier, Module, OpInfix, Stmt, StmtAssign,
+        StmtExpr, TypeRef,
     };
 
     use crate::errors::{Error, SyntaxError};
@@ -1604,7 +1605,7 @@ mod parser_tests {
                     identifier: Identifier {
                         name: "a".to_string()
                     },
-                    type_identifier: None,
+                    type_expr: None,
                     is_const: false,
                     value: Some((ast::Expr::Literal(ExprLiteral::Number(123f64)), 8..11))
                 }),
@@ -1622,7 +1623,7 @@ mod parser_tests {
                     identifier: Identifier {
                         name: "a".to_string()
                     },
-                    type_identifier: None,
+                    type_expr: None,
                     is_const: false,
                     value: Some((
                         ast::Expr::Assign(Box::new(ExprAssign {
@@ -1648,9 +1649,10 @@ mod parser_tests {
                     identifier: Identifier {
                         name: "a".to_string()
                     },
-                    type_identifier: Some(Identifier {
-                        name: "Number".to_string()
-                    }),
+                    type_expr: Some((
+                        Expr::Type(ExprType(TypeRef("Number".to_string(), vec![]))),
+                        7..13
+                    )),
                     is_const: false,
                     value: Some((
                         ast::Expr::Assign(Box::new(ExprAssign {
@@ -1676,9 +1678,10 @@ mod parser_tests {
                     identifier: Identifier {
                         name: "a".to_string()
                     },
-                    type_identifier: Some(Identifier {
-                        name: "Number".to_string()
-                    }),
+                    type_expr: Some((
+                        Expr::Type(ExprType(TypeRef("Number".to_string(), vec![]))),
+                        7..13
+                    )),
                     is_const: false,
                     value: Some((ast::Expr::Literal(ExprLiteral::Number(123f64)), 16..19))
                 }),
@@ -1696,7 +1699,7 @@ mod parser_tests {
                     identifier: Identifier {
                         name: "a".to_string()
                     },
-                    type_identifier: None,
+                    type_expr: None,
                     is_const: false,
                     value: None
                 }),
@@ -1714,9 +1717,10 @@ mod parser_tests {
                     identifier: Identifier {
                         name: "a".to_string()
                     },
-                    type_identifier: Some(Identifier {
-                        name: "Number".to_string()
-                    }),
+                    type_expr: Some((
+                        Expr::Type(ExprType(TypeRef("Number".to_string(), vec![]))),
+                        7..13
+                    )),
                     is_const: false,
                     value: None
                 }),
@@ -1734,7 +1738,7 @@ mod parser_tests {
                     identifier: Identifier {
                         name: "a".to_string()
                     },
-                    type_identifier: None,
+                    type_expr: None,
                     is_const: false,
                     value: Some((
                         Expr::If(Box::new(ExprIf {

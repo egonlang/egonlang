@@ -1,5 +1,5 @@
 use crate::span::Spanned;
-use std::fmt::{self, Debug, Formatter};
+use std::fmt::{self, Debug, Display, Formatter};
 
 /// Modules are units of code (e.g. variables, functions)
 #[derive(Debug, Default, PartialEq)]
@@ -38,7 +38,7 @@ pub struct StmtExpr {
 #[derive(Clone, Debug, PartialEq)]
 pub struct StmtAssign {
     pub identifier: Identifier,
-    pub type_identifier: Option<Identifier>,
+    pub type_expr: Option<ExprS>,
     pub is_const: bool,
     pub value: Option<ExprS>,
 }
@@ -58,29 +58,37 @@ pub enum Expr {
     If(Box<ExprIf>),
     Fn(Box<ExprFn>),
     Range(ExprRange),
+    Type(ExprType),
 }
 
 impl Expr {
-    pub fn get_type_identifier(self) -> String {
+    pub fn get_type_expr(self) -> TypeRef {
         match self {
-            Expr::Unit => "Void".to_string(),
+            Expr::Unit => TypeRef::simple("Void".to_string()),
             Expr::Literal(literal) => match literal {
-                ExprLiteral::Bool(_) => "Bool".to_string(),
-                ExprLiteral::Number(_) => "Number".to_string(),
-                ExprLiteral::String(_) => "String".to_string(),
+                ExprLiteral::Bool(_) => TypeRef::simple("Bool".to_string()),
+                ExprLiteral::Number(_) => TypeRef::simple("Number".to_string()),
+                ExprLiteral::String(_) => TypeRef::simple("String".to_string()),
             },
             Expr::Identifier(_) => todo!(),
             Expr::Block(block) => block
                 .return_expr
-                .map_or("Void".to_string(), |(expr, _)| expr.get_type_identifier()),
-            Expr::List(_) => "List".to_string(),
-            Expr::Tuple(_) => "Tuple".to_string(),
-            Expr::Infix(_) => todo!(),
-            Expr::Prefix(_) => todo!(),
-            Expr::Assign(_) => todo!(),
-            Expr::If(_) => "If".to_string(),
-            Expr::Fn(_) => "Fn".to_string(),
-            Expr::Range(_) => "Range".to_string(),
+                .map_or(TypeRef::simple("Void".to_string()), |(expr, _)| {
+                    expr.get_type_expr()
+                }),
+            Expr::List(_) => TypeRef::simple("List".to_string()),
+            Expr::Tuple(_) => TypeRef::simple("Tuple".to_string()),
+            Expr::Infix(infix) => infix.rt.0.get_type_expr(),
+            Expr::Prefix(prefix) => prefix.rt.0.get_type_expr(),
+            Expr::Assign(assign) => {
+                let (expr, _) = assign.value;
+
+                expr.get_type_expr()
+            }
+            Expr::If(if_) => if_.then.0.get_type_expr(),
+            Expr::Fn(_) => todo!(),
+            Expr::Range(_) => TypeRef::simple("Range".to_string()),
+            Expr::Type(ty) => ty.0,
         }
     }
 }
@@ -178,4 +186,22 @@ pub struct ExprRange {
     pub start: Option<Spanned<ExprLiteral>>,
     pub end: Option<Spanned<ExprLiteral>>,
     pub inclusive_end: bool,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct ExprType(pub TypeRef);
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct TypeRef(pub String, pub Vec<ExprS>);
+
+impl TypeRef {
+    pub fn simple(type_ident: String) -> TypeRef {
+        TypeRef(type_ident, vec![])
+    }
+}
+
+impl Display for TypeRef {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.write_fmt(format_args!("{}", self.0))
+    }
 }
