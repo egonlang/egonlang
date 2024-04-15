@@ -1,0 +1,4 @@
+[1, 2, "foo", false];
+
+// out: TypeError: mismatched types: expected type `Number` but received `String`
+// out: TypeError: mismatched types: expected type `Number` but received `Bool`

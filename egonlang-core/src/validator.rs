@@ -1,5 +1,5 @@
 use crate::{
-    ast::{Expr, Identifier, Module, Stmt},
+    ast::{Expr, ExprS, Identifier, Module, Stmt},
     errors::{Error, ErrorS, SyntaxError},
     span::Spanned,
 };
@@ -79,8 +79,41 @@ impl Validator {
         }
     }
 
-    fn visit_expr(&mut self, _expr: &Spanned<Expr>) -> Result<(), Vec<ErrorS>> {
-        Ok(())
+    fn visit_expr(&mut self, expr: &Spanned<Expr>) -> Result<(), Vec<ErrorS>> {
+        let (expr, _) = expr;
+
+        match expr {
+            Expr::List(list) => {
+                if list.items.is_empty() {
+                    return Ok(());
+                }
+
+                let (first_item, _) = list.items.first().unwrap().clone();
+
+                let first_item_type_ident = &first_item.get_type_identifier();
+
+                let remaining_items: Vec<ExprS> = list.items.clone().into_iter().skip(1).collect();
+
+                let mut errs = vec![];
+
+                for (item_expr, item_span) in remaining_items {
+                    let item_expr_type_ident = &item_expr.get_type_identifier();
+
+                    if item_expr_type_ident != first_item_type_ident {
+                        errs.push((
+                            Error::TypeError(crate::errors::TypeError::MismatchType {
+                                expected: first_item_type_ident.to_string(),
+                                actual: item_expr_type_ident.to_string(),
+                            }),
+                            item_span.clone(),
+                        ));
+                    }
+                }
+
+                Err(errs)
+            }
+            _ => Ok(()),
+        }
     }
 }
 
@@ -213,5 +246,19 @@ mod parser_tests {
         validate_let_decl_with_value_as_block_without_returning_expr,
         "let a: Void = { 123; };",
         Ok(())
+    );
+
+    validator_test!(validate_list_items_with_same_type, "[1, 2, 3];", Ok(()));
+
+    validator_test!(
+        validate_list_items_with_mixed_types,
+        "[1, 2, \"foo\"];",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "Number".to_string(),
+                actual: "String".to_string()
+            }),
+            7..12
+        )])
     );
 }

@@ -1,3 +1,4 @@
-if true { false }
+if true { false };
 
 // out: SyntaxError: unexpected "true"; expected: ["\"(\""]
+// out: SyntaxError: unexpected "{"; expected: ["\"!=\"", "\"%\"", "\")\"", "\"*\"", "\"+\"", "\",\"", "\"-\"", "\"/\"", "\";\"", "\"<\"", "\"<=\"", "\"==\"", "\">\"", "\">=\"", "\"]\"", "\"and\"", "\"or\"", "\"}\""]

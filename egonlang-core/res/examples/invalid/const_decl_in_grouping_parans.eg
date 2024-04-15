@@ -1,3 +1,4 @@
 (const a = 123;);
 
 // out: SyntaxError: unexpected "const"; expected: ["\"!\"", "\"(\"", "\"-\"", "\"..\"", "\"[\"", "\"false\"", "\"if\"", "\"true\"", "\"void\"", "\"{\"", "identifier", "number", "string"]
+// out: SyntaxError: unexpected ")"; expected: ["\"!\"", "\"(\"", "\"-\"", "\"..\"", "\"[\"", "\"const\"", "\"false\"", "\"if\"", "\"let\"", "\"true\"", "\"void\"", "\"{\"", "\"}\"", "identifier", "number", "string"]

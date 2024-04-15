@@ -78,7 +78,7 @@ impl Expr {
             Expr::Infix(_) => todo!(),
             Expr::Prefix(_) => todo!(),
             Expr::Assign(_) => todo!(),
-            Expr::If(_) => todo!(),
+            Expr::If(_) => "If".to_string(),
             Expr::Fn(_) => "Fn".to_string(),
             Expr::Range(_) => "Range".to_string(),
         }

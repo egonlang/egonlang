@@ -1,3 +1,4 @@
-if (true) false else true
+if (true) false else true;
 
 // out: SyntaxError: unexpected "false"; expected: ["\"{\""]
+// out: SyntaxError: unexpected "else"; expected: ["\"!=\"", "\"%\"", "\")\"", "\"*\"", "\"+\"", "\",\"", "\"-\"", "\"/\"", "\";\"", "\"<\"", "\"<=\"", "\"==\"", "\">\"", "\">=\"", "\"]\"", "\"and\"", "\"or\"", "\"}\""]

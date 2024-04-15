@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use std::{fs, str};
 
 use egonlang_core::validator::Validator;
+
 use pretty_assertions::assert_eq;
 
 use egonlang_core::parser::parse;
@@ -22,8 +23,13 @@ fn integration(#[files("res/examples/**/*.eg")] path: PathBuf) {
 
     let mut got_output = Vec::new();
     if let Err(e) = parse(&source, 0).and_then(|module| Validator.validate(&module)) {
-        let (e, _) = e.first().expect("received empty error");
-        writeln!(&mut got_output, "{e}").expect("could not write to output");
+        let m = e
+            .into_iter()
+            .map(|(e, _)| e.to_string())
+            .collect::<Vec<String>>()
+            .join("\n");
+
+        writeln!(&mut got_output, "{m}").expect("could not write to output");
     }
     let got_output = str::from_utf8(&got_output).expect("invalid UTF-8 in output");
     assert_eq!(exp_output, got_output);

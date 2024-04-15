@@ -1,3 +1,4 @@
-if void void
+if void void;
 
 // out: SyntaxError: unexpected "void"; expected: ["\"(\""]
+// out: SyntaxError: unexpected "void"; expected: ["\"!=\"", "\"%\"", "\")\"", "\"*\"", "\"+\"", "\",\"", "\"-\"", "\"/\"", "\";\"", "\"<\"", "\"<=\"", "\"==\"", "\">\"", "\">=\"", "\"]\"", "\"and\"", "\"or\"", "\"}\""]
