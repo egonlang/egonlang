@@ -377,4 +377,22 @@ mod parser_tests {
             0..26
         )])
     );
+
+    validator_test!(
+        validate_assign_chain_mismatched_types,
+        "let a: Void = b = 123;",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "Void".to_string(),
+                actual: "Number".to_string()
+            }),
+            0..22
+        )])
+    );
+
+    validator_test!(
+        validate_assign_chain_matching_types,
+        "let a: Number = b = 123;",
+        Ok(())
+    );
 }
