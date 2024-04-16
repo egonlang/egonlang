@@ -1,5 +1,5 @@
 use crate::{
-    ast::{Expr, ExprS, Identifier, Module, Stmt},
+    ast::{Expr, ExprInfix, ExprS, Identifier, Module, OpInfix, Stmt, TypeRef},
     errors::{Error, ErrorS, SyntaxError},
     span::Spanned,
 };
@@ -113,6 +113,18 @@ impl Validator {
                 Err(errs)
             }
             Expr::If(if_) => {
+                let cond_expr = if_.cond.0.clone().get_type_expr();
+
+                if cond_expr.0 != *"Bool" {
+                    return Err(vec![(
+                        Error::TypeError(crate::errors::TypeError::MismatchType {
+                            expected: "Bool".to_string(),
+                            actual: cond_expr.to_string(),
+                        }),
+                        if_.cond.1.clone(),
+                    )]);
+                }
+
                 let then_type_ref = if_.then.0.clone().get_type_expr();
 
                 if if_.else_.is_some() {
@@ -132,8 +144,66 @@ impl Validator {
 
                 Ok(())
             }
+
+            Expr::Infix(infix) => {
+                let number_typeref = TypeRef::simple("Number".to_string());
+                let bool_typeref = TypeRef::simple("Bool".to_string());
+
+                match infix.op {
+                    OpInfix::Add => self.validate_infix_types(infix, number_typeref),
+                    OpInfix::Subtract => self.validate_infix_types(infix, number_typeref),
+                    OpInfix::Multiply => self.validate_infix_types(infix, number_typeref),
+                    OpInfix::Divide => self.validate_infix_types(infix, number_typeref),
+                    OpInfix::Modulus => self.validate_infix_types(infix, number_typeref),
+                    OpInfix::Less => self.validate_infix_types(infix, number_typeref),
+                    OpInfix::LessEqual => self.validate_infix_types(infix, number_typeref),
+                    OpInfix::Greater => self.validate_infix_types(infix, number_typeref),
+                    OpInfix::GreaterEqual => self.validate_infix_types(infix, number_typeref),
+                    OpInfix::LogicAnd => self.validate_infix_types(infix, bool_typeref),
+                    OpInfix::LogicOr => self.validate_infix_types(infix, bool_typeref),
+                    _ => Ok(()),
+                }
+            }
             _ => Ok(()),
         }
+    }
+
+    fn validate_infix_types(
+        &self,
+        infix: &ExprInfix,
+        expected_type: TypeRef,
+    ) -> Result<(), Vec<ErrorS>> {
+        let mut errs = vec![];
+
+        let (lt, lt_span) = infix.lt.clone();
+        let lt_typeref = lt.get_type_expr();
+        let (rt, rt_span) = infix.rt.clone();
+        let rt_typeref = rt.get_type_expr();
+
+        if lt_typeref != expected_type {
+            errs.push((
+                Error::TypeError(crate::errors::TypeError::MismatchType {
+                    expected: expected_type.to_string(),
+                    actual: lt_typeref.to_string(),
+                }),
+                lt_span,
+            ));
+        }
+        if rt_typeref != expected_type {
+            errs.push((
+                Error::TypeError(crate::errors::TypeError::MismatchType {
+                    expected: expected_type.to_string(),
+                    actual: rt_typeref.to_string(),
+                }),
+                rt_span,
+            ));
+        }
+
+        if !errs.is_empty() {
+            return Err(errs);
+        }
+
+        Ok(())
     }
 }
 
@@ -425,6 +495,92 @@ mod parser_tests {
                 actual: "Number".to_string()
             }),
             24..31
+        )])
+    );
+
+    validator_test!(
+        validate_if_cond_is_bool_mismatch_number,
+        "if (123) {} else {};",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "Bool".to_string(),
+                actual: "Number".to_string()
+            }),
+            4..7
+        )])
+    );
+
+    validator_test!(
+        validate_if_cond_is_bool_mismatch_number_plus_number,
+        "if (123 + 456) {} else {};",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "Bool".to_string(),
+                actual: "Number".to_string()
+            }),
+            4..13
+        )])
+    );
+
+    validator_test!(
+        validate_if_cond_is_bool_match_number_lt_number,
+        "if (123 < 456) {} else {};",
+        Ok(())
+    );
+
+    validator_test!(
+        validate_if_cond_is_bool_match_number_gt_number,
+        "if (123 > 456) {} else {};",
+        Ok(())
+    );
+
+    validator_test!(
+        validate_if_cond_is_bool_match_number_gte_number,
+        "if (123 >= 456) {} else {};",
+        Ok(())
+    );
+
+    validator_test!(
+        validate_if_cond_is_bool_match_number_lte_number,
+        "if (123 <= 456) {} else {};",
+        Ok(())
+    );
+
+    validator_test!(
+        validate_if_cond_is_bool_neq,
+        "if (123 != 456) {} else {};",
+        Ok(())
+    );
+
+    validator_test!(
+        validate_if_cond_is_bool_eq,
+        "if (123 == 456) {} else {};",
+        Ok(())
+    );
+
+    validator_test!(validate_infix_types_plus_type_match, "1 + 1;", Ok(()));
+
+    validator_test!(
+        validate_infix_types_plus_type_mismatch_string,
+        "1 + \"foo\";",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "Number".to_string(),
+                actual: "String".to_string()
+            }),
+            4..9
+        )])
+    );
+
+    validator_test!(
+        validate_infix_types_plus_type_mismatch_string_flipped,
+        "\"foo\" + 1;",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "Number".to_string(),
+                actual: "String".to_string()
+            }),
+            0..5
         )])
     );
 }

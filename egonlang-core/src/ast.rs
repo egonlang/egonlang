@@ -78,7 +78,21 @@ impl Expr {
                 }),
             Expr::List(_) => TypeRef::simple("List".to_string()),
             Expr::Tuple(_) => TypeRef::simple("Tuple".to_string()),
-            Expr::Infix(infix) => infix.rt.0.get_type_expr(),
+            Expr::Infix(infix) => match infix.op {
+                OpInfix::Add => TypeRef::simple("Number".to_string()),
+                OpInfix::Subtract => TypeRef::simple("Number".to_string()),
+                OpInfix::Multiply => TypeRef::simple("Number".to_string()),
+                OpInfix::Divide => TypeRef::simple("Number".to_string()),
+                OpInfix::Modulus => TypeRef::simple("Number".to_string()),
+                OpInfix::Less => TypeRef::simple("Bool".to_string()),
+                OpInfix::LessEqual => TypeRef::simple("Bool".to_string()),
+                OpInfix::Greater => TypeRef::simple("Bool".to_string()),
+                OpInfix::GreaterEqual => TypeRef::simple("Bool".to_string()),
+                OpInfix::Equal => TypeRef::simple("Bool".to_string()),
+                OpInfix::NotEqual => TypeRef::simple("Bool".to_string()),
+                OpInfix::LogicAnd => TypeRef::simple("Bool".to_string()),
+                OpInfix::LogicOr => TypeRef::simple("Bool".to_string()),
+            },
             Expr::Prefix(prefix) => prefix.rt.0.get_type_expr(),
             Expr::Assign(assign) => {
                 let (expr, _) = assign.value;

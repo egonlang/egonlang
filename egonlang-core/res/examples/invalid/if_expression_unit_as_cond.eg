@@ -1,0 +1,3 @@
+if (void) { 123 } else { 456 };
+
+// out: TypeError: mismatched types: expected type `Bool` but received `Void`
