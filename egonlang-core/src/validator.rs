@@ -112,6 +112,26 @@ impl Validator {
 
                 Err(errs)
             }
+            Expr::If(if_) => {
+                let then_type_ref = if_.then.0.clone().get_type_expr();
+
+                if if_.else_.is_some() {
+                    let (else_expr, else_span) = if_.else_.clone().unwrap();
+                    let else_type_ref = else_expr.get_type_expr();
+
+                    if else_type_ref != then_type_ref {
+                        return Err(vec![(
+                            Error::TypeError(crate::errors::TypeError::MismatchType {
+                                expected: then_type_ref.to_string(),
+                                actual: else_type_ref.to_string(),
+                            }),
+                            else_span.clone(),
+                        )]);
+                    }
+                }
+
+                Ok(())
+            }
             _ => Ok(()),
         }
     }
@@ -394,5 +414,17 @@ mod parser_tests {
         validate_assign_chain_matching_types,
         "let a: Number = b = 123;",
         Ok(())
+    );
+
+    validator_test!(
+        validate_if_else_mismatched_types,
+        "if (true) { 123; } else { 123 };",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "Void".to_string(),
+                actual: "Number".to_string()
+            }),
+            24..31
+        )])
     );
 }
