@@ -165,8 +165,8 @@ impl Validator {
                 Ok(())
             }
             Expr::Infix(infix) => {
-                let number_typeref = TypeRef::simple("Number".to_string());
-                let bool_typeref = TypeRef::simple("Bool".to_string());
+                let number_typeref = TypeRef::number();
+                let bool_typeref = TypeRef::bool();
 
                 match infix.op {
                     OpInfix::Add => self.validate_infix_types(infix, number_typeref),
@@ -184,8 +184,8 @@ impl Validator {
                 }
             }
             Expr::Prefix(prefix) => {
-                let number_typeref = TypeRef::simple("Number".to_string());
-                let bool_typeref = TypeRef::simple("Bool".to_string());
+                let number_typeref = TypeRef::number();
+                let bool_typeref = TypeRef::bool();
 
                 match prefix.op {
                     OpPrefix::Negate => self.validate_prefix_types(prefix, number_typeref),

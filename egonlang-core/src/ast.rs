@@ -64,34 +64,32 @@ pub enum Expr {
 impl Expr {
     pub fn get_type_expr(self) -> TypeRef {
         match self {
-            Expr::Unit => TypeRef::simple("Void".to_string()),
+            Expr::Unit => TypeRef::void(),
             Expr::Literal(literal) => match literal {
-                ExprLiteral::Bool(_) => TypeRef::simple("Bool".to_string()),
-                ExprLiteral::Number(_) => TypeRef::simple("Number".to_string()),
-                ExprLiteral::String(_) => TypeRef::simple("String".to_string()),
+                ExprLiteral::Bool(_) => TypeRef::bool(),
+                ExprLiteral::Number(_) => TypeRef::number(),
+                ExprLiteral::String(_) => TypeRef::string(),
             },
-            Expr::Identifier(_) => TypeRef::simple("Identifier".to_string()),
+            Expr::Identifier(_) => TypeRef::identifier(),
             Expr::Block(block) => block
                 .return_expr
-                .map_or(TypeRef::simple("Void".to_string()), |(expr, _)| {
-                    expr.get_type_expr()
-                }),
-            Expr::List(_) => TypeRef::simple("List".to_string()),
-            Expr::Tuple(_) => TypeRef::simple("Tuple".to_string()),
+                .map_or(TypeRef::void(), |(expr, _)| expr.get_type_expr()),
+            Expr::List(_) => TypeRef::list(),
+            Expr::Tuple(_) => TypeRef::tuple(),
             Expr::Infix(infix) => match infix.op {
-                OpInfix::Add => TypeRef::simple("Number".to_string()),
-                OpInfix::Subtract => TypeRef::simple("Number".to_string()),
-                OpInfix::Multiply => TypeRef::simple("Number".to_string()),
-                OpInfix::Divide => TypeRef::simple("Number".to_string()),
-                OpInfix::Modulus => TypeRef::simple("Number".to_string()),
-                OpInfix::Less => TypeRef::simple("Bool".to_string()),
-                OpInfix::LessEqual => TypeRef::simple("Bool".to_string()),
-                OpInfix::Greater => TypeRef::simple("Bool".to_string()),
-                OpInfix::GreaterEqual => TypeRef::simple("Bool".to_string()),
-                OpInfix::Equal => TypeRef::simple("Bool".to_string()),
-                OpInfix::NotEqual => TypeRef::simple("Bool".to_string()),
-                OpInfix::LogicAnd => TypeRef::simple("Bool".to_string()),
-                OpInfix::LogicOr => TypeRef::simple("Bool".to_string()),
+                OpInfix::Add => TypeRef::number(),
+                OpInfix::Subtract => TypeRef::number(),
+                OpInfix::Multiply => TypeRef::number(),
+                OpInfix::Divide => TypeRef::number(),
+                OpInfix::Modulus => TypeRef::number(),
+                OpInfix::Less => TypeRef::bool(),
+                OpInfix::LessEqual => TypeRef::bool(),
+                OpInfix::Greater => TypeRef::bool(),
+                OpInfix::GreaterEqual => TypeRef::bool(),
+                OpInfix::Equal => TypeRef::bool(),
+                OpInfix::NotEqual => TypeRef::bool(),
+                OpInfix::LogicAnd => TypeRef::bool(),
+                OpInfix::LogicOr => TypeRef::bool(),
             },
             Expr::Prefix(prefix) => prefix.rt.0.get_type_expr(),
             Expr::Assign(assign) => {
@@ -101,7 +99,7 @@ impl Expr {
             }
             Expr::If(if_) => if_.then.0.get_type_expr(),
             Expr::Fn(_) => todo!(),
-            Expr::Range(_) => TypeRef::simple("Range".to_string()),
+            Expr::Range(_) => TypeRef::range(),
             Expr::Type(ty) => ty.0,
         }
     }
@@ -209,8 +207,36 @@ pub struct ExprType(pub TypeRef);
 pub struct TypeRef(pub String, pub Vec<ExprS>);
 
 impl TypeRef {
-    pub fn simple(type_ident: String) -> TypeRef {
-        TypeRef(type_ident, vec![])
+    pub fn string() -> TypeRef {
+        TypeRef("String".to_string(), vec![])
+    }
+
+    pub fn number() -> TypeRef {
+        TypeRef("Number".to_string(), vec![])
+    }
+
+    pub fn bool() -> TypeRef {
+        TypeRef("Bool".to_string(), vec![])
+    }
+
+    pub fn void() -> TypeRef {
+        TypeRef("Void".to_string(), vec![])
+    }
+
+    pub fn range() -> TypeRef {
+        TypeRef("Range".to_string(), vec![])
+    }
+
+    pub fn list() -> TypeRef {
+        TypeRef("List".to_string(), vec![])
+    }
+
+    pub fn tuple() -> TypeRef {
+        TypeRef("Tuple".to_string(), vec![])
+    }
+
+    pub fn identifier() -> TypeRef {
+        TypeRef("Identifier".to_string(), vec![])
     }
 }
 
