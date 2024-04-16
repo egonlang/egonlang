@@ -70,7 +70,7 @@ impl Expr {
                 ExprLiteral::Number(_) => TypeRef::simple("Number".to_string()),
                 ExprLiteral::String(_) => TypeRef::simple("String".to_string()),
             },
-            Expr::Identifier(_) => todo!(),
+            Expr::Identifier(_) => TypeRef::simple("Identifier".to_string()),
             Expr::Block(block) => block
                 .return_expr
                 .map_or(TypeRef::simple("Void".to_string()), |(expr, _)| {

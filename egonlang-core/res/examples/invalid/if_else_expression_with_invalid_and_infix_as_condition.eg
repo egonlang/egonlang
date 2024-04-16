@@ -1,0 +1,3 @@
+if (true and 1) { void; } else { void; };
+
+// out: TypeError: mismatched types: expected type `Bool` but received `Number`

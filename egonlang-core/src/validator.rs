@@ -1,6 +1,8 @@
 use crate::{
-    ast::{Expr, ExprInfix, ExprS, Identifier, Module, OpInfix, Stmt, TypeRef},
-    errors::{Error, ErrorS, SyntaxError},
+    ast::{
+        Expr, ExprInfix, ExprPrefix, ExprS, Identifier, Module, OpInfix, OpPrefix, Stmt, TypeRef,
+    },
+    errors::{Error, ErrorS, SyntaxError, TypeError},
     span::Spanned,
 };
 
@@ -99,7 +101,7 @@ impl Validator {
 
                     if item_expr_type_ident != first_item_type_ident {
                         errs.push((
-                            Error::TypeError(crate::errors::TypeError::MismatchType {
+                            Error::TypeError(TypeError::MismatchType {
                                 expected: first_item_type_ident.to_string(),
                                 actual: item_expr_type_ident.to_string(),
                             }),
@@ -111,6 +113,22 @@ impl Validator {
                 Err(errs)
             }
             Expr::If(if_) => {
+                let mut errs = vec![];
+
+                if let Err(cond_errs) = self.visit_expr(&if_.cond) {
+                    errs.extend(cond_errs);
+                }
+
+                if let Err(then_errs) = self.visit_expr(&if_.then) {
+                    errs.extend(then_errs);
+                }
+
+                if let Some(else_errs) = &if_.else_ {
+                    if let Err(else_errs) = self.visit_expr(else_errs) {
+                        errs.extend(else_errs);
+                    }
+                }
+
                 let cond_expr = if_.cond.0.clone().get_type_expr();
 
                 if cond_expr.0 != *"Bool" {
@@ -140,9 +158,12 @@ impl Validator {
                     }
                 }
 
+                if !errs.is_empty() {
+                    return Err(errs);
+                }
+
                 Ok(())
             }
-
             Expr::Infix(infix) => {
                 let number_typeref = TypeRef::simple("Number".to_string());
                 let bool_typeref = TypeRef::simple("Bool".to_string());
@@ -162,16 +183,52 @@ impl Validator {
                     _ => Ok(()),
                 }
             }
+            Expr::Prefix(prefix) => {
+                let number_typeref = TypeRef::simple("Number".to_string());
+                let bool_typeref = TypeRef::simple("Bool".to_string());
+
+                match prefix.op {
+                    OpPrefix::Negate => self.validate_prefix_types(prefix, number_typeref),
+                    OpPrefix::Not => self.validate_prefix_types(prefix, bool_typeref),
+                }
+            }
+            Expr::Block(block) => {
+                let mut errs: Vec<ErrorS> = vec![];
+
+                for stmt in &block.stmts {
+                    if let Err(stmt_errs) = self.visit_stmt(&stmt) {
+                        errs.extend(stmt_errs);
+                    }
+                }
+
+                if let Some(returning_expr) = &block.return_expr {
+                    if let Err(expr_errs) = self.visit_expr(&returning_expr) {
+                        errs.extend(expr_errs);
+                    }
+                }
+
+                if !errs.is_empty() {
+                    return Err(errs);
+                }
+
+                Ok(())
+            }
             _ => Ok(()),
         }
     }
 
     fn validate_infix_types(
-        &self,
+        &mut self,
         infix: &ExprInfix,
         expected_type: TypeRef,
     ) -> Result<(), Vec<ErrorS>> {
         let mut errs = vec![];
+
+        let lt_errs = self.visit_expr(&infix.lt).err().unwrap_or_default();
+        errs.extend(lt_errs);
+
+        let rt_errs = self.visit_expr(&infix.rt).err().unwrap_or_default();
+        errs.extend(rt_errs);
 
         let (lt, lt_span) = infix.lt.clone();
         let lt_typeref = lt.get_type_expr();
@@ -180,7 +237,7 @@ impl Validator {
 
         if lt_typeref != expected_type {
             errs.push((
-                Error::TypeError(crate::errors::TypeError::MismatchType {
+                Error::TypeError(TypeError::MismatchType {
                     expected: expected_type.to_string(),
                     actual: lt_typeref.to_string(),
                 }),
@@ -189,7 +246,37 @@ impl Validator {
         }
         if rt_typeref != expected_type {
             errs.push((
-                Error::TypeError(crate::errors::TypeError::MismatchType {
+                Error::TypeError(TypeError::MismatchType {
+                    expected: expected_type.to_string(),
+                    actual: rt_typeref.to_string(),
+                }),
+                rt_span,
+            ));
+        }
+
+        if !errs.is_empty() {
+            return Err(errs);
+        }
+
+        Ok(())
+    }
+
+    fn validate_prefix_types(
+        &mut self,
+        prefix: &ExprPrefix,
+        expected_type: TypeRef,
+    ) -> Result<(), Vec<ErrorS>> {
+        let mut errs = vec![];
+
+        let rt_errs = self.visit_expr(&prefix.rt).err().unwrap_or_default();
+        errs.extend(rt_errs);
+
+        let (rt, rt_span) = prefix.rt.clone();
+        let rt_typeref = rt.get_type_expr();
+
+        if rt_typeref != expected_type {
+            errs.push((
+                Error::TypeError(TypeError::MismatchType {
                     expected: expected_type.to_string(),
                     actual: rt_typeref.to_string(),
                 }),
@@ -579,6 +666,18 @@ mod parser_tests {
                 actual: "String".to_string()
             }),
             0..5
+        )])
+    );
+
+    validator_test!(
+        testtt,
+        "if (true and 1) { void; } else { void; };",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "Bool".to_string(),
+                actual: "Number".to_string()
+            }),
+            13..14
         )])
     );
 }
