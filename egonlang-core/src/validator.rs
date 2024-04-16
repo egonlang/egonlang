@@ -39,13 +39,11 @@ impl Validator {
                 let name = stmt_assign.identifier.name.clone();
 
                 // const declarations
-                if stmt_assign.is_const {
-                    if stmt_assign.value.is_none() {
-                        return Err(vec![(
-                            Error::SyntaxError(SyntaxError::UninitializedConst { name }),
-                            span.clone(),
-                        )]);
-                    }
+                if stmt_assign.is_const && stmt_assign.value.is_none() {
+                    return Err(vec![(
+                        Error::SyntaxError(SyntaxError::UninitializedConst { name }),
+                        span.clone(),
+                    )]);
                 }
 
                 // let declarations
