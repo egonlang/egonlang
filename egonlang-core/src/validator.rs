@@ -66,10 +66,10 @@ impl Validator {
                         if type_identifier != value_type {
                             // This checks for empty lists being assigned to a list<T>
                             // e.g. let a: list<number> = [];
-                            if type_identifier.0 == TypeRef::list(TypeRef::unknown()).0 {
-                                if value_type == TypeRef::list(TypeRef::unknown()) {
-                                    return Ok(());
-                                }
+                            if type_identifier.0 == TypeRef::list(TypeRef::unknown()).0
+                                && value_type == TypeRef::list(TypeRef::unknown())
+                            {
+                                return Ok(());
                             };
 
                             return Err(vec![(
@@ -82,15 +82,13 @@ impl Validator {
                         } else {
                             // This checks for empty lists being assigned to a list<unknown>
                             // e.g. let a: list<unknown> = [];
-                            if type_identifier == TypeRef::list(TypeRef::unknown()) {
-                                if value_type == TypeRef::list(TypeRef::unknown()) {
-                                    return Err(vec![(
-                                        Error::TypeError(
-                                            crate::errors::TypeError::UknownListType {},
-                                        ),
-                                        span.clone(),
-                                    )]);
-                                }
+                            if type_identifier == TypeRef::list(TypeRef::unknown())
+                                && value_type == TypeRef::list(TypeRef::unknown())
+                            {
+                                return Err(vec![(
+                                    Error::TypeError(crate::errors::TypeError::UknownListType {}),
+                                    span.clone(),
+                                )]);
                             };
                         }
                     }
@@ -235,13 +233,13 @@ impl Validator {
                 let mut errs: Vec<ErrorS> = vec![];
 
                 for stmt in &block.stmts {
-                    if let Err(stmt_errs) = self.visit_stmt(&stmt) {
+                    if let Err(stmt_errs) = self.visit_stmt(stmt) {
                         errs.extend(stmt_errs);
                     }
                 }
 
                 if let Some(returning_expr) = &block.return_expr {
-                    if let Err(expr_errs) = self.visit_expr(&returning_expr) {
+                    if let Err(expr_errs) = self.visit_expr(returning_expr) {
                         errs.extend(expr_errs);
                     }
                 }
