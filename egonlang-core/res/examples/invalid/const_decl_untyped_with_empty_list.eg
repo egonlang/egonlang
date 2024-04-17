@@ -1,0 +1,3 @@
+const a = [];
+
+// out: TypeError: list declared with an unknown type e.g. let a = []; // list<unknown>

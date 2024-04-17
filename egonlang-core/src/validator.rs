@@ -79,6 +79,19 @@ impl Validator {
                                 }),
                                 span.clone(),
                             )]);
+                        } else {
+                            // This checks for empty lists being assigned to a list<unknown>
+                            // e.g. let a: list<unknown> = [];
+                            if type_identifier == TypeRef::list(TypeRef::unknown()) {
+                                if value_type == TypeRef::list(TypeRef::unknown()) {
+                                    return Err(vec![(
+                                        Error::TypeError(
+                                            crate::errors::TypeError::UknownListType {},
+                                        ),
+                                        span.clone(),
+                                    )]);
+                                }
+                            };
                         }
                     }
                 } else {
@@ -88,6 +101,8 @@ impl Validator {
                         let value = stmt_assign.value.clone().unwrap();
                         let value_type = value.0.get_type_expr();
 
+                        // This checks for empty lists being assigned to a list<T>
+                        // e.g. let a = [];
                         if value_type == TypeRef::list(TypeRef::unknown()) {
                             return Err(vec![(
                                 Error::TypeError(crate::errors::TypeError::UknownListType {}),
@@ -418,6 +433,12 @@ mod validator_tests {
     );
 
     validator_test!(
+        validate_let_decl_typed_as_list_number_with_list_value_type,
+        "let a: list<number> = [1, 2, 3];",
+        Ok(())
+    );
+
+    validator_test!(
         validate_let_decl_typed_as_tuple_with_tuple_value_type,
         "let a: tuple<number, number, number> = (1, 2, 3,);",
         Ok(())
@@ -717,6 +738,24 @@ mod validator_tests {
         Err(vec![(
             Error::TypeError(TypeError::UknownListType {}),
             0..11
+        )])
+    );
+
+    validator_test!(
+        validate_let_decl_empty_list_to_unknown_list,
+        "let a: list<unknown> = [];",
+        Err(vec![(
+            Error::TypeError(TypeError::UknownListType {}),
+            0..26
+        )])
+    );
+
+    validator_test!(
+        validate_const_decl_empty_list_to_unknown_list,
+        "const a: list<unknown> = [];",
+        Err(vec![(
+            Error::TypeError(TypeError::UknownListType {}),
+            0..28
         )])
     );
 }
