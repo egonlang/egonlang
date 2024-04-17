@@ -19,15 +19,15 @@
 // out: TypeError: mismatched types: expected type `Number` but received `String`
 // out: TypeError: mismatched types: expected type `Number` but received `String`
 
-// out: TypeError: mismatched types: expected type `Bool` but received `List`
+// out: TypeError: mismatched types: expected type `Bool` but received `List<Unknown>`
 // out: TypeError: mismatched types: expected type `Bool` but received `Void`
 
 // out: TypeError: mismatched types: expected type `Bool` but received `Number`
-// out: TypeError: mismatched types: expected type `Bool` but received `List`
+// out: TypeError: mismatched types: expected type `Bool` but received `List<Unknown>`
 
 // out: TypeError: mismatched types: expected type `Bool` but received `Number`
-// out: TypeError: mismatched types: expected type `Bool` but received `List`
+// out: TypeError: mismatched types: expected type `Bool` but received `List<Unknown>`
 // out: TypeError: mismatched types: expected type `Bool` but received `Void`
 
-// out: TypeError: mismatched types: expected type `Number` but received `List`
-// out: TypeError: mismatched types: expected type `Number` but received `List`
+// out: TypeError: mismatched types: expected type `Number` but received `List<Unknown>`
+// out: TypeError: mismatched types: expected type `Number` but received `List<Unknown>`

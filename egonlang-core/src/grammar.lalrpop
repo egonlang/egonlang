@@ -18,21 +18,21 @@ DeclLetVar: ast::Stmt = <assign:StmtAssign> =>
     ast::Stmt::Assign(<>);
 
 StmtAssign: ast::StmtAssign = {
-    "let" <name:identifier> <type_expr:(":" <Spanned<identifier>>)?> <value:("=" <ExprS>)?> ";" => ast::StmtAssign {
+    "let" <name:identifier> <type_expr:(":" <Spanned<TypeRef>>)?> <value:("=" <ExprS>)?> ";" => ast::StmtAssign {
         identifier: ast::Identifier {
             name,
         },
         type_expr: type_expr.map(|(ty, ty_span)|
-            (ast::Expr::Type(ast::ExprType(ast::TypeRef(ty, vec![]))), ty_span)),
+            (ast::Expr::Type(ast::ExprType(ty)), ty_span)),
         is_const: false,
         value,
     },
-    "const" <name:identifier> <type_expr:(":" <Spanned<identifier>>)?> <value:("=" <ExprS>)?> ";" => ast::StmtAssign {
+    "const" <name:identifier> <type_expr:(":" <Spanned<TypeRef>>)?> <value:("=" <ExprS>)?> ";" => ast::StmtAssign {
         identifier: ast::Identifier {
             name,
         },
         type_expr: type_expr.map(|(ty, ty_span)|
-            (ast::Expr::Type(ast::ExprType(ast::TypeRef(ty, vec![]))), ty_span)),
+            (ast::Expr::Type(ast::ExprType(ty)), ty_span)),
         is_const: true,
         value,
     },
@@ -197,6 +197,10 @@ ExprBlock: ast::Expr = {
 
 /// Utilities
 
+TypeRef: ast::TypeRef = <base:identifier> <args:("<" <Seperated<TypeRef, ",">> ">")?> => {
+    ast::TypeRef(base, args.unwrap_or_default())
+};
+
 Spanned<T>: span::Spanned<T> = <l:@L> <t:T> <r:@R> =>
     (t, l..r);
 
@@ -207,7 +211,7 @@ SeperatedNoDefault<E, T>: Vec<ast::ExprS> = {
     },
 }
 
-Seperated<E, T>: Vec<ast::ExprS> = {
+Seperated<E, T>: Vec<E> = {
     <first:E> <mut args:(T <E>)*> => {
         args.insert(0, first);
         args

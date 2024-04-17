@@ -39,6 +39,9 @@ pub enum SyntaxError {
 pub enum TypeError {
     #[error("mismatched types: expected type `{expected}` but received `{actual}`")]
     MismatchType { expected: String, actual: String },
+
+    #[error("list declared with an unknown type e.g. let a = []; // List<Unknown>")]
+    UknownListType,
 }
 
 macro_rules! impl_from_error {

@@ -56,20 +56,42 @@ impl Validator {
                     )]);
                 }
 
-                if stmt_assign.type_expr.is_some() && stmt_assign.value.is_some() {
-                    let (type_expr, _) = stmt_assign.type_expr.clone().unwrap();
-                    let type_identifier = type_expr.get_type_expr();
-                    let value = stmt_assign.value.clone().unwrap();
-                    let value_type = value.0.get_type_expr();
+                if stmt_assign.type_expr.is_some() {
+                    if stmt_assign.value.is_some() {
+                        let (type_expr, _) = stmt_assign.type_expr.clone().unwrap();
+                        let type_identifier = type_expr.get_type_expr();
+                        let value = stmt_assign.value.clone().unwrap();
+                        let value_type = value.0.get_type_expr();
 
-                    if type_identifier != value_type {
-                        return Err(vec![(
-                            Error::TypeError(crate::errors::TypeError::MismatchType {
-                                expected: type_identifier.to_string(),
-                                actual: value_type.to_string(),
-                            }),
-                            span.clone(),
-                        )]);
+                        if type_identifier != value_type {
+                            // This checks for empty lists being assigned to a typed List<T> type
+                            // e.g. let a: List<Number> = [];
+                            if type_identifier.0 == *"List" {
+                                if value_type == TypeRef::list(TypeRef::unknown()) {
+                                    return Ok(());
+                                }
+                            };
+
+                            return Err(vec![(
+                                Error::TypeError(crate::errors::TypeError::MismatchType {
+                                    expected: type_identifier.to_string(),
+                                    actual: value_type.to_string(),
+                                }),
+                                span.clone(),
+                            )]);
+                        }
+                    }
+                } else {
+                    if stmt_assign.value.is_some() {
+                        let value = stmt_assign.value.clone().unwrap();
+                        let value_type = value.0.get_type_expr();
+
+                        if value_type == TypeRef::list(TypeRef::unknown()) {
+                            return Err(vec![(
+                                Error::TypeError(crate::errors::TypeError::UknownListType {}),
+                                span.clone(),
+                            )]);
+                        }
                     }
                 }
 
@@ -387,7 +409,7 @@ mod parser_tests {
         Err(vec![(
             Error::TypeError(TypeError::MismatchType {
                 expected: "Number".to_string(),
-                actual: "List".to_string()
+                actual: "List<Number>".to_string()
             }),
             0..26
         )])
@@ -395,7 +417,7 @@ mod parser_tests {
 
     validator_test!(
         validate_let_decl_typed_as_tuple_with_tuple_value_type,
-        "let a: Tuple = (1, 2, 3,);",
+        "let a: Tuple<Number, Number, Number> = (1, 2, 3,);",
         Ok(())
     );
 
@@ -511,7 +533,7 @@ mod parser_tests {
         Err(vec![(
             Error::TypeError(TypeError::MismatchType {
                 expected: "Void".to_string(),
-                actual: "List".to_string()
+                actual: "List<Number>".to_string()
             }),
             0..28
         )])
@@ -523,7 +545,7 @@ mod parser_tests {
         Err(vec![(
             Error::TypeError(TypeError::MismatchType {
                 expected: "Void".to_string(),
-                actual: "Tuple".to_string()
+                actual: "Tuple<Number, Number, Number>".to_string()
             }),
             0..29
         )])
@@ -678,6 +700,21 @@ mod parser_tests {
                 actual: "Number".to_string()
             }),
             13..14
+        )])
+    );
+
+    validator_test!(
+        validate_assign_empty_list_to_typed_list,
+        "let a: List<Number> = [];",
+        Ok(())
+    );
+
+    validator_test!(
+        validate_assign_empty_list_to_untyped_list,
+        "let a = [];",
+        Err(vec![(
+            Error::TypeError(TypeError::UknownListType {}),
+            0..11
         )])
     );
 }

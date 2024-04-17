@@ -74,8 +74,24 @@ impl Expr {
             Expr::Block(block) => block
                 .return_expr
                 .map_or(TypeRef::void(), |(expr, _)| expr.get_type_expr()),
-            Expr::List(_) => TypeRef::list(),
-            Expr::Tuple(_) => TypeRef::tuple(),
+            Expr::List(list) => {
+                if list.items.is_empty() {
+                    return TypeRef::list(TypeRef::unknown());
+                }
+
+                let (first_item, _) = list.items.first().unwrap().clone();
+
+                let first_item_type_ident = first_item.get_type_expr();
+
+                TypeRef::list(first_item_type_ident)
+            }
+            Expr::Tuple(tuple) => TypeRef::tuple(
+                tuple
+                    .items
+                    .into_iter()
+                    .map(|(expr, _)| expr.get_type_expr())
+                    .collect(),
+            ),
             Expr::Infix(infix) => match infix.op {
                 OpInfix::Add => TypeRef::number(),
                 OpInfix::Subtract => TypeRef::number(),
@@ -204,7 +220,7 @@ pub struct ExprRange {
 pub struct ExprType(pub TypeRef);
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct TypeRef(pub String, pub Vec<ExprS>);
+pub struct TypeRef(pub String, pub Vec<TypeRef>);
 
 impl TypeRef {
     pub fn string() -> TypeRef {
@@ -227,21 +243,40 @@ impl TypeRef {
         TypeRef("Range".to_string(), vec![])
     }
 
-    pub fn list() -> TypeRef {
-        TypeRef("List".to_string(), vec![])
+    pub fn list(item_type: TypeRef) -> TypeRef {
+        TypeRef("List".to_string(), vec![item_type])
     }
 
-    pub fn tuple() -> TypeRef {
-        TypeRef("Tuple".to_string(), vec![])
+    pub fn tuple(item_types: Vec<TypeRef>) -> TypeRef {
+        TypeRef("Tuple".to_string(), item_types)
     }
 
     pub fn identifier() -> TypeRef {
         TypeRef("Identifier".to_string(), vec![])
     }
+
+    pub fn unknown() -> TypeRef {
+        TypeRef("Unknown".to_string(), vec![])
+    }
 }
 
 impl Display for TypeRef {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        f.write_fmt(format_args!("{}", self.0))
+        let base = if self.1.is_empty() {
+            self.0.clone()
+        } else {
+            let m = format!(
+                "{}<{}>",
+                self.0,
+                self.1
+                    .clone()
+                    .into_iter()
+                    .map(|typeref| typeref.to_string())
+                    .collect::<Vec<String>>()
+                    .join(", ")
+            );
+            m
+        };
+        f.write_fmt(format_args!("{}", base))
     }
 }
