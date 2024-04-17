@@ -42,6 +42,9 @@ pub enum TypeError {
 
     #[error("list declared with an unknown type e.g. let a = []; // list<unknown>")]
     UknownListType,
+
+    #[error("unknown type e.g. let a: unknown; or let a;")]
+    UnknownType,
 }
 
 macro_rules! impl_from_error {

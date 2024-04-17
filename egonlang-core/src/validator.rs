@@ -51,7 +51,7 @@ impl Validator {
                 // let declarations
                 if stmt_assign.type_expr.is_none() && stmt_assign.value.is_none() {
                     return Err(vec![(
-                        Error::SyntaxError(SyntaxError::UninitializedUntypedLet { name }),
+                        Error::TypeError(TypeError::UnknownType),
                         span.clone(),
                     )]);
                 }
@@ -90,6 +90,16 @@ impl Validator {
                                     span.clone(),
                                 )]);
                             };
+                        }
+                    } else {
+                        let (type_expr, _) = stmt_assign.type_expr.clone().unwrap();
+                        let type_identifier = type_expr.get_type_expr();
+
+                        if type_identifier == TypeRef::unknown() {
+                            return Err(vec![(
+                                Error::TypeError(crate::errors::TypeError::UnknownType {}),
+                                span.clone(),
+                            )]);
                         }
                     }
                 } else {
@@ -387,12 +397,7 @@ mod validator_tests {
     validator_test!(
         validate_let_declaration_requires_type_or_value,
         "let a;",
-        Err(vec![(
-            Error::SyntaxError(crate::errors::SyntaxError::UninitializedUntypedLet {
-                name: "a".to_string()
-            }),
-            0..6
-        )])
+        Err(vec![(Error::TypeError(TypeError::UnknownType), 0..6)])
     );
 
     validator_test!(
@@ -771,7 +776,7 @@ mod validator_tests {
     );
 
     validator_test!(
-        assign_mixed_type_list,
+        validate_assign_mixed_type_list,
         "a = [1, \"a\"];",
         Err(vec![(
             Error::TypeError(TypeError::MismatchType {
@@ -780,5 +785,11 @@ mod validator_tests {
             }),
             8..11
         )])
+    );
+
+    validator_test!(
+        validate_let_decl_unknown_type,
+        "let a: unknown;",
+        Err(vec![(Error::TypeError(TypeError::UnknownType {}), 0..15)])
     );
 }
