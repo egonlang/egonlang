@@ -252,6 +252,19 @@ impl Validator {
 
                 Ok(())
             }
+            Expr::Assign(assign) => {
+                let mut errs: Vec<ErrorS> = vec![];
+
+                if let Err(expr_errs) = self.visit_expr(&assign.value) {
+                    errs.extend(expr_errs);
+                }
+
+                if !errs.is_empty() {
+                    return Err(errs);
+                }
+
+                Ok(())
+            }
             _ => Ok(()),
         }
     }
@@ -756,6 +769,18 @@ mod validator_tests {
         Err(vec![(
             Error::TypeError(TypeError::UknownListType {}),
             0..28
+        )])
+    );
+
+    validator_test!(
+        assign_mixed_type_list,
+        "a = [1, \"a\"];",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "number".to_string(),
+                actual: "string".to_string()
+            }),
+            8..11
         )])
     );
 }
