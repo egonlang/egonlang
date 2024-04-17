@@ -64,9 +64,9 @@ impl Validator {
                         let value_type = value.0.get_type_expr();
 
                         if type_identifier != value_type {
-                            // This checks for empty lists being assigned to a typed List<T> type
-                            // e.g. let a: List<Number> = [];
-                            if type_identifier.0 == *"List" {
+                            // This checks for empty lists being assigned to a list<T>
+                            // e.g. let a: list<number> = [];
+                            if type_identifier.0 == TypeRef::list(TypeRef::unknown()).0 {
                                 if value_type == TypeRef::list(TypeRef::unknown()) {
                                     return Ok(());
                                 }
@@ -82,6 +82,8 @@ impl Validator {
                         }
                     }
                 } else {
+                    // This checks for empty lists being assigned to a untyped list<unknown>
+                    // e.g. let a = [];
                     if stmt_assign.value.is_some() {
                         let value = stmt_assign.value.clone().unwrap();
                         let value_type = value.0.get_type_expr();
@@ -153,10 +155,10 @@ impl Validator {
 
                 let cond_expr = if_.cond.0.clone().get_type_expr();
 
-                if cond_expr.0 != *"Bool" {
+                if cond_expr.0 != *"bool" {
                     return Err(vec![(
                         Error::TypeError(crate::errors::TypeError::MismatchType {
-                            expected: "Bool".to_string(),
+                            expected: "bool".to_string(),
                             actual: cond_expr.to_string(),
                         }),
                         if_.cond.1.clone(),
@@ -315,7 +317,7 @@ impl Validator {
 }
 
 #[cfg(test)]
-mod parser_tests {
+mod validator_tests {
     use pretty_assertions::assert_eq;
 
     use crate::{
@@ -375,17 +377,17 @@ mod parser_tests {
 
     validator_test!(
         validate_let_declaration_requires_type_or_value_with_type,
-        "let a: Number;",
+        "let a: number;",
         Ok(())
     );
 
     validator_test!(
         validate_let_declarations_with_value_and_type_must_match,
-        "let a: Number = \"foo\";",
+        "let a: number = \"foo\";",
         Err(vec![(
             Error::TypeError(TypeError::MismatchType {
-                expected: "Number".to_string(),
-                actual: "String".to_string()
+                expected: "number".to_string(),
+                actual: "string".to_string()
             }),
             0..22
         )])
@@ -393,11 +395,11 @@ mod parser_tests {
 
     validator_test!(
         validate_let_decl_typed_as_number_with_range_value_type,
-        "let a: Number = 0..10;",
+        "let a: number = 0..10;",
         Err(vec![(
             Error::TypeError(TypeError::MismatchType {
-                expected: "Number".to_string(),
-                actual: "Range".to_string()
+                expected: "number".to_string(),
+                actual: "range".to_string()
             }),
             0..22
         )])
@@ -405,11 +407,11 @@ mod parser_tests {
 
     validator_test!(
         validate_let_decl_typed_as_number_with_list_value_type,
-        "let a: Number = [1, 2, 3];",
+        "let a: number = [1, 2, 3];",
         Err(vec![(
             Error::TypeError(TypeError::MismatchType {
-                expected: "Number".to_string(),
-                actual: "List<Number>".to_string()
+                expected: "number".to_string(),
+                actual: "list<number>".to_string()
             }),
             0..26
         )])
@@ -417,23 +419,23 @@ mod parser_tests {
 
     validator_test!(
         validate_let_decl_typed_as_tuple_with_tuple_value_type,
-        "let a: Tuple<Number, Number, Number> = (1, 2, 3,);",
+        "let a: tuple<number, number, number> = (1, 2, 3,);",
         Ok(())
     );
 
     validator_test!(
         validate_let_decl_with_value_as_block_with_returning_expr,
-        "let a: Number = { 123 };",
+        "let a: number = { 123 };",
         Ok(())
     );
 
     validator_test!(
         validate_let_decl_with_value_as_block_with_returning_expr_mismatch_types,
-        "let a: Number = { \"foo\" };",
+        "let a: number = { \"foo\" };",
         Err(vec![(
             Error::TypeError(TypeError::MismatchType {
-                expected: "Number".to_string(),
-                actual: "String".to_string()
+                expected: "number".to_string(),
+                actual: "string".to_string()
             }),
             0..26
         )])
@@ -441,7 +443,7 @@ mod parser_tests {
 
     validator_test!(
         validate_let_decl_with_value_as_block_without_returning_expr,
-        "let a: Void = { 123; };",
+        "let a: () = { 123; };",
         Ok(())
     );
 
@@ -461,36 +463,36 @@ mod parser_tests {
         Err(vec![
             (
                 Error::TypeError(TypeError::MismatchType {
-                    expected: "Number".to_string(),
-                    actual: "String".to_string()
+                    expected: "number".to_string(),
+                    actual: "string".to_string()
                 }),
                 44..49
             ),
             (
                 Error::TypeError(TypeError::MismatchType {
-                    expected: "Number".to_string(),
-                    actual: "Void".to_string()
+                    expected: "number".to_string(),
+                    actual: "()".to_string()
                 }),
                 63..71
             ),
             (
                 Error::TypeError(TypeError::MismatchType {
-                    expected: "Number".to_string(),
-                    actual: "Range".to_string()
+                    expected: "number".to_string(),
+                    actual: "range".to_string()
                 }),
                 85..90
             ),
             (
                 Error::TypeError(TypeError::MismatchType {
-                    expected: "Number".to_string(),
-                    actual: "Bool".to_string()
+                    expected: "number".to_string(),
+                    actual: "bool".to_string()
                 }),
                 104..109
             ),
             (
                 Error::TypeError(TypeError::MismatchType {
-                    expected: "Number".to_string(),
-                    actual: "String".to_string()
+                    expected: "number".to_string(),
+                    actual: "string".to_string()
                 }),
                 123..158
             )
@@ -499,97 +501,97 @@ mod parser_tests {
 
     validator_test!(
         validate_assign_mismatch_types_block_returning_string,
-        "let a: Void = { \"foo\" };",
+        "let a: () = { \"foo\" };",
         Err(vec![(
             Error::TypeError(TypeError::MismatchType {
-                expected: "Void".to_string(),
-                actual: "String".to_string()
-            }),
-            0..24
-        )])
-    );
-
-    validator_test!(
-        validate_assign_mismatch_types_block_returning_number,
-        "let a: Void = { 123 };",
-        Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
-                expected: "Void".to_string(),
-                actual: "Number".to_string()
+                expected: "()".to_string(),
+                actual: "string".to_string()
             }),
             0..22
         )])
     );
 
     validator_test!(
+        validate_assign_mismatch_types_block_returning_number,
+        "let a: () = { 123 };",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "()".to_string(),
+                actual: "number".to_string()
+            }),
+            0..20
+        )])
+    );
+
+    validator_test!(
         validate_assign_mismatch_types_block_returning_void,
-        "let a: Void = { void };",
+        "let a: () = { void };",
         Ok(())
     );
 
     validator_test!(
         validate_assign_mismatch_types_block_returning_list,
-        "let a: Void = { [1, 2, 3] };",
+        "let a: () = { [1, 2, 3] };",
         Err(vec![(
             Error::TypeError(TypeError::MismatchType {
-                expected: "Void".to_string(),
-                actual: "List<Number>".to_string()
-            }),
-            0..28
-        )])
-    );
-
-    validator_test!(
-        validate_assign_mismatch_types_block_returning_tuple,
-        "let a: Void = { (1, 2, 3,) };",
-        Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
-                expected: "Void".to_string(),
-                actual: "Tuple<Number, Number, Number>".to_string()
-            }),
-            0..29
-        )])
-    );
-
-    validator_test!(
-        validate_assign_mismatch_types_block_returning_bool,
-        "let a: Void = { false };",
-        Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
-                expected: "Void".to_string(),
-                actual: "Bool".to_string()
-            }),
-            0..24
-        )])
-    );
-
-    validator_test!(
-        validate_assign_mismatch_types_nested_block_returning_number,
-        "let a: Void = { { 123 } };",
-        Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
-                expected: "Void".to_string(),
-                actual: "Number".to_string()
+                expected: "()".to_string(),
+                actual: "list<number>".to_string()
             }),
             0..26
         )])
     );
 
     validator_test!(
-        validate_assign_chain_mismatched_types,
-        "let a: Void = b = 123;",
+        validate_assign_mismatch_types_block_returning_tuple,
+        "let a: () = { (1, 2, 3,) };",
         Err(vec![(
             Error::TypeError(TypeError::MismatchType {
-                expected: "Void".to_string(),
-                actual: "Number".to_string()
+                expected: "()".to_string(),
+                actual: "tuple<number, number, number>".to_string()
+            }),
+            0..27
+        )])
+    );
+
+    validator_test!(
+        validate_assign_mismatch_types_block_returning_bool,
+        "let a: () = { false };",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "()".to_string(),
+                actual: "bool".to_string()
             }),
             0..22
         )])
     );
 
     validator_test!(
+        validate_assign_mismatch_types_nested_block_returning_number,
+        "let a: () = { { 123 } };",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "()".to_string(),
+                actual: "number".to_string()
+            }),
+            0..24
+        )])
+    );
+
+    validator_test!(
+        validate_assign_chain_mismatched_types,
+        "let a: () = b = 123;",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "()".to_string(),
+                actual: "number".to_string()
+            }),
+            0..20
+        )])
+    );
+
+    validator_test!(
         validate_assign_chain_matching_types,
-        "let a: Number = b = 123;",
+        "let a: number = b = 123;",
         Ok(())
     );
 
@@ -598,8 +600,8 @@ mod parser_tests {
         "if (true) { 123; } else { 123 };",
         Err(vec![(
             Error::TypeError(TypeError::MismatchType {
-                expected: "Void".to_string(),
-                actual: "Number".to_string()
+                expected: "()".to_string(),
+                actual: "number".to_string()
             }),
             24..31
         )])
@@ -610,8 +612,8 @@ mod parser_tests {
         "if (123) {} else {};",
         Err(vec![(
             Error::TypeError(TypeError::MismatchType {
-                expected: "Bool".to_string(),
-                actual: "Number".to_string()
+                expected: "bool".to_string(),
+                actual: "number".to_string()
             }),
             4..7
         )])
@@ -622,8 +624,8 @@ mod parser_tests {
         "if (123 + 456) {} else {};",
         Err(vec![(
             Error::TypeError(TypeError::MismatchType {
-                expected: "Bool".to_string(),
-                actual: "Number".to_string()
+                expected: "bool".to_string(),
+                actual: "number".to_string()
             }),
             4..13
         )])
@@ -672,8 +674,8 @@ mod parser_tests {
         "1 + \"foo\";",
         Err(vec![(
             Error::TypeError(TypeError::MismatchType {
-                expected: "Number".to_string(),
-                actual: "String".to_string()
+                expected: "number".to_string(),
+                actual: "string".to_string()
             }),
             4..9
         )])
@@ -684,8 +686,8 @@ mod parser_tests {
         "\"foo\" + 1;",
         Err(vec![(
             Error::TypeError(TypeError::MismatchType {
-                expected: "Number".to_string(),
-                actual: "String".to_string()
+                expected: "number".to_string(),
+                actual: "string".to_string()
             }),
             0..5
         )])
@@ -696,8 +698,8 @@ mod parser_tests {
         "if (true and 1) { void; } else { void; };",
         Err(vec![(
             Error::TypeError(TypeError::MismatchType {
-                expected: "Bool".to_string(),
-                actual: "Number".to_string()
+                expected: "bool".to_string(),
+                actual: "number".to_string()
             }),
             13..14
         )])
@@ -705,7 +707,7 @@ mod parser_tests {
 
     validator_test!(
         validate_assign_empty_list_to_typed_list,
-        "let a: List<Number> = [];",
+        "let a: list<number> = [];",
         Ok(())
     );
 

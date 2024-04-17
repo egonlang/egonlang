@@ -1,1 +1,1 @@
-let a: List<List<Number>> = [[1]];
+let a: list<list<number>> = [[1]];

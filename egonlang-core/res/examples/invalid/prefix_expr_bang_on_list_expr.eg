@@ -1,5 +1,5 @@
 ![];
 ![1, 2, 3];
 
-// out: TypeError: mismatched types: expected type `Bool` but received `List<Unknown>`
-// out: TypeError: mismatched types: expected type `Bool` but received `List<Number>`
+// out: TypeError: mismatched types: expected type `bool` but received `list<unknown>`
+// out: TypeError: mismatched types: expected type `bool` but received `list<number>`

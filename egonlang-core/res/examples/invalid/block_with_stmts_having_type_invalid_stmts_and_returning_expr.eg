@@ -13,21 +13,21 @@
     })
 });
 
-// out: TypeError: mismatched types: expected type `Number` but received `Bool`
-// out: TypeError: mismatched types: expected type `Number` but received `Bool`
+// out: TypeError: mismatched types: expected type `number` but received `bool`
+// out: TypeError: mismatched types: expected type `number` but received `bool`
 
-// out: TypeError: mismatched types: expected type `Number` but received `String`
-// out: TypeError: mismatched types: expected type `Number` but received `String`
+// out: TypeError: mismatched types: expected type `number` but received `string`
+// out: TypeError: mismatched types: expected type `number` but received `string`
 
-// out: TypeError: mismatched types: expected type `Bool` but received `List<Unknown>`
-// out: TypeError: mismatched types: expected type `Bool` but received `Void`
+// out: TypeError: mismatched types: expected type `bool` but received `list<unknown>`
+// out: TypeError: mismatched types: expected type `bool` but received `()`
 
-// out: TypeError: mismatched types: expected type `Bool` but received `Number`
-// out: TypeError: mismatched types: expected type `Bool` but received `List<Unknown>`
+// out: TypeError: mismatched types: expected type `bool` but received `number`
+// out: TypeError: mismatched types: expected type `bool` but received `list<unknown>`
 
-// out: TypeError: mismatched types: expected type `Bool` but received `Number`
-// out: TypeError: mismatched types: expected type `Bool` but received `List<Unknown>`
-// out: TypeError: mismatched types: expected type `Bool` but received `Void`
+// out: TypeError: mismatched types: expected type `bool` but received `number`
+// out: TypeError: mismatched types: expected type `bool` but received `list<unknown>`
+// out: TypeError: mismatched types: expected type `bool` but received `()`
 
-// out: TypeError: mismatched types: expected type `Number` but received `List<Unknown>`
-// out: TypeError: mismatched types: expected type `Number` but received `List<Unknown>`
+// out: TypeError: mismatched types: expected type `number` but received `list<unknown>`
+// out: TypeError: mismatched types: expected type `number` but received `list<unknown>`

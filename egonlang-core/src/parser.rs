@@ -1642,17 +1642,14 @@ mod parser_tests {
 
     parser_test!(
         parse_let_decl_typed_with_assign_chain,
-        "let a: Number = b = 123;",
+        "let a: number = b = 123;",
         Ok(Module {
             stmts: vec![(
                 Stmt::Assign(StmtAssign {
                     identifier: Identifier {
                         name: "a".to_string()
                     },
-                    type_expr: Some((
-                        Expr::Type(ExprType(TypeRef("Number".to_string(), vec![]))),
-                        7..13
-                    )),
+                    type_expr: Some((Expr::Type(ExprType(TypeRef::number())), 7..13)),
                     is_const: false,
                     value: Some((
                         ast::Expr::Assign(Box::new(ExprAssign {
@@ -1671,17 +1668,14 @@ mod parser_tests {
 
     parser_test!(
         parse_let_decl_typed_with_assign,
-        "let a: Number = 123;",
+        "let a: number = 123;",
         Ok(Module {
             stmts: vec![(
                 Stmt::Assign(StmtAssign {
                     identifier: Identifier {
                         name: "a".to_string()
                     },
-                    type_expr: Some((
-                        Expr::Type(ExprType(TypeRef("Number".to_string(), vec![]))),
-                        7..13
-                    )),
+                    type_expr: Some((Expr::Type(ExprType(TypeRef::number())), 7..13)),
                     is_const: false,
                     value: Some((ast::Expr::Literal(ExprLiteral::Number(123f64)), 16..19))
                 }),
@@ -1710,17 +1704,14 @@ mod parser_tests {
 
     parser_test!(
         parse_let_decl_typed_without_assign,
-        "let a: Number;",
+        "let a: number;",
         Ok(Module {
             stmts: vec![(
                 Stmt::Assign(StmtAssign {
                     identifier: Identifier {
                         name: "a".to_string()
                     },
-                    type_expr: Some((
-                        Expr::Type(ExprType(TypeRef("Number".to_string(), vec![]))),
-                        7..13
-                    )),
+                    type_expr: Some((Expr::Type(ExprType(TypeRef::number())), 7..13)),
                     is_const: false,
                     value: None
                 }),

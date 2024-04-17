@@ -197,9 +197,13 @@ ExprBlock: ast::Expr = {
 
 /// Utilities
 
-TypeRef: ast::TypeRef = <base:identifier> <args:("<" <Seperated<TypeRef, ",">> ">")?> => {
-    ast::TypeRef(base, args.unwrap_or_default())
-};
+TypeRef: ast::TypeRef = {
+    <base:identifier> <args:("<" <Seperated<TypeRef, ",">> ">")?> => {
+        ast::TypeRef(base, args.unwrap_or_default())
+    },
+
+    "(" ")" => ast::TypeRef::void()
+}
 
 Spanned<T>: span::Spanned<T> = <l:@L> <t:T> <r:@R> =>
     (t, l..r);

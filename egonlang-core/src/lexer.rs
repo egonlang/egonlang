@@ -764,12 +764,12 @@ mod lexer_tests {
 
     lexer_test!(
         lex_let_decl_typed_with_assign,
-        "let a: Number = 123;",
+        "let a: number = 123;",
         vec![
             Ok((0, Token::Let, 3)),
             Ok((4, Token::Identifier("a".to_string()), 5)),
             Ok((5, Token::Colon, 6)),
-            Ok((7, Token::Identifier("Number".to_string()), 13)),
+            Ok((7, Token::Identifier("number".to_string()), 13)),
             Ok((14, Token::Equal, 15)),
             Ok((16, Token::Number(123f64), 19)),
             Ok((19, Token::Semicolon, 20)),
@@ -788,12 +788,12 @@ mod lexer_tests {
 
     lexer_test!(
         lex_const_decl_typed_without_assign,
-        "const a: Number;",
+        "const a: number;",
         vec![
             Ok((0, Token::Const, 5)),
             Ok((6, Token::Identifier("a".to_string()), 7)),
             Ok((7, Token::Colon, 8)),
-            Ok((9, Token::Identifier("Number".to_string()), 15)),
+            Ok((9, Token::Identifier("number".to_string()), 15)),
             Ok((15, Token::Semicolon, 16)),
         ]
     );
@@ -812,12 +812,12 @@ mod lexer_tests {
 
     lexer_test!(
         lex_const_decl_typed_with_assign,
-        "const a: Number = 123;",
+        "const a: number = 123;",
         vec![
             Ok((0, Token::Const, 5)),
             Ok((6, Token::Identifier("a".to_string()), 7)),
             Ok((7, Token::Colon, 8)),
-            Ok((9, Token::Identifier("Number".to_string()), 15)),
+            Ok((9, Token::Identifier("number".to_string()), 15)),
             Ok((16, Token::Equal, 17)),
             Ok((18, Token::Number(123f64), 21)),
             Ok((21, Token::Semicolon, 22)),

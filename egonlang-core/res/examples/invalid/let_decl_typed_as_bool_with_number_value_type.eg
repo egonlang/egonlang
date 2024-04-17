@@ -1,3 +1,3 @@
-let a: Bool = 123;
+let a: bool = 123;
 
-// out: TypeError: mismatched types: expected type `Bool` but received `Number`
+// out: TypeError: mismatched types: expected type `bool` but received `number`

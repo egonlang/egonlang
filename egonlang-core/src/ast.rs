@@ -224,39 +224,39 @@ pub struct TypeRef(pub String, pub Vec<TypeRef>);
 
 impl TypeRef {
     pub fn string() -> TypeRef {
-        TypeRef("String".to_string(), vec![])
+        TypeRef("string".to_string(), vec![])
     }
 
     pub fn number() -> TypeRef {
-        TypeRef("Number".to_string(), vec![])
+        TypeRef("number".to_string(), vec![])
     }
 
     pub fn bool() -> TypeRef {
-        TypeRef("Bool".to_string(), vec![])
+        TypeRef("bool".to_string(), vec![])
     }
 
     pub fn void() -> TypeRef {
-        TypeRef("Void".to_string(), vec![])
+        TypeRef("()".to_string(), vec![])
     }
 
     pub fn range() -> TypeRef {
-        TypeRef("Range".to_string(), vec![])
+        TypeRef("range".to_string(), vec![])
     }
 
     pub fn list(item_type: TypeRef) -> TypeRef {
-        TypeRef("List".to_string(), vec![item_type])
+        TypeRef("list".to_string(), vec![item_type])
     }
 
     pub fn tuple(item_types: Vec<TypeRef>) -> TypeRef {
-        TypeRef("Tuple".to_string(), item_types)
+        TypeRef("tuple".to_string(), item_types)
     }
 
     pub fn identifier() -> TypeRef {
-        TypeRef("Identifier".to_string(), vec![])
+        TypeRef("identifier".to_string(), vec![])
     }
 
     pub fn unknown() -> TypeRef {
-        TypeRef("Unknown".to_string(), vec![])
+        TypeRef("unknown".to_string(), vec![])
     }
 }
 
