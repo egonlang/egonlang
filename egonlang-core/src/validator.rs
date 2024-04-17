@@ -20,11 +20,11 @@ impl Validator {
             }
         }
 
-        if all_errs.is_empty() {
-            return Ok(());
+        if !all_errs.is_empty() {
+            return Err(all_errs);
         }
 
-        Err(all_errs)
+        Ok(())
     }
 
     #[allow(dead_code)]
