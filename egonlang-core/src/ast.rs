@@ -64,7 +64,7 @@ pub enum Expr {
 impl Expr {
     pub fn get_type_expr(self) -> TypeRef {
         match self {
-            Expr::Unit => TypeRef::void(),
+            Expr::Unit => TypeRef::unit(),
             Expr::Literal(literal) => match literal {
                 ExprLiteral::Bool(_) => TypeRef::bool(),
                 ExprLiteral::Number(_) => TypeRef::number(),
@@ -73,7 +73,7 @@ impl Expr {
             Expr::Identifier(_) => TypeRef::identifier(),
             Expr::Block(block) => block
                 .return_expr
-                .map_or(TypeRef::void(), |(expr, _)| expr.get_type_expr()),
+                .map_or(TypeRef::unit(), |(expr, _)| expr.get_type_expr()),
             Expr::List(list) => {
                 if list.items.is_empty() {
                     return TypeRef::list(TypeRef::unknown());
@@ -235,7 +235,7 @@ impl TypeRef {
         TypeRef("bool".to_string(), vec![])
     }
 
-    pub fn void() -> TypeRef {
+    pub fn unit() -> TypeRef {
         TypeRef("()".to_string(), vec![])
     }
 

@@ -637,7 +637,7 @@ mod parser_tests {
 
     parser_test!(
         parse_blocks_with_multiple_statements_and_return_expression,
-        r#"{foo;123;void;"bar"};"#,
+        r#"{foo;123;();"bar"};"#,
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
@@ -665,20 +665,20 @@ mod parser_tests {
                                 ),
                                 (
                                     Stmt::Expr(StmtExpr {
-                                        expr: (Expr::Unit, 9..13)
+                                        expr: (Expr::Unit, 9..11)
                                     }),
-                                    9..14
+                                    9..12
                                 )
                             ],
                             return_expr: Some((
                                 Expr::Literal(ExprLiteral::String("bar".to_string())),
-                                14..19
+                                12..17
                             ))
                         })),
-                        0..20
+                        0..18
                     )
                 }),
-                0..21
+                0..19
             )]
         })
     );
@@ -712,7 +712,6 @@ mod parser_tests {
                     "\"false\"".to_string(),
                     "\"if\"".to_string(),
                     "\"true\"".to_string(),
-                    "\"void\"".to_string(),
                     "\"{\"".to_string(),
                     "identifier".to_string(),
                     "number".to_string(),
@@ -781,7 +780,6 @@ mod parser_tests {
                     "\"false\"".to_string(),
                     "\"if\"".to_string(),
                     "\"true\"".to_string(),
-                    "\"void\"".to_string(),
                     "\"{\"".to_string(),
                     "identifier".to_string(),
                     "number".to_string(),
@@ -842,13 +840,13 @@ mod parser_tests {
 
     parser_test!(
         parse_unit,
-        "void;",
+        "();",
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    expr: (Expr::Unit, 0..4)
+                    expr: (Expr::Unit, 0..2)
                 }),
-                0..5
+                0..3
             )]
         })
     );
@@ -862,13 +860,13 @@ mod parser_tests {
                 expected: vec![
                     "\"!\"".to_string(),
                     "\"(\"".to_string(),
+                    "\")\"".to_string(),
                     "\"-\"".to_string(),
                     "\"..\"".to_string(),
                     "\"[\"".to_string(),
                     "\"false\"".to_string(),
                     "\"if\"".to_string(),
                     "\"true\"".to_string(),
-                    "\"void\"".to_string(),
                     "\"{\"".to_string(),
                     "identifier".to_string(),
                     "number".to_string(),

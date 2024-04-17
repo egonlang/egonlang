@@ -4,10 +4,10 @@
 
         "foo" + "bar";
 
-        [] and void;
+        [] and ();
         123 or [];
 
-        void or 123 and [] or true;
+        () or 123 and [] or true;
 
         [] <= []
     })

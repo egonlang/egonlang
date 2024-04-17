@@ -1,5 +1,4 @@
-if void { void } else { void };
+if () { () } else { () };
 
-// out: SyntaxError: unexpected "void"; expected: ["\"(\""]
-// out: SyntaxError: unexpected "{"; expected: ["\"!=\"", "\"%\"", "\")\"", "\"*\"", "\"+\"", "\",\"", "\"-\"", "\"/\"", "\";\"", "\"<\"", "\"<=\"", "\"==\"", "\">\"", "\">=\"", "\"]\"", "\"and\"", "\"or\"", "\"}\""]
+// out: SyntaxError: unexpected ")"; expected: ["\"!\"", "\"(\"", "\"-\"", "\"..\"", "\"[\"", "\"false\"", "\"true\"", "identifier", "number", "string"]
 // out: SyntaxError: unexpected "else"; expected: ["\")\"", "\",\"", "\";\"", "\"]\"", "\"}\""]

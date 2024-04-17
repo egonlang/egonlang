@@ -1,3 +1,4 @@
-if (void) { 123 } else { 456 };
+if () { 123 } else { 456 };
 
-// out: TypeError: mismatched types: expected type `bool` but received `()`
+// out: SyntaxError: unexpected ")"; expected: ["\"!\"", "\"(\"", "\"-\"", "\"..\"", "\"[\"", "\"false\"", "\"true\"", "identifier", "number", "string"]
+// out: SyntaxError: unexpected "else"; expected: ["\")\"", "\",\"", "\";\"", "\"]\"", "\"}\""]

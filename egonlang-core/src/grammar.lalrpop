@@ -157,7 +157,7 @@ ExprPrimary: ast::Expr = {
     // Literals
     string => ast::Expr::Literal(ast::ExprLiteral::String(<>)),
     number => ast::Expr::Literal(ast::ExprLiteral::Number(<>)),
-    "void" => ast::Expr::Unit,
+    "(" ")" => ast::Expr::Unit,
     "true" => ast::Expr::Literal(ast::ExprLiteral::Bool(true)),
     "false" => ast::Expr::Literal(ast::ExprLiteral::Bool(false)),
 
@@ -202,7 +202,7 @@ TypeRef: ast::TypeRef = {
         ast::TypeRef(base, args.unwrap_or_default())
     },
 
-    "(" ")" => ast::TypeRef::void()
+    "(" ")" => ast::TypeRef::unit()
 }
 
 Spanned<T>: span::Spanned<T> = <l:@L> <t:T> <r:@R> =>
@@ -269,7 +269,6 @@ extern {
         "if" => lexer::Token::If,
         "else" => lexer::Token::Else,
         "fn" => lexer::Token::Fn,
-        "void" => lexer::Token::Void,
         "let" => lexer::Token::Let,
         "const" => lexer::Token::Const,
 

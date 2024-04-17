@@ -3,6 +3,6 @@ if (true) { 1 < "foo" } else { false };
 // out: TypeError: mismatched types: expected type `number` but received `string`
 
 
-if (true and 1) { void; } else { void; };
+if (true and 1) { (); } else { (); };
 
 // out: TypeError: mismatched types: expected type `bool` but received `number`

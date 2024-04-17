@@ -120,8 +120,6 @@ pub enum Token {
     LessEqual,
 
     // Keywords
-    #[token("void")]
-    Void,
     #[token("true")]
     True,
     #[token("false")]

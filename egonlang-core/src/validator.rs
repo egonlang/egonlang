@@ -455,7 +455,7 @@ mod validator_tests {
             1,
             2,
             \"foo\",
-            { void },
+            { () },
             0..10,
             false,
             if (true) { \"red\" } else { \"blue\" }
@@ -473,28 +473,28 @@ mod validator_tests {
                     expected: "number".to_string(),
                     actual: "()".to_string()
                 }),
-                63..71
+                63..69
             ),
             (
                 Error::TypeError(TypeError::MismatchType {
                     expected: "number".to_string(),
                     actual: "range".to_string()
                 }),
-                85..90
+                83..88
             ),
             (
                 Error::TypeError(TypeError::MismatchType {
                     expected: "number".to_string(),
                     actual: "bool".to_string()
                 }),
-                104..109
+                102..107
             ),
             (
                 Error::TypeError(TypeError::MismatchType {
                     expected: "number".to_string(),
                     actual: "string".to_string()
                 }),
-                123..158
+                121..156
             )
         ])
     );
@@ -524,8 +524,8 @@ mod validator_tests {
     );
 
     validator_test!(
-        validate_assign_mismatch_types_block_returning_void,
-        "let a: () = { void };",
+        validate_assign_mismatch_types_block_returning_unit,
+        "let a: () = { () };",
         Ok(())
     );
 
@@ -695,7 +695,7 @@ mod validator_tests {
 
     validator_test!(
         testtt,
-        "if (true and 1) { void; } else { void; };",
+        "if (true and 1) { (); } else { (); };",
         Err(vec![(
             Error::TypeError(TypeError::MismatchType {
                 expected: "bool".to_string(),
