@@ -2,7 +2,10 @@ use crate::{
     ast::{
         Expr, ExprInfix, ExprPrefix, ExprS, Identifier, Module, OpInfix, OpPrefix, Stmt, TypeRef,
     },
-    errors::{Error, ErrorS, SyntaxError, TypeError},
+    errors::{
+        Error, ErrorS, SyntaxError,
+        TypeError::{self, UknownListType, UnknownType},
+    },
     span::Spanned,
 };
 
@@ -38,22 +41,21 @@ impl Validator {
         match stmt {
             Stmt::Expr(stmt_expr) => self.visit_expr(&stmt_expr.expr),
             Stmt::Assign(stmt_assign) => {
+                let mut errs = vec![];
+
                 let name = stmt_assign.identifier.name.clone();
 
                 // const declarations
                 if stmt_assign.is_const && stmt_assign.value.is_none() {
-                    return Err(vec![(
+                    errs.push((
                         Error::SyntaxError(SyntaxError::UninitializedConst { name }),
                         span.clone(),
-                    )]);
+                    ));
                 }
 
                 // let declarations
                 if stmt_assign.type_expr.is_none() && stmt_assign.value.is_none() {
-                    return Err(vec![(
-                        Error::TypeError(TypeError::UnknownType),
-                        span.clone(),
-                    )]);
+                    errs.push((Error::TypeError(TypeError::UnknownType), span.clone()));
                 }
 
                 if stmt_assign.type_expr.is_some() {
@@ -72,23 +74,20 @@ impl Validator {
                                 return Ok(());
                             };
 
-                            return Err(vec![(
-                                Error::TypeError(crate::errors::TypeError::MismatchType {
+                            errs.push((
+                                Error::TypeError(TypeError::MismatchType {
                                     expected: type_identifier.to_string(),
                                     actual: value_type.to_string(),
                                 }),
                                 span.clone(),
-                            )]);
+                            ));
                         } else {
                             // This checks for empty lists being assigned to a list<unknown>
                             // e.g. let a: list<unknown> = [];
                             if type_identifier == TypeRef::list(TypeRef::unknown())
                                 && value_type == TypeRef::list(TypeRef::unknown())
                             {
-                                return Err(vec![(
-                                    Error::TypeError(crate::errors::TypeError::UknownListType {}),
-                                    span.clone(),
-                                )]);
+                                errs.push((Error::TypeError(UknownListType {}), span.clone()));
                             };
                         }
                     } else {
@@ -96,10 +95,7 @@ impl Validator {
                         let type_identifier = type_expr.get_type_expr();
 
                         if type_identifier == TypeRef::unknown() {
-                            return Err(vec![(
-                                Error::TypeError(crate::errors::TypeError::UnknownType {}),
-                                span.clone(),
-                            )]);
+                            errs.push((Error::TypeError(UnknownType {}), span.clone()));
                         }
                     }
                 } else {
@@ -112,12 +108,13 @@ impl Validator {
                         // This checks for empty lists being assigned to a list<T>
                         // e.g. let a = [];
                         if value_type == TypeRef::list(TypeRef::unknown()) {
-                            return Err(vec![(
-                                Error::TypeError(crate::errors::TypeError::UknownListType {}),
-                                span.clone(),
-                            )]);
+                            errs.push((Error::TypeError(UknownListType {}), span.clone()));
                         }
                     }
+                }
+
+                if !errs.is_empty() {
+                    return Err(errs);
                 }
 
                 Ok(())
@@ -181,7 +178,7 @@ impl Validator {
 
                 if cond_expr.0 != *"bool" {
                     return Err(vec![(
-                        Error::TypeError(crate::errors::TypeError::MismatchType {
+                        Error::TypeError(TypeError::MismatchType {
                             expected: "bool".to_string(),
                             actual: cond_expr.to_string(),
                         }),
@@ -197,7 +194,7 @@ impl Validator {
 
                     if else_type_ref != then_type_ref {
                         return Err(vec![(
-                            Error::TypeError(crate::errors::TypeError::MismatchType {
+                            Error::TypeError(TypeError::MismatchType {
                                 expected: then_type_ref.to_string(),
                                 actual: else_type_ref.to_string(),
                             }),
@@ -389,7 +386,7 @@ mod validator_tests {
     use pretty_assertions::assert_eq;
 
     use crate::{
-        errors::{Error, TypeError},
+        errors::{Error, SyntaxError, TypeError},
         parser::parse,
     };
 
@@ -412,12 +409,15 @@ mod validator_tests {
     validator_test!(
         validate_const_declaration_requires_value,
         "const a;",
-        Err(vec![(
-            Error::SyntaxError(crate::errors::SyntaxError::UninitializedConst {
-                name: "a".to_string()
-            }),
-            0..8
-        )])
+        Err(vec![
+            (
+                Error::SyntaxError(SyntaxError::UninitializedConst {
+                    name: "a".to_string()
+                }),
+                0..8
+            ),
+            (Error::TypeError(TypeError::UnknownType {}), 0..8)
+        ])
     );
 
     validator_test!(
