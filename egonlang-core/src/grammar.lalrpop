@@ -10,11 +10,20 @@ grammar<'err>(
 pub Module: ast::Module = <stmts:Spanned<Decl>*> => ast::Module { <> };
 
 Decl = {
-    DeclLetVar,
+    DeclVar,
+    DeclFn,
     Stmt,
 }
 
-DeclLetVar: ast::Stmt = <assign:StmtAssign> =>
+DeclFn: ast::Stmt = {
+    "fn" <name:identifier> "(" <params:Seperated<Spanned<FnParam>, ",">> ")" ":" <return_type:Spanned<TypeRef>> <body:Spanned<ExprBlock>> =>
+        ast::Stmt::Fn(Box::new(ast::StmtFn { 
+            name: ast::Identifier { name: name.clone() },
+            fn_expr: (ast::Expr::Fn(Box::new(ast::ExprFn { name: Some(ast::Identifier { name }), params, return_type, body })), 0..0)
+         })),
+}
+
+DeclVar: ast::Stmt = <assign:StmtAssign> =>
     ast::Stmt::Assign(<>);
 
 StmtAssign: ast::StmtAssign = {
@@ -55,7 +64,8 @@ ExprS = Spanned<Expr>;
 
 Expr: ast::Expr = {
     ExprAssign,
-    ExprBlock
+    ExprBlock,
+    
 };
 
 ExprAssign: ast::Expr = {
@@ -138,7 +148,8 @@ OpPrefix: ast::OpPrefix = {
 }
 
 ExprSimple: ast::Expr = {
-    ExprList
+    ExprList,
+    
 };
 
 ExprList: ast::Expr = {
@@ -165,6 +176,8 @@ ExprPrimary: ast::Expr = {
     ExprIdentifier,
 
     ExprRange,
+
+    ExprFn,
 
     // Grouping
     "(" <Expr> ")",
@@ -195,6 +208,18 @@ ExprBlock: ast::Expr = {
     )),
 }
 
+FnParam: (ast::Identifier, ast::TypeRef) = <name:identifier> ":" <typeref:TypeRef> => (ast::Identifier { name }, typeref);
+
+ExprFn: ast::Expr = {
+   "(" <params:Seperated<Spanned<FnParam>, ",">> ")" ":" <return_type:Spanned<TypeRef>> <body:Spanned<ExprBlock>> =>
+        ast::Expr::Fn(Box::new(ast::ExprFn { 
+            name: None,
+            params,
+            return_type,
+            body,
+         }))
+}
+
 /// Utilities
 
 TypeRef: ast::TypeRef = {
@@ -215,6 +240,7 @@ SeperatedNoDefault<E, T>: Vec<ast::ExprS> = {
     },
 }
 
+#[inline]
 Seperated<E, T>: Vec<E> = {
     <first:E> <mut args:(T <E>)*> => {
         args.insert(0, first);

@@ -271,7 +271,6 @@ mod parser_tests {
                     "\",\"".to_string(),
                     "\";\"".to_string(),
                     "\"]\"".to_string(),
-                    "\"else\"".to_string(),
                     "\"}\"".to_string(),
                 ]
             }),

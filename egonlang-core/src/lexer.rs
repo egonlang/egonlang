@@ -831,4 +831,29 @@ mod lexer_tests {
             Ok((7, Token::Semicolon, 8)),
         ]
     );
+
+    lexer_test!(
+        lex_fn_decl,
+        "fn sum (a: number, b: number): number { a + b }",
+        vec![
+            Ok((0, Token::Fn, 2)),
+            Ok((3, Token::Identifier("sum".to_string()), 6)),
+            Ok((7, Token::ParanOpen, 8)),
+            Ok((8, Token::Identifier("a".to_string()), 9)),
+            Ok((9, Token::Colon, 10)),
+            Ok((11, Token::Identifier("number".to_string()), 17)),
+            Ok((17, Token::Comma, 18)),
+            Ok((19, Token::Identifier("b".to_string()), 20)),
+            Ok((20, Token::Colon, 21)),
+            Ok((22, Token::Identifier("number".to_string()), 28)),
+            Ok((28, Token::ParanClose, 29)),
+            Ok((29, Token::Colon, 30)),
+            Ok((31, Token::Identifier("number".to_string()), 37)),
+            Ok((38, Token::BraceOpen, 39)),
+            Ok((40, Token::Identifier("a".to_string()), 41)),
+            Ok((42, Token::Plus, 43)),
+            Ok((44, Token::Identifier("b".to_string()), 45)),
+            Ok((46, Token::BraceClose, 47)),
+        ]
+    );
 }

@@ -122,6 +122,7 @@ impl Validator {
 
                 Ok(())
             }
+            Stmt::Fn(_) => Ok(()),
             Stmt::Error => todo!(),
         }
     }
@@ -265,6 +266,37 @@ impl Validator {
 
                 if let Err(expr_errs) = self.visit_expr(&assign.value) {
                     errs.extend(expr_errs);
+                }
+
+                if !errs.is_empty() {
+                    return Err(errs);
+                }
+
+                Ok(())
+            }
+            Expr::Fn(fn_) => {
+                let mut errs: Vec<ErrorS> = vec![];
+
+                if let Err(body_errs) = self.visit_expr(&fn_.body) {
+                    errs.extend(body_errs);
+                }
+
+                let fn_return_type = fn_.return_type.0.clone();
+
+                if let Expr::Block(block) = &fn_.body.0 {
+                    if let Some((block_return_expr, returning_expr_span)) = &block.return_expr {
+                        let block_return_expr = block_return_expr.clone().get_type_expr();
+
+                        if fn_return_type != block_return_expr {
+                            errs.push((
+                                Error::TypeError(TypeError::MismatchType {
+                                    expected: fn_return_type.to_string(),
+                                    actual: block_return_expr.to_string(),
+                                }),
+                                returning_expr_span.clone(),
+                            ));
+                        }
+                    }
                 }
 
                 if !errs.is_empty() {

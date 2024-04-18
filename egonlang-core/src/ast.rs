@@ -15,6 +15,7 @@ pub type ExprS = Spanned<Expr>;
 pub enum Stmt {
     Expr(StmtExpr),
     Assign(StmtAssign),
+    Fn(Box<StmtFn>),
     Error,
 }
 
@@ -23,6 +24,7 @@ impl Debug for Stmt {
         match self {
             Self::Expr(arg0) => f.write_fmt(format_args!("{:#?}", arg0)),
             Self::Assign(arg0) => f.write_fmt(format_args!("{:#?}", arg0)),
+            Self::Fn(arg0) => f.write_fmt(format_args!("{:#?}", arg0)),
             Self::Error => write!(f, "Error"),
         }
     }
@@ -41,6 +43,12 @@ pub struct StmtAssign {
     pub type_expr: Option<ExprS>,
     pub is_const: bool,
     pub value: Option<ExprS>,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct StmtFn {
+    pub name: Identifier,
+    pub fn_expr: ExprS,
 }
 
 /// Expressions
@@ -114,7 +122,10 @@ impl Expr {
                 expr.get_type_expr()
             }
             Expr::If(if_) => if_.then.0.get_type_expr(),
-            Expr::Fn(_) => todo!(),
+            Expr::Fn(fn_) => TypeRef::function(
+                fn_.params.into_iter().map(|param| param.0 .1).collect(),
+                fn_.return_type.0,
+            ),
             Expr::Range(_) => TypeRef::range(),
             Expr::Type(ty) => ty.0,
         }
@@ -205,7 +216,9 @@ pub struct ExprIf {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ExprFn {
-    pub params: Vec<ExprS>,
+    pub name: Option<Identifier>,
+    pub params: Vec<Spanned<(Identifier, TypeRef)>>,
+    pub return_type: Spanned<TypeRef>,
     pub body: ExprS,
 }
 
@@ -257,6 +270,13 @@ impl TypeRef {
 
     pub fn unknown() -> TypeRef {
         TypeRef("unknown".to_string(), vec![])
+    }
+
+    pub fn function(params_types: Vec<TypeRef>, return_type: TypeRef) -> TypeRef {
+        TypeRef(
+            "function".to_string(),
+            vec![TypeRef::tuple(params_types), return_type],
+        )
     }
 }
 
