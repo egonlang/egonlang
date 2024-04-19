@@ -834,7 +834,7 @@ mod lexer_tests {
 
     lexer_test!(
         lex_fn_decl,
-        "fn sum (a: number, b: number): number { a + b }",
+        "fn sum (a: number, b: number): number => { a + b }",
         vec![
             Ok((0, Token::Fn, 2)),
             Ok((3, Token::Identifier("sum".to_string()), 6)),
@@ -849,11 +849,12 @@ mod lexer_tests {
             Ok((28, Token::ParanClose, 29)),
             Ok((29, Token::Colon, 30)),
             Ok((31, Token::Identifier("number".to_string()), 37)),
-            Ok((38, Token::BraceOpen, 39)),
-            Ok((40, Token::Identifier("a".to_string()), 41)),
-            Ok((42, Token::Plus, 43)),
-            Ok((44, Token::Identifier("b".to_string()), 45)),
-            Ok((46, Token::BraceClose, 47)),
+            Ok((38, Token::FatArrow, 40)),
+            Ok((41, Token::BraceOpen, 42)),
+            Ok((43, Token::Identifier("a".to_string()), 44)),
+            Ok((45, Token::Plus, 46)),
+            Ok((47, Token::Identifier("b".to_string()), 48)),
+            Ok((49, Token::BraceClose, 50)),
         ]
     );
 }

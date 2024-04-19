@@ -16,7 +16,7 @@ Decl = {
 }
 
 DeclFn: ast::Stmt = {
-    "fn" <name:identifier> "(" <params:Seperated<Spanned<FnParam>, ",">> ")" ":" <return_type:Spanned<TypeRef>> <body:Spanned<ExprBlock>> =>
+    "fn" <name:identifier> "(" <params:Seperated<Spanned<FnParam>, ",">> ")" ":" <return_type:Spanned<TypeRef>> "=>" <body:Spanned<ExprBlock>> =>
         ast::Stmt::Fn(Box::new(ast::StmtFn { 
             name: ast::Identifier { name: name.clone() },
             fn_expr: (ast::Expr::Fn(Box::new(ast::ExprFn { name: Some(ast::Identifier { name }), params, return_type, body })), 0..0)
@@ -211,7 +211,7 @@ ExprBlock: ast::Expr = {
 FnParam: (ast::Identifier, ast::TypeRef) = <name:identifier> ":" <typeref:TypeRef> => (ast::Identifier { name }, typeref);
 
 ExprFn: ast::Expr = {
-   "(" <params:Seperated<Spanned<FnParam>, ",">> ")" ":" <return_type:Spanned<TypeRef>> <body:Spanned<ExprBlock>> =>
+   "(" <params:Seperated<Spanned<FnParam>, ",">> ")" ":" <return_type:Spanned<TypeRef>> "=>" <body:Spanned<ExprBlock>> =>
         ast::Expr::Fn(Box::new(ast::ExprFn { 
             name: None,
             params,

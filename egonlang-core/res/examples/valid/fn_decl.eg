@@ -1,1 +1,1 @@
-fn example (a: number, b: number): () {}
+fn example (a: number, b: number): () => {}

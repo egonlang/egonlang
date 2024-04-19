@@ -1,3 +1,3 @@
-let a: number = (a: number, b: number): number { a + b };
+let a: number = (a: number, b: number): number => { a + b };
 
 // out: TypeError: mismatched types: expected type `number` but received `function<tuple<number, number>, number>`
