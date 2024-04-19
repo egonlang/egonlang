@@ -191,12 +191,27 @@ ExprIdentifier: ast::Expr = <name:identifier> =>
         }
     });
 
-ExprRange: ast::Expr = <start:Spanned<number>?> ".." <inclusive_end:"="?> <end:Spanned<number>?> =>
-    ast::Expr::Range(ast::ExprRange {
-        start: start.map(|start| (ast::ExprLiteral::Number(start.0), start.1)),
-        end: end.map(|end| (ast::ExprLiteral::Number(end.0), end.1)),
-        inclusive_end: inclusive_end.is_some()
-    });
+#[inline]
+ExprRange: ast::Expr = {
+    <start:Spanned<number>> ".." <inclusive_end:"="?> <end:Spanned<number>> =>
+        ast::Expr::Range(ast::ExprRange {
+            start: Some((ast::ExprLiteral::Number(start.0), start.1)),
+            end: Some((ast::ExprLiteral::Number(end.0), end.1)),
+            inclusive_end: inclusive_end.is_some()
+        }),
+    <start:Spanned<number>> ".." =>
+        ast::Expr::Range(ast::ExprRange {
+            start: Some((ast::ExprLiteral::Number(start.0), start.1)),
+            end: None,
+            inclusive_end: false
+        }),
+    ".." <inclusive_end:"="?> <end:Spanned<number>> =>
+        ast::Expr::Range(ast::ExprRange {
+            start: None,
+            end: Some((ast::ExprLiteral::Number(end.0), end.1)),
+            inclusive_end: inclusive_end.is_some()
+        }),
+}
 
 ExprBlock: ast::Expr = {
     "{" <stmts:(<Spanned<Decl>>)*> <return_expr:(ExprS)?> "}" =>

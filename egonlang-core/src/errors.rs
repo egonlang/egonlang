@@ -35,6 +35,8 @@ pub enum SyntaxError {
     ReassigningConst { name: String },
     #[error("let `{name}` missing value and type. lets require at least a type or declared with a value")]
     UninitializedUntypedLet { name: String },
+    #[error("empty range e.g. `..`")]
+    EmptyRange,
 }
 
 #[derive(Debug, Error, Eq, PartialEq)]
