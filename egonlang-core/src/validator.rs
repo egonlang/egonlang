@@ -13,10 +13,7 @@ use crate::{
 use std::collections::HashMap;
 
 #[derive(Default)]
-pub struct Validator {
-    /// Keep track of identifiers to types
-    pub env: HashMap<String, EnvVar>,
-}
+pub struct Validator {}
 
 #[derive(Debug, PartialEq)]
 pub struct EnvVar {
@@ -24,13 +21,57 @@ pub struct EnvVar {
     pub is_const: bool,
 }
 
+#[derive(Default)]
+struct Env<'a> {
+    root: Option<&'a Env<'a>>,
+    env: HashMap<String, EnvVar>,
+}
+
+impl<'a> Env<'a> {
+    fn new() -> Env<'a> {
+        Env {
+            root: None,
+            env: HashMap::new(),
+        }
+    }
+
+    fn extend(&self) -> Env {
+        Env {
+            root: Some(self),
+            env: HashMap::new(),
+        }
+    }
+
+    pub fn get(&self, key: &str) -> Option<&EnvVar> {
+        let result = self.env.get(key);
+
+        if result.is_none() {
+            if let Some(root) = &self.root {
+                let result = root.get(key);
+
+                return result;
+            }
+        } else {
+            return result;
+        }
+
+        None
+    }
+
+    pub fn set(&mut self, key: &str, value: EnvVar) {
+        self.env.insert(key.to_string(), value);
+    }
+}
+
 impl Validator {
     /// Validate a [`Module`]'s AST
     pub fn validate(&mut self, module: &Module) -> Result<(), Vec<ErrorS>> {
         let mut all_errs: Vec<ErrorS> = vec![];
 
+        let mut env = Env::new();
+
         for stmt in &module.stmts {
-            if let Err(errs) = self.visit_stmt(stmt) {
+            if let Err(errs) = self.visit_stmt(stmt, &mut env) {
                 all_errs.extend(errs);
             }
         }
@@ -47,11 +88,11 @@ impl Validator {
         Ok(())
     }
 
-    fn visit_stmt(&mut self, stmt: &Spanned<Stmt>) -> Result<(), Vec<ErrorS>> {
+    fn visit_stmt(&mut self, stmt: &Spanned<Stmt>, env: &mut Env<'_>) -> Result<(), Vec<ErrorS>> {
         let (stmt, span) = stmt;
 
         match stmt {
-            Stmt::Expr(stmt_expr) => self.visit_expr(&stmt_expr.expr),
+            Stmt::Expr(stmt_expr) => self.visit_expr(&stmt_expr.expr, env),
             Stmt::Assign(stmt_assign) => {
                 let mut errs = vec![];
 
@@ -91,8 +132,8 @@ impl Validator {
                             if type_identifier.0 == TypeRef::list(TypeRef::unknown()).0
                                 && value_type == TypeRef::list(TypeRef::unknown())
                             {
-                                self.env.insert(
-                                    name,
+                                env.set(
+                                    &name,
                                     EnvVar {
                                         typeref: type_identifier,
                                         is_const: stmt_assign.is_const,
@@ -102,7 +143,7 @@ impl Validator {
                                 if let Expr::Identifier(identifier) = &value_expr {
                                     let value_identifier = &identifier.identifier.name;
 
-                                    if let Some(value_type) = self.env.get(value_identifier) {
+                                    if let Some(value_type) = env.get(value_identifier) {
                                         if type_identifier != value_type.typeref {
                                             errs.push((
                                                 Error::TypeError(TypeError::MismatchType {
@@ -131,8 +172,8 @@ impl Validator {
                             {
                                 errs.push((Error::TypeError(UknownListType {}), span.clone()));
                             } else {
-                                self.env.insert(
-                                    name,
+                                env.set(
+                                    &name,
                                     EnvVar {
                                         typeref: type_identifier,
                                         is_const: stmt_assign.is_const,
@@ -147,8 +188,8 @@ impl Validator {
                         if type_identifier == TypeRef::unknown() {
                             errs.push((Error::TypeError(UnknownType {}), span.clone()));
                         } else {
-                            self.env.insert(
-                                name,
+                            env.set(
+                                &name,
                                 EnvVar {
                                     typeref: type_identifier,
                                     is_const: stmt_assign.is_const,
@@ -162,7 +203,7 @@ impl Validator {
                     if stmt_assign.value.is_some() {
                         let value = stmt_assign.value.clone().unwrap();
 
-                        if let Err(e) = self.visit_expr(&value) {
+                        if let Err(e) = self.visit_expr(&value, env) {
                             errs.extend(e);
                         } else {
                             let value_type = value.0.get_type_expr();
@@ -172,8 +213,8 @@ impl Validator {
                             if value_type == TypeRef::list(TypeRef::unknown()) {
                                 errs.push((Error::TypeError(UknownListType {}), span.clone()));
                             } else {
-                                self.env.insert(
-                                    name,
+                                env.set(
+                                    &name,
                                     EnvVar {
                                         typeref: value_type,
                                         is_const: stmt_assign.is_const,
@@ -195,7 +236,7 @@ impl Validator {
         }
     }
 
-    fn visit_expr(&mut self, expr: &Spanned<Expr>) -> Result<(), Vec<ErrorS>> {
+    fn visit_expr(&mut self, expr: &Spanned<Expr>, env: &mut Env<'_>) -> Result<(), Vec<ErrorS>> {
         let (expr, expr_span) = expr;
 
         match expr {
@@ -208,7 +249,7 @@ impl Validator {
 
                 let first_item_type_ident = match &first_item {
                     Expr::Identifier(ExprIdentifier { identifier }) => {
-                        if let Some(env_var) = self.env.get(&identifier.name) {
+                        if let Some(env_var) = env.get(&identifier.name) {
                             env_var.typeref.clone()
                         } else {
                             TypeRef::identifier()
@@ -225,7 +266,7 @@ impl Validator {
                     if let Expr::Identifier(ExprIdentifier { identifier }) = &item_expr {
                         let identifier = &identifier.name;
 
-                        if let Some(env_var) = self.env.get(identifier) {
+                        if let Some(env_var) = env.get(identifier) {
                             let env_var_type = &env_var.typeref;
 
                             if env_var_type != &first_item_type_ident {
@@ -258,16 +299,16 @@ impl Validator {
             Expr::If(if_) => {
                 let mut errs = vec![];
 
-                if let Err(cond_errs) = self.visit_expr(&if_.cond) {
+                if let Err(cond_errs) = self.visit_expr(&if_.cond, env) {
                     errs.extend(cond_errs);
                 }
 
-                if let Err(then_errs) = self.visit_expr(&if_.then) {
+                if let Err(then_errs) = self.visit_expr(&if_.then, env) {
                     errs.extend(then_errs);
                 }
 
                 if let Some(else_errs) = &if_.else_ {
-                    if let Err(else_errs) = self.visit_expr(else_errs) {
+                    if let Err(else_errs) = self.visit_expr(else_errs, env) {
                         errs.extend(else_errs);
                     }
                 }
@@ -312,17 +353,17 @@ impl Validator {
                 let bool_typeref = TypeRef::bool();
 
                 match infix.op {
-                    OpInfix::Add => self.validate_infix_types(infix, number_typeref),
-                    OpInfix::Subtract => self.validate_infix_types(infix, number_typeref),
-                    OpInfix::Multiply => self.validate_infix_types(infix, number_typeref),
-                    OpInfix::Divide => self.validate_infix_types(infix, number_typeref),
-                    OpInfix::Modulus => self.validate_infix_types(infix, number_typeref),
-                    OpInfix::Less => self.validate_infix_types(infix, number_typeref),
-                    OpInfix::LessEqual => self.validate_infix_types(infix, number_typeref),
-                    OpInfix::Greater => self.validate_infix_types(infix, number_typeref),
-                    OpInfix::GreaterEqual => self.validate_infix_types(infix, number_typeref),
-                    OpInfix::LogicAnd => self.validate_infix_types(infix, bool_typeref),
-                    OpInfix::LogicOr => self.validate_infix_types(infix, bool_typeref),
+                    OpInfix::Add => self.validate_infix_types(infix, number_typeref, env),
+                    OpInfix::Subtract => self.validate_infix_types(infix, number_typeref, env),
+                    OpInfix::Multiply => self.validate_infix_types(infix, number_typeref, env),
+                    OpInfix::Divide => self.validate_infix_types(infix, number_typeref, env),
+                    OpInfix::Modulus => self.validate_infix_types(infix, number_typeref, env),
+                    OpInfix::Less => self.validate_infix_types(infix, number_typeref, env),
+                    OpInfix::LessEqual => self.validate_infix_types(infix, number_typeref, env),
+                    OpInfix::Greater => self.validate_infix_types(infix, number_typeref, env),
+                    OpInfix::GreaterEqual => self.validate_infix_types(infix, number_typeref, env),
+                    OpInfix::LogicAnd => self.validate_infix_types(infix, bool_typeref, env),
+                    OpInfix::LogicOr => self.validate_infix_types(infix, bool_typeref, env),
                     _ => Ok(()),
                 }
             }
@@ -331,21 +372,21 @@ impl Validator {
                 let bool_typeref = TypeRef::bool();
 
                 match prefix.op {
-                    OpPrefix::Negate => self.validate_prefix_types(prefix, number_typeref),
-                    OpPrefix::Not => self.validate_prefix_types(prefix, bool_typeref),
+                    OpPrefix::Negate => self.validate_prefix_types(prefix, number_typeref, env),
+                    OpPrefix::Not => self.validate_prefix_types(prefix, bool_typeref, env),
                 }
             }
             Expr::Block(block) => {
                 let mut errs: Vec<ErrorS> = vec![];
 
                 for stmt in &block.stmts {
-                    if let Err(stmt_errs) = self.visit_stmt(stmt) {
+                    if let Err(stmt_errs) = self.visit_stmt(stmt, env) {
                         errs.extend(stmt_errs);
                     }
                 }
 
                 if let Some(returning_expr) = &block.return_expr {
-                    if let Err(expr_errs) = self.visit_expr(returning_expr) {
+                    if let Err(expr_errs) = self.visit_expr(returning_expr, env) {
                         errs.extend(expr_errs);
                     }
                 }
@@ -359,13 +400,13 @@ impl Validator {
             Expr::Assign(assign) => {
                 let mut errs: Vec<ErrorS> = vec![];
 
-                if let Err(expr_errs) = self.visit_expr(&assign.value) {
+                if let Err(expr_errs) = self.visit_expr(&assign.value, env) {
                     errs.extend(expr_errs);
                 }
 
                 let value_type = assign.value.0.clone().get_type_expr();
 
-                if let Some(env_var) = self.env.get(&assign.identifier.name) {
+                if let Some(env_var) = env.get(&assign.identifier.name) {
                     if env_var.is_const {
                         errs.push((
                             Error::SyntaxError(SyntaxError::ReassigningConst {
@@ -397,7 +438,21 @@ impl Validator {
             Expr::Fn(fn_) => {
                 let mut errs: Vec<ErrorS> = vec![];
 
-                if let Err(body_errs) = self.visit_expr(&fn_.body) {
+                let mut fn_env = env.extend();
+
+                for ((ident, type_ref), _) in &fn_.params {
+                    let name = &ident.name;
+
+                    fn_env.set(
+                        name,
+                        EnvVar {
+                            typeref: type_ref.clone(),
+                            is_const: true,
+                        },
+                    );
+                }
+
+                if let Err(body_errs) = self.visit_expr(&fn_.body, &mut fn_env) {
                     errs.extend(body_errs);
                 }
 
@@ -433,19 +488,38 @@ impl Validator {
         &mut self,
         infix: &ExprInfix,
         expected_type: TypeRef,
+        env: &mut Env<'_>,
     ) -> Result<(), Vec<ErrorS>> {
         let mut errs = vec![];
 
-        let lt_errs = self.visit_expr(&infix.lt).err().unwrap_or_default();
+        let lt_errs = self.visit_expr(&infix.lt, env).err().unwrap_or_default();
         errs.extend(lt_errs);
 
-        let rt_errs = self.visit_expr(&infix.rt).err().unwrap_or_default();
+        let rt_errs = self.visit_expr(&infix.rt, env).err().unwrap_or_default();
         errs.extend(rt_errs);
 
         let (lt, lt_span) = infix.lt.clone();
-        let lt_typeref = lt.get_type_expr();
         let (rt, rt_span) = infix.rt.clone();
-        let rt_typeref = rt.get_type_expr();
+
+        let lt_typeref = if let Expr::Identifier(ExprIdentifier { identifier }) = &lt {
+            if let Some(env_var) = env.get(&identifier.name) {
+                env_var.typeref.clone()
+            } else {
+                lt.get_type_expr()
+            }
+        } else {
+            lt.get_type_expr()
+        };
+
+        let rt_typeref = if let Expr::Identifier(ExprIdentifier { identifier }) = &rt {
+            if let Some(env_var) = env.get(&identifier.name) {
+                env_var.typeref.clone()
+            } else {
+                rt.get_type_expr()
+            }
+        } else {
+            rt.get_type_expr()
+        };
 
         if lt_typeref != expected_type {
             errs.push((
@@ -477,10 +551,11 @@ impl Validator {
         &mut self,
         prefix: &ExprPrefix,
         expected_type: TypeRef,
+        env: &mut Env<'_>,
     ) -> Result<(), Vec<ErrorS>> {
         let mut errs = vec![];
 
-        let rt_errs = self.visit_expr(&prefix.rt).err().unwrap_or_default();
+        let rt_errs = self.visit_expr(&prefix.rt, env).err().unwrap_or_default();
         errs.extend(rt_errs);
 
         let (rt, rt_span) = prefix.rt.clone();
@@ -515,7 +590,7 @@ mod validator_tests {
         validator::EnvVar,
     };
 
-    use super::Validator;
+    use super::{Env, Validator};
 
     macro_rules! validator_test {
         ($test_name:ident, $input:expr, $expected:expr) => {
@@ -950,75 +1025,6 @@ mod validator_tests {
         Err(vec![(Error::TypeError(TypeError::UnknownType {}), 0..15)])
     );
 
-    #[test]
-    fn validate_let_decl_typed_sets_env_type() {
-        let module = parse(
-            "
-        let a: number = 123;
-        ",
-            0,
-        )
-        .unwrap();
-        let mut v = Validator::default();
-
-        let result = v.validate(&module);
-        assert_eq!(
-            Some(&EnvVar {
-                typeref: TypeRef::number(),
-                is_const: false
-            }),
-            v.env.get("a")
-        );
-
-        assert_eq!(Ok(()), result);
-    }
-
-    #[test]
-    fn validate_let_decl_typed_sets_env_type_without_assign_value() {
-        let module = parse(
-            "
-        let a: number;
-        ",
-            0,
-        )
-        .unwrap();
-        let mut v = Validator::default();
-
-        let result = v.validate(&module);
-        assert_eq!(
-            Some(&EnvVar {
-                typeref: TypeRef::number(),
-                is_const: false
-            }),
-            v.env.get("a")
-        );
-
-        assert_eq!(Ok(()), result);
-    }
-
-    #[test]
-    fn validate_let_decl_untyped_sets_env_type() {
-        let module = parse(
-            "
-        let a = 123;
-        ",
-            0,
-        )
-        .unwrap();
-        let mut v = Validator::default();
-
-        let result = v.validate(&module);
-        assert_eq!(
-            Some(&EnvVar {
-                typeref: TypeRef::number(),
-                is_const: false
-            }),
-            v.env.get("a")
-        );
-
-        assert_eq!(Ok(()), result);
-    }
-
     validator_test!(
         validate_let_decl_untyped_sets_env_type_reassign_type_mismatch,
         "
@@ -1048,40 +1054,6 @@ mod validator_tests {
             46..47
         )])
     );
-
-    #[test]
-    fn validate_const_decl_typed_sets_env_type() {
-        let module = parse("const a: number = 123;", 0).unwrap();
-        let mut v = Validator::default();
-
-        let result = v.validate(&module);
-        assert_eq!(
-            Some(&EnvVar {
-                typeref: TypeRef::number(),
-                is_const: true
-            }),
-            v.env.get("a")
-        );
-
-        assert_eq!(Ok(()), result);
-    }
-
-    #[test]
-    fn validate_const_decl_untyped_sets_env_type() {
-        let module = parse("const a = 123;", 0).unwrap();
-        let mut v = Validator::default();
-
-        let result = v.validate(&module);
-        assert_eq!(
-            Some(&EnvVar {
-                typeref: TypeRef::number(),
-                is_const: true
-            }),
-            v.env.get("a")
-        );
-
-        assert_eq!(Ok(()), result);
-    }
 
     validator_test!(
         validate_const_decl_untyped_sets_env_type_reassign_type_mismatch,
@@ -1126,4 +1098,78 @@ mod validator_tests {
             51..52
         )])
     );
+
+    validator_test!(
+        validate_fn_expr_sum,
+        "(a: number, b: number): number => { a + b };",
+        Ok(())
+    );
+
+    validator_test!(
+        validate_fn_expr_sum_type_mismatch,
+        "(a: string, b: ()): number => { a + b };",
+        Err(vec![
+            (
+                Error::TypeError(TypeError::MismatchType {
+                    expected: "number".to_string(),
+                    actual: "string".to_string()
+                }),
+                32..33
+            ),
+            (
+                Error::TypeError(TypeError::MismatchType {
+                    expected: "number".to_string(),
+                    actual: "()".to_string()
+                }),
+                36..37
+            )
+        ])
+    );
+
+    #[test]
+    fn env_works() {
+        let mut env = Env::new();
+
+        env.set(
+            "a",
+            EnvVar {
+                typeref: TypeRef::number(),
+                is_const: false,
+            },
+        );
+
+        assert_eq!(
+            Some(&EnvVar {
+                typeref: TypeRef::number(),
+                is_const: false,
+            }),
+            env.get("a")
+        );
+
+        let mut env2 = Env::extend(&env);
+
+        env2.set(
+            "a",
+            EnvVar {
+                typeref: TypeRef::unit(),
+                is_const: false,
+            },
+        );
+
+        assert_eq!(
+            Some(&EnvVar {
+                typeref: TypeRef::unit(),
+                is_const: false,
+            }),
+            env2.get("a")
+        );
+
+        assert_eq!(
+            Some(&EnvVar {
+                typeref: TypeRef::number(),
+                is_const: false,
+            }),
+            env.get("a")
+        );
+    }
 }
