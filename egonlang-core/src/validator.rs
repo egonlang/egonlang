@@ -172,7 +172,7 @@ impl Validator {
     }
 
     fn visit_expr(&mut self, expr: &Spanned<Expr>) -> Result<(), Vec<ErrorS>> {
-        let (expr, _) = expr;
+        let (expr, expr_span) = expr;
 
         match expr {
             Expr::List(list) => {
@@ -315,16 +315,25 @@ impl Validator {
                 let value_type = assign.value.0.clone().get_type_expr();
 
                 if let Some(env_var) = self.env.get(&assign.identifier.name) {
-                    let env_var_type = env_var.typeref.clone();
-
-                    if env_var_type != value_type {
+                    if env_var.is_const {
                         errs.push((
-                            Error::TypeError(TypeError::MismatchType {
-                                expected: env_var_type.to_string(),
-                                actual: value_type.to_string(),
+                            Error::SyntaxError(SyntaxError::ReassigningConst {
+                                name: assign.identifier.name.clone(),
                             }),
-                            assign.value.1.clone(),
+                            expr_span.clone(),
                         ));
+                    } else {
+                        let env_var_type = env_var.typeref.clone();
+
+                        if env_var_type != value_type {
+                            errs.push((
+                                Error::TypeError(TypeError::MismatchType {
+                                    expected: env_var_type.to_string(),
+                                    actual: value_type.to_string(),
+                                }),
+                                assign.value.1.clone(),
+                            ));
+                        }
                     }
                 }
 
@@ -1007,4 +1016,18 @@ mod validator_tests {
 
         assert_eq!(Ok(()), result);
     }
+
+    validator_test!(
+        validate_const_decl_untyped_sets_env_type_reassign_type_mismatch,
+        "
+        const a = 123;
+        a = \"foo\";
+        ",
+        Err(vec![(
+            Error::SyntaxError(SyntaxError::ReassigningConst {
+                name: "a".to_string()
+            }),
+            32..41
+        )])
+    );
 }
