@@ -1554,6 +1554,26 @@ mod parser_tests {
     );
 
     parser_test!(
+        parse_range_start,
+        "0..;",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Expr(StmtExpr {
+                    expr: (
+                        Expr::Range(ExprRange {
+                            start: Some((ExprLiteral::Number(0f64), 0..1)),
+                            end: None,
+                            inclusive_end: false
+                        }),
+                        0..3
+                    )
+                }),
+                0..4
+            )]
+        })
+    );
+
+    parser_test!(
         parse_range_start_and_end,
         "0..10;",
         Ok(Module {
@@ -1564,6 +1584,46 @@ mod parser_tests {
                             start: Some((ExprLiteral::Number(0f64), 0..1)),
                             end: Some((ExprLiteral::Number(10f64), 3..5)),
                             inclusive_end: false
+                        }),
+                        0..5
+                    )
+                }),
+                0..6
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_range_end,
+        "..10;",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Expr(StmtExpr {
+                    expr: (
+                        Expr::Range(ExprRange {
+                            start: None,
+                            end: Some((ExprLiteral::Number(10f64), 2..4)),
+                            inclusive_end: false
+                        }),
+                        0..4
+                    )
+                }),
+                0..5
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_range_inclusive_end,
+        "..=10;",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Expr(StmtExpr {
+                    expr: (
+                        Expr::Range(ExprRange {
+                            start: None,
+                            end: Some((ExprLiteral::Number(10f64), 3..5)),
+                            inclusive_end: true
                         }),
                         0..5
                     )
@@ -1591,6 +1651,42 @@ mod parser_tests {
                 0..7
             )]
         })
+    );
+
+    parser_test!(
+        parse_range_empty,
+        "..;",
+        Err(vec![(
+            Error::SyntaxError(SyntaxError::UnrecognizedToken {
+                token: ";".to_string(),
+                expected: vec!["\"=\"".to_string(), "number".to_string()]
+            }),
+            2..3
+        )])
+    );
+
+    parser_test!(
+        parse_range_empty_inclusive_no_end,
+        "..=;",
+        Err(vec![(
+            Error::SyntaxError(SyntaxError::UnrecognizedToken {
+                token: ";".to_string(),
+                expected: vec!["number".to_string()]
+            }),
+            3..4
+        )])
+    );
+
+    parser_test!(
+        parse_range_start_inclusive_no_end,
+        "1..=;",
+        Err(vec![(
+            Error::SyntaxError(SyntaxError::UnrecognizedToken {
+                token: ";".to_string(),
+                expected: vec!["number".to_string()]
+            }),
+            4..5
+        )])
     );
 
     parser_test!(
