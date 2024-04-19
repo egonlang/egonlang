@@ -16,10 +16,10 @@ Decl = {
 }
 
 DeclFn: ast::Stmt = {
-    "fn" <name:identifier> "(" <params:Seperated<Spanned<FnParam>, ",">> ")" ":" <return_type:Spanned<TypeRef>> "=>" <body:Spanned<ExprBlock>> =>
+    "fn" <name:identifier> <fn_expr:Spanned<ExprFn>> =>
         ast::Stmt::Fn(Box::new(ast::StmtFn { 
             name: ast::Identifier { name: name.clone() },
-            fn_expr: (ast::Expr::Fn(Box::new(ast::ExprFn { name: Some(ast::Identifier { name }), params, return_type, body })), 0..0)
+            fn_expr
          })),
 }
 
