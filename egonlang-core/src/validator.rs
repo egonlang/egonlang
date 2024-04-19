@@ -14,7 +14,13 @@ use std::collections::HashMap;
 #[derive(Default)]
 pub struct Validator {
     /// Keep track of identifiers to types
-    pub env: HashMap<String, TypeRef>,
+    pub env: HashMap<String, EnvVar>,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct EnvVar {
+    pub typeref: TypeRef,
+    pub is_const: bool,
 }
 
 impl Validator {
@@ -90,7 +96,13 @@ impl Validator {
                                     span.clone(),
                                 ));
                             } else {
-                                self.env.insert(name, type_identifier);
+                                self.env.insert(
+                                    name,
+                                    EnvVar {
+                                        typeref: type_identifier,
+                                        is_const: stmt_assign.is_const,
+                                    },
+                                );
                             };
                         } else {
                             // This checks for empty lists being assigned to a list<unknown>
@@ -100,7 +112,13 @@ impl Validator {
                             {
                                 errs.push((Error::TypeError(UknownListType {}), span.clone()));
                             } else {
-                                self.env.insert(name, type_identifier);
+                                self.env.insert(
+                                    name,
+                                    EnvVar {
+                                        typeref: type_identifier,
+                                        is_const: stmt_assign.is_const,
+                                    },
+                                );
                             };
                         }
                     } else {
@@ -110,7 +128,13 @@ impl Validator {
                         if type_identifier == TypeRef::unknown() {
                             errs.push((Error::TypeError(UnknownType {}), span.clone()));
                         } else {
-                            self.env.insert(name, type_identifier);
+                            self.env.insert(
+                                name,
+                                EnvVar {
+                                    typeref: type_identifier,
+                                    is_const: stmt_assign.is_const,
+                                },
+                            );
                         }
                     }
                 } else {
@@ -125,7 +149,13 @@ impl Validator {
                         if value_type == TypeRef::list(TypeRef::unknown()) {
                             errs.push((Error::TypeError(UknownListType {}), span.clone()));
                         } else {
-                            self.env.insert(name, value_type);
+                            self.env.insert(
+                                name,
+                                EnvVar {
+                                    typeref: value_type,
+                                    is_const: stmt_assign.is_const,
+                                },
+                            );
                         }
                     }
                 }
@@ -282,6 +312,22 @@ impl Validator {
                     errs.extend(expr_errs);
                 }
 
+                let value_type = assign.value.0.clone().get_type_expr();
+
+                if let Some(env_var) = self.env.get(&assign.identifier.name) {
+                    let env_var_type = env_var.typeref.clone();
+
+                    if env_var_type != value_type {
+                        errs.push((
+                            Error::TypeError(TypeError::MismatchType {
+                                expected: env_var_type.to_string(),
+                                actual: value_type.to_string(),
+                            }),
+                            assign.value.1.clone(),
+                        ));
+                    }
+                }
+
                 if !errs.is_empty() {
                     return Err(errs);
                 }
@@ -406,6 +452,7 @@ mod validator_tests {
         ast::TypeRef,
         errors::{Error, SyntaxError, TypeError},
         parser::parse,
+        validator::EnvVar,
     };
 
     use super::Validator;
@@ -417,7 +464,7 @@ mod validator_tests {
                 let result =
                     parse($input, 0).and_then(|module| Validator::default().validate(&module));
 
-                assert_eq!(result, $expected);
+                assert_eq!($expected, result);
             }
         };
     }
@@ -855,7 +902,13 @@ mod validator_tests {
         let mut v = Validator::default();
 
         let result = v.validate(&module);
-        assert_eq!(Some(&TypeRef::number()), v.env.get("a"));
+        assert_eq!(
+            Some(&EnvVar {
+                typeref: TypeRef::number(),
+                is_const: false
+            }),
+            v.env.get("a")
+        );
 
         assert_eq!(Ok(()), result);
     }
@@ -872,7 +925,13 @@ mod validator_tests {
         let mut v = Validator::default();
 
         let result = v.validate(&module);
-        assert_eq!(Some(&TypeRef::number()), v.env.get("a"));
+        assert_eq!(
+            Some(&EnvVar {
+                typeref: TypeRef::number(),
+                is_const: false
+            }),
+            v.env.get("a")
+        );
 
         assert_eq!(Ok(()), result);
     }
@@ -889,10 +948,31 @@ mod validator_tests {
         let mut v = Validator::default();
 
         let result = v.validate(&module);
-        assert_eq!(Some(&TypeRef::number()), v.env.get("a"));
+        assert_eq!(
+            Some(&EnvVar {
+                typeref: TypeRef::number(),
+                is_const: false
+            }),
+            v.env.get("a")
+        );
 
         assert_eq!(Ok(()), result);
     }
+
+    validator_test!(
+        validate_let_decl_untyped_sets_env_type_reassign_type_mismatch,
+        "
+        let a = 123;
+        a = \"foo\";
+        ",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: TypeRef::number().to_string(),
+                actual: TypeRef::string().to_string()
+            }),
+            34..39
+        )])
+    );
 
     #[test]
     fn validate_const_decl_typed_sets_env_type() {
@@ -900,7 +980,13 @@ mod validator_tests {
         let mut v = Validator::default();
 
         let result = v.validate(&module);
-        assert_eq!(Some(&TypeRef::number()), v.env.get("a"));
+        assert_eq!(
+            Some(&EnvVar {
+                typeref: TypeRef::number(),
+                is_const: true
+            }),
+            v.env.get("a")
+        );
 
         assert_eq!(Ok(()), result);
     }
@@ -911,7 +997,13 @@ mod validator_tests {
         let mut v = Validator::default();
 
         let result = v.validate(&module);
-        assert_eq!(Some(&TypeRef::number()), v.env.get("a"));
+        assert_eq!(
+            Some(&EnvVar {
+                typeref: TypeRef::number(),
+                is_const: true
+            }),
+            v.env.get("a")
+        );
 
         assert_eq!(Ok(()), result);
     }
