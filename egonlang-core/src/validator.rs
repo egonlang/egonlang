@@ -1,6 +1,7 @@
 use crate::{
     ast::{
-        Expr, ExprInfix, ExprPrefix, ExprS, Identifier, Module, OpInfix, OpPrefix, Stmt, TypeRef,
+        Expr, ExprIdentifier, ExprInfix, ExprPrefix, ExprS, Identifier, Module, OpInfix, OpPrefix,
+        Stmt, TypeRef,
     },
     errors::{
         Error, ErrorS, SyntaxError,
@@ -80,22 +81,16 @@ impl Validator {
                         let (type_expr, _) = stmt_assign.type_expr.clone().unwrap();
                         let type_identifier = type_expr.get_type_expr();
                         let value = stmt_assign.value.clone().unwrap();
-                        let value_type = value.0.get_type_expr();
+
+                        let value_expr = value.0;
+                        let value_type = value_expr.clone().get_type_expr();
 
                         if type_identifier != value_type {
                             // This checks for empty lists being assigned to a list<T>
                             // e.g. let a: list<number> = [];
-                            if !(type_identifier.0 == TypeRef::list(TypeRef::unknown()).0
-                                && value_type == TypeRef::list(TypeRef::unknown()))
+                            if type_identifier.0 == TypeRef::list(TypeRef::unknown()).0
+                                && value_type == TypeRef::list(TypeRef::unknown())
                             {
-                                errs.push((
-                                    Error::TypeError(TypeError::MismatchType {
-                                        expected: type_identifier.to_string(),
-                                        actual: value_type.to_string(),
-                                    }),
-                                    span.clone(),
-                                ));
-                            } else {
                                 self.env.insert(
                                     name,
                                     EnvVar {
@@ -103,6 +98,30 @@ impl Validator {
                                         is_const: stmt_assign.is_const,
                                     },
                                 );
+                            } else if value_type.0 == *"identifier" {
+                                if let Expr::Identifier(identifier) = &value_expr {
+                                    let value_identifier = &identifier.identifier.name;
+
+                                    if let Some(value_type) = self.env.get(value_identifier) {
+                                        if type_identifier != value_type.typeref {
+                                            errs.push((
+                                                Error::TypeError(TypeError::MismatchType {
+                                                    expected: type_identifier.to_string(),
+                                                    actual: value_type.typeref.to_string(),
+                                                }),
+                                                value.1.clone(),
+                                            ));
+                                        }
+                                    }
+                                }
+                            } else {
+                                errs.push((
+                                    Error::TypeError(TypeError::MismatchType {
+                                        expected: type_identifier.to_string(),
+                                        actual: value_type.to_string(),
+                                    }),
+                                    span.clone(),
+                                ));
                             };
                         } else {
                             // This checks for empty lists being assigned to a list<unknown>
@@ -142,20 +161,25 @@ impl Validator {
                     // e.g. let a = [];
                     if stmt_assign.value.is_some() {
                         let value = stmt_assign.value.clone().unwrap();
-                        let value_type = value.0.get_type_expr();
 
-                        // This checks for empty lists being assigned to a list<T>
-                        // e.g. let a = [];
-                        if value_type == TypeRef::list(TypeRef::unknown()) {
-                            errs.push((Error::TypeError(UknownListType {}), span.clone()));
+                        if let Err(e) = self.visit_expr(&value) {
+                            errs.extend(e);
                         } else {
-                            self.env.insert(
-                                name,
-                                EnvVar {
-                                    typeref: value_type,
-                                    is_const: stmt_assign.is_const,
-                                },
-                            );
+                            let value_type = value.0.get_type_expr();
+
+                            // This checks for empty lists being assigned to a list<T>
+                            // e.g. let a = [];
+                            if value_type == TypeRef::list(TypeRef::unknown()) {
+                                errs.push((Error::TypeError(UknownListType {}), span.clone()));
+                            } else {
+                                self.env.insert(
+                                    name,
+                                    EnvVar {
+                                        typeref: value_type,
+                                        is_const: stmt_assign.is_const,
+                                    },
+                                );
+                            }
                         }
                     }
                 }
@@ -182,23 +206,50 @@ impl Validator {
 
                 let (first_item, _) = list.items.first().unwrap().clone();
 
-                let first_item_type_ident = &first_item.get_type_expr();
+                let first_item_type_ident = match &first_item {
+                    Expr::Identifier(ExprIdentifier { identifier }) => {
+                        if let Some(env_var) = self.env.get(&identifier.name) {
+                            env_var.typeref.clone()
+                        } else {
+                            TypeRef::identifier()
+                        }
+                    }
+                    _ => first_item.get_type_expr(),
+                };
 
                 let remaining_items: Vec<ExprS> = list.items.clone().into_iter().skip(1).collect();
 
                 let mut errs = vec![];
 
                 for (item_expr, item_span) in remaining_items {
-                    let item_expr_type_ident = &item_expr.get_type_expr();
+                    if let Expr::Identifier(ExprIdentifier { identifier }) = &item_expr {
+                        let identifier = &identifier.name;
 
-                    if item_expr_type_ident != first_item_type_ident {
-                        errs.push((
-                            Error::TypeError(TypeError::MismatchType {
-                                expected: first_item_type_ident.to_string(),
-                                actual: item_expr_type_ident.to_string(),
-                            }),
-                            item_span.clone(),
-                        ));
+                        if let Some(env_var) = self.env.get(identifier) {
+                            let env_var_type = &env_var.typeref;
+
+                            if env_var_type != &first_item_type_ident {
+                                errs.push((
+                                    Error::TypeError(TypeError::MismatchType {
+                                        expected: first_item_type_ident.to_string(),
+                                        actual: env_var_type.to_string(),
+                                    }),
+                                    item_span.clone(),
+                                ));
+                            }
+                        }
+                    } else {
+                        let item_expr_type_ident = &item_expr.get_type_expr();
+
+                        if item_expr_type_ident != &first_item_type_ident {
+                            errs.push((
+                                Error::TypeError(TypeError::MismatchType {
+                                    expected: first_item_type_ident.to_string(),
+                                    actual: item_expr_type_ident.to_string(),
+                                }),
+                                item_span.clone(),
+                            ));
+                        }
                     }
                 }
 
@@ -983,6 +1034,21 @@ mod validator_tests {
         )])
     );
 
+    validator_test!(
+        validate_let_decl_untyped_assign_from_identifier_type_mismatch,
+        "
+        let a = 123;
+        let b: string = a;
+        ",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: TypeRef::string().to_string(),
+                actual: TypeRef::number().to_string()
+            }),
+            46..47
+        )])
+    );
+
     #[test]
     fn validate_const_decl_typed_sets_env_type() {
         let module = parse("const a: number = 123;", 0).unwrap();
@@ -1028,6 +1094,36 @@ mod validator_tests {
                 name: "a".to_string()
             }),
             32..41
+        )])
+    );
+
+    validator_test!(
+        list_expression_with_mismatch_type_identifier_value,
+        "
+        let a = \"foo\";
+        let b = [1, 2, a];
+        ",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: TypeRef::number().to_string(),
+                actual: TypeRef::string().to_string()
+            }),
+            47..48
+        )])
+    );
+
+    validator_test!(
+        list_expression_with_typed_identifier_first_item_and_mismatch_type_item,
+        "
+        let a = \"foo\";
+        let b = [a, \"bar\", 3];
+        ",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: TypeRef::string().to_string(),
+                actual: TypeRef::number().to_string()
+            }),
+            51..52
         )])
     );
 }
