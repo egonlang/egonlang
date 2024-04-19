@@ -217,7 +217,14 @@ ExprFn: ast::Expr = {
             params,
             return_type,
             body,
-         }))
+         })),
+    "(" <params:Seperated<Spanned<FnParam>, ",">> ")" ":" <return_type:Spanned<TypeRef>> "=>" <body:Spanned<ExprFn>> =>
+        ast::Expr::Fn(Box::new(ast::ExprFn { 
+            name: None,
+            params,
+            return_type,
+            body,
+         })),
 }
 
 /// Utilities

@@ -1,0 +1,5 @@
+(a: number, b: number): tuple<number, number> => (1, 2,);
+
+// out: SyntaxError: unexpected "1"; expected: ["\")\"", "identifier"]
+// out: SyntaxError: unexpected ","; expected: ["\";\""]
+// out: SyntaxError: unexpected ","; expected: ["\";\""]
