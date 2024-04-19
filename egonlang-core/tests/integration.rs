@@ -22,7 +22,7 @@ fn integration(#[files("res/examples/**/*.eg")] path: PathBuf) {
     }
 
     let mut got_output = Vec::new();
-    if let Err(e) = parse(&source, 0).and_then(|module| Validator.validate(&module)) {
+    if let Err(e) = parse(&source, 0).and_then(|module| Validator::default().validate(&module)) {
         let m = e
             .into_iter()
             .map(|(e, _)| e.to_string())

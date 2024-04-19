@@ -9,8 +9,13 @@ use crate::{
     span::Spanned,
 };
 
+use std::collections::HashMap;
+
 #[derive(Default)]
-pub struct Validator;
+pub struct Validator {
+    /// Keep track of identifiers to types
+    pub env: HashMap<String, TypeRef>,
+}
 
 impl Validator {
     /// Validate a [`Module`]'s AST
@@ -46,15 +51,21 @@ impl Validator {
                 let name = stmt_assign.identifier.name.clone();
 
                 // const declarations
-                if stmt_assign.is_const && stmt_assign.value.is_none() {
-                    errs.push((
-                        Error::SyntaxError(SyntaxError::UninitializedConst { name }),
-                        span.clone(),
-                    ));
-                }
+                if stmt_assign.is_const {
+                    if stmt_assign.value.is_none() {
+                        errs.push((
+                            Error::SyntaxError(SyntaxError::UninitializedConst {
+                                name: name.clone(),
+                            }),
+                            span.clone(),
+                        ));
 
+                        if stmt_assign.type_expr.is_none() {
+                            errs.push((Error::TypeError(TypeError::UnknownType), span.clone()));
+                        }
+                    }
                 // let declarations
-                if stmt_assign.type_expr.is_none() && stmt_assign.value.is_none() {
+                } else if stmt_assign.type_expr.is_none() && stmt_assign.value.is_none() {
                     errs.push((Error::TypeError(TypeError::UnknownType), span.clone()));
                 }
 
@@ -68,19 +79,19 @@ impl Validator {
                         if type_identifier != value_type {
                             // This checks for empty lists being assigned to a list<T>
                             // e.g. let a: list<number> = [];
-                            if type_identifier.0 == TypeRef::list(TypeRef::unknown()).0
-                                && value_type == TypeRef::list(TypeRef::unknown())
+                            if !(type_identifier.0 == TypeRef::list(TypeRef::unknown()).0
+                                && value_type == TypeRef::list(TypeRef::unknown()))
                             {
-                                return Ok(());
+                                errs.push((
+                                    Error::TypeError(TypeError::MismatchType {
+                                        expected: type_identifier.to_string(),
+                                        actual: value_type.to_string(),
+                                    }),
+                                    span.clone(),
+                                ));
+                            } else {
+                                self.env.insert(name, type_identifier);
                             };
-
-                            errs.push((
-                                Error::TypeError(TypeError::MismatchType {
-                                    expected: type_identifier.to_string(),
-                                    actual: value_type.to_string(),
-                                }),
-                                span.clone(),
-                            ));
                         } else {
                             // This checks for empty lists being assigned to a list<unknown>
                             // e.g. let a: list<unknown> = [];
@@ -88,6 +99,8 @@ impl Validator {
                                 && value_type == TypeRef::list(TypeRef::unknown())
                             {
                                 errs.push((Error::TypeError(UknownListType {}), span.clone()));
+                            } else {
+                                self.env.insert(name, type_identifier);
                             };
                         }
                     } else {
@@ -96,6 +109,8 @@ impl Validator {
 
                         if type_identifier == TypeRef::unknown() {
                             errs.push((Error::TypeError(UnknownType {}), span.clone()));
+                        } else {
+                            self.env.insert(name, type_identifier);
                         }
                     }
                 } else {
@@ -109,6 +124,8 @@ impl Validator {
                         // e.g. let a = [];
                         if value_type == TypeRef::list(TypeRef::unknown()) {
                             errs.push((Error::TypeError(UknownListType {}), span.clone()));
+                        } else {
+                            self.env.insert(name, value_type);
                         }
                     }
                 }
@@ -386,6 +403,7 @@ mod validator_tests {
     use pretty_assertions::assert_eq;
 
     use crate::{
+        ast::TypeRef,
         errors::{Error, SyntaxError, TypeError},
         parser::parse,
     };
@@ -824,4 +842,77 @@ mod validator_tests {
         "let a: unknown;",
         Err(vec![(Error::TypeError(TypeError::UnknownType {}), 0..15)])
     );
+
+    #[test]
+    fn validate_let_decl_typed_sets_env_type() {
+        let module = parse(
+            "
+        let a: number = 123;
+        ",
+            0,
+        )
+        .unwrap();
+        let mut v = Validator::default();
+
+        let result = v.validate(&module);
+        assert_eq!(Some(&TypeRef::number()), v.env.get("a"));
+
+        assert_eq!(Ok(()), result);
+    }
+
+    #[test]
+    fn validate_let_decl_typed_sets_env_type_without_assign_value() {
+        let module = parse(
+            "
+        let a: number;
+        ",
+            0,
+        )
+        .unwrap();
+        let mut v = Validator::default();
+
+        let result = v.validate(&module);
+        assert_eq!(Some(&TypeRef::number()), v.env.get("a"));
+
+        assert_eq!(Ok(()), result);
+    }
+
+    #[test]
+    fn validate_let_decl_untyped_sets_env_type() {
+        let module = parse(
+            "
+        let a = 123;
+        ",
+            0,
+        )
+        .unwrap();
+        let mut v = Validator::default();
+
+        let result = v.validate(&module);
+        assert_eq!(Some(&TypeRef::number()), v.env.get("a"));
+
+        assert_eq!(Ok(()), result);
+    }
+
+    #[test]
+    fn validate_const_decl_typed_sets_env_type() {
+        let module = parse("const a: number = 123;", 0).unwrap();
+        let mut v = Validator::default();
+
+        let result = v.validate(&module);
+        assert_eq!(Some(&TypeRef::number()), v.env.get("a"));
+
+        assert_eq!(Ok(()), result);
+    }
+
+    #[test]
+    fn validate_const_decl_untyped_sets_env_type() {
+        let module = parse("const a = 123;", 0).unwrap();
+        let mut v = Validator::default();
+
+        let result = v.validate(&module);
+        assert_eq!(Some(&TypeRef::number()), v.env.get("a"));
+
+        assert_eq!(Ok(()), result);
+    }
 }
