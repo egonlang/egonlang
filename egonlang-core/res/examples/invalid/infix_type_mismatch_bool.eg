@@ -1,0 +1,11 @@
+1 % true;
+true % 1;
+
+// out: TypeError: mismatched types: expected type `number` but received `bool`
+// out: TypeError: mismatched types: expected type `number` but received `bool`
+
+1 % false;
+false % 1;
+
+// out: TypeError: mismatched types: expected type `number` but received `bool`
+// out: TypeError: mismatched types: expected type `number` but received `bool`

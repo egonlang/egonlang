@@ -1,0 +1,5 @@
+1 % (1, "foo",);
+(1, "foo",) % 1;
+
+// out: TypeError: mismatched types: expected type `number` but received `tuple<number, string>`
+// out: TypeError: mismatched types: expected type `number` but received `tuple<number, string>`

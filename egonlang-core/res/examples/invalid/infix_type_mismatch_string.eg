@@ -1,0 +1,5 @@
+1 % "foo";
+"foo" % 1;
+
+// out: TypeError: mismatched types: expected type `number` but received `string`
+// out: TypeError: mismatched types: expected type `number` but received `string`

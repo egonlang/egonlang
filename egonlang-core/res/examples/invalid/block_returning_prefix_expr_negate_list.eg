@@ -1,0 +1,5 @@
+{ -[] };
+{ -[1, 2, 3] };
+
+// out: TypeError: mismatched types: expected type `number` but received `list<unknown>`
+// out: TypeError: mismatched types: expected type `number` but received `list<number>`
