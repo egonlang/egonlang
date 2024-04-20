@@ -1,0 +1,3 @@
+- (): () => { () };
+
+// out: TypeError: mismatched types: expected type `number` but received `function<tuple, ()>`

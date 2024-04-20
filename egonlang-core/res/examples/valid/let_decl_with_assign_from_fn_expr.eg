@@ -1,0 +1,3 @@
+let sum: function<tuple<number, number>, number> = (a: number, b: number): number => {
+  a + b  
+};

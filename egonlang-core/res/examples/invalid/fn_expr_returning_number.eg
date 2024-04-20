@@ -1,0 +1,3 @@
+(a: number, b: number): number => 123;
+
+// out: SyntaxError: unexpected "123"; expected: ["\"(\"", "\"{\""]

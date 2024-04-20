@@ -10,11 +10,20 @@ grammar<'err>(
 pub Module: ast::Module = <stmts:Spanned<Decl>*> => ast::Module { <> };
 
 Decl = {
-    DeclLetVar,
+    DeclVar,
+    DeclFn,
     Stmt,
 }
 
-DeclLetVar: ast::Stmt = <assign:StmtAssign> =>
+DeclFn: ast::Stmt = {
+    "fn" <name:identifier> <fn_expr:Spanned<ExprFn>> =>
+        ast::Stmt::Fn(Box::new(ast::StmtFn { 
+            name: ast::Identifier { name: name.clone() },
+            fn_expr
+         })),
+}
+
+DeclVar: ast::Stmt = <assign:StmtAssign> =>
     ast::Stmt::Assign(<>);
 
 StmtAssign: ast::StmtAssign = {
@@ -55,7 +64,8 @@ ExprS = Spanned<Expr>;
 
 Expr: ast::Expr = {
     ExprAssign,
-    ExprBlock
+    ExprBlock,
+    
 };
 
 ExprAssign: ast::Expr = {
@@ -138,7 +148,8 @@ OpPrefix: ast::OpPrefix = {
 }
 
 ExprSimple: ast::Expr = {
-    ExprList
+    ExprList,
+    
 };
 
 ExprList: ast::Expr = {
@@ -166,6 +177,8 @@ ExprPrimary: ast::Expr = {
 
     ExprRange,
 
+    ExprFn,
+
     // Grouping
     "(" <Expr> ")",
 
@@ -178,12 +191,27 @@ ExprIdentifier: ast::Expr = <name:identifier> =>
         }
     });
 
-ExprRange: ast::Expr = <start:Spanned<number>?> ".." <inclusive_end:"="?> <end:Spanned<number>?> =>
-    ast::Expr::Range(ast::ExprRange {
-        start: start.map(|start| (ast::ExprLiteral::Number(start.0), start.1)),
-        end: end.map(|end| (ast::ExprLiteral::Number(end.0), end.1)),
-        inclusive_end: inclusive_end.is_some()
-    });
+#[inline]
+ExprRange: ast::Expr = {
+    <start:Spanned<number>> ".." <inclusive_end:"="?> <end:Spanned<number>> =>
+        ast::Expr::Range(ast::ExprRange {
+            start: Some((ast::ExprLiteral::Number(start.0), start.1)),
+            end: Some((ast::ExprLiteral::Number(end.0), end.1)),
+            inclusive_end: inclusive_end.is_some()
+        }),
+    <start:Spanned<number>> ".." =>
+        ast::Expr::Range(ast::ExprRange {
+            start: Some((ast::ExprLiteral::Number(start.0), start.1)),
+            end: None,
+            inclusive_end: false
+        }),
+    ".." <inclusive_end:"="?> <end:Spanned<number>> =>
+        ast::Expr::Range(ast::ExprRange {
+            start: None,
+            end: Some((ast::ExprLiteral::Number(end.0), end.1)),
+            inclusive_end: inclusive_end.is_some()
+        }),
+}
 
 ExprBlock: ast::Expr = {
     "{" <stmts:(<Spanned<Decl>>)*> <return_expr:(ExprS)?> "}" =>
@@ -193,6 +221,25 @@ ExprBlock: ast::Expr = {
             return_expr
         }
     )),
+}
+
+FnParam: (ast::Identifier, ast::TypeRef) = <name:identifier> ":" <typeref:TypeRef> => (ast::Identifier { name }, typeref);
+
+ExprFn: ast::Expr = {
+   "(" <params:Seperated<Spanned<FnParam>, ",">> ")" ":" <return_type:Spanned<TypeRef>> "=>" <body:Spanned<ExprBlock>> =>
+        ast::Expr::Fn(Box::new(ast::ExprFn { 
+            name: None,
+            params,
+            return_type,
+            body,
+         })),
+    "(" <params:Seperated<Spanned<FnParam>, ",">> ")" ":" <return_type:Spanned<TypeRef>> "=>" <body:Spanned<ExprFn>> =>
+        ast::Expr::Fn(Box::new(ast::ExprFn { 
+            name: None,
+            params,
+            return_type,
+            body,
+         })),
 }
 
 /// Utilities
@@ -215,6 +262,7 @@ SeperatedNoDefault<E, T>: Vec<ast::ExprS> = {
     },
 }
 
+#[inline]
 Seperated<E, T>: Vec<E> = {
     <first:E> <mut args:(T <E>)*> => {
         args.insert(0, first);

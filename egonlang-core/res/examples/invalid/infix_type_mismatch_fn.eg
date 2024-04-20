@@ -1,0 +1,5 @@
+1 % (): () => { () };
+(): () => { () } % 1;
+
+// out: TypeError: mismatched types: expected type `number` but received `function<tuple, ()>`
+// out: TypeError: mismatched types: expected type `number` but received `function<tuple, ()>`

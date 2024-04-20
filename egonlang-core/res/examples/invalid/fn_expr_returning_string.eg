@@ -1,0 +1,3 @@
+(a: number, b: number): string => "foo";
+
+// out: SyntaxError: unexpected "\"foo\""; expected: ["\"(\"", "\"{\""]

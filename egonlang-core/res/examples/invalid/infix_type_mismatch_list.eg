@@ -1,0 +1,11 @@
+1 % [];
+[] % 1;
+
+// out: TypeError: mismatched types: expected type `number` but received `list<unknown>`
+// out: TypeError: mismatched types: expected type `number` but received `list<unknown>`
+
+1 % [1, 2, 3];
+[1, 2, 3] % 1;
+
+// out: TypeError: mismatched types: expected type `number` but received `list<number>`
+// out: TypeError: mismatched types: expected type `number` but received `list<number>`

@@ -1,0 +1,3 @@
+{ !"foo" };
+
+// out: TypeError: mismatched types: expected type `bool` but received `string`

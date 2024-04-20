@@ -1,0 +1,2 @@
+const example_fn: function<tuple<number, number>, function<tuple<number>, number>> =
+    (a: number, b: number): function<tuple<number>, number> => (c: number): number => { 123 };

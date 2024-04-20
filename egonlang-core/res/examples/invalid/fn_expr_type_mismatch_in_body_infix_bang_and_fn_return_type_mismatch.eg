@@ -1,0 +1,4 @@
+(a: string): number => { !a };
+
+// out: TypeError: mismatched types: expected type `bool` but received `string`
+// out: TypeError: mismatched types: expected type `number` but received `bool`

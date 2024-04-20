@@ -1,0 +1,7 @@
+let a = false;
+
+1 % a;
+a % 1;
+
+// out: TypeError: mismatched types: expected type `number` but received `bool`
+// out: TypeError: mismatched types: expected type `number` but received `bool`
