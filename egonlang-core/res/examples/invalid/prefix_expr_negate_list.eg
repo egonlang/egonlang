@@ -3,6 +3,3 @@
 
 // out: TypeError: mismatched types: expected type `number` but received `list<unknown>`
 // out: TypeError: mismatched types: expected type `number` but received `list<number>`
-
-
-(): () => { () }
