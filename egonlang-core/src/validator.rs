@@ -15,7 +15,7 @@ use std::collections::HashMap;
 #[derive(Default)]
 pub struct Validator {}
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct EnvVar {
     pub typeref: TypeRef,
     pub is_const: bool,
@@ -460,7 +460,18 @@ impl Validator {
 
                 if let Expr::Block(block) = &fn_.body.0 {
                     if let Some((block_return_expr, returning_expr_span)) = &block.return_expr {
-                        let block_return_expr = block_return_expr.clone().get_type_expr();
+                        // A function's body block's return type may be an identifier
+                        // Identifiers need to be resolved to get the correct type
+                        let block_return_expr: TypeRef = match block_return_expr {
+                            Expr::Identifier(ExprIdentifier { identifier }) => {
+                                if let Some(env_var) = fn_env.get(&identifier.name) {
+                                    env_var.typeref.clone()
+                                } else {
+                                    block_return_expr.clone().get_type_expr()
+                                }
+                            }
+                            _ => block_return_expr.clone().get_type_expr(),
+                        };
 
                         if fn_return_type != block_return_expr {
                             errs.push((
@@ -559,7 +570,15 @@ impl Validator {
         errs.extend(rt_errs);
 
         let (rt, rt_span) = prefix.rt.clone();
-        let rt_typeref = rt.get_type_expr();
+        let rt_typeref = if let Expr::Identifier(ExprIdentifier { identifier }) = &rt {
+            if let Some(env_var) = env.get(&identifier.name) {
+                env_var.typeref.clone()
+            } else {
+                rt.get_type_expr()
+            }
+        } else {
+            rt.get_type_expr()
+        };
 
         if rt_typeref != expected_type {
             errs.push((
@@ -1103,6 +1122,66 @@ mod validator_tests {
         validate_fn_expr_sum,
         "(a: number, b: number): number => { a + b };",
         Ok(())
+    );
+
+    validator_test!(
+        validate_fn_expr_type_mismatch_in_body_identifier,
+        "(a: string): number => { a };",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "number".to_string(),
+                actual: "string".to_string()
+            }),
+            25..26
+        )])
+    );
+
+    validator_test!(
+        validate_fn_expr_type_mismatch_in_body_infix_bang,
+        "(a: string): bool => { !a };",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "bool".to_string(),
+                actual: "string".to_string()
+            }),
+            24..25
+        )])
+    );
+
+    validator_test!(
+        validate_fn_expr_type_mismatch_in_body_infix_bang_and_fn_return_type_mismatch,
+        "(a: string): number => { !a };",
+        Err(vec![
+            (
+                Error::TypeError(TypeError::MismatchType {
+                    expected: "bool".to_string(),
+                    actual: "string".to_string()
+                }),
+                26..27
+            ),
+            (
+                Error::TypeError(TypeError::MismatchType {
+                    expected: "number".to_string(),
+                    actual: "bool".to_string()
+                }),
+                25..27
+            )
+        ])
+    );
+
+    validator_test!(
+        validate_let_decl_typed_assigning_bang_prefixed_identifier,
+        "
+        let a = 123;
+        let b: number = { !a };
+        ",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "number".to_string(),
+                actual: "bool".to_string()
+            }),
+            30..53
+        )])
     );
 
     validator_test!(

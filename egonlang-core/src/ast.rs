@@ -115,7 +115,10 @@ impl Expr {
                 OpInfix::LogicAnd => TypeRef::bool(),
                 OpInfix::LogicOr => TypeRef::bool(),
             },
-            Expr::Prefix(prefix) => prefix.rt.0.get_type_expr(),
+            Expr::Prefix(prefix) => match prefix.op {
+                OpPrefix::Negate => TypeRef::number(),
+                OpPrefix::Not => TypeRef::bool(),
+            },
             Expr::Assign(assign) => {
                 let (expr, _) = assign.value;
 
