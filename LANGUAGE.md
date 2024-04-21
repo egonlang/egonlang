@@ -68,15 +68,16 @@ let d = if (true) { 123 } else { 456; };
 
 ### Types
 
-| Type                             | Description                                                      |
-| -------------------------------- | ---------------------------------------------------------------- |
-| `()`                             | A type only containing the value `()`                            |
-| `number`                         | 64bit floating point                                             |
-| `string`                         | `"Hello World"`                                                  |
-| `bool`                           | `true`, `false`                                                  |
-| `list<T>`                        | A growable sequence of `T`                                       |
-| `tuple<T, U...>`                 | A fixed lenth sequence of `T, U, ...`                            |
-| `function<tuple<P0, P1, ...> R>` | Function with typed params (e.g. `P0`, `P1`) and return type `R` |
+| Type                             | Description                                      |                                      Example |
+| -------------------------------- | ------------------------------------------------ | -------------------------------------------: |
+| `()`                             | A type only containing the value `()`            |                                         `()` |
+| `number`                         | 64bit floating point                             |                                    `123.456` |
+| `string`                         | `"Hello World"`                                  |                                      `"foo"` |
+| `bool`                           | `true`, `false`                                  |                                      `false` |
+| `list<T>`                        | A growable sequence of `T`                       |                                  `[3, 2, 1]` |
+| `tuple<T, U...>`                 | A fixed lenth sequence of `T, U, ...`            |                          `(true, 0, "foo",)` |
+| `range`                          | A range between two numbers                      |                                      `0..10` |
+| `function<tuple<P0, P1, ...> R>` | Function params (e.g. `P0`, `P1`) and return `R` | `(a: number, b: number): number => { a + b}` |
 
 
 ### Expressions
@@ -107,6 +108,22 @@ const collections: tuple<
     [1, 2, 3],
     ("a", "b", 0,),
 );
+```
+
+##### List Expressions
+
+A growable sequence of `T`. Lists can only contain items of the same type.
+
+```
+[1, 2, 3]
+```
+
+##### Tuple Expressions
+
+A fixed lenth sequence of `T, U, ...`. Used to group a small amount of related types together.
+
+```
+("foo", 2, false,)
 ```
 
 #### Block Expressions
@@ -174,6 +191,7 @@ Statements generally fall in to one of these categories:
 
 - Expression Statements
 - Declaration Statements
+- Syntactical Statements
 
 #### Expression Statements
 
@@ -201,6 +219,10 @@ if (is) {
     value = 456;
 };
 ```
+
+#### Variable Declaration Statements
+
+...
 
 #### Function Statements
 
