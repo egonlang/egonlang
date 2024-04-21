@@ -136,13 +136,15 @@ const value = if (is) { 123 } else { 456 };
 Functions can be written as expressions. The function body is a block expression.
 
 ```
-const functions: tuple<
-    function<tuple, ()>,
-    function<tuple<number, number>, number>,
-> = (
-    (): () => { },
-    (a: number, b: number): number => { a + b },
-,);
+// No op function returning `()`
+(): () => { };
+
+// Function to sum
+(a: number, b: number): number => { a + b };
+
+// Curried function to sum
+(a: number): function<tuple<number>, number> =>
+        (b: number): number => { a + b };
 ```
 
 ### Statements
