@@ -208,7 +208,7 @@ Functions can be declared using a statement using the `fn` keyword and a functio
 fn sum (a: number, b: number): number => { a + b };
 ```
 
-#### Type Aliases
+#### Type Alias Statements
 
 Type aliases are a declaration statement allowing you to alias type names
 
