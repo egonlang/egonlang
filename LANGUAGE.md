@@ -117,13 +117,13 @@ Blocks are code delimited by braces `{}`. Blocks can contain multiple statements
 let result: number = { 
     let n = 5;
 
-    n * n
+    { n * n } // Wrapped in a block expression that will return `n * n`
  };
 ```
 
 #### If/Else Expressions
 
-If/Else can be written as expressions
+If/Else can be written as expressions it's then/else blocks are block expressions.
 
 ```
 const is = true;
@@ -132,6 +132,8 @@ const value = if (is) { 123 } else { 456 };
 ```
 
 #### Function Expressions
+
+Functions can be written as expressions. The function body is a block expression.
 
 ```
 const functions: tuple<
@@ -204,4 +206,16 @@ Functions can be declared using a statement using the `fn` keyword and a functio
 
 ```
 fn sum (a: number, b: number): number => { a + b };
+```
+
+#### Type Aliases
+
+Type aliases are a declaration statement allowing you to alias type names
+
+```
+type NumberList = list<number>;
+
+let numbers: NumberList = ["foo"];
+
+// out: TypeError: mismatched types: expected type `list<number>` but received `list<string>`
 ```
