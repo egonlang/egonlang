@@ -1,0 +1,8 @@
+(): () => {
+    type Int = number;
+    let a: number = 5;
+    let b: Int = a + 10;
+    b
+};
+
+// out: TypeError: mismatched types: expected type `()` but received `number`

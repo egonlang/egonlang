@@ -520,6 +520,12 @@ impl Validator {
                 let fn_return_type = fn_.return_type.0.clone();
 
                 if let Expr::Block(block) = &fn_.body.0 {
+                    for stmt in &block.stmts {
+                        if let Err(stmt_errs) = self.visit_stmt(stmt, &mut fn_env) {
+                            errs.extend(stmt_errs);
+                        }
+                    }
+
                     if let Some((block_return_expr, returning_expr_span)) = &block.return_expr {
                         // A function's body block's return type may be an identifier
                         // Identifiers need to be resolved to get the correct type
@@ -1306,6 +1312,25 @@ mod validator_tests {
                 name: "Number_List".to_string()
             }),
             0..32
+        )])
+    );
+
+    validator_test!(
+        validate_fn_expr_mismatch_return_identifier_declared_in_body,
+        "
+        (): () => {
+            type Int = number;
+            let a: number = 5;
+            let b: Int = a + 10;
+            b
+        };
+        ",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "()".to_string(),
+                actual: "number".to_string()
+            }),
+            128..129
         )])
     );
 
