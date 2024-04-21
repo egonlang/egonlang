@@ -72,7 +72,7 @@ let d = if (true) { 123 } else { 456; };
 | -------------------------------- | ---------------------------------------------------------------- |
 | `()`                             | A type only containing the value `()`                            |
 | `number`                         | 64bit floating point                                             |
-| `"Hello World!"`                 | Text                                                             |
+| `string`                         | `"Hello World"`                                                  |
 | `bool`                           | `true`, `false`                                                  |
 | `list<T>`                        | A growable sequence of `T`                                       |
 | `tuple<T, U...>`                 | A fixed lenth sequence of `T, U, ...`                            |
