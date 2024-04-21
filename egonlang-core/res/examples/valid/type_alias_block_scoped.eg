@@ -1,0 +1,16 @@
+type Int = number;
+
+let a: Int = 5;
+
+{
+    type Integer = Int;
+
+    const b: Integer = 10;
+
+    {
+        const c: number = a + b;
+    };
+};
+
+let b: number = 20;
+let c: Int = a + b;

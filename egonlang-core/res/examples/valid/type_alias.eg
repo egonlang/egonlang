@@ -1,0 +1,3 @@
+type NumberList = list<number>;
+
+let a: NumberList = [1, 2, 3];

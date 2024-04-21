@@ -21,6 +21,15 @@ pub struct EnvVar {
     pub is_const: bool,
 }
 
+impl EnvVar {
+    fn map_typeref(&self, typeref: TypeRef) -> EnvVar {
+        let mut env_var = self.clone();
+        env_var.typeref = typeref;
+
+        env_var
+    }
+}
+
 #[derive(Default)]
 struct Env<'a> {
     root: Option<&'a Env<'a>>,
@@ -42,24 +51,49 @@ impl<'a> Env<'a> {
         }
     }
 
-    pub fn get(&self, key: &str) -> Option<&EnvVar> {
-        let result = self.env.get(key);
+    /// Attempt to resolve an identifier `name` to an [`EnvVar`].
+    ///
+    /// If the `name` resolve to [`None`], then the `root` [`Env`] will be searched.
+    pub fn get(&self, name: &str) -> Option<EnvVar> {
+        let result = match self.env.get(name) {
+            Some(result) => Some(result.clone()),
+            None => match self.root {
+                Some(root) => root.get(name),
+                _ => None,
+            },
+        };
 
-        if result.is_none() {
-            if let Some(root) = &self.root {
-                let result = root.get(key);
+        if result.is_some() {
+            let result = result.clone().unwrap();
 
-                return result;
+            if result.typeref.0 == *"type" {
+                return Some(result.map_typeref(result.typeref.1.first().unwrap().clone()));
             }
-        } else {
-            return result;
         }
 
-        None
+        result
     }
 
-    pub fn set(&mut self, key: &str, value: EnvVar) {
-        self.env.insert(key.to_string(), value);
+    /// Set an identifier name to an [`TypeRef`] and an is_const [`bool`].
+    ///
+    /// If the [`TypeRef`] is a `type<T>`, the boxed type will be unwrapped when stored.
+    /// This helps resolve type aliases.
+    ///
+    /// If the env did not have this name present, [`None`] is returned.
+    pub fn set(&mut self, name: &str, value: EnvVar) -> Option<EnvVar> {
+        // Is this a type alias?
+        if value.typeref.0 == *"type" {
+            let new_typeref = value.typeref.1.first().unwrap().clone();
+
+            return match self.get(&new_typeref.to_string()) {
+                Some(r) => self.env.insert(name.to_string(), r),
+                None => self
+                    .env
+                    .insert(name.to_string(), value.map_typeref(new_typeref)),
+            };
+        }
+
+        self.env.insert(name.to_string(), value)
     }
 }
 
@@ -120,11 +154,18 @@ impl Validator {
                 if stmt_assign.type_expr.is_some() {
                     if stmt_assign.value.is_some() {
                         let (type_expr, _) = stmt_assign.type_expr.clone().unwrap();
-                        let type_identifier = type_expr.get_type_expr();
+                        let mut type_identifier = type_expr.get_type_expr();
                         let value = stmt_assign.value.clone().unwrap();
 
                         let value_expr = value.0;
                         let value_type = value_expr.clone().get_type_expr();
+
+                        // Resolve any type identifier type aliases
+                        if let Some(type_identifier_aliased_to) =
+                            env.get(&type_identifier.to_string())
+                        {
+                            type_identifier = type_identifier_aliased_to.typeref.clone();
+                        }
 
                         if type_identifier != value_type {
                             // This checks for empty lists being assigned to a list<T>
@@ -139,6 +180,8 @@ impl Validator {
                                         is_const: stmt_assign.is_const,
                                     },
                                 );
+                            // If the mismatched type is an identifier, the identifier's
+                            // must be resolved first
                             } else if value_type.0 == *"identifier" {
                                 if let Expr::Identifier(identifier) = &value_expr {
                                     let value_identifier = &identifier.identifier.name;
@@ -155,6 +198,7 @@ impl Validator {
                                         }
                                     }
                                 }
+                            // All other cases are a type mismatch
                             } else {
                                 errs.push((
                                     Error::TypeError(TypeError::MismatchType {
@@ -181,6 +225,7 @@ impl Validator {
                                 );
                             };
                         }
+                    // Assignment value was not defined
                     } else {
                         let (type_expr, _) = stmt_assign.type_expr.clone().unwrap();
                         let type_identifier = type_expr.get_type_expr();
@@ -197,6 +242,7 @@ impl Validator {
                             );
                         }
                     }
+                // Assignment type expression was not defined
                 } else {
                     // This checks for empty lists being assigned to a untyped list<unknown>
                     // e.g. let a = [];
@@ -1205,6 +1251,27 @@ mod validator_tests {
         ])
     );
 
+    validator_test!(
+        validate_type_alias,
+        "
+        type NumberList = list<number>;
+
+        let a: NumberList = [1, 2, 3];
+        ",
+        Ok(())
+    );
+
+    validator_test!(
+        validate_type_alias_nested,
+        "
+        type NumberList = list<number>;
+        type Alias = NumberList;
+
+        let a: Alias = [1, 2, 3];
+        ",
+        Ok(())
+    );
+
     #[test]
     fn env_works() {
         let mut env = Env::new();
@@ -1218,7 +1285,7 @@ mod validator_tests {
         );
 
         assert_eq!(
-            Some(&EnvVar {
+            Some(EnvVar {
                 typeref: TypeRef::number(),
                 is_const: false,
             }),
@@ -1236,7 +1303,7 @@ mod validator_tests {
         );
 
         assert_eq!(
-            Some(&EnvVar {
+            Some(EnvVar {
                 typeref: TypeRef::unit(),
                 is_const: false,
             }),
@@ -1244,11 +1311,61 @@ mod validator_tests {
         );
 
         assert_eq!(
-            Some(&EnvVar {
+            Some(EnvVar {
                 typeref: TypeRef::number(),
                 is_const: false,
             }),
             env.get("a")
+        );
+    }
+
+    #[test]
+    fn env_type_aliases_work() {
+        let mut env = Env::new();
+
+        env.set(
+            "Int",
+            EnvVar {
+                typeref: TypeRef::typed(TypeRef::number()),
+                is_const: true,
+            },
+        );
+
+        assert_eq!(
+            Some(EnvVar {
+                typeref: TypeRef::number(),
+                is_const: true,
+            }),
+            env.get("Int")
+        );
+    }
+
+    #[test]
+    fn env_type_aliases_work_nested() {
+        let mut env = Env::new();
+
+        env.set(
+            "NumberList",
+            EnvVar {
+                typeref: TypeRef::typed(TypeRef::number()),
+                is_const: true,
+            },
+        );
+
+        env.set(
+            "Alias",
+            EnvVar {
+                typeref: TypeRef::typed(TypeRef("NumberList".to_string(), vec![])),
+                is_const: true,
+            },
+        );
+
+        assert_eq!(
+            Some(EnvVar {
+                typeref: TypeRef::number(),
+                is_const: true,
+            }),
+            env.get("Alias")
         );
     }
 }

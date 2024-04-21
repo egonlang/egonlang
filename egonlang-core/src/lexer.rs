@@ -138,6 +138,8 @@ pub enum Token {
     Let,
     #[token("const")]
     Const,
+    #[token("type")]
+    Type,
 
     // Literals.
     #[regex("[a-zA-Z_][a-zA-Z0-9_]*", lex_identifier)]
@@ -855,6 +857,21 @@ mod lexer_tests {
             Ok((45, Token::Plus, 46)),
             Ok((47, Token::Identifier("b".to_string()), 48)),
             Ok((49, Token::BraceClose, 50)),
+        ]
+    );
+
+    lexer_test!(
+        lex_type_alias,
+        "type NumberList = list<number>;",
+        vec![
+            Ok((0, Token::Type, 4)),
+            Ok((5, Token::Identifier("NumberList".to_string()), 15)),
+            Ok((16, Token::Equal, 17)),
+            Ok((18, Token::Identifier("list".to_string()), 22)),
+            Ok((22, Token::Less, 23)),
+            Ok((23, Token::Identifier("number".to_string()), 29)),
+            Ok((29, Token::Greater, 30)),
+            Ok((30, Token::Semicolon, 31)),
         ]
     );
 }

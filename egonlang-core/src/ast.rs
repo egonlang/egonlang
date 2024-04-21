@@ -30,6 +30,14 @@ impl Debug for Stmt {
     }
 }
 
+/// Statement that creates a type alias
+/// e.g. type NumberList = number<list>;
+#[derive(Clone, Debug, PartialEq)]
+pub struct StmtType {
+    pub identifier: Identifier,
+    pub type_expr: Option<ExprS>,
+}
+
 /// An expression statement evaluates an expression and discards the result.
 #[derive(Clone, Debug, PartialEq)]
 pub struct StmtExpr {
@@ -280,6 +288,10 @@ impl TypeRef {
             "function".to_string(),
             vec![TypeRef::tuple(params_types), return_type],
         )
+    }
+
+    pub fn typed(value: TypeRef) -> TypeRef {
+        TypeRef("type".to_string(), vec![value])
     }
 }
 

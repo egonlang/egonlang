@@ -1796,6 +1796,30 @@ mod parser_tests {
     );
 
     parser_test!(
+        parse_type_alias,
+        "type NumberList = list<number>;",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Assign(StmtAssign {
+                    identifier: Identifier {
+                        name: "NumberList".to_string()
+                    },
+                    type_expr: Some((
+                        Expr::Type(ExprType(TypeRef::typed(TypeRef::list(TypeRef::number())))),
+                        18..30
+                    )),
+                    is_const: true,
+                    value: Some((
+                        Expr::Type(ExprType(TypeRef::typed(TypeRef::list(TypeRef::number())))),
+                        18..30
+                    ))
+                }),
+                0..31
+            )]
+        })
+    );
+
+    parser_test!(
         parse_let_decl_typed_without_assign,
         "let a: number;",
         Ok(Module {

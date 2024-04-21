@@ -45,6 +45,16 @@ StmtAssign: ast::StmtAssign = {
         is_const: true,
         value,
     },
+    "type" <name:identifier> <type_expr:("=" <Spanned<TypeRef>>)?> ";" => ast::StmtAssign {
+        identifier: ast::Identifier {
+            name,
+        },
+        type_expr: type_expr.clone().map(|(ty, ty_span)|
+            (ast::Expr::Type(ast::ExprType(ast::TypeRef::typed(ty))), ty_span)),
+        is_const: true,
+        value: type_expr.clone().map(|(ty, ty_span)|
+            (ast::Expr::Type(ast::ExprType(ast::TypeRef::typed(ty))), ty_span)),
+    },
 }
 
 StmtS = Spanned<Stmt>;
@@ -319,6 +329,7 @@ extern {
         "fn" => lexer::Token::Fn,
         "let" => lexer::Token::Let,
         "const" => lexer::Token::Const,
+        "type" => lexer::Token::Type,
 
         // Literals.
         identifier => lexer::Token::Identifier(<String>),
