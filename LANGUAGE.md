@@ -91,10 +91,12 @@ const literals: tuple<
     number,
     string,
     bool,
+    range
 > = (
     123,
     "foo",
     false,
+    0..10
 );
 ```
 
@@ -222,7 +224,7 @@ if (is) {
 
 #### Variable Declaration Statements
 
-...
+As covered above variables can be declared with the `let` or `const` keywords.
 
 #### Function Statements
 
