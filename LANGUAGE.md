@@ -2,6 +2,8 @@
 
 ## Introduction
 
+This will serve as an introduction to the language. Please see [examples](./egonlang-core/res/examples) to better understand things.
+
 ### Variables
 
 Variables can be declared using the `let` keyword, their type and value. Variable values can be reassigned.
