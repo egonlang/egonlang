@@ -1,3 +1,5 @@
+use regex::Regex;
+
 use crate::{
     ast::{
         Expr, ExprIdentifier, ExprInfix, ExprPrefix, ExprS, Identifier, Module, OpInfix, OpPrefix,
@@ -128,6 +130,8 @@ impl Validator {
         match stmt {
             Stmt::Expr(stmt_expr) => self.visit_expr(&stmt_expr.expr, env),
             Stmt::Assign(stmt_assign) => {
+                let pattern = Regex::new("^[A-Z][A-Za-z0-9]*$").unwrap();
+
                 let mut errs = vec![];
 
                 let name = stmt_assign.identifier.name.clone();
@@ -159,6 +163,15 @@ impl Validator {
 
                         let value_expr = value.0;
                         let value_type = value_expr.clone().get_type_expr();
+
+                        if value_type.0 == *"type" && !pattern.is_match(&name) {
+                            errs.push((
+                                Error::SyntaxError(SyntaxError::InvalidTypeAlias {
+                                    name: name.to_string(),
+                                }),
+                                span.clone(),
+                            ));
+                        }
 
                         // Resolve any type identifier type aliases
                         if let Some(type_identifier_aliased_to) =
@@ -1272,6 +1285,28 @@ mod validator_tests {
         let a: Alias = [1, 2, 3];
         ",
         Ok(())
+    );
+
+    validator_test!(
+        validate_type_alias_pascal_case,
+        "type int = number;",
+        Err(vec![(
+            Error::SyntaxError(SyntaxError::InvalidTypeAlias {
+                name: "int".to_string()
+            }),
+            0..18
+        )])
+    );
+
+    validator_test!(
+        validate_type_alias_pascal_case2,
+        "type Number_List = list<number>;",
+        Err(vec![(
+            Error::SyntaxError(SyntaxError::InvalidTypeAlias {
+                name: "Number_List".to_string()
+            }),
+            0..32
+        )])
     );
 
     #[test]

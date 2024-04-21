@@ -134,6 +134,7 @@ dependencies = [
  "lalrpop-util",
  "logos",
  "pretty_assertions",
+ "regex",
  "rstest",
  "serde",
  "thiserror",

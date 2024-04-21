@@ -1,0 +1,3 @@
+type Number_List = list<number>;
+
+// out: SyntaxError: type aliases are required to be PascalCase: `Number_List`

@@ -37,6 +37,8 @@ pub enum SyntaxError {
     UninitializedUntypedLet { name: String },
     #[error("empty range e.g. `..`")]
     EmptyRange,
+    #[error("type aliases are required to be PascalCase: `{name}`")]
+    InvalidTypeAlias { name: String },
 }
 
 #[derive(Debug, Error, Eq, PartialEq)]
