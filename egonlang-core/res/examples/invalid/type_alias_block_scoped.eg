@@ -1,0 +1,12 @@
+type Int = number;
+
+let a: Int = 5;
+
+{
+    type Integer = Int;
+};
+
+let b: number = 20;
+let c: Integer = a + b;
+
+// out: TypeError: mismatched types: expected type `Integer` but received `number`

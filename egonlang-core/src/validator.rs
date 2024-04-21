@@ -425,14 +425,16 @@ impl Validator {
             Expr::Block(block) => {
                 let mut errs: Vec<ErrorS> = vec![];
 
+                let mut block_env = env.extend();
+
                 for stmt in &block.stmts {
-                    if let Err(stmt_errs) = self.visit_stmt(stmt, env) {
+                    if let Err(stmt_errs) = self.visit_stmt(stmt, &mut block_env) {
                         errs.extend(stmt_errs);
                     }
                 }
 
                 if let Some(returning_expr) = &block.return_expr {
-                    if let Err(expr_errs) = self.visit_expr(returning_expr, env) {
+                    if let Err(expr_errs) = self.visit_expr(returning_expr, &mut block_env) {
                         errs.extend(expr_errs);
                     }
                 }
