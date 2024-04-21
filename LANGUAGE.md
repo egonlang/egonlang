@@ -155,19 +155,19 @@ Expressions produce a value while statements do not.
 
 ```
 let a: number = 123;
-                ^-^-: Expression: `123` produces `123`
-    ^-------------^-: Expression: `a: number = 123` produces `123`
-^------------------^: Statement
+                ^-^  Expression `123` produces 123
+    ^-------------^  Expression `a: number = 123` produces 123
+^------------------^ Statement
 
 123;
-^-^-: Expression: `123` -> `123`
-^--^: Statement
+^-^  Expression `123` produces 123
+^--^ Statement
 
 ["foo", "bar"];
-        ^---^--: Expression: `"bar"` produces `"bar"`
- ^---^---------: Expression: `"foo"` produces `"foo"`
-^------------^-: Expression: `["foo", "bar"]` produces `["foo", "bar"]`
-^-------------^: Statement
+        ^---^   Expression `"bar"` produces "bar"
+ ^---^          Expression `"foo"` produces "foo"
+^------------^  Expression `["foo", "bar"]` produces ["foo", "bar"]
+^-------------^ Statement
 ```
 
 Statements generally fall in to one of these categories:
