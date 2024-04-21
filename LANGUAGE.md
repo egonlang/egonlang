@@ -219,3 +219,14 @@ let numbers: NumberList = ["foo"];
 
 // out: TypeError: mismatched types: expected type `list<number>` but received `list<string>`
 ```
+
+You can alias type aliases as well.
+
+```
+type NumberList = list<number>;
+type ListOfNumbers = NumberList;
+
+let numbers: ListOfNumbers = ["foo"];
+
+// out: TypeError: mismatched types: expected type `list<number>` but received `list<string>`
+```
