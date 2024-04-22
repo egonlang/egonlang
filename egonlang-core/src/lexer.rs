@@ -1,6 +1,7 @@
 use std::num::ParseFloatError;
 
 use logos::Logos;
+use serde::{Deserialize, Serialize};
 
 use crate::errors::{Error, ErrorS, SyntaxError};
 
@@ -66,7 +67,7 @@ impl<'a> Iterator for Lexer<'a> {
     }
 }
 
-#[derive(Clone, Debug, Logos, PartialEq)]
+#[derive(Clone, Debug, Logos, PartialEq, Serialize, Deserialize)]
 pub enum Token {
     #[token(";")]
     Semicolon,

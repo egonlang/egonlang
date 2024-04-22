@@ -43,9 +43,16 @@ fn main() {
 
             let tokens = egonlang_core::lexer::Lexer::new(&content).collect::<Vec<_>>();
 
-            println!("Path:\n\n{:?}\n", std::fs::canonicalize(pathbuf).unwrap());
-            println!("Input:\n\n{content}\n");
-            println!("Tokens:\n\n{tokens:#?}");
+            match serde_json::to_string(&tokens) {
+                Ok(tokens) => {
+                    println!("{tokens}");
+                }
+                Err(errs) => {
+                    println!("Path:\n\n{:?}\n", std::fs::canonicalize(pathbuf).unwrap());
+                    println!("Input:\n\n{content}\n");
+                    println!("Errors:\n\n{errs}");
+                }
+            };
         }
         _ => {
             println!(

@@ -1,10 +1,11 @@
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::span::Spanned;
 
 pub type ErrorS = Spanned<Error>;
 
-#[derive(Debug, Error, PartialEq)]
+#[derive(Debug, Error, PartialEq, Serialize, Deserialize)]
 pub enum Error {
     #[error("SyntaxError: {0}")]
     SyntaxError(SyntaxError),
@@ -12,7 +13,7 @@ pub enum Error {
     TypeError(TypeError),
 }
 
-#[derive(Debug, Error, Eq, PartialEq)]
+#[derive(Debug, Error, Eq, PartialEq, Serialize, Deserialize)]
 pub enum SyntaxError {
     #[error("extraneous input: {token:?}")]
     ExtraToken { token: String },
@@ -41,7 +42,7 @@ pub enum SyntaxError {
     InvalidTypeAlias { name: String },
 }
 
-#[derive(Debug, Error, Eq, PartialEq)]
+#[derive(Debug, Error, Eq, PartialEq, Serialize, Deserialize)]
 pub enum TypeError {
     #[error("mismatched types: expected type `{expected}` but received `{actual}`")]
     MismatchType { expected: String, actual: String },
