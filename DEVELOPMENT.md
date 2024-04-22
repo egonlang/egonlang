@@ -30,4 +30,4 @@
 | `just clean`                   | Clean build artifacts                                                                    |
 | `just cli COMMAND PATH`        | Run the egon command with the `COMMAND` (`lex` or `parse`) and the file `PATH` in `PWD`  |
 | `just build-docker`            | Build the docker image for the egon language                                             |
-| `just run-docker COMMAND PATH` | Run the egon command in docker. This mounts `PWD`.                                       |
+| `just run-docker COMMAND PATH` | Run the egon command in docker e.g. `$ just run docker parse ./path/to/file.eg`          |

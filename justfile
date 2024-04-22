@@ -37,4 +37,4 @@ build-docker:
     docker build -t egonlang/egonlang:0.1.0 .
 
 run-docker +args:
-    docker run --rm --read-only -v "/$PWD":/home/egon:ro -it egonlang/egonlang:0.1.0 egon -- {{args}}
+    docker run --rm --read-only -v "/$PWD":/home/egon:ro -it egonlang/egonlang:0.1.0 egon {{args}}
