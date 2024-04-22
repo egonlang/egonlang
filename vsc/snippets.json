@@ -1,0 +1,94 @@
+{
+  "(a: P0, ...): R => {}": {
+    "prefix": "fn",
+    "body": [
+      "(${1:a: P0}): ${2:R} => { $3 }$0"
+    ],
+    "description": "Create a function expression"
+  },
+  "fn name (a: P0, ...): R => {}": {
+    "prefix": "fn",
+    "body": [
+      "fn ${1:name} (${2:a: P0}): ${3:R} => { $4 }$0"
+    ],
+    "description": "Declare a function"
+  },
+  "let a: T;": {
+    "prefix": "let",
+    "body": [
+      "let ${1:a}: ${2:T};$0"
+    ],
+    "description": "Declare a variable with a type"
+  },
+  "let a = ...;": {
+    "prefix": "let",
+    "body": [
+      "let ${1:a} = ${2:()};$0"
+    ],
+    "description": "Declare a variable with a value (type is inferred)"
+  },
+  "let a: T = ...;": {
+    "prefix": "let",
+    "body": [
+      "let ${1:a}: ${2:T} = ${3:()};$0"
+    ],
+    "description": "Declare a variable with a type and value"
+  },
+  "if else (expression)": {
+    "prefix": [
+      "if",
+      "ifelse"
+    ],
+    "body": [
+      "if (${1:cond}) { $2 } else { $3 }$0"
+    ],
+    "description": "Create an if/else expression"
+  },
+  "if (statement)": {
+    "prefix": "if",
+    "body": [
+      "if (${1:cond}) {",
+      "  $2",
+      "};$0"
+    ],
+    "description": "Create an if statement"
+  },
+  "if else (statement)": {
+    "prefix": "ifelse",
+    "body": [
+      "if (${1:cond}) {",
+      "  $2",
+      "} else $3 {",
+      "  $4",
+      "};$0"
+    ],
+    "description": "Create an if/else statement"
+  },
+  "tuple (T, U,)": {
+    "prefix": [
+      "tu"
+    ],
+    "body": [
+      "($1, $2,)$0"
+    ],
+    "description": "Create a tuple (T, U,)"
+  },
+  "tuple (T, U, V,)": {
+    "prefix": [
+      "tu3"
+    ],
+    "body": [
+      "($1, $2, $3,)$0"
+    ],
+    "description": "Create a tuple (T, U, V,)"
+  },
+  "tuple (T, U, V, X,)": {
+    "prefix": [
+      "tu4"
+    ],
+    "body": [
+      "($1, $2, $3, $4,)$0"
+    ],
+    "description": "Create a tuple (T, U, V, W,)"
+  }
+}

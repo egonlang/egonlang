@@ -3,6 +3,7 @@ default:
 
 build:
     cargo build
+    cd vsc && just build
 
 build-release:
     cargo build --release

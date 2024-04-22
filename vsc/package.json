@@ -1,0 +1,105 @@
+{
+  "name": "egon-language",
+  "displayName": "Egon Language",
+  "description": "An extension for the Egon language",
+  "version": "1.0.0",
+  "publisher": "kyleect",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/egonlang/egonlang"
+  },
+  "bugs": {
+    "url": "https://github.com/egonlang/egonlang/issues"
+  },
+  "engines": {
+    "vscode": "^1.83.1"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets"
+  ],
+  "main": "out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "egon",
+        "aliases": [
+          "egon"
+        ],
+        "extensions": [
+          ".eg"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "egon",
+        "scopeName": "source.egon",
+        "path": "./egon.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "egon",
+        "path": "./snippets.json"
+      }
+    ],
+    "configuration": {
+      "title": "Egon",
+      "properties": {
+        "egon.binPath": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "Specifies the folder path containing the egon binary."
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "egon.LexCurrentFile",
+        "title": "Egon: Lex Current File"
+      },
+      {
+        "command": "egon.parseCurrentFile",
+        "title": "Egon: Parse Current File"
+      },
+      {
+        "command": "egon.openGithub",
+        "title": "Egon: Open On Github"
+      }
+    ],
+    "taskDefinitions": [
+      {
+        "type": "egon",
+        "required": [],
+        "properties": {}
+      }
+    ]
+  },
+  "activationEvents": [],
+  "devDependencies": {
+    "@types/node": "^17.0.45",
+    "@types/vscode": "^1.83.1",
+    "@vscode/test-electron": "2.3.6",
+    "esbuild": "^0.19.5",
+    "typescript": "^4.6.4",
+    "vsce": "^2.15.0"
+  },
+  "dependencies": {
+    "lz-string": "^1.5.0",
+    "vscode-languageclient": "9.0.1"
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run esbuild-base -- --minify",
+    "esbuild-base": "esbuild ./extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
+    "build": "npm run esbuild-base -- --sourcemap",
+    "package": "vsce package --out out",
+    "watch": "npm run esbuild-base -- --sourcemap --watch",
+    "update-vscode": "node ./node_modules/vscode/bin/install"
+  }
+}

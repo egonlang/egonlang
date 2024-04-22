@@ -15,6 +15,7 @@
 
 - [egonlang-core](./egonlang-core/): Library responsible lexing, and parsing egon code
 - [egonlang-cli](./egonlang-cli/): Command line tool to lex and parse egon code files 
+- [vsc](./vsc/): VS Code language extension
 
 ## Build, test, verify, etc...
 
@@ -31,3 +32,15 @@
 | `just cli COMMAND PATH`        | Run the egon command with the `COMMAND` (`lex` or `parse`) and the file `PATH` in `PWD`  |
 | `just build-docker`            | Build the docker image for the egon language                                             |
 | `just run-docker COMMAND PATH` | Run the egon command in docker e.g. `$ just run docker parse ./path/to/file.eg`          |
+
+## VS Code Extension
+
+### Requirements
+
+- [node](https://nodejs.org/) & [nvm](https://github.com/nvm-sh/nvm)
+
+### Building
+
+Builds the extension to `./vsc/out/egon-language-*.vsix`
+
+> $ just build
