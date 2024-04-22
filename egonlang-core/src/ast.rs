@@ -1,8 +1,10 @@
+use serde::{Deserialize, Serialize};
+
 use crate::span::Spanned;
 use std::fmt::{self, Debug, Display, Formatter};
 
 /// Modules are units of code (e.g. variables, functions)
-#[derive(Debug, Default, PartialEq)]
+#[derive(Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct Module {
     pub stmts: Vec<StmtS>,
 }
@@ -11,7 +13,7 @@ pub type StmtS = Spanned<Stmt>;
 pub type ExprS = Spanned<Expr>;
 
 /// Statements
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub enum Stmt {
     Expr(StmtExpr),
     Assign(StmtAssign),
@@ -32,20 +34,20 @@ impl Debug for Stmt {
 
 /// Statement that creates a type alias
 /// e.g. type NumberList = number<list>;
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct StmtType {
     pub identifier: Identifier,
     pub type_expr: Option<ExprS>,
 }
 
 /// An expression statement evaluates an expression and discards the result.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct StmtExpr {
     pub expr: ExprS,
 }
 
 /// Statement that sets `var.name` to `value`
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct StmtAssign {
     pub identifier: Identifier,
     pub type_expr: Option<ExprS>,
@@ -53,14 +55,14 @@ pub struct StmtAssign {
     pub value: Option<ExprS>,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct StmtFn {
     pub name: Identifier,
     pub fn_expr: ExprS,
 }
 
 /// Expressions
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Expr {
     Unit,
     Literal(ExprLiteral),
@@ -143,47 +145,47 @@ impl Expr {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum ExprLiteral {
     Bool(bool),
     Number(f64),
     String(String),
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ExprIdentifier {
     pub identifier: Identifier,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Identifier {
     pub name: String,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ExprBlock {
     pub stmts: Vec<StmtS>,
     pub return_expr: Option<ExprS>,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ExprList {
     pub items: Vec<ExprS>,
 }
 
-#[derive(Clone, Debug, PartialEq, Default)]
+#[derive(Clone, Debug, PartialEq, Default, Serialize, Deserialize)]
 pub struct ExprTuple {
     pub items: Vec<ExprS>,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ExprInfix {
     pub lt: ExprS,
     pub op: OpInfix,
     pub rt: ExprS,
 }
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Serialize, Deserialize)]
 pub enum OpInfix {
     Add,
     Subtract,
@@ -200,32 +202,32 @@ pub enum OpInfix {
     LogicOr,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ExprPrefix {
     pub op: OpPrefix,
     pub rt: ExprS,
 }
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Serialize, Deserialize)]
 pub enum OpPrefix {
     Negate,
     Not,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ExprAssign {
     pub identifier: Identifier,
     pub value: ExprS,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ExprIf {
     pub cond: ExprS,
     pub then: ExprS,
     pub else_: Option<ExprS>,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ExprFn {
     pub name: Option<Identifier>,
     pub params: Vec<Spanned<(Identifier, TypeRef)>>,
@@ -233,17 +235,17 @@ pub struct ExprFn {
     pub body: ExprS,
 }
 
-#[derive(Clone, Debug, PartialEq, Default)]
+#[derive(Clone, Debug, PartialEq, Default, Serialize, Deserialize)]
 pub struct ExprRange {
     pub start: Option<Spanned<ExprLiteral>>,
     pub end: Option<Spanned<ExprLiteral>>,
     pub inclusive_end: bool,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ExprType(pub TypeRef);
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TypeRef(pub String, pub Vec<TypeRef>);
 
 impl TypeRef {
