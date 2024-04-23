@@ -337,15 +337,32 @@ impl Validator {
                                     item_span.clone(),
                                 ));
                             }
-                        }
-                    } else {
-                        let item_expr_type_ident = &item_expr.get_type_expr();
-
-                        if item_expr_type_ident != &first_item_type_ident {
+                        } else {
                             errs.push((
                                 Error::TypeError(TypeError::MismatchType {
                                     expected: first_item_type_ident.to_string(),
-                                    actual: item_expr_type_ident.to_string(),
+                                    actual: TypeRef::identifier().to_string(),
+                                }),
+                                item_span.clone(),
+                            ));
+                        }
+                    } else {
+                        let item_typeref: TypeRef = match &item_expr {
+                            Expr::Identifier(ExprIdentifier { identifier }) => {
+                                if let Some(env_var) = env.get(&identifier.name) {
+                                    env_var.typeref.clone()
+                                } else {
+                                    item_expr.clone().get_type_expr()
+                                }
+                            }
+                            _ => item_expr.clone().get_type_expr(),
+                        };
+
+                        if item_typeref != first_item_type_ident {
+                            errs.push((
+                                Error::TypeError(TypeError::MismatchType {
+                                    expected: first_item_type_ident.to_string(),
+                                    actual: item_typeref.to_string(),
                                 }),
                                 item_span.clone(),
                             ));
@@ -353,7 +370,11 @@ impl Validator {
                     }
                 }
 
-                Err(errs)
+                if !errs.is_empty() {
+                    return Err(errs);
+                }
+
+                Ok(())
             }
             Expr::If(if_) => {
                 let mut errs = vec![];
@@ -1331,6 +1352,18 @@ mod validator_tests {
                 actual: "number".to_string()
             }),
             128..129
+        )])
+    );
+
+    validator_test!(
+        validate_list_expr_mismatch_item_types_with_identifiers,
+        "[1, a];",
+        Err(vec![(
+            Error::TypeError(TypeError::MismatchType {
+                expected: "number".to_string(),
+                actual: "identifier".to_string()
+            }),
+            4..5
         )])
     );
 
