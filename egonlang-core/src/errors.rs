@@ -52,6 +52,8 @@ pub enum TypeError {
 
     #[error("unknown type e.g. let a: unknown; or let a;")]
     UnknownType,
+    #[error("`{0}` is not defined")]
+    Undefined(String),
 }
 
 macro_rules! impl_from_error {

@@ -2,13 +2,14 @@ use regex::Regex;
 
 use crate::{
     ast::{
-        Expr, ExprInfix, ExprPrefix, ExprS, Identifier, Module, OpInfix, OpPrefix, Stmt, TypeRef,
+        Expr, ExprIdentifier, ExprInfix, ExprList, ExprPrefix, ExprS, ExprTuple, Identifier,
+        Module, OpInfix, OpPrefix, Stmt, TypeRef,
     },
     errors::{
         Error, ErrorS, SyntaxError,
         TypeError::{self, UknownListType, UnknownType},
     },
-    span::Spanned,
+    span::{Span, Spanned},
 };
 
 use std::collections::HashMap;
@@ -108,74 +109,84 @@ impl<'a> TypeEnvironment<'a> {
     ///
     /// (a, b,); // This expression's type resolves to (number, bool,)
     pub fn resolve_expr_type(&self, expr: &ExprS) -> Result<TypeRef, Vec<ErrorS>> {
-        let (expr, _span) = expr;
+        let (expr, span) = expr;
 
         let resolved_type = match expr {
-            Expr::Identifier(ident_expr) => {
-                let name = &ident_expr.identifier.name;
-
-                let resolved_type = if let Some(env_var) = self.get(name) {
-                    env_var.typeref
-                } else {
-                    expr.clone().get_type_expr()
-                };
-
-                Ok(resolved_type)
-            }
-            Expr::List(list_expr) => {
-                if list_expr.items.is_empty() {
-                    return Ok(TypeRef::list(TypeRef::unknown()));
-                }
-
-                let first_item = list_expr.items.first().unwrap().clone();
-                let first_item_type = self.resolve_expr_type(&first_item)?;
-
-                let remaining_items: Vec<ExprS> =
-                    list_expr.items.clone().into_iter().skip(1).collect();
-
-                let mut errs = vec![];
-
-                for item in remaining_items {
-                    let (_, item_span) = &item;
-                    let item_type = self.resolve_expr_type(&item)?;
-
-                    if item_type != first_item_type {
-                        errs.push((
-                            Error::TypeError(TypeError::MismatchType {
-                                expected: first_item_type.to_string(),
-                                actual: item_type.to_string(),
-                            }),
-                            item_span.clone(),
-                        ));
-                    }
-                }
-
-                if !errs.is_empty() {
-                    return Err(errs);
-                }
-
-                Ok(TypeRef::list(first_item_type))
-            }
-            Expr::Tuple(tuple_expr) => {
-                if tuple_expr.items.is_empty() {
-                    return Ok(TypeRef::list(TypeRef::unknown()));
-                }
-
-                let item_types = tuple_expr
-                    .items
-                    .clone()
-                    .into_iter()
-                    .map(|x| self.resolve_expr_type(&x).unwrap())
-                    .collect();
-
-                Ok(TypeRef::tuple(item_types))
-            }
+            Expr::Identifier(ident_expr) => self.resolve_identifier_type(ident_expr, span),
+            Expr::List(list_expr) => self.resolve_list_type(list_expr),
+            Expr::Tuple(tuple_expr) => self.resolve_tuple_type(tuple_expr),
             _ => Ok(expr.clone().get_type_expr()),
         };
 
         println!("Resolving type for expr: {expr:?} to {resolved_type:?}");
 
         resolved_type
+    }
+
+    fn resolve_identifier_type(
+        &self,
+        ident_expr: &ExprIdentifier,
+        span: &Span,
+    ) -> Result<TypeRef, Vec<ErrorS>> {
+        let name = &ident_expr.identifier.name;
+
+        if let Some(env_var) = self.get(name) {
+            Ok(env_var.typeref)
+        } else {
+            Err(vec![(
+                Error::TypeError(TypeError::Undefined(name.to_string())),
+                span.clone(),
+            )])
+        }
+    }
+
+    fn resolve_list_type(&self, list_expr: &ExprList) -> Result<TypeRef, Vec<ErrorS>> {
+        if list_expr.items.is_empty() {
+            return Ok(TypeRef::list(TypeRef::unknown()));
+        }
+
+        let first_item = list_expr.items.first().unwrap().clone();
+        let first_item_type = self.resolve_expr_type(&first_item)?;
+
+        let remaining_items: Vec<ExprS> = list_expr.items.clone().into_iter().skip(1).collect();
+
+        let mut errs = vec![];
+
+        for item in remaining_items {
+            let (_, item_span) = &item;
+            let item_type = self.resolve_expr_type(&item)?;
+
+            if item_type != first_item_type {
+                errs.push((
+                    Error::TypeError(TypeError::MismatchType {
+                        expected: first_item_type.to_string(),
+                        actual: item_type.to_string(),
+                    }),
+                    item_span.clone(),
+                ));
+            }
+        }
+
+        if !errs.is_empty() {
+            return Err(errs);
+        }
+
+        Ok(TypeRef::list(first_item_type))
+    }
+
+    fn resolve_tuple_type(&self, tuple_expr: &ExprTuple) -> Result<TypeRef, Vec<ErrorS>> {
+        if tuple_expr.items.is_empty() {
+            return Ok(TypeRef::list(TypeRef::unknown()));
+        }
+
+        let item_types = tuple_expr
+            .items
+            .clone()
+            .into_iter()
+            .map(|x| self.resolve_expr_type(&x).unwrap())
+            .collect();
+
+        Ok(TypeRef::tuple(item_types))
     }
 }
 
@@ -1373,10 +1384,7 @@ mod validator_tests {
         validate_list_expr_mismatch_item_types_with_identifiers,
         "[1, a];",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
-                expected: "number".to_string(),
-                actual: "identifier".to_string()
-            }),
+            Error::TypeError(TypeError::Undefined("a".to_string())),
             4..5
         )])
     );
