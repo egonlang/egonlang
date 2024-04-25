@@ -130,13 +130,12 @@ impl<'a> TypeEnvironment<'a> {
     ) -> Result<TypeRef, Vec<ErrorS>> {
         let name = &ident_expr.identifier.name;
 
-        if let Some(env_var) = self.get(name) {
-            Ok(env_var.typeref)
-        } else {
-            Err(vec![(
+        match self.get(name) {
+            Some(env_var) => Ok(env_var.typeref),
+            None => Err(vec![(
                 Error::TypeError(TypeError::Undefined(name.to_string())),
                 span.clone(),
-            )])
+            )]),
         }
     }
 
