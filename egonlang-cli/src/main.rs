@@ -38,8 +38,8 @@ fn main() {
                 path,
                 use_tokens_file: _,
             } => {
-                let content = std::fs::read_to_string(&path).expect("Unable to read file");
-                let path = std::fs::canonicalize(&path).unwrap();
+                let content = std::fs::read_to_string(path).expect("Unable to read file");
+                let path = std::fs::canonicalize(path).unwrap();
 
                 let module = match egonlang_core::parser::parse(&content, 0) {
                     Ok(module) => {
@@ -64,8 +64,8 @@ fn main() {
                 };
             }
             Commands::Lex { path } => {
-                let content = std::fs::read_to_string(&path).expect("Unable to read file");
-                let path = std::fs::canonicalize(&path).unwrap();
+                let content = std::fs::read_to_string(path).expect("Unable to read file");
+                let path = std::fs::canonicalize(path).unwrap();
 
                 let tokens = egonlang_core::lexer::Lexer::new(&content).collect::<Vec<_>>();
 
