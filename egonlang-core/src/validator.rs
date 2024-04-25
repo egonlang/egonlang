@@ -18,13 +18,13 @@ use std::collections::HashMap;
 pub struct Validator {}
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct EnvVar {
+pub struct TypeEnvValue {
     pub typeref: TypeRef,
     pub is_const: bool,
 }
 
-impl EnvVar {
-    fn map_typeref(&self, typeref: TypeRef) -> EnvVar {
+impl TypeEnvValue {
+    fn map_typeref(&self, typeref: TypeRef) -> TypeEnvValue {
         let mut env_var = self.clone();
         env_var.typeref = typeref;
 
@@ -33,21 +33,21 @@ impl EnvVar {
 }
 
 #[derive(Default)]
-struct Env<'a> {
-    root: Option<&'a Env<'a>>,
-    env: HashMap<String, EnvVar>,
+struct TypeEnvironment<'a> {
+    root: Option<&'a TypeEnvironment<'a>>,
+    env: HashMap<String, TypeEnvValue>,
 }
 
-impl<'a> Env<'a> {
-    fn new() -> Env<'a> {
-        Env {
+impl<'a> TypeEnvironment<'a> {
+    fn new() -> TypeEnvironment<'a> {
+        TypeEnvironment {
             root: None,
             env: HashMap::new(),
         }
     }
 
-    fn extend(&self) -> Env {
-        Env {
+    fn extend(&self) -> TypeEnvironment {
+        TypeEnvironment {
             root: Some(self),
             env: HashMap::new(),
         }
@@ -56,7 +56,7 @@ impl<'a> Env<'a> {
     /// Attempt to resolve an identifier `name` to an [`EnvVar`].
     ///
     /// If the `name` resolve to [`None`], then the `root` [`Env`] will be searched.
-    pub fn get(&self, name: &str) -> Option<EnvVar> {
+    pub fn get(&self, name: &str) -> Option<TypeEnvValue> {
         let result = match self.env.get(name) {
             Some(result) => Some(result.clone()),
             None => match self.root {
@@ -82,7 +82,7 @@ impl<'a> Env<'a> {
     /// This helps resolve type aliases.
     ///
     /// If the env did not have this name present, [`None`] is returned.
-    pub fn set(&mut self, name: &str, value: EnvVar) -> Option<EnvVar> {
+    pub fn set(&mut self, name: &str, value: TypeEnvValue) -> Option<TypeEnvValue> {
         // Is this a type alias?
         if value.typeref.0 == *"type" {
             let new_typeref = value.typeref.1.first().unwrap().clone();
@@ -104,7 +104,7 @@ impl Validator {
     pub fn validate(&mut self, module: &Module) -> Result<(), Vec<ErrorS>> {
         let mut all_errs: Vec<ErrorS> = vec![];
 
-        let mut env = Env::new();
+        let mut env = TypeEnvironment::new();
 
         for stmt in &module.stmts {
             if let Err(errs) = self.visit_stmt(stmt, &mut env) {
@@ -124,7 +124,11 @@ impl Validator {
         Ok(())
     }
 
-    fn visit_stmt(&mut self, stmt: &Spanned<Stmt>, env: &mut Env<'_>) -> Result<(), Vec<ErrorS>> {
+    fn visit_stmt(
+        &mut self,
+        stmt: &Spanned<Stmt>,
+        env: &mut TypeEnvironment<'_>,
+    ) -> Result<(), Vec<ErrorS>> {
         let (stmt, span) = stmt;
 
         match stmt {
@@ -188,7 +192,7 @@ impl Validator {
                             {
                                 env.set(
                                     &name,
-                                    EnvVar {
+                                    TypeEnvValue {
                                         typeref: type_identifier,
                                         is_const: stmt_assign.is_const,
                                     },
@@ -231,7 +235,7 @@ impl Validator {
                             } else {
                                 env.set(
                                     &name,
-                                    EnvVar {
+                                    TypeEnvValue {
                                         typeref: type_identifier,
                                         is_const: stmt_assign.is_const,
                                     },
@@ -248,7 +252,7 @@ impl Validator {
                         } else {
                             env.set(
                                 &name,
-                                EnvVar {
+                                TypeEnvValue {
                                     typeref: type_identifier,
                                     is_const: stmt_assign.is_const,
                                 },
@@ -274,7 +278,7 @@ impl Validator {
                             } else {
                                 env.set(
                                     &name,
-                                    EnvVar {
+                                    TypeEnvValue {
                                         typeref: value_type,
                                         is_const: stmt_assign.is_const,
                                     },
@@ -295,7 +299,11 @@ impl Validator {
         }
     }
 
-    fn visit_expr(&mut self, expr: &Spanned<Expr>, env: &mut Env<'_>) -> Result<(), Vec<ErrorS>> {
+    fn visit_expr(
+        &mut self,
+        expr: &Spanned<Expr>,
+        env: &mut TypeEnvironment<'_>,
+    ) -> Result<(), Vec<ErrorS>> {
         let (expr, expr_span) = expr;
 
         match expr {
@@ -527,7 +535,7 @@ impl Validator {
 
                     fn_env.set(
                         name,
-                        EnvVar {
+                        TypeEnvValue {
                             typeref: type_ref.clone(),
                             is_const: true,
                         },
@@ -587,7 +595,7 @@ impl Validator {
         &mut self,
         infix: &ExprInfix,
         expected_type: TypeRef,
-        env: &mut Env<'_>,
+        env: &mut TypeEnvironment<'_>,
     ) -> Result<(), Vec<ErrorS>> {
         let mut errs = vec![];
 
@@ -650,7 +658,7 @@ impl Validator {
         &mut self,
         prefix: &ExprPrefix,
         expected_type: TypeRef,
-        env: &mut Env<'_>,
+        env: &mut TypeEnvironment<'_>,
     ) -> Result<(), Vec<ErrorS>> {
         let mut errs = vec![];
 
@@ -694,10 +702,10 @@ mod validator_tests {
         ast::TypeRef,
         errors::{Error, SyntaxError, TypeError},
         parser::parse,
-        validator::EnvVar,
+        validator::TypeEnvValue,
     };
 
-    use super::{Env, Validator};
+    use super::{TypeEnvironment, Validator};
 
     macro_rules! validator_test {
         ($test_name:ident, $input:expr, $expected:expr) => {
@@ -1369,36 +1377,36 @@ mod validator_tests {
 
     #[test]
     fn env_works() {
-        let mut env = Env::new();
+        let mut env = TypeEnvironment::new();
 
         env.set(
             "a",
-            EnvVar {
+            TypeEnvValue {
                 typeref: TypeRef::number(),
                 is_const: false,
             },
         );
 
         assert_eq!(
-            Some(EnvVar {
+            Some(TypeEnvValue {
                 typeref: TypeRef::number(),
                 is_const: false,
             }),
             env.get("a")
         );
 
-        let mut env2 = Env::extend(&env);
+        let mut env2 = TypeEnvironment::extend(&env);
 
         env2.set(
             "a",
-            EnvVar {
+            TypeEnvValue {
                 typeref: TypeRef::unit(),
                 is_const: false,
             },
         );
 
         assert_eq!(
-            Some(EnvVar {
+            Some(TypeEnvValue {
                 typeref: TypeRef::unit(),
                 is_const: false,
             }),
@@ -1406,7 +1414,7 @@ mod validator_tests {
         );
 
         assert_eq!(
-            Some(EnvVar {
+            Some(TypeEnvValue {
                 typeref: TypeRef::number(),
                 is_const: false,
             }),
@@ -1416,18 +1424,18 @@ mod validator_tests {
 
     #[test]
     fn env_type_aliases_work() {
-        let mut env = Env::new();
+        let mut env = TypeEnvironment::new();
 
         env.set(
             "Int",
-            EnvVar {
+            TypeEnvValue {
                 typeref: TypeRef::typed(TypeRef::number()),
                 is_const: true,
             },
         );
 
         assert_eq!(
-            Some(EnvVar {
+            Some(TypeEnvValue {
                 typeref: TypeRef::number(),
                 is_const: true,
             }),
@@ -1437,11 +1445,11 @@ mod validator_tests {
 
     #[test]
     fn env_type_aliases_work_nested() {
-        let mut env = Env::new();
+        let mut env = TypeEnvironment::new();
 
         env.set(
             "NumberList",
-            EnvVar {
+            TypeEnvValue {
                 typeref: TypeRef::typed(TypeRef::number()),
                 is_const: true,
             },
@@ -1449,14 +1457,14 @@ mod validator_tests {
 
         env.set(
             "Alias",
-            EnvVar {
+            TypeEnvValue {
                 typeref: TypeRef::typed(TypeRef("NumberList".to_string(), vec![])),
                 is_const: true,
             },
         );
 
         assert_eq!(
-            Some(EnvVar {
+            Some(TypeEnvValue {
                 typeref: TypeRef::number(),
                 is_const: true,
             }),
