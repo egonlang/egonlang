@@ -2,8 +2,7 @@ use regex::Regex;
 
 use crate::{
     ast::{
-        Expr, ExprIdentifier, ExprInfix, ExprPrefix, ExprS, Identifier, Module, OpInfix, OpPrefix,
-        Stmt, TypeRef,
+        Expr, ExprInfix, ExprPrefix, ExprS, Identifier, Module, OpInfix, OpPrefix, Stmt, TypeRef,
     },
     errors::{
         Error, ErrorS, SyntaxError,
@@ -96,6 +95,87 @@ impl<'a> TypeEnvironment<'a> {
         }
 
         self.env.insert(name.to_string(), value)
+    }
+
+    /// Resolve an expression's type recursively.
+    /// This will resolve value identifiers types as well.
+    ///
+    /// Example
+    ///
+    /// let a = 123;
+    ///
+    /// let b = false;
+    ///
+    /// (a, b,); // This expression's type resolves to (number, bool,)
+    pub fn resolve_expr_type(&self, expr: &ExprS) -> Result<TypeRef, Vec<ErrorS>> {
+        let (expr, _span) = expr;
+
+        let resolved_type = match expr {
+            Expr::Identifier(ident_expr) => {
+                let name = &ident_expr.identifier.name;
+
+                let resolved_type = if let Some(env_var) = self.get(name) {
+                    env_var.typeref
+                } else {
+                    expr.clone().get_type_expr()
+                };
+
+                Ok(resolved_type)
+            }
+            Expr::List(list_expr) => {
+                if list_expr.items.is_empty() {
+                    return Ok(TypeRef::list(TypeRef::unknown()));
+                }
+
+                let first_item = list_expr.items.first().unwrap().clone();
+                let first_item_type = self.resolve_expr_type(&first_item)?;
+
+                let remaining_items: Vec<ExprS> =
+                    list_expr.items.clone().into_iter().skip(1).collect();
+
+                let mut errs = vec![];
+
+                for item in remaining_items {
+                    let (_, item_span) = &item;
+                    let item_type = self.resolve_expr_type(&item)?;
+
+                    if item_type != first_item_type {
+                        errs.push((
+                            Error::TypeError(TypeError::MismatchType {
+                                expected: first_item_type.to_string(),
+                                actual: item_type.to_string(),
+                            }),
+                            item_span.clone(),
+                        ));
+                    }
+                }
+
+                if !errs.is_empty() {
+                    return Err(errs);
+                }
+
+                Ok(TypeRef::list(first_item_type))
+            }
+            Expr::Tuple(tuple_expr) => {
+                if tuple_expr.items.is_empty() {
+                    return Ok(TypeRef::list(TypeRef::unknown()));
+                }
+
+                let item_types = tuple_expr
+                    .items
+                    .clone()
+                    .into_iter()
+                    .map(|x| self.resolve_expr_type(&x).unwrap())
+                    .collect();
+
+                Ok(TypeRef::tuple(item_types))
+            }
+            _ => Ok(expr.clone().get_type_expr()),
+        };
+
+        println!("Resolving type for expr: {expr:?} to {resolved_type:?}");
+
+        resolved_type
     }
 }
 
@@ -314,69 +394,26 @@ impl Validator {
                     return Ok(());
                 }
 
-                let (first_item, _) = list.items.first().unwrap().clone();
+                let first_item = list.items.first().unwrap().clone();
 
-                let first_item_type_ident = match &first_item {
-                    Expr::Identifier(ExprIdentifier { identifier }) => {
-                        if let Some(env_var) = env.get(&identifier.name) {
-                            env_var.typeref.clone()
-                        } else {
-                            TypeRef::identifier()
-                        }
-                    }
-                    _ => first_item.get_type_expr(),
-                };
+                let first_item_type_ident = env.resolve_expr_type(&first_item)?;
 
                 let remaining_items: Vec<ExprS> = list.items.clone().into_iter().skip(1).collect();
 
                 let mut errs = vec![];
 
-                for (item_expr, item_span) in remaining_items {
-                    if let Expr::Identifier(ExprIdentifier { identifier }) = &item_expr {
-                        let identifier = &identifier.name;
+                for item in remaining_items {
+                    let (_, item_span) = &item;
+                    let item_type = env.resolve_expr_type(&item)?;
 
-                        if let Some(env_var) = env.get(identifier) {
-                            let env_var_type = &env_var.typeref;
-
-                            if env_var_type != &first_item_type_ident {
-                                errs.push((
-                                    Error::TypeError(TypeError::MismatchType {
-                                        expected: first_item_type_ident.to_string(),
-                                        actual: env_var_type.to_string(),
-                                    }),
-                                    item_span.clone(),
-                                ));
-                            }
-                        } else {
-                            errs.push((
-                                Error::TypeError(TypeError::MismatchType {
-                                    expected: first_item_type_ident.to_string(),
-                                    actual: TypeRef::identifier().to_string(),
-                                }),
-                                item_span.clone(),
-                            ));
-                        }
-                    } else {
-                        let item_typeref: TypeRef = match &item_expr {
-                            Expr::Identifier(ExprIdentifier { identifier }) => {
-                                if let Some(env_var) = env.get(&identifier.name) {
-                                    env_var.typeref.clone()
-                                } else {
-                                    item_expr.clone().get_type_expr()
-                                }
-                            }
-                            _ => item_expr.clone().get_type_expr(),
-                        };
-
-                        if item_typeref != first_item_type_ident {
-                            errs.push((
-                                Error::TypeError(TypeError::MismatchType {
-                                    expected: first_item_type_ident.to_string(),
-                                    actual: item_typeref.to_string(),
-                                }),
-                                item_span.clone(),
-                            ));
-                        }
+                    if item_type != first_item_type_ident {
+                        errs.push((
+                            Error::TypeError(TypeError::MismatchType {
+                                expected: first_item_type_ident.to_string(),
+                                actual: item_type.to_string(),
+                            }),
+                            item_span.clone(),
+                        ));
                     }
                 }
 
@@ -557,25 +594,15 @@ impl Validator {
                         }
                     }
 
-                    if let Some((block_return_expr, returning_expr_span)) = &block.return_expr {
-                        // A function's body block's return type may be an identifier
-                        // Identifiers need to be resolved to get the correct type
-                        let block_return_expr: TypeRef = match block_return_expr {
-                            Expr::Identifier(ExprIdentifier { identifier }) => {
-                                if let Some(env_var) = fn_env.get(&identifier.name) {
-                                    env_var.typeref.clone()
-                                } else {
-                                    block_return_expr.clone().get_type_expr()
-                                }
-                            }
-                            _ => block_return_expr.clone().get_type_expr(),
-                        };
+                    if let Some(block_return) = &block.return_expr {
+                        let block_return_type = fn_env.resolve_expr_type(block_return)?;
+                        let (_, returning_expr_span) = block_return;
 
-                        if fn_return_type != block_return_expr {
+                        if fn_return_type != block_return_type {
                             errs.push((
                                 Error::TypeError(TypeError::MismatchType {
                                     expected: fn_return_type.to_string(),
-                                    actual: block_return_expr.to_string(),
+                                    actual: block_return_type.to_string(),
                                 }),
                                 returning_expr_span.clone(),
                             ));
@@ -607,43 +634,26 @@ impl Validator {
         let rt_errs = self.visit_expr(&infix.rt, env).err().unwrap_or_default();
         errs.extend(rt_errs);
 
-        let (lt, lt_span) = infix.lt.clone();
-        let (rt, rt_span) = infix.rt.clone();
+        let lt_type = env.resolve_expr_type(&infix.lt)?;
+        let (_, lt_span) = infix.lt.clone();
 
-        let lt_typeref = if let Expr::Identifier(ExprIdentifier { identifier }) = &lt {
-            if let Some(env_var) = env.get(&identifier.name) {
-                env_var.typeref.clone()
-            } else {
-                lt.get_type_expr()
-            }
-        } else {
-            lt.get_type_expr()
-        };
+        let rt_type = env.resolve_expr_type(&infix.rt)?;
+        let (_, rt_span) = infix.rt.clone();
 
-        let rt_typeref = if let Expr::Identifier(ExprIdentifier { identifier }) = &rt {
-            if let Some(env_var) = env.get(&identifier.name) {
-                env_var.typeref.clone()
-            } else {
-                rt.get_type_expr()
-            }
-        } else {
-            rt.get_type_expr()
-        };
-
-        if lt_typeref != expected_type {
+        if lt_type != expected_type {
             errs.push((
                 Error::TypeError(TypeError::MismatchType {
                     expected: expected_type.to_string(),
-                    actual: lt_typeref.to_string(),
+                    actual: lt_type.to_string(),
                 }),
                 lt_span,
             ));
         }
-        if rt_typeref != expected_type {
+        if rt_type != expected_type {
             errs.push((
                 Error::TypeError(TypeError::MismatchType {
                     expected: expected_type.to_string(),
-                    actual: rt_typeref.to_string(),
+                    actual: rt_type.to_string(),
                 }),
                 rt_span,
             ));
@@ -667,22 +677,14 @@ impl Validator {
         let rt_errs = self.visit_expr(&prefix.rt, env).err().unwrap_or_default();
         errs.extend(rt_errs);
 
-        let (rt, rt_span) = prefix.rt.clone();
-        let rt_typeref = if let Expr::Identifier(ExprIdentifier { identifier }) = &rt {
-            if let Some(env_var) = env.get(&identifier.name) {
-                env_var.typeref.clone()
-            } else {
-                rt.get_type_expr()
-            }
-        } else {
-            rt.get_type_expr()
-        };
+        let rt_type = env.resolve_expr_type(&prefix.rt)?;
+        let (_, rt_span) = prefix.rt.clone();
 
-        if rt_typeref != expected_type {
+        if rt_type != expected_type {
             errs.push((
                 Error::TypeError(TypeError::MismatchType {
                     expected: expected_type.to_string(),
-                    actual: rt_typeref.to_string(),
+                    actual: rt_type.to_string(),
                 }),
                 rt_span,
             ));
