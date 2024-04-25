@@ -2,6 +2,7 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::{fs, str};
 
+use egonlang_core::validator::TypeEnvironment;
 use egonlang_core::validator::Validator;
 
 use pretty_assertions::assert_eq;
@@ -22,7 +23,12 @@ fn integration(#[files("res/examples/**/*.eg")] path: PathBuf) {
     }
 
     let mut got_output = Vec::new();
-    if let Err(e) = parse(&source, 0).and_then(|module| Validator::default().validate(&module)) {
+
+    let mut env = TypeEnvironment::new();
+
+    if let Err(e) =
+        parse(&source, 0).and_then(|module| Validator::default().validate(&module, &mut env))
+    {
         let m = e
             .into_iter()
             .map(|(e, _)| e.to_string())

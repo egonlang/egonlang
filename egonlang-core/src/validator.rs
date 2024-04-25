@@ -33,13 +33,13 @@ impl TypeEnvValue {
 }
 
 #[derive(Default)]
-struct TypeEnvironment<'a> {
+pub struct TypeEnvironment<'a> {
     root: Option<&'a TypeEnvironment<'a>>,
     env: HashMap<String, TypeEnvValue>,
 }
 
 impl<'a> TypeEnvironment<'a> {
-    fn new() -> TypeEnvironment<'a> {
+    pub fn new() -> TypeEnvironment<'a> {
         TypeEnvironment {
             root: None,
             env: HashMap::new(),
@@ -101,13 +101,15 @@ impl<'a> TypeEnvironment<'a> {
 
 impl Validator {
     /// Validate a [`Module`]'s AST
-    pub fn validate(&mut self, module: &Module) -> Result<(), Vec<ErrorS>> {
+    pub fn validate(
+        &mut self,
+        module: &Module,
+        env: &mut TypeEnvironment,
+    ) -> Result<(), Vec<ErrorS>> {
         let mut all_errs: Vec<ErrorS> = vec![];
 
-        let mut env = TypeEnvironment::new();
-
         for stmt in &module.stmts {
-            if let Err(errs) = self.visit_stmt(stmt, &mut env) {
+            if let Err(errs) = self.visit_stmt(stmt, env) {
                 all_errs.extend(errs);
             }
         }
@@ -127,7 +129,7 @@ impl Validator {
     fn visit_stmt(
         &mut self,
         stmt: &Spanned<Stmt>,
-        env: &mut TypeEnvironment<'_>,
+        env: &mut TypeEnvironment,
     ) -> Result<(), Vec<ErrorS>> {
         let (stmt, span) = stmt;
 
@@ -302,7 +304,7 @@ impl Validator {
     fn visit_expr(
         &mut self,
         expr: &Spanned<Expr>,
-        env: &mut TypeEnvironment<'_>,
+        env: &mut TypeEnvironment,
     ) -> Result<(), Vec<ErrorS>> {
         let (expr, expr_span) = expr;
 
@@ -711,8 +713,10 @@ mod validator_tests {
         ($test_name:ident, $input:expr, $expected:expr) => {
             #[test]
             fn $test_name() {
-                let result =
-                    parse($input, 0).and_then(|module| Validator::default().validate(&module));
+                let mut env = TypeEnvironment::new();
+
+                let result = parse($input, 0)
+                    .and_then(|module| Validator::default().validate(&module, &mut env));
 
                 assert_eq!($expected, result);
             }
