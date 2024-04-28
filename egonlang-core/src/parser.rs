@@ -91,7 +91,7 @@ mod parser_tests {
     use pretty_assertions::assert_eq;
 
     use crate::ast::{
-        self, Expr, ExprAssign, ExprBlock, ExprIdentifier, ExprIf, ExprInfix, ExprList,
+        self, Expr, ExprAssign, ExprBlock, ExprFn, ExprIdentifier, ExprIf, ExprInfix, ExprList,
         ExprLiteral, ExprRange, ExprTuple, ExprType, Identifier, Module, OpInfix, Stmt, StmtAssign,
         StmtExpr, TypeRef,
     };
@@ -1815,6 +1815,173 @@ mod parser_tests {
                     ))
                 }),
                 0..31
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_type_alias_2,
+        "
+        type NumberList = list<number>;
+        let a: NumberList = [1, 2];
+        ",
+        Ok(Module {
+            stmts: vec![
+                (
+                    Stmt::Assign(StmtAssign {
+                        identifier: Identifier {
+                            name: "NumberList".to_string()
+                        },
+                        type_expr: Some((
+                            Expr::Type(ExprType(TypeRef::typed(TypeRef::list(TypeRef::number())))),
+                            27..39
+                        )),
+                        is_const: true,
+                        value: Some((
+                            Expr::Type(ExprType(TypeRef::typed(TypeRef::list(TypeRef::number())))),
+                            27..39
+                        ))
+                    }),
+                    9..40
+                ),
+                (
+                    Stmt::Assign(StmtAssign {
+                        identifier: Identifier {
+                            name: "a".to_string()
+                        },
+                        type_expr: Some((
+                            Expr::Type(ExprType(TypeRef("NumberList".to_string(), vec![]))),
+                            56..66
+                        )),
+                        is_const: false,
+                        value: Some((
+                            Expr::List(ExprList {
+                                items: vec![
+                                    (Expr::Literal(ExprLiteral::Number(1f64)), 70..71),
+                                    (Expr::Literal(ExprLiteral::Number(2f64)), 73..74)
+                                ]
+                            }),
+                            69..75
+                        ))
+                    }),
+                    49..76
+                )
+            ]
+        })
+    );
+
+    parser_test!(
+        parse_type_alias_3,
+        "
+        (): () => {
+            type Int = number;
+            let a: number = 5;
+            let b: Int = a + 10;
+            b
+        };
+        ",
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Expr(StmtExpr {
+                    expr: (
+                        Expr::Fn(Box::new(ExprFn {
+                            name: None,
+                            params: vec![],
+                            return_type: (TypeRef::unit(), 13..15),
+                            body: (
+                                Expr::Block(Box::new(ExprBlock {
+                                    stmts: vec![
+                                        (
+                                            Stmt::Assign(StmtAssign {
+                                                identifier: Identifier {
+                                                    name: "Int".to_string()
+                                                },
+                                                type_expr: Some((
+                                                    Expr::Type(ExprType(TypeRef::typed(
+                                                        TypeRef::number()
+                                                    ))),
+                                                    44..50
+                                                )),
+                                                is_const: true,
+                                                value: Some((
+                                                    Expr::Type(ExprType(TypeRef::typed(
+                                                        TypeRef::number()
+                                                    ))),
+                                                    44..50
+                                                ))
+                                            }),
+                                            33..51
+                                        ),
+                                        (
+                                            Stmt::Assign(StmtAssign {
+                                                identifier: Identifier {
+                                                    name: "a".to_string()
+                                                },
+                                                type_expr: Some((
+                                                    Expr::Type(ExprType(TypeRef::number())),
+                                                    71..77
+                                                )),
+                                                is_const: false,
+                                                value: Some((
+                                                    Expr::Literal(ExprLiteral::Number(5f64)),
+                                                    80..81
+                                                ))
+                                            }),
+                                            64..82
+                                        ),
+                                        (
+                                            Stmt::Assign(StmtAssign {
+                                                identifier: Identifier {
+                                                    name: "b".to_string()
+                                                },
+                                                type_expr: Some((
+                                                    Expr::Type(ExprType(TypeRef(
+                                                        "Int".to_string(),
+                                                        vec![]
+                                                    ))),
+                                                    102..105
+                                                )),
+                                                is_const: false,
+                                                value: Some((
+                                                    Expr::Infix(Box::new(ExprInfix {
+                                                        lt: (
+                                                            Expr::Identifier(ExprIdentifier {
+                                                                identifier: Identifier {
+                                                                    name: "a".to_string()
+                                                                }
+                                                            }),
+                                                            108..109
+                                                        ),
+                                                        op: OpInfix::Add,
+                                                        rt: (
+                                                            Expr::Literal(ExprLiteral::Number(
+                                                                10f64
+                                                            )),
+                                                            112..114
+                                                        )
+                                                    })),
+                                                    108..114
+                                                ))
+                                            }),
+                                            95..115
+                                        )
+                                    ],
+                                    return_expr: Some((
+                                        Expr::Identifier(ExprIdentifier {
+                                            identifier: Identifier {
+                                                name: "b".to_string()
+                                            }
+                                        }),
+                                        128..129
+                                    ))
+                                })),
+                                19..139
+                            )
+                        })),
+                        9..139
+                    )
+                }),
+                9..140
             )]
         })
     );
