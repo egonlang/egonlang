@@ -2,5 +2,11 @@
     "rust-analyzer.linkedProjects": [
         "./egonlang-core/Cargo.toml",
         "./egonlang-core/Cargo.toml"
+    ],
+    "lldb.showDisassembly": "auto",
+    "lldb.dereferencePointers": true,
+    "lldb.consoleMode": "commands",
+    "lldb.launch.sourceLanguages": [
+        "rust"
     ]
 }
