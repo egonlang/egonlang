@@ -272,12 +272,10 @@ impl Display for ExprBlock {
                 stmts,
                 return_expr.as_ref().unwrap().0
             ))
+        } else if stmts.is_empty() {
+            f.write_fmt(format_args!(r"{{}}"))
         } else {
-            if stmts.is_empty() {
-                f.write_fmt(format_args!(r"{{}}"))
-            } else {
-                f.write_fmt(format_args!(r"{{ {} }}", stmts))
-            }
+            f.write_fmt(format_args!(r"{{ {} }}", stmts))
         }
     }
 }
