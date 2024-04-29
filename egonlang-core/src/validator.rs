@@ -301,7 +301,7 @@ impl Validator {
                 } else {
                     // e.g. let a;
                     if stmt_assign.type_expr.is_none() && stmt_assign.value.is_none() {
-                    errs.push((Error::TypeError(TypeError::UnknownType), span.clone()));
+                        errs.push((Error::TypeError(TypeError::UnknownType), span.clone()));
                     }
                 }
 
@@ -314,7 +314,7 @@ impl Validator {
                         let assign_type = stmt_assign.type_expr.clone().unwrap();
                         let value = stmt_assign.value.clone().unwrap();
 
-                        let (value_expr, _) = &value;
+                        let (value_expr, value_span) = &value;
 
                         let value_type = env.resolve_expr_type(&value)?;
 
@@ -384,7 +384,7 @@ impl Validator {
                                         expected: type_identifier.to_string(),
                                         actual: value_type.to_string(),
                                     }),
-                                    span.clone(),
+                                    value_span.clone(),
                                 ));
                             };
                         // If the assigning value does match the assign type
@@ -857,7 +857,7 @@ mod validator_tests {
                 expected: "number".to_string(),
                 actual: "string".to_string()
             }),
-            0..22
+            16..21
         )])
     );
 
@@ -869,7 +869,7 @@ mod validator_tests {
                 expected: "number".to_string(),
                 actual: "range".to_string()
             }),
-            0..22
+            16..21
         )])
     );
 
@@ -881,7 +881,7 @@ mod validator_tests {
                 expected: "number".to_string(),
                 actual: "list<number>".to_string()
             }),
-            0..26
+            16..25
         )])
     );
 
@@ -911,7 +911,7 @@ mod validator_tests {
                 expected: "number".to_string(),
                 actual: "string".to_string()
             }),
-            0..26
+            16..25
         )])
     );
 
@@ -981,7 +981,7 @@ mod validator_tests {
                 expected: "()".to_string(),
                 actual: "string".to_string()
             }),
-            0..22
+            12..21
         )])
     );
 
@@ -993,7 +993,7 @@ mod validator_tests {
                 expected: "()".to_string(),
                 actual: "number".to_string()
             }),
-            0..20
+            12..19
         )])
     );
 
@@ -1011,7 +1011,7 @@ mod validator_tests {
                 expected: "()".to_string(),
                 actual: "list<number>".to_string()
             }),
-            0..26
+            12..25
         )])
     );
 
@@ -1023,7 +1023,7 @@ mod validator_tests {
                 expected: "()".to_string(),
                 actual: "tuple<number, number, number>".to_string()
             }),
-            0..27
+            12..26
         )])
     );
 
@@ -1035,7 +1035,7 @@ mod validator_tests {
                 expected: "()".to_string(),
                 actual: "bool".to_string()
             }),
-            0..22
+            12..21
         )])
     );
 
@@ -1047,7 +1047,7 @@ mod validator_tests {
                 expected: "()".to_string(),
                 actual: "number".to_string()
             }),
-            0..24
+            12..23
         )])
     );
 
@@ -1059,7 +1059,7 @@ mod validator_tests {
                 expected: "()".to_string(),
                 actual: "number".to_string()
             }),
-            0..20
+            12..19
         )])
     );
 
@@ -1366,7 +1366,7 @@ mod validator_tests {
                 expected: "number".to_string(),
                 actual: "bool".to_string()
             }),
-            30..53
+            46..52
         )])
     );
 
