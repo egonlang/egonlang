@@ -14,9 +14,6 @@ use crate::{
 
 use std::collections::HashMap;
 
-#[derive(Default)]
-pub struct Validator {}
-
 #[derive(Debug, PartialEq, Clone)]
 pub struct TypeEnvValue {
     pub typeref: TypeRef,
@@ -85,16 +82,47 @@ impl<'a> TypeEnvironment<'a> {
     pub fn set(&mut self, name: &str, value: TypeEnvValue) -> Option<TypeEnvValue> {
         // Is this a type alias?
         if value.typeref.0 == *"type" {
+            // Grab the aliased type from the value's typeref
+            //
+            // type A = number;
+            // ---------^ TypeRef::typed(TypeRef::number())
+            //
+            // This grabs the type `number` from the assigment value
+            // new_type = TypeRef::number()
             let new_typeref = value.typeref.1.first().unwrap().clone();
 
+            // Look up the new typeref (as a string) in the type environment
+            // This flattens out type aliases aliasing type aliases
+            //
+            // type A = number;
+            // type B = A;
+            // ---------^ TypeRef::typed(TypeRef::number())
             return match self.get(&new_typeref.to_string()) {
-                Some(r) => self.env.insert(name.to_string(), r),
-                None => self
-                    .env
-                    .insert(name.to_string(), value.map_typeref(new_typeref)),
+                Some(aliased_type) => {
+                    // Set the name to the flattened resolved type in the type env
+                    //
+                    // type A = number;
+                    // type B = A;
+                    //
+                    // B is set to `number`
+                    // println!("Set `{name}` from type env as {aliased_type:?}");
+                    self.env.insert(name.to_string(), aliased_type)
+                }
+                None => {
+                    // Set the name to the type
+                    //
+                    // type A = number;
+                    //
+                    // A is set to `number`
+                    // println!("Set `{name}` from type env as {new_typeref:?}");
+                    self.env
+                        .insert(name.to_string(), value.map_typeref(new_typeref))
+                }
             };
         }
 
+        // Type isn't aliased, set name to the value's type
+        // println!("Set `{name}` from type env as {value:?}");
         self.env.insert(name.to_string(), value)
     }
 
@@ -115,10 +143,27 @@ impl<'a> TypeEnvironment<'a> {
             Expr::Identifier(ident_expr) => self.resolve_identifier_type(ident_expr, span),
             Expr::List(list_expr) => self.resolve_list_type(list_expr),
             Expr::Tuple(tuple_expr) => self.resolve_tuple_type(tuple_expr),
+            Expr::Block(block_expr) => {
+                let block_return_type = block_expr
+                    .return_expr
+                    .clone()
+                    .map(|x| self.resolve_expr_type(&x).unwrap())
+                    .unwrap_or(TypeRef::unit());
+
+                Ok(block_return_type)
+            }
+            Expr::Type(type_expr) => {
+                let type_string = type_expr.0.to_string();
+                let a = self.get(type_string.as_str());
+
+                if let Some(a) = &a {
+                    return Ok(a.typeref.clone());
+                }
+
+                Ok(type_expr.0.clone())
+            }
             _ => Ok(expr.clone().get_type_expr()),
         };
-
-        println!("Resolving type for expr: {expr:?} to {resolved_type:?}");
 
         resolved_type
     }
@@ -189,6 +234,9 @@ impl<'a> TypeEnvironment<'a> {
     }
 }
 
+#[derive(Default)]
+pub struct Validator {}
+
 impl Validator {
     /// Validate a [`Module`]'s AST
     pub fn validate(
@@ -233,7 +281,9 @@ impl Validator {
                 let name = stmt_assign.identifier.name.clone();
 
                 // const declarations
+                // e.g. const a = 123;
                 if stmt_assign.is_const {
+                    // e.g. const a: number;
                     if stmt_assign.value.is_none() {
                         errs.push((
                             Error::SyntaxError(SyntaxError::UninitializedConst {
@@ -242,24 +292,38 @@ impl Validator {
                             span.clone(),
                         ));
 
+                        // e.g. const a;
                         if stmt_assign.type_expr.is_none() {
                             errs.push((Error::TypeError(TypeError::UnknownType), span.clone()));
                         }
                     }
                 // let declarations
-                } else if stmt_assign.type_expr.is_none() && stmt_assign.value.is_none() {
+                } else {
+                    // e.g. let a;
+                    if stmt_assign.type_expr.is_none() && stmt_assign.value.is_none() {
                     errs.push((Error::TypeError(TypeError::UnknownType), span.clone()));
+                    }
                 }
 
+                // Assignment has a type
+                // e.g. let a: number;
                 if stmt_assign.type_expr.is_some() {
+                    // Assignment has a value
+                    // e.g. let a: number = 123;
                     if stmt_assign.value.is_some() {
-                        let (type_expr, _) = stmt_assign.type_expr.clone().unwrap();
-                        let mut type_identifier = type_expr.get_type_expr();
+                        let assign_type = stmt_assign.type_expr.clone().unwrap();
                         let value = stmt_assign.value.clone().unwrap();
 
-                        let value_expr = value.0;
-                        let value_type = value_expr.clone().get_type_expr();
+                        let (value_expr, _) = &value;
 
+                        let value_type = env.resolve_expr_type(&value)?;
+
+                        // Valid type aliases are PascalCase
+                        //
+                        // type Int = number;
+                        // -----^ Valid Type Alias
+                        // type int = number;
+                        // -----^ Invalid Type Alias
                         if value_type.0 == *"type" && !pattern.is_match(&name) {
                             errs.push((
                                 Error::SyntaxError(SyntaxError::InvalidTypeAlias {
@@ -269,16 +333,21 @@ impl Validator {
                             ));
                         }
 
-                        // Resolve any type identifier type aliases
-                        if let Some(type_identifier_aliased_to) =
-                            env.get(&type_identifier.to_string())
-                        {
-                            type_identifier = type_identifier_aliased_to.typeref.clone();
-                        }
+                        // If the assign type is an aliased type
+                        // Example
+                        //
+                        // type A = number;
+                        // let a: A = 123;
+                        // -------^ This is an aliased type
+                        let type_identifier = env.resolve_expr_type(&assign_type)?;
 
+                        // If the assigning value doesn't match the assign type
+                        // e.g. let a: number = "foo";
+                        // e.g. let a: list<string> = [1, 2];
                         if type_identifier != value_type {
-                            // This checks for empty lists being assigned to a list<T>
-                            // e.g. let a: list<number> = [];
+                            // e.g. let a: list<number> = [];'
+                            // If that is the case, accept the empty string and assign
+                            // the variable's name to the assign type
                             if type_identifier.0 == TypeRef::list(TypeRef::unknown()).0
                                 && value_type == TypeRef::list(TypeRef::unknown())
                             {
@@ -296,6 +365,7 @@ impl Validator {
                                     let value_identifier = &identifier.identifier.name;
 
                                     if let Some(value_type) = env.get(value_identifier) {
+                                        // If the resolved type doesn't match, generate a validation error
                                         if type_identifier != value_type.typeref {
                                             errs.push((
                                                 Error::TypeError(TypeError::MismatchType {
@@ -317,6 +387,9 @@ impl Validator {
                                     span.clone(),
                                 ));
                             };
+                        // If the assigning value does match the assign type
+                        // e.g. let a: string = "foo";
+                        // e.g. let a: list<number> = [1, 2];
                         } else {
                             // This checks for empty lists being assigned to a list<unknown>
                             // e.g. let a: list<unknown> = [];
@@ -328,13 +401,14 @@ impl Validator {
                                 env.set(
                                     &name,
                                     TypeEnvValue {
-                                        typeref: type_identifier,
+                                        typeref: value_type,
                                         is_const: stmt_assign.is_const,
                                     },
                                 );
                             };
                         }
                     // Assignment value was not defined
+                    // e.g. let a: number;
                     } else {
                         let (type_expr, _) = stmt_assign.type_expr.clone().unwrap();
                         let type_identifier = type_expr.get_type_expr();
