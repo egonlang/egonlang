@@ -144,13 +144,15 @@ impl<'a> TypeEnvironment<'a> {
             Expr::List(list_expr) => self.resolve_list_type(list_expr),
             Expr::Tuple(tuple_expr) => self.resolve_tuple_type(tuple_expr),
             Expr::Block(block_expr) => {
-                let block_return_type = block_expr
-                    .return_expr
-                    .clone()
-                    .map(|x| self.resolve_expr_type(&x).unwrap())
-                    .unwrap_or(TypeRef::unit());
+                let a = block_expr.return_expr.clone();
 
-                Ok(block_return_type)
+                if let Some(a) = a {
+                    let result = self.resolve_expr_type(&a);
+
+                    return result;
+                } else {
+                    return Ok(TypeRef::unit());
+                }
             }
             Expr::Type(type_expr) => {
                 let type_string = type_expr.0.to_string();

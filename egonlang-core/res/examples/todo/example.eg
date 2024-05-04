@@ -1,0 +1,7 @@
+let a: number = {
+    let a: string = "foo";
+
+    a
+};
+
+// out: TypeError: mismatched types: expected type `number` but received `string`
