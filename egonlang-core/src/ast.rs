@@ -216,6 +216,22 @@ pub enum ExprLiteral {
     String(String),
 }
 
+impl From<Expr> for f64 {
+    fn from(value: Expr) -> Self {
+        match value {
+            Expr::Literal(literal) => match literal {
+                ExprLiteral::Number(number) => number,
+                _ => todo!(),
+            },
+            Expr::Prefix(prefix) => match prefix.op {
+                OpPrefix::Negate => prefix.rt.0.into(),
+                OpPrefix::Not => todo!(),
+            },
+            _ => todo!(),
+        }
+    }
+}
+
 impl Display for ExprLiteral {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {

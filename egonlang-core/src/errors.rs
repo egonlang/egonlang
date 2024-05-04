@@ -40,6 +40,8 @@ pub enum SyntaxError {
     EmptyRange,
     #[error("type aliases are required to be PascalCase: `{name}`")]
     InvalidTypeAlias { name: String },
+    #[error("can not divide by zero")]
+    DivideByZero,
 }
 
 #[derive(Debug, Error, Eq, PartialEq, Serialize, Deserialize)]

@@ -719,10 +719,10 @@ impl Validator {
         errs.extend(rt_errs);
 
         let lt_type = env.resolve_expr_type(&infix.lt)?;
-        let (_, lt_span) = infix.lt.clone();
+        let (lt_expr, lt_span) = infix.lt.clone();
 
         let rt_type = env.resolve_expr_type(&infix.rt)?;
-        let (_, rt_span) = infix.rt.clone();
+        let (rt_expr, rt_span) = infix.rt.clone();
 
         if lt_type != expected_type {
             errs.push((
@@ -730,7 +730,7 @@ impl Validator {
                     expected: expected_type.to_string(),
                     actual: lt_type.to_string(),
                 }),
-                lt_span,
+                lt_span.clone(),
             ));
         }
         if rt_type != expected_type {
@@ -739,9 +739,22 @@ impl Validator {
                     expected: expected_type.to_string(),
                     actual: rt_type.to_string(),
                 }),
-                rt_span,
+                rt_span.clone(),
             ));
         }
+
+        if let OpInfix::Divide = &infix.op {
+            let lt_value: f64 = lt_expr.into();
+            let rt_value: f64 = rt_expr.into();
+
+            if lt_value == 0f64 {
+                errs.push((Error::SyntaxError(SyntaxError::DivideByZero), lt_span));
+            }
+
+            if rt_value == 0f64 {
+                errs.push((Error::SyntaxError(SyntaxError::DivideByZero), rt_span));
+            }
+        };
 
         if !errs.is_empty() {
             return Err(errs);
@@ -1454,12 +1467,24 @@ mod validator_tests {
     );
 
     validator_test!(
-        validate_list_expr_mismatch_item_types_with_identifiers,
-        "[1, a];",
-        Err(vec![(
-            Error::TypeError(TypeError::Undefined("a".to_string())),
-            4..5
-        )])
+        validate_divide_by_zero,
+        "0 / 1;",
+        Err(vec![(Error::SyntaxError(SyntaxError::DivideByZero), 0..1)])
+    );
+
+    validator_test!(
+        validate_divide_by_zero_2,
+        "1 / 0;",
+        Err(vec![(Error::SyntaxError(SyntaxError::DivideByZero), 4..5)])
+    );
+
+    validator_test!(
+        validate_divide_by_zero_3,
+        "0 / 0;",
+        Err(vec![
+            (Error::SyntaxError(SyntaxError::DivideByZero), 0..1),
+            (Error::SyntaxError(SyntaxError::DivideByZero), 4..5)
+        ])
     );
 
     #[test]
