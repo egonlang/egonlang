@@ -7,7 +7,7 @@ use crate::{
     },
     errors::{
         Error, ErrorS, SyntaxError,
-        TypeError::{self, UknownListType, UnknownType},
+        TypeError::{self},
     },
     span::{Span, Spanned},
 };
@@ -180,7 +180,7 @@ impl<'a> TypeEnvironment<'a> {
         match self.get(name) {
             Some(env_var) => Ok(env_var.typeref),
             None => Err(vec![(
-                Error::TypeError(TypeError::Undefined(name.to_string())),
+                TypeError::Undefined(name.to_string()).into(),
                 span.clone(),
             )]),
         }
@@ -204,10 +204,11 @@ impl<'a> TypeEnvironment<'a> {
 
             if item_type != first_item_type {
                 errs.push((
-                    Error::TypeError(TypeError::MismatchType {
+                    TypeError::MismatchType {
                         expected: first_item_type.to_string(),
                         actual: item_type.to_string(),
-                    }),
+                    }
+                    .into(),
                     item_span.clone(),
                 ));
             }
@@ -288,22 +289,20 @@ impl Validator {
                     // e.g. const a: number;
                     if stmt_assign.value.is_none() {
                         errs.push((
-                            Error::SyntaxError(SyntaxError::UninitializedConst {
-                                name: name.clone(),
-                            }),
+                            SyntaxError::UninitializedConst { name: name.clone() }.into(),
                             span.clone(),
                         ));
 
                         // e.g. const a;
                         if stmt_assign.type_expr.is_none() {
-                            errs.push((Error::TypeError(TypeError::UnknownType), span.clone()));
+                            errs.push((TypeError::UnknownType.into(), span.clone()));
                         }
                     }
                 // let declarations
                 } else {
                     // e.g. let a;
                     if stmt_assign.type_expr.is_none() && stmt_assign.value.is_none() {
-                        errs.push((Error::TypeError(TypeError::UnknownType), span.clone()));
+                        errs.push((TypeError::UnknownType.into(), span.clone()));
                     }
                 }
 
@@ -370,10 +369,11 @@ impl Validator {
                                         // If the resolved type doesn't match, generate a validation error
                                         if type_identifier != value_type.typeref {
                                             errs.push((
-                                                Error::TypeError(TypeError::MismatchType {
+                                                TypeError::MismatchType {
                                                     expected: type_identifier.to_string(),
                                                     actual: value_type.typeref.to_string(),
-                                                }),
+                                                }
+                                                .into(),
                                                 value.1.clone(),
                                             ));
                                         }
@@ -382,10 +382,11 @@ impl Validator {
                             // All other cases are a type mismatch
                             } else {
                                 errs.push((
-                                    Error::TypeError(TypeError::MismatchType {
+                                    TypeError::MismatchType {
                                         expected: type_identifier.to_string(),
                                         actual: value_type.to_string(),
-                                    }),
+                                    }
+                                    .into(),
                                     value_span.clone(),
                                 ));
                             };
@@ -398,7 +399,7 @@ impl Validator {
                             if type_identifier == TypeRef::list(TypeRef::unknown())
                                 && value_type == TypeRef::list(TypeRef::unknown())
                             {
-                                errs.push((Error::TypeError(UknownListType {}), span.clone()));
+                                errs.push((TypeError::UknownListType.into(), span.clone()));
                             } else {
                                 env.set(
                                     &name,
@@ -416,7 +417,7 @@ impl Validator {
                         let type_identifier = type_expr.get_type_expr();
 
                         if type_identifier == TypeRef::unknown() {
-                            errs.push((Error::TypeError(UnknownType {}), span.clone()));
+                            errs.push((TypeError::UnknownType.into(), span.clone()));
                         } else {
                             env.set(
                                 &name,
@@ -442,7 +443,7 @@ impl Validator {
                             // This checks for empty lists being assigned to a list<T>
                             // e.g. let a = [];
                             if value_type == TypeRef::list(TypeRef::unknown()) {
-                                errs.push((Error::TypeError(UknownListType {}), span.clone()));
+                                errs.push((TypeError::UknownListType.into(), span.clone()));
                             } else {
                                 env.set(
                                     &name,
@@ -494,10 +495,11 @@ impl Validator {
 
                     if item_type != first_item_type_ident {
                         errs.push((
-                            Error::TypeError(TypeError::MismatchType {
+                            TypeError::MismatchType {
                                 expected: first_item_type_ident.to_string(),
                                 actual: item_type.to_string(),
-                            }),
+                            }
+                            .into(),
                             item_span.clone(),
                         ));
                     }
@@ -530,10 +532,11 @@ impl Validator {
 
                 if cond_expr.0 != *"bool" {
                     return Err(vec![(
-                        Error::TypeError(TypeError::MismatchType {
+                        TypeError::MismatchType {
                             expected: "bool".to_string(),
                             actual: cond_expr.to_string(),
-                        }),
+                        }
+                        .into(),
                         if_.cond.1.clone(),
                     )]);
                 }
@@ -546,10 +549,11 @@ impl Validator {
 
                     if else_type_ref != then_type_ref {
                         return Err(vec![(
-                            Error::TypeError(TypeError::MismatchType {
+                            TypeError::MismatchType {
                                 expected: then_type_ref.to_string(),
                                 actual: else_type_ref.to_string(),
-                            }),
+                            }
+                            .into(),
                             else_span.clone(),
                         )]);
                     }
@@ -634,10 +638,11 @@ impl Validator {
 
                         if env_var_type != value_type {
                             errs.push((
-                                Error::TypeError(TypeError::MismatchType {
+                                TypeError::MismatchType {
                                     expected: env_var_type.to_string(),
                                     actual: value_type.to_string(),
-                                }),
+                                }
+                                .into(),
                                 assign.value.1.clone(),
                             ));
                         }
@@ -686,10 +691,11 @@ impl Validator {
 
                         if fn_return_type != block_return_type {
                             errs.push((
-                                Error::TypeError(TypeError::MismatchType {
+                                TypeError::MismatchType {
                                     expected: fn_return_type.to_string(),
                                     actual: block_return_type.to_string(),
-                                }),
+                                }
+                                .into(),
                                 returning_expr_span.clone(),
                             ));
                         }
@@ -728,19 +734,21 @@ impl Validator {
 
         if lt_type != expected_type {
             errs.push((
-                Error::TypeError(TypeError::MismatchType {
+                TypeError::MismatchType {
                     expected: expected_type.to_string(),
                     actual: lt_type.to_string(),
-                }),
+                }
+                .into(),
                 lt_span.clone(),
             ));
         }
         if rt_type != expected_type {
             errs.push((
-                Error::TypeError(TypeError::MismatchType {
+                TypeError::MismatchType {
                     expected: expected_type.to_string(),
                     actual: rt_type.to_string(),
-                }),
+                }
+                .into(),
                 rt_span.clone(),
             ));
         }
@@ -781,10 +789,11 @@ impl Validator {
 
         if rt_type != expected_type {
             errs.push((
-                Error::TypeError(TypeError::MismatchType {
+                TypeError::MismatchType {
                     expected: expected_type.to_string(),
                     actual: rt_type.to_string(),
-                }),
+                }
+                .into(),
                 rt_span,
             ));
         }
@@ -836,7 +845,7 @@ mod validator_tests {
                 }),
                 0..8
             ),
-            (Error::TypeError(TypeError::UnknownType {}), 0..8)
+            (TypeError::UnknownType.into(), 0..8)
         ])
     );
 
@@ -849,7 +858,7 @@ mod validator_tests {
     validator_test!(
         validate_let_declaration_requires_type_or_value,
         "let a;",
-        Err(vec![(Error::TypeError(TypeError::UnknownType), 0..6)])
+        Err(vec![(TypeError::UnknownType.into(), 0..6)])
     );
 
     validator_test!(
@@ -868,10 +877,11 @@ mod validator_tests {
         validate_let_declarations_with_value_and_type_must_match,
         "let a: number = \"foo\";",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
+            TypeError::MismatchType {
                 expected: "number".to_string(),
                 actual: "string".to_string()
-            }),
+            }
+            .into(),
             16..21
         )])
     );
@@ -880,10 +890,11 @@ mod validator_tests {
         validate_let_decl_typed_as_number_with_range_value_type,
         "let a: number = 0..10;",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
+            TypeError::MismatchType {
                 expected: "number".to_string(),
                 actual: "range".to_string()
-            }),
+            }
+            .into(),
             16..21
         )])
     );
@@ -892,10 +903,11 @@ mod validator_tests {
         validate_let_decl_typed_as_number_with_list_value_type,
         "let a: number = [1, 2, 3];",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
+            TypeError::MismatchType {
                 expected: "number".to_string(),
                 actual: "list<number>".to_string()
-            }),
+            }
+            .into(),
             16..25
         )])
     );
@@ -922,10 +934,11 @@ mod validator_tests {
         validate_let_decl_with_value_as_block_with_returning_expr_mismatch_types,
         "let a: number = { \"foo\" };",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
+            TypeError::MismatchType {
                 expected: "number".to_string(),
                 actual: "string".to_string()
-            }),
+            }
+            .into(),
             16..25
         )])
     );
@@ -951,38 +964,43 @@ mod validator_tests {
         ];",
         Err(vec![
             (
-                Error::TypeError(TypeError::MismatchType {
+                TypeError::MismatchType {
                     expected: "number".to_string(),
                     actual: "string".to_string()
-                }),
+                }
+                .into(),
                 44..49
             ),
             (
-                Error::TypeError(TypeError::MismatchType {
+                TypeError::MismatchType {
                     expected: "number".to_string(),
                     actual: "()".to_string()
-                }),
+                }
+                .into(),
                 63..69
             ),
             (
-                Error::TypeError(TypeError::MismatchType {
+                TypeError::MismatchType {
                     expected: "number".to_string(),
                     actual: "range".to_string()
-                }),
+                }
+                .into(),
                 83..88
             ),
             (
-                Error::TypeError(TypeError::MismatchType {
+                TypeError::MismatchType {
                     expected: "number".to_string(),
                     actual: "bool".to_string()
-                }),
+                }
+                .into(),
                 102..107
             ),
             (
-                Error::TypeError(TypeError::MismatchType {
+                TypeError::MismatchType {
                     expected: "number".to_string(),
                     actual: "string".to_string()
-                }),
+                }
+                .into(),
                 121..156
             )
         ])
@@ -992,10 +1010,11 @@ mod validator_tests {
         validate_assign_mismatch_types_block_returning_string,
         "let a: () = { \"foo\" };",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
+            TypeError::MismatchType {
                 expected: "()".to_string(),
                 actual: "string".to_string()
-            }),
+            }
+            .into(),
             12..21
         )])
     );
@@ -1004,10 +1023,11 @@ mod validator_tests {
         validate_assign_mismatch_types_block_returning_number,
         "let a: () = { 123 };",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
+            TypeError::MismatchType {
                 expected: "()".to_string(),
                 actual: "number".to_string()
-            }),
+            }
+            .into(),
             12..19
         )])
     );
@@ -1022,10 +1042,11 @@ mod validator_tests {
         validate_assign_mismatch_types_block_returning_list,
         "let a: () = { [1, 2, 3] };",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
+            TypeError::MismatchType {
                 expected: "()".to_string(),
                 actual: "list<number>".to_string()
-            }),
+            }
+            .into(),
             12..25
         )])
     );
@@ -1034,10 +1055,11 @@ mod validator_tests {
         validate_assign_mismatch_types_block_returning_tuple,
         "let a: () = { (1, 2, 3,) };",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
+            TypeError::MismatchType {
                 expected: "()".to_string(),
                 actual: "tuple<number, number, number>".to_string()
-            }),
+            }
+            .into(),
             12..26
         )])
     );
@@ -1046,10 +1068,11 @@ mod validator_tests {
         validate_assign_mismatch_types_block_returning_bool,
         "let a: () = { false };",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
+            TypeError::MismatchType {
                 expected: "()".to_string(),
                 actual: "bool".to_string()
-            }),
+            }
+            .into(),
             12..21
         )])
     );
@@ -1058,10 +1081,11 @@ mod validator_tests {
         validate_assign_mismatch_types_nested_block_returning_number,
         "let a: () = { { 123 } };",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
+            TypeError::MismatchType {
                 expected: "()".to_string(),
                 actual: "number".to_string()
-            }),
+            }
+            .into(),
             12..23
         )])
     );
@@ -1070,10 +1094,11 @@ mod validator_tests {
         validate_assign_chain_mismatched_types,
         "let a: () = b = 123;",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
+            TypeError::MismatchType {
                 expected: "()".to_string(),
                 actual: "number".to_string()
-            }),
+            }
+            .into(),
             12..19
         )])
     );
@@ -1088,10 +1113,11 @@ mod validator_tests {
         validate_if_else_mismatched_types,
         "if (true) { 123; } else { 123 };",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
+            TypeError::MismatchType {
                 expected: "()".to_string(),
                 actual: "number".to_string()
-            }),
+            }
+            .into(),
             24..31
         )])
     );
@@ -1100,10 +1126,11 @@ mod validator_tests {
         validate_if_cond_is_bool_mismatch_number,
         "if (123) {} else {};",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
+            TypeError::MismatchType {
                 expected: "bool".to_string(),
                 actual: "number".to_string()
-            }),
+            }
+            .into(),
             4..7
         )])
     );
@@ -1112,10 +1139,11 @@ mod validator_tests {
         validate_if_cond_is_bool_mismatch_number_plus_number,
         "if (123 + 456) {} else {};",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
+            TypeError::MismatchType {
                 expected: "bool".to_string(),
                 actual: "number".to_string()
-            }),
+            }
+            .into(),
             4..13
         )])
     );
@@ -1162,10 +1190,11 @@ mod validator_tests {
         validate_infix_types_plus_type_mismatch_string,
         "1 + \"foo\";",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
+            TypeError::MismatchType {
                 expected: "number".to_string(),
                 actual: "string".to_string()
-            }),
+            }
+            .into(),
             4..9
         )])
     );
@@ -1174,10 +1203,11 @@ mod validator_tests {
         validate_infix_types_plus_type_mismatch_string_flipped,
         "\"foo\" + 1;",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
+            TypeError::MismatchType {
                 expected: "number".to_string(),
                 actual: "string".to_string()
-            }),
+            }
+            .into(),
             0..5
         )])
     );
@@ -1186,10 +1216,11 @@ mod validator_tests {
         testtt,
         "if (true and 1) { (); } else { (); };",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
+            TypeError::MismatchType {
                 expected: "bool".to_string(),
                 actual: "number".to_string()
-            }),
+            }
+            .into(),
             13..14
         )])
     );
@@ -1203,38 +1234,30 @@ mod validator_tests {
     validator_test!(
         validate_assign_empty_list_to_untyped_list,
         "let a = [];",
-        Err(vec![(
-            Error::TypeError(TypeError::UknownListType {}),
-            0..11
-        )])
+        Err(vec![(TypeError::UknownListType.into(), 0..11)])
     );
 
     validator_test!(
         validate_let_decl_empty_list_to_unknown_list,
         "let a: list<unknown> = [];",
-        Err(vec![(
-            Error::TypeError(TypeError::UknownListType {}),
-            0..26
-        )])
+        Err(vec![(TypeError::UknownListType.into(), 0..26)])
     );
 
     validator_test!(
         validate_const_decl_empty_list_to_unknown_list,
         "const a: list<unknown> = [];",
-        Err(vec![(
-            Error::TypeError(TypeError::UknownListType {}),
-            0..28
-        )])
+        Err(vec![(TypeError::UknownListType.into(), 0..28)])
     );
 
     validator_test!(
         validate_assign_mixed_type_list,
         "a = [1, \"a\"];",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
+            TypeError::MismatchType {
                 expected: "number".to_string(),
                 actual: "string".to_string()
-            }),
+            }
+            .into(),
             8..11
         )])
     );
@@ -1242,7 +1265,7 @@ mod validator_tests {
     validator_test!(
         validate_let_decl_unknown_type,
         "let a: unknown;",
-        Err(vec![(Error::TypeError(TypeError::UnknownType {}), 0..15)])
+        Err(vec![(TypeError::UnknownType.into(), 0..15)])
     );
 
     validator_test!(
@@ -1252,10 +1275,11 @@ mod validator_tests {
         a = \"foo\";
         ",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
+            TypeError::MismatchType {
                 expected: TypeRef::number().to_string(),
                 actual: TypeRef::string().to_string()
-            }),
+            }
+            .into(),
             34..39
         )])
     );
@@ -1267,10 +1291,11 @@ mod validator_tests {
         let b: string = a;
         ",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
+            TypeError::MismatchType {
                 expected: TypeRef::string().to_string(),
                 actual: TypeRef::number().to_string()
-            }),
+            }
+            .into(),
             46..47
         )])
     );
@@ -1282,9 +1307,10 @@ mod validator_tests {
         a = \"foo\";
         ",
         Err(vec![(
-            Error::SyntaxError(SyntaxError::ReassigningConst {
+            SyntaxError::ReassigningConst {
                 name: "a".to_string()
-            }),
+            }
+            .into(),
             32..41
         )])
     );
@@ -1296,10 +1322,11 @@ mod validator_tests {
         let b = [1, 2, a];
         ",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
+            TypeError::MismatchType {
                 expected: TypeRef::number().to_string(),
                 actual: TypeRef::string().to_string()
-            }),
+            }
+            .into(),
             47..48
         )])
     );
@@ -1311,10 +1338,11 @@ mod validator_tests {
         let b = [a, \"bar\", 3];
         ",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
+            TypeError::MismatchType {
                 expected: TypeRef::string().to_string(),
                 actual: TypeRef::number().to_string()
-            }),
+            }
+            .into(),
             51..52
         )])
     );
@@ -1329,10 +1357,11 @@ mod validator_tests {
         validate_fn_expr_type_mismatch_in_body_identifier,
         "(a: string): number => { a };",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
+            TypeError::MismatchType {
                 expected: "number".to_string(),
                 actual: "string".to_string()
-            }),
+            }
+            .into(),
             25..26
         )])
     );
@@ -1341,10 +1370,11 @@ mod validator_tests {
         validate_fn_expr_type_mismatch_in_body_infix_bang,
         "(a: string): bool => { !a };",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
+            TypeError::MismatchType {
                 expected: "bool".to_string(),
                 actual: "string".to_string()
-            }),
+            }
+            .into(),
             24..25
         )])
     );
@@ -1354,17 +1384,19 @@ mod validator_tests {
         "(a: string): number => { !a };",
         Err(vec![
             (
-                Error::TypeError(TypeError::MismatchType {
+                TypeError::MismatchType {
                     expected: "bool".to_string(),
                     actual: "string".to_string()
-                }),
+                }
+                .into(),
                 26..27
             ),
             (
-                Error::TypeError(TypeError::MismatchType {
+                TypeError::MismatchType {
                     expected: "number".to_string(),
                     actual: "bool".to_string()
-                }),
+                }
+                .into(),
                 25..27
             )
         ])
@@ -1377,10 +1409,11 @@ mod validator_tests {
         let b: number = { !a };
         ",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
+            TypeError::MismatchType {
                 expected: "number".to_string(),
                 actual: "bool".to_string()
-            }),
+            }
+            .into(),
             46..52
         )])
     );
@@ -1390,17 +1423,19 @@ mod validator_tests {
         "(a: string, b: ()): number => { a + b };",
         Err(vec![
             (
-                Error::TypeError(TypeError::MismatchType {
+                TypeError::MismatchType {
                     expected: "number".to_string(),
                     actual: "string".to_string()
-                }),
+                }
+                .into(),
                 32..33
             ),
             (
-                Error::TypeError(TypeError::MismatchType {
+                TypeError::MismatchType {
                     expected: "number".to_string(),
                     actual: "()".to_string()
-                }),
+                }
+                .into(),
                 36..37
             )
         ])
@@ -1442,9 +1477,10 @@ mod validator_tests {
         validate_type_alias_pascal_case2,
         "type Number_List = list<number>;",
         Err(vec![(
-            Error::SyntaxError(SyntaxError::InvalidTypeAlias {
+            SyntaxError::InvalidTypeAlias {
                 name: "Number_List".to_string()
-            }),
+            }
+            .into(),
             0..32
         )])
     );
@@ -1460,10 +1496,11 @@ mod validator_tests {
         };
         ",
         Err(vec![(
-            Error::TypeError(TypeError::MismatchType {
+            TypeError::MismatchType {
                 expected: "()".to_string(),
                 actual: "number".to_string()
-            }),
+            }
+            .into(),
             128..129
         )])
     );
@@ -1471,21 +1508,21 @@ mod validator_tests {
     validator_test!(
         validate_divide_by_zero,
         "0 / 1;",
-        Err(vec![(Error::SyntaxError(SyntaxError::DivideByZero), 0..1)])
+        Err(vec![(SyntaxError::DivideByZero.into(), 0..1)])
     );
 
     validator_test!(
         validate_divide_by_zero_2,
         "1 / 0;",
-        Err(vec![(Error::SyntaxError(SyntaxError::DivideByZero), 4..5)])
+        Err(vec![(SyntaxError::DivideByZero.into(), 4..5)])
     );
 
     validator_test!(
         validate_divide_by_zero_3,
         "0 / 0;",
         Err(vec![
-            (Error::SyntaxError(SyntaxError::DivideByZero), 0..1),
-            (Error::SyntaxError(SyntaxError::DivideByZero), 4..5)
+            (SyntaxError::DivideByZero.into(), 0..1),
+            (SyntaxError::DivideByZero.into(), 4..5)
         ])
     );
 
