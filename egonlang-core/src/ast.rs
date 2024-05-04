@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::span::Spanned;
+use crate::{errors::Error, span::Spanned};
 use std::fmt::{self, Debug, Display, Formatter};
 
 /// Modules are units of code (e.g. variables, functions)
@@ -216,18 +216,101 @@ pub enum ExprLiteral {
     String(String),
 }
 
-impl From<Expr> for f64 {
-    fn from(value: Expr) -> Self {
+impl TryFrom<Expr> for f64 {
+    type Error = Vec<Error>;
+
+    fn try_from(value: Expr) -> Result<Self, Self::Error> {
         match value {
             Expr::Literal(literal) => match literal {
-                ExprLiteral::Number(number) => number,
-                _ => todo!(),
+                ExprLiteral::Number(number) => Ok(number),
+                ExprLiteral::Bool(_) => Err(vec![Error::TypeError(
+                    crate::errors::TypeError::MismatchType {
+                        expected: TypeRef::number().to_string(),
+                        actual: TypeRef::bool().to_string(),
+                    },
+                )]),
+                ExprLiteral::String(_) => Err(vec![Error::TypeError(
+                    crate::errors::TypeError::MismatchType {
+                        expected: TypeRef::number().to_string(),
+                        actual: TypeRef::string().to_string(),
+                    },
+                )]),
             },
             Expr::Prefix(prefix) => match prefix.op {
-                OpPrefix::Negate => prefix.rt.0.into(),
-                OpPrefix::Not => todo!(),
+                OpPrefix::Negate => prefix.rt.0.try_into(),
+                OpPrefix::Not => Err(vec![Error::TypeError(
+                    crate::errors::TypeError::MismatchType {
+                        expected: TypeRef::number().to_string(),
+                        actual: TypeRef::bool().to_string(),
+                    },
+                )]),
             },
-            _ => todo!(),
+            _ => Err(vec![Error::TypeError(
+                crate::errors::TypeError::MismatchType {
+                    expected: TypeRef::number().to_string(),
+                    actual: value.get_type_expr().to_string(),
+                },
+            )]),
+        }
+    }
+}
+
+impl TryFrom<Expr> for String {
+    type Error = Vec<Error>;
+
+    fn try_from(value: Expr) -> Result<Self, Self::Error> {
+        match value {
+            Expr::Literal(literal) => match literal {
+                ExprLiteral::Number(_) => Err(vec![Error::TypeError(
+                    crate::errors::TypeError::MismatchType {
+                        expected: TypeRef::string().to_string(),
+                        actual: TypeRef::number().to_string(),
+                    },
+                )]),
+                ExprLiteral::Bool(_) => Err(vec![Error::TypeError(
+                    crate::errors::TypeError::MismatchType {
+                        expected: TypeRef::string().to_string(),
+                        actual: TypeRef::bool().to_string(),
+                    },
+                )]),
+                ExprLiteral::String(string) => Ok(string),
+            },
+            _ => Err(vec![Error::TypeError(
+                crate::errors::TypeError::MismatchType {
+                    expected: TypeRef::string().to_string(),
+                    actual: value.get_type_expr().to_string(),
+                },
+            )]),
+        }
+    }
+}
+
+impl TryFrom<Expr> for bool {
+    type Error = Vec<Error>;
+
+    fn try_from(value: Expr) -> Result<Self, Self::Error> {
+        match value {
+            Expr::Literal(literal) => match literal {
+                ExprLiteral::Number(_) => Err(vec![Error::TypeError(
+                    crate::errors::TypeError::MismatchType {
+                        expected: TypeRef::bool().to_string(),
+                        actual: TypeRef::number().to_string(),
+                    },
+                )]),
+                ExprLiteral::Bool(bool) => Ok(bool),
+                ExprLiteral::String(_) => Err(vec![Error::TypeError(
+                    crate::errors::TypeError::MismatchType {
+                        expected: TypeRef::bool().to_string(),
+                        actual: TypeRef::string().to_string(),
+                    },
+                )]),
+            },
+            _ => Err(vec![Error::TypeError(
+                crate::errors::TypeError::MismatchType {
+                    expected: TypeRef::bool().to_string(),
+                    actual: value.get_type_expr().to_string(),
+                },
+            )]),
         }
     }
 }

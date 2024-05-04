@@ -746,8 +746,8 @@ impl Validator {
         }
 
         if let OpInfix::Divide = &infix.op {
-            let lt_value: f64 = lt_expr.into();
-            let rt_value: f64 = rt_expr.into();
+            let lt_value: f64 = lt_expr.try_into().unwrap();
+            let rt_value: f64 = rt_expr.try_into().unwrap();
 
             if lt_value == 0f64 {
                 errs.push((Error::SyntaxError(SyntaxError::DivideByZero), lt_span));
