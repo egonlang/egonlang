@@ -6,9 +6,10 @@ use egonlang_core::{
 
 use crate::{
     rules::{
+        rule::Rule, type_mismatch_list_items::TypeMisMatchListItemsRule,
         type_mismatch_negate_prefix::TypeMisMatchNegatePrefixRule,
         type_mismatch_on_assignment::TypeMisMatchOnAssignmentRule,
-        undefined_identifier::UndefinedIdentifierRule, Rule,
+        undefined_identifier::UndefinedIdentifierRule,
     },
     type_env::TypeEnv,
     visitor::Visitor,
@@ -26,6 +27,7 @@ impl Verifier<'_> {
         let mut verifier = Verifier::default();
 
         verifier.rules.push(Box::from(TypeMisMatchNegatePrefixRule));
+        verifier.rules.push(Box::from(TypeMisMatchListItemsRule));
         verifier.rules.push(Box::from(TypeMisMatchOnAssignmentRule));
         verifier.rules.push(Box::from(UndefinedIdentifierRule));
 
@@ -167,6 +169,16 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                     errs.extend(expr_errs);
                 }
             }
+            Expr::Assign(assign_expr) => {
+                let (value_expr, value_span) = &assign_expr.value;
+
+                let value_errs = self
+                    .visit_expr(value_expr, value_span, types)
+                    .err()
+                    .unwrap_or_default();
+
+                errs.extend(value_errs);
+            }
             _ => {}
         };
 
@@ -181,7 +193,7 @@ impl<'a> Visitor<'a> for Verifier<'a> {
 #[cfg(test)]
 mod verifier_tests {
     use egonlang_core::{
-        ast::{Identifier, Module, StmtExpr},
+        ast::{ExprAssign, ExprList, ExprLiteral, Identifier, Module, StmtExpr, TypeRef},
         errors::TypeError,
     };
     use pretty_assertions::assert_eq;
@@ -265,6 +277,51 @@ mod verifier_tests {
                 (TypeError::Undefined("a".to_string()).into(), 1..2),
                 (TypeError::Undefined("b".to_string()).into(), 5..6)
             ]),
+            results
+        );
+    }
+
+    #[test]
+    fn errors_when_assigning_list_with_type_mismatched_items() {
+        let verifier = Verifier::new();
+
+        let module = Module::from(vec![(
+            StmtExpr {
+                expr: (
+                    ExprAssign {
+                        identifier: Identifier {
+                            name: "a".to_string(),
+                        },
+                        value: (
+                            ExprList {
+                                items: vec![
+                                    (ExprLiteral::Number(10f64).into(), 0..1),
+                                    (ExprLiteral::Bool(false).into(), 2..3),
+                                ],
+                            }
+                            .into(),
+                            0..0,
+                        ),
+                    }
+                    .into(),
+                    1..2,
+                ),
+            }
+            .into(),
+            0..0,
+        )]);
+
+        let results = verifier.verify(&module);
+
+        assert_eq!(
+            Err(vec![(
+                TypeError::MismatchType {
+                    expected: TypeRef::number().to_string(),
+                    actual: TypeRef::bool().to_string()
+                }
+                .into(),
+                2..3
+            )]),
             results
         );
     }

@@ -6,7 +6,7 @@ use egonlang_core::{
 
 use crate::type_env::TypeEnv;
 
-use super::Rule;
+use crate::rules::rule::Rule;
 
 pub struct UndefinedIdentifierRule;
 impl<'a> Rule<'a> for UndefinedIdentifierRule {
@@ -49,7 +49,7 @@ mod undefined_identifier_test {
     use pretty_assertions::assert_eq;
 
     use crate::{
-        rules::Rule,
+        rules::rule::Rule,
         type_env::{TypeEnv, TypeEnvValue},
     };
 

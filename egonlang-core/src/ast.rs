@@ -202,6 +202,12 @@ impl From<ExprPrefix> for Expr {
     }
 }
 
+impl From<ExprAssign> for Expr {
+    fn from(value: ExprAssign) -> Self {
+        Expr::Assign(Box::from(value))
+    }
+}
+
 impl Display for Expr {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {

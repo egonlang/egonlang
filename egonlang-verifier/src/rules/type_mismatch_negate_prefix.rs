@@ -6,7 +6,7 @@ use egonlang_core::{
 
 use crate::{type_env::TypeEnv, verifier::VerificationResult};
 
-use super::Rule;
+use crate::rules::rule::Rule;
 
 pub struct TypeMisMatchNegatePrefixRule;
 impl<'a> Rule<'a> for TypeMisMatchNegatePrefixRule {
@@ -68,7 +68,7 @@ mod type_mismatch_negate_prefix_tests {
     };
     use pretty_assertions::assert_eq;
 
-    use crate::{rules::Rule, type_env::TypeEnv};
+    use crate::{rules::rule::Rule, type_env::TypeEnv};
 
     use super::TypeMisMatchNegatePrefixRule;
 

@@ -5,4 +5,3 @@ pub mod lexer;
 pub mod parser;
 pub mod span;
 pub mod validator;
-pub mod verifier;
