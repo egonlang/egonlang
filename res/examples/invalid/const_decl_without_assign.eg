@@ -1,4 +1,4 @@
 const a;
 
-// out: SyntaxError: const `a` missing value. consts must be declared with a value
 // out: TypeError: unknown type e.g. let a: unknown; or let a;
+// out: SyntaxError: const `a` missing value. consts must be declared with a value
