@@ -7,11 +7,13 @@ use crate::rules::rule::Rule;
 
 pub struct TypeMismatchOnDeclarationsRule;
 impl<'a> Rule<'a> for TypeMismatchOnDeclarationsRule {
-    fn visit_stmt(&self, stmt: &Stmt, _span: &Span, types: &mut TypeEnv<'a>) -> VerificationResult {
+    fn visit_stmt(&self, stmt: &Stmt, span: &Span, types: &mut TypeEnv<'a>) -> VerificationResult {
         if let Stmt::Assign(stmt_assign) = stmt {
             match (&stmt_assign.type_expr, &stmt_assign.value) {
                 // let a;
-                (None, None) => {}
+                (None, None) => {
+                    return Err(vec![(TypeError::UnknownType.into(), span.clone())]);
+                }
                 // let a = 123;
                 (None, Some((value_expr, value_span))) => {
                     let value_typeref = types.resolve_expr_type(value_expr, value_span)?;

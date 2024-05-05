@@ -202,6 +202,12 @@ impl From<ExprPrefix> for Expr {
     }
 }
 
+impl From<ExprInfix> for Expr {
+    fn from(value: ExprInfix) -> Self {
+        Expr::Infix(Box::from(value))
+    }
+}
+
 impl From<ExprAssign> for Expr {
     fn from(value: ExprAssign) -> Self {
         Expr::Assign(Box::from(value))

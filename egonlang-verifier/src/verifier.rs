@@ -8,6 +8,7 @@ use crate::{
     rules::{
         const_declaration_with_no_value::DeclareConstWithoutValue,
         reassigning_const_values::ReassigningConstValueRule, rule::Rule,
+        type_mismatch_infix::TypeMismatchInfixRule,
         type_mismatch_list_items::TypeMisMatchListItemsRule,
         type_mismatch_negate_prefix::TypeMisMatchNegatePrefixRule,
         type_mismatch_on_declarations::TypeMismatchOnDeclarationsRule,
@@ -28,6 +29,7 @@ impl Verifier<'_> {
     pub fn new() -> Self {
         let mut verifier = Verifier::default();
 
+        verifier.rules.push(Box::from(TypeMismatchInfixRule));
         verifier.rules.push(Box::from(TypeMisMatchNegatePrefixRule));
         verifier.rules.push(Box::from(TypeMisMatchListItemsRule));
         verifier
@@ -226,6 +228,25 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                     .unwrap_or_default();
 
                 errs.extend(value_errs);
+            }
+            Expr::Infix(infix_expr) => {
+                let (lt_expr, lt_span) = &infix_expr.lt;
+
+                let lt_errs = self
+                    .visit_expr(lt_expr, lt_span, types)
+                    .err()
+                    .unwrap_or_default();
+
+                errs.extend(lt_errs);
+
+                let (rt_expr, rt_span) = &infix_expr.rt;
+
+                let rt_errs = self
+                    .visit_expr(rt_expr, rt_span, types)
+                    .err()
+                    .unwrap_or_default();
+
+                errs.extend(rt_errs);
             }
             _ => {}
         };
