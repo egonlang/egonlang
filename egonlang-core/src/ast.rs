@@ -190,6 +190,18 @@ impl From<ExprTuple> for Expr {
     }
 }
 
+impl From<ExprType> for Expr {
+    fn from(value: ExprType) -> Self {
+        Expr::Type(value)
+    }
+}
+
+impl From<ExprPrefix> for Expr {
+    fn from(value: ExprPrefix) -> Self {
+        Expr::Prefix(Box::from(value))
+    }
+}
+
 impl Display for Expr {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {

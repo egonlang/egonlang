@@ -1,6 +1,10 @@
 use std::collections::HashMap;
 
-use egonlang_core::ast::TypeRef;
+use egonlang_core::{
+    ast::{Expr, ExprIdentifier, ExprList, ExprS, ExprTuple, TypeRef},
+    errors::{ErrorS, TypeError},
+    span::Span,
+};
 
 /// Typing information stored about an identifier
 #[derive(Debug, PartialEq, Clone)]
@@ -103,6 +107,113 @@ impl<'a> TypeEnv<'a> {
         // Type isn't aliased, set name to the value's type
         // println!("Set `{name}` from type env as {value:?}");
         self.values.insert(identifier.to_string(), value)
+    }
+
+    /// Resolve an expression's type recursively.
+    /// This will resolve value identifiers types as well.
+    ///
+    /// Example
+    ///
+    /// let a = 123;
+    ///
+    /// let b = false;
+    ///
+    /// (a, b,); // This expression's type resolves to (number, bool,)
+    pub fn resolve_expr_type(&self, expr: &Expr, span: &Span) -> Result<TypeRef, Vec<ErrorS>> {
+        let resolved_type = match expr {
+            Expr::Identifier(ident_expr) => self.resolve_identifier_type(ident_expr, span),
+            Expr::List(list_expr) => self.resolve_list_type(list_expr),
+            Expr::Tuple(tuple_expr) => self.resolve_tuple_type(tuple_expr),
+            Expr::Block(block_expr) => {
+                let a = block_expr.return_expr.clone();
+
+                if let Some((a, a_span)) = a {
+                    let result = self.resolve_expr_type(&a, &a_span);
+
+                    return result;
+                } else {
+                    return Ok(TypeRef::unit());
+                }
+            }
+            Expr::Type(type_expr) => {
+                let type_string = type_expr.0.to_string();
+                let a = self.get(type_string.as_str());
+
+                if let Some(a) = &a {
+                    return Ok(a.typeref.clone());
+                }
+
+                Ok(type_expr.0.clone())
+            }
+            _ => Ok(expr.clone().get_type_expr()),
+        };
+
+        resolved_type
+    }
+
+    fn resolve_identifier_type(
+        &self,
+        ident_expr: &ExprIdentifier,
+        span: &Span,
+    ) -> Result<TypeRef, Vec<ErrorS>> {
+        let name = &ident_expr.identifier.name;
+
+        match self.get(name) {
+            Some(env_var) => Ok(env_var.typeref),
+            None => Err(vec![(
+                TypeError::Undefined(name.to_string()).into(),
+                span.clone(),
+            )]),
+        }
+    }
+
+    fn resolve_list_type(&self, list_expr: &ExprList) -> Result<TypeRef, Vec<ErrorS>> {
+        if list_expr.items.is_empty() {
+            return Ok(TypeRef::list(TypeRef::unknown()));
+        }
+
+        let (first_item_expr, first_item_span) = list_expr.items.first().unwrap().clone();
+        let first_item_type = self.resolve_expr_type(&first_item_expr, &first_item_span)?;
+
+        let remaining_items: Vec<ExprS> = list_expr.items.clone().into_iter().skip(1).collect();
+
+        let mut errs = vec![];
+
+        for (item_expr, item_span) in remaining_items {
+            let item_type = self.resolve_expr_type(&item_expr, &item_span)?;
+
+            if item_type != first_item_type {
+                errs.push((
+                    TypeError::MismatchType {
+                        expected: first_item_type.to_string(),
+                        actual: item_type.to_string(),
+                    }
+                    .into(),
+                    item_span.clone(),
+                ));
+            }
+        }
+
+        if !errs.is_empty() {
+            return Err(errs);
+        }
+
+        Ok(TypeRef::list(first_item_type))
+    }
+
+    fn resolve_tuple_type(&self, tuple_expr: &ExprTuple) -> Result<TypeRef, Vec<ErrorS>> {
+        if tuple_expr.items.is_empty() {
+            return Ok(TypeRef::list(TypeRef::unknown()));
+        }
+
+        let item_types = tuple_expr
+            .items
+            .clone()
+            .into_iter()
+            .map(|(x_expr, x_span)| self.resolve_expr_type(&x_expr, &x_span).unwrap())
+            .collect();
+
+        Ok(TypeRef::tuple(item_types))
     }
 }
 

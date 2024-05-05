@@ -231,7 +231,6 @@ dependencies = [
  "logos",
  "pretty_assertions",
  "regex",
- "rstest",
  "serde",
  "thiserror",
 ]

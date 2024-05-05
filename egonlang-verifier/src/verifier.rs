@@ -1,54 +1,32 @@
 use egonlang_core::{
-    ast::{Expr, ExprIdentifier, Module, Stmt},
-    errors::{ErrorS, TypeError},
+    ast::{Expr, Module, Stmt},
+    errors::ErrorS,
     span::Span,
 };
 
-use crate::{type_env::TypeEnv, visitor::Visitor};
+use crate::{
+    rules::{
+        type_mismatch_negate_prefix::TypeMisMatchNegatePrefixRule,
+        type_mismatch_on_assignment::TypeMisMatchOnAssignmentRule,
+        undefined_identifier::UndefinedIdentifierRule, Rule,
+    },
+    type_env::TypeEnv,
+    visitor::Visitor,
+};
 
 pub type VerificationResult = Result<(), Vec<ErrorS>>;
 
 #[derive(Default)]
 pub struct Verifier<'a> {
-    rules: Vec<Box<dyn Visitor<'a>>>,
-}
-
-pub struct UndefinedIdentifierRule;
-impl<'a> Visitor<'a> for UndefinedIdentifierRule {
-    fn visit_stmt(
-        &self,
-        _stmt: &Stmt,
-        _span: &Span,
-        _types: &mut TypeEnv<'a>,
-    ) -> Result<(), Vec<ErrorS>> {
-        Ok(())
-    }
-
-    fn visit_expr(
-        &self,
-        expr: &Expr,
-        span: &Span,
-        types: &mut TypeEnv<'a>,
-    ) -> Result<(), Vec<ErrorS>> {
-        if let Expr::Identifier(ExprIdentifier { identifier }) = expr {
-            let name = &identifier.name;
-
-            if types.get(name).is_none() {
-                return Err(vec![(
-                    TypeError::Undefined(name.to_string()).into(),
-                    span.clone(),
-                )]);
-            }
-        }
-
-        Ok(())
-    }
+    rules: Vec<Box<dyn Rule<'a>>>,
 }
 
 impl Verifier<'_> {
     pub fn new() -> Self {
         let mut verifier = Verifier::default();
 
+        verifier.rules.push(Box::from(TypeMisMatchNegatePrefixRule));
+        verifier.rules.push(Box::from(TypeMisMatchOnAssignmentRule));
         verifier.rules.push(Box::from(UndefinedIdentifierRule));
 
         verifier
@@ -167,6 +145,30 @@ impl<'a> Visitor<'a> for Verifier<'a> {
 
             errs.extend(rule_errs);
         }
+
+        match expr {
+            Expr::Block(block_expr) => {
+                for (stmt, stmt_span) in &block_expr.stmts {
+                    let stmt_errs = self
+                        .visit_stmt(stmt, stmt_span, types)
+                        .err()
+                        .unwrap_or_default();
+
+                    errs.extend(stmt_errs);
+                }
+
+                if block_expr.return_expr.is_some() {
+                    let (return_expr, return_span) = block_expr.return_expr.as_ref().unwrap();
+                    let expr_errs = self
+                        .visit_expr(return_expr, return_span, types)
+                        .err()
+                        .unwrap_or_default();
+
+                    errs.extend(expr_errs);
+                }
+            }
+            _ => {}
+        };
 
         if !errs.is_empty() {
             return Err(errs);
