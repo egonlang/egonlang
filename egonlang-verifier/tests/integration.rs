@@ -2,20 +2,18 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::{fs, str};
 
-use egonlang_core::validator::TypeEnvironment;
-use egonlang_core::validator::Validator;
-
+use egonlang_verifier::verifier::Verifier;
 use pretty_assertions::assert_eq;
 
 use egonlang_core::parser::parse;
 
 #[rstest::rstest]
-fn integration_valid(#[files("res/examples/valid/**/*.eg")] path: PathBuf) {
+fn integration_valid(#[files("../res/examples/valid/**/*.eg")] path: PathBuf) {
     integration_implemented(path);
 }
 
 #[rstest::rstest]
-fn integration_invalid(#[files("res/examples/invalid/**/*.eg")] path: PathBuf) {
+fn integration_invalid(#[files("../res/examples/invalid/**/*.eg")] path: PathBuf) {
     integration_implemented(path);
 }
 
@@ -34,11 +32,9 @@ fn integration_implemented(path: PathBuf) {
 
     let mut got_output = Vec::new();
 
-    let mut env = TypeEnvironment::new();
+    let verifier = Verifier::new();
 
-    if let Err(e) =
-        parse(&source, 0).and_then(|module| Validator::default().validate(&module, &mut env))
-    {
+    if let Err(e) = parse(&source, 0).and_then(|module| verifier.verify(&module)) {
         let m = e
             .into_iter()
             .map(|(e, _)| e.to_string())
@@ -54,7 +50,7 @@ fn integration_implemented(path: PathBuf) {
 /// Runs tests on features that will be implemented
 /// These tests will fail an expected error message matches a returned validation error
 #[rstest::rstest]
-fn integration_todo(#[files("res/examples/todo/**/*.eg")] path: PathBuf) {
+fn integration_todo(#[files("../res/examples/todo/**/*.eg")] path: PathBuf) {
     let source = fs::read_to_string(path).expect("unable to read test file");
     let mut exp_output = String::new();
 
@@ -68,11 +64,9 @@ fn integration_todo(#[files("res/examples/todo/**/*.eg")] path: PathBuf) {
 
     let mut output_lines = exp_output.lines();
 
-    let mut env = TypeEnvironment::new();
+    let verifier = Verifier::new();
 
-    if let Err(e) =
-        parse(&source, 0).and_then(|module| Validator::default().validate(&module, &mut env))
-    {
+    if let Err(e) = parse(&source, 0).and_then(|module| verifier.verify(&module)) {
         let validation_messages = e
             .into_iter()
             .map(|(e, _)| e.to_string())
