@@ -24,6 +24,24 @@ pub enum Stmt {
     Error,
 }
 
+impl From<StmtExpr> for Stmt {
+    fn from(value: StmtExpr) -> Self {
+        Stmt::Expr(value)
+    }
+}
+
+impl From<StmtAssign> for Stmt {
+    fn from(value: StmtAssign) -> Self {
+        Stmt::Assign(value)
+    }
+}
+
+impl From<StmtFn> for Stmt {
+    fn from(value: StmtFn) -> Self {
+        Stmt::Fn(Box::from(value))
+    }
+}
+
 impl Display for Stmt {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {

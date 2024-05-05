@@ -237,6 +237,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "egonlang-verifier"
+version = "0.1.0"
+dependencies = [
+ "egonlang-core",
+ "pretty_assertions",
+]
+
+[[package]]
 name = "either"
 version = "1.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

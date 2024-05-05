@@ -1,7 +1,8 @@
-mod ast;
+pub mod ast;
 mod diagnostics;
 pub mod errors;
 pub mod lexer;
 pub mod parser;
-mod span;
+pub mod span;
 pub mod validator;
+pub mod verifier;
