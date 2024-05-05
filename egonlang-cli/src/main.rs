@@ -1,9 +1,7 @@
 use std::path::PathBuf;
 
-use egonlang_core::validator::TypeEnvironment;
-use egonlang_core::validator::Validator;
-
 use clap::{Parser, Subcommand};
+use egonlang_verifier::verifier::Verifier;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -44,9 +42,9 @@ fn main() {
 
                 let module = match egonlang_core::parser::parse(&content, 0) {
                     Ok(module) => {
-                        let mut env = TypeEnvironment::new();
+                        let verifier = Verifier::new();
 
-                        if let Err(errs) = Validator::default().validate(&module, &mut env) {
+                        if let Err(errs) = verifier.verify(&module) {
                             Err(errs)
                         } else {
                             Ok(serde_json::to_string(&module).unwrap())

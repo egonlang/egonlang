@@ -217,6 +217,7 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "egonlang-core",
+ "egonlang-verifier",
  "serde_json",
 ]
 
