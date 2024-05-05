@@ -8,8 +8,8 @@ use crate::{type_env::TypeEnv, verifier::VerificationResult};
 
 use crate::rules::rule::Rule;
 
-pub struct TypeMisMatchNegatePrefixRule;
-impl<'a> Rule<'a> for TypeMisMatchNegatePrefixRule {
+pub struct TypeMismatchPrefixRule;
+impl<'a> Rule<'a> for TypeMismatchPrefixRule {
     fn visit_stmt(&self, _stmt: &Stmt, _span: &Span, _types: &mut TypeEnv) -> VerificationResult {
         Ok(())
     }
@@ -56,7 +56,7 @@ impl<'a> Rule<'a> for TypeMisMatchNegatePrefixRule {
 }
 
 #[cfg(test)]
-mod type_mismatch_negate_prefix_tests {
+mod type_mismatch_prefix_tests {
     use egonlang_core::{
         ast::{Expr, ExprLiteral, ExprPrefix, TypeRef},
         errors::TypeError,
@@ -65,11 +65,11 @@ mod type_mismatch_negate_prefix_tests {
 
     use crate::{rules::rule::Rule, type_env::TypeEnv};
 
-    use super::TypeMisMatchNegatePrefixRule;
+    use super::TypeMismatchPrefixRule;
 
     #[test]
     fn returns_ok_if_negate_prefix_on_number_literal_expr() {
-        let rule = TypeMisMatchNegatePrefixRule;
+        let rule = TypeMismatchPrefixRule;
 
         let mut types = TypeEnv::new();
 
@@ -86,7 +86,7 @@ mod type_mismatch_negate_prefix_tests {
 
     #[test]
     fn returns_err_if_negate_prefix_on_bool_literal_expr() {
-        let rule = TypeMisMatchNegatePrefixRule;
+        let rule = TypeMismatchPrefixRule;
 
         let mut types = TypeEnv::new();
 
@@ -103,6 +103,77 @@ mod type_mismatch_negate_prefix_tests {
                 TypeError::MismatchType {
                     expected: TypeRef::number().to_string(),
                     actual: TypeRef::bool().to_string()
+                }
+                .into(),
+                0..0
+            )]),
+            rule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_ok_if_not_prefix_on_number_literal_expr() {
+        let rule = TypeMismatchPrefixRule;
+
+        let mut types = TypeEnv::new();
+
+        let expr: Expr = ExprPrefix {
+            op: egonlang_core::ast::OpPrefix::Not,
+            rt: (ExprLiteral::Bool(false).into(), 0..0),
+        }
+        .into();
+
+        let span = 0..0;
+
+        assert_eq!(Ok(()), rule.visit_expr(&expr, &span, &mut types));
+    }
+
+    #[test]
+    fn returns_err_if_not_prefix_on_number_literal_expr() {
+        let rule = TypeMismatchPrefixRule;
+
+        let mut types = TypeEnv::new();
+
+        let expr: Expr = ExprPrefix {
+            op: egonlang_core::ast::OpPrefix::Not,
+            rt: (ExprLiteral::Number(123f64).into(), 0..0),
+        }
+        .into();
+
+        let span = 0..0;
+
+        assert_eq!(
+            Err(vec![(
+                TypeError::MismatchType {
+                    expected: TypeRef::bool().to_string(),
+                    actual: TypeRef::number().to_string()
+                }
+                .into(),
+                0..0
+            )]),
+            rule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_err_if_not_prefix_on_string_literal_expr() {
+        let rule = TypeMismatchPrefixRule;
+
+        let mut types = TypeEnv::new();
+
+        let expr: Expr = ExprPrefix {
+            op: egonlang_core::ast::OpPrefix::Not,
+            rt: (ExprLiteral::String("test".to_string()).into(), 0..0),
+        }
+        .into();
+
+        let span = 0..0;
+
+        assert_eq!(
+            Err(vec![(
+                TypeError::MismatchType {
+                    expected: TypeRef::bool().to_string(),
+                    actual: TypeRef::string().to_string()
                 }
                 .into(),
                 0..0

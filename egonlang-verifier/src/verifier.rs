@@ -10,8 +10,8 @@ use crate::{
         divide_by_zero::DivideByZeroRule, reassigning_const_values::ReassigningConstValueRule,
         rule::Rule, type_mismatch_infix::TypeMismatchInfixRule,
         type_mismatch_list_items::TypeMisMatchListItemsRule,
-        type_mismatch_negate_prefix::TypeMisMatchNegatePrefixRule,
         type_mismatch_on_declarations::TypeMismatchOnDeclarationsRule,
+        type_mismatch_prefix::TypeMismatchPrefixRule,
         undefined_identifier::UndefinedIdentifierRule,
     },
     type_env::{TypeEnv, TypeEnvValue},
@@ -30,7 +30,7 @@ impl Verifier<'_> {
         let mut verifier = Verifier::default();
 
         verifier.rules.push(Box::from(TypeMismatchInfixRule));
-        verifier.rules.push(Box::from(TypeMisMatchNegatePrefixRule));
+        verifier.rules.push(Box::from(TypeMismatchPrefixRule));
         verifier.rules.push(Box::from(TypeMisMatchListItemsRule));
         verifier
             .rules
@@ -240,6 +240,30 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                     .unwrap_or_default();
 
                 errs.extend(rt_errs);
+            }
+            Expr::Fn(fn_expr) => {
+                let mut fn_types = types.extend();
+
+                for ((ident, type_ref), _) in &fn_expr.params {
+                    let name = &ident.name;
+
+                    fn_types.set(
+                        name,
+                        TypeEnvValue {
+                            typeref: type_ref.clone(),
+                            is_const: true,
+                        },
+                    );
+                }
+
+                let (body_expr, body_span) = &fn_expr.body;
+
+                let body_errs = self
+                    .visit_expr(body_expr, body_span, &mut fn_types)
+                    .err()
+                    .unwrap_or_default();
+
+                errs.extend(body_errs);
             }
             _ => {}
         };
