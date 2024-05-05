@@ -10,7 +10,7 @@ use crate::rules::rule::Rule;
 
 pub struct DeclareConstWithoutValue;
 impl<'a> Rule<'a> for DeclareConstWithoutValue {
-    fn visit_stmt(&self, stmt: &Stmt, span: &Span, _types: &mut TypeEnv<'a>) -> VerificationResult {
+    fn visit_stmt(&self, stmt: &Stmt, span: &Span, _types: &mut TypeEnv) -> VerificationResult {
         let mut errs = vec![];
 
         match stmt {
@@ -35,12 +35,7 @@ impl<'a> Rule<'a> for DeclareConstWithoutValue {
         Ok(())
     }
 
-    fn visit_expr(
-        &self,
-        _expr: &Expr,
-        _span: &Span,
-        _types: &mut TypeEnv<'a>,
-    ) -> VerificationResult {
+    fn visit_expr(&self, _expr: &Expr, _span: &Span, _types: &mut TypeEnv) -> VerificationResult {
         Ok(())
     }
 }

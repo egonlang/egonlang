@@ -10,21 +10,11 @@ use crate::rules::rule::Rule;
 
 pub struct DivideByZeroRule;
 impl<'a> Rule<'a> for DivideByZeroRule {
-    fn visit_stmt(
-        &self,
-        _stmt: &Stmt,
-        _span: &Span,
-        _types: &mut TypeEnv<'a>,
-    ) -> VerificationResult {
+    fn visit_stmt(&self, _stmt: &Stmt, _span: &Span, _types: &mut TypeEnv) -> VerificationResult {
         Ok(())
     }
 
-    fn visit_expr(
-        &self,
-        expr: &Expr,
-        _span: &Span,
-        _types: &mut TypeEnv<'a>,
-    ) -> VerificationResult {
+    fn visit_expr(&self, expr: &Expr, _span: &Span, _types: &mut TypeEnv) -> VerificationResult {
         let mut errs = vec![];
 
         if let Expr::Infix(infix_expr) = &expr {

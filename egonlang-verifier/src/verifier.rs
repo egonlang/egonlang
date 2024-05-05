@@ -63,12 +63,7 @@ impl Verifier<'_> {
 }
 
 impl<'a> Visitor<'a> for Verifier<'a> {
-    fn visit_stmt(
-        &self,
-        stmt: &Stmt,
-        span: &Span,
-        types: &mut TypeEnv<'a>,
-    ) -> Result<(), Vec<ErrorS>> {
+    fn visit_stmt(&self, stmt: &Stmt, span: &Span, types: &mut TypeEnv) -> Result<(), Vec<ErrorS>> {
         match stmt {
             Stmt::Expr(stmt_expr) => {
                 let mut errs: Vec<ErrorS> = vec![];
@@ -185,12 +180,7 @@ impl<'a> Visitor<'a> for Verifier<'a> {
         }
     }
 
-    fn visit_expr(
-        &self,
-        expr: &Expr,
-        span: &Span,
-        types: &mut TypeEnv<'a>,
-    ) -> Result<(), Vec<ErrorS>> {
+    fn visit_expr(&self, expr: &Expr, span: &Span, types: &mut TypeEnv) -> Result<(), Vec<ErrorS>> {
         let mut errs: Vec<ErrorS> = vec![];
 
         for rule in &self.rules {
@@ -201,9 +191,11 @@ impl<'a> Visitor<'a> for Verifier<'a> {
 
         match expr {
             Expr::Block(block_expr) => {
+                let mut block_types = types.extend();
+
                 for (stmt, stmt_span) in &block_expr.stmts {
                     let stmt_errs = self
-                        .visit_stmt(stmt, stmt_span, types)
+                        .visit_stmt(stmt, stmt_span, &mut block_types)
                         .err()
                         .unwrap_or_default();
 
@@ -213,7 +205,7 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 if block_expr.return_expr.is_some() {
                     let (return_expr, return_span) = block_expr.return_expr.as_ref().unwrap();
                     let expr_errs = self
-                        .visit_expr(return_expr, return_span, types)
+                        .visit_expr(return_expr, return_span, &mut block_types)
                         .err()
                         .unwrap_or_default();
 

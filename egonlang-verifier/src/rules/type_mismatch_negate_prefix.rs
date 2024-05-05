@@ -10,16 +10,11 @@ use crate::rules::rule::Rule;
 
 pub struct TypeMisMatchNegatePrefixRule;
 impl<'a> Rule<'a> for TypeMisMatchNegatePrefixRule {
-    fn visit_stmt(
-        &self,
-        _stmt: &Stmt,
-        _span: &Span,
-        _types: &mut TypeEnv<'a>,
-    ) -> VerificationResult {
+    fn visit_stmt(&self, _stmt: &Stmt, _span: &Span, _types: &mut TypeEnv) -> VerificationResult {
         Ok(())
     }
 
-    fn visit_expr(&self, expr: &Expr, _span: &Span, types: &mut TypeEnv<'a>) -> VerificationResult {
+    fn visit_expr(&self, expr: &Expr, _span: &Span, types: &mut TypeEnv) -> VerificationResult {
         match expr {
             Expr::Prefix(prefix_expr) => match prefix_expr.op {
                 OpPrefix::Negate => {

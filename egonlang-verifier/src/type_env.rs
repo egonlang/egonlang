@@ -24,7 +24,7 @@ impl TypeEnvValue {
 
 #[derive(Default)]
 pub struct TypeEnv<'a> {
-    root: Option<&'a TypeEnv<'a>>,
+    root: Option<Box<&'a TypeEnv<'a>>>,
     values: HashMap<String, TypeEnvValue>,
 }
 
@@ -34,9 +34,9 @@ impl<'a> TypeEnv<'a> {
     }
 
     /// Create a new type environment by extending the current one
-    pub fn extend(&'a self) -> Box<TypeEnv<'a>> {
+    pub fn extend(&self) -> Box<TypeEnv> {
         Box::from(TypeEnv {
-            root: Some(self),
+            root: Some(Box::from(self)),
             values: HashMap::new(),
         })
     }
@@ -45,7 +45,7 @@ impl<'a> TypeEnv<'a> {
     pub fn get(&self, identifier: &str) -> Option<TypeEnvValue> {
         let result = match self.values.get(identifier) {
             Some(result) => Some(result.clone()),
-            None => match self.root {
+            None => match &self.root {
                 Some(root) => root.get(identifier),
                 _ => None,
             },

@@ -14,17 +14,12 @@ impl<'a> Rule<'a> for UndefinedIdentifierRule {
         &self,
         _stmt: &Stmt,
         _span: &Span,
-        _types: &mut TypeEnv<'a>,
+        _types: &mut TypeEnv,
     ) -> Result<(), Vec<ErrorS>> {
         Ok(())
     }
 
-    fn visit_expr(
-        &self,
-        expr: &Expr,
-        span: &Span,
-        types: &mut TypeEnv<'a>,
-    ) -> Result<(), Vec<ErrorS>> {
+    fn visit_expr(&self, expr: &Expr, span: &Span, types: &mut TypeEnv) -> Result<(), Vec<ErrorS>> {
         if let Expr::Identifier(ExprIdentifier { identifier }) = expr {
             let name = &identifier.name;
 

@@ -7,7 +7,7 @@ use crate::rules::rule::Rule;
 
 pub struct TypeMismatchOnDeclarationsRule;
 impl<'a> Rule<'a> for TypeMismatchOnDeclarationsRule {
-    fn visit_stmt(&self, stmt: &Stmt, span: &Span, types: &mut TypeEnv<'a>) -> VerificationResult {
+    fn visit_stmt(&self, stmt: &Stmt, span: &Span, types: &mut TypeEnv) -> VerificationResult {
         if let Stmt::Assign(stmt_assign) = stmt {
             match (&stmt_assign.type_expr, &stmt_assign.value) {
                 // let a;
@@ -87,7 +87,7 @@ impl<'a> Rule<'a> for TypeMismatchOnDeclarationsRule {
         &self,
         expr: &egonlang_core::ast::Expr,
         _span: &Span,
-        _types: &mut TypeEnv<'a>,
+        _types: &mut TypeEnv,
     ) -> VerificationResult {
         let _ = expr;
         Ok(())

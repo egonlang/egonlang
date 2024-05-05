@@ -12,7 +12,7 @@ impl TypeMismatchInfixRule {
         &self,
         infix: &ExprInfix,
         expected_type: TypeRef,
-        types: &mut TypeEnv<'_>,
+        types: &mut TypeEnv,
     ) -> VerificationResult {
         let mut errs = vec![];
 
@@ -52,16 +52,11 @@ impl TypeMismatchInfixRule {
 }
 
 impl<'a> Rule<'a> for TypeMismatchInfixRule {
-    fn visit_stmt(
-        &self,
-        _stmt: &Stmt,
-        _span: &Span,
-        _types: &mut TypeEnv<'a>,
-    ) -> VerificationResult {
+    fn visit_stmt(&self, _stmt: &Stmt, _span: &Span, _types: &mut TypeEnv) -> VerificationResult {
         Ok(())
     }
 
-    fn visit_expr(&self, expr: &Expr, _span: &Span, types: &mut TypeEnv<'a>) -> VerificationResult {
+    fn visit_expr(&self, expr: &Expr, _span: &Span, types: &mut TypeEnv) -> VerificationResult {
         match expr {
             Expr::Infix(infix) => {
                 let mut errs = vec![];

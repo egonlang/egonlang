@@ -10,16 +10,11 @@ use crate::rules::rule::Rule;
 
 pub struct ReassigningConstValueRule;
 impl<'a> Rule<'a> for ReassigningConstValueRule {
-    fn visit_stmt(
-        &self,
-        _stmt: &Stmt,
-        _span: &Span,
-        _types: &mut TypeEnv<'a>,
-    ) -> VerificationResult {
+    fn visit_stmt(&self, _stmt: &Stmt, _span: &Span, _types: &mut TypeEnv) -> VerificationResult {
         Ok(())
     }
 
-    fn visit_expr(&self, expr: &Expr, span: &Span, types: &mut TypeEnv<'a>) -> VerificationResult {
+    fn visit_expr(&self, expr: &Expr, span: &Span, types: &mut TypeEnv) -> VerificationResult {
         let mut errs = vec![];
 
         match expr {

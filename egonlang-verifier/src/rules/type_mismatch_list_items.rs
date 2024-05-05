@@ -10,16 +10,11 @@ use crate::rules::rule::Rule;
 
 pub struct TypeMisMatchListItemsRule;
 impl<'a> Rule<'a> for TypeMisMatchListItemsRule {
-    fn visit_stmt(
-        &self,
-        _stmt: &Stmt,
-        _span: &Span,
-        _types: &mut TypeEnv<'a>,
-    ) -> VerificationResult {
+    fn visit_stmt(&self, _stmt: &Stmt, _span: &Span, _types: &mut TypeEnv) -> VerificationResult {
         Ok(())
     }
 
-    fn visit_expr(&self, expr: &Expr, _span: &Span, types: &mut TypeEnv<'a>) -> VerificationResult {
+    fn visit_expr(&self, expr: &Expr, _span: &Span, types: &mut TypeEnv) -> VerificationResult {
         let mut errs = vec![];
 
         match expr {
