@@ -1,25 +1,20 @@
 use egonlang_core::{
     ast::{Expr, ExprIdentifier, Stmt},
-    errors::{ErrorS, TypeError},
+    errors::TypeError,
     span::Span,
 };
 
-use crate::type_env::TypeEnv;
+use crate::{type_env::TypeEnv, verifier::VerificationResult};
 
 use crate::rules::rule::Rule;
 
 pub struct UndefinedIdentifierRule;
 impl<'a> Rule<'a> for UndefinedIdentifierRule {
-    fn visit_stmt(
-        &self,
-        _stmt: &Stmt,
-        _span: &Span,
-        _types: &mut TypeEnv,
-    ) -> Result<(), Vec<ErrorS>> {
+    fn visit_stmt(&self, _stmt: &Stmt, _span: &Span, _types: &mut TypeEnv) -> VerificationResult {
         Ok(())
     }
 
-    fn visit_expr(&self, expr: &Expr, span: &Span, types: &mut TypeEnv) -> Result<(), Vec<ErrorS>> {
+    fn visit_expr(&self, expr: &Expr, span: &Span, types: &mut TypeEnv) -> VerificationResult {
         if let Expr::Identifier(ExprIdentifier { identifier }) = expr {
             let name = &identifier.name;
 
