@@ -7,8 +7,8 @@ use egonlang_core::{
 use crate::{
     rules::{
         const_declaration_with_no_value::DeclareConstWithoutValue,
-        reassigning_const_values::ReassigningConstValueRule, rule::Rule,
-        type_mismatch_infix::TypeMismatchInfixRule,
+        divide_by_zero::DivideByZeroRule, reassigning_const_values::ReassigningConstValueRule,
+        rule::Rule, type_mismatch_infix::TypeMismatchInfixRule,
         type_mismatch_list_items::TypeMisMatchListItemsRule,
         type_mismatch_negate_prefix::TypeMisMatchNegatePrefixRule,
         type_mismatch_on_declarations::TypeMismatchOnDeclarationsRule,
@@ -38,6 +38,7 @@ impl Verifier<'_> {
         verifier.rules.push(Box::from(DeclareConstWithoutValue));
         verifier.rules.push(Box::from(ReassigningConstValueRule));
         verifier.rules.push(Box::from(UndefinedIdentifierRule));
+        verifier.rules.push(Box::from(DivideByZeroRule));
 
         verifier
     }

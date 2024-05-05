@@ -1,4 +1,5 @@
 pub mod const_declaration_with_no_value;
+pub mod divide_by_zero;
 pub mod reassigning_const_values;
 pub mod rule;
 pub mod type_mismatch_infix;
