@@ -16,7 +16,7 @@ pub trait Visitor<'a> {
 
     fn visit_expr(
         &self,
-        stmt: &Expr,
+        expr: &Expr,
         span: &Span,
         types: &mut TypeEnv<'a>,
     ) -> Result<(), Vec<ErrorS>>;

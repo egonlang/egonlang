@@ -12,6 +12,16 @@ pub struct Module {
     pub stmts: Vec<StmtS>,
 }
 
+impl Module {
+    pub fn new() -> Self {
+        Module::default()
+    }
+
+    pub fn from(stmts: Vec<StmtS>) -> Self {
+        Module { stmts }
+    }
+}
+
 pub type StmtS = Spanned<Stmt>;
 pub type ExprS = Spanned<Expr>;
 
