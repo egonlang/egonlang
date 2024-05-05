@@ -6,12 +6,14 @@ use egonlang_core::{
 
 use crate::{
     rules::{
-        rule::Rule, type_mismatch_list_items::TypeMisMatchListItemsRule,
+        const_declaration_with_no_value::DeclareConstWithoutValue,
+        reassigning_const_values::ReassigningConstValueRule, rule::Rule,
+        type_mismatch_list_items::TypeMisMatchListItemsRule,
         type_mismatch_negate_prefix::TypeMisMatchNegatePrefixRule,
         type_mismatch_on_assignment::TypeMisMatchOnAssignmentRule,
         undefined_identifier::UndefinedIdentifierRule,
     },
-    type_env::TypeEnv,
+    type_env::{TypeEnv, TypeEnvValue},
     visitor::Visitor,
 };
 
@@ -29,6 +31,8 @@ impl Verifier<'_> {
         verifier.rules.push(Box::from(TypeMisMatchNegatePrefixRule));
         verifier.rules.push(Box::from(TypeMisMatchListItemsRule));
         verifier.rules.push(Box::from(TypeMisMatchOnAssignmentRule));
+        verifier.rules.push(Box::from(DeclareConstWithoutValue));
+        verifier.rules.push(Box::from(ReassigningConstValueRule));
         verifier.rules.push(Box::from(UndefinedIdentifierRule));
 
         verifier
@@ -87,6 +91,12 @@ impl<'a> Visitor<'a> for Verifier<'a> {
             Stmt::Assign(stmt_assign) => {
                 let mut errs: Vec<ErrorS> = vec![];
 
+                for rule in &self.rules {
+                    let rule_errs = rule.visit_stmt(stmt, span, types).err().unwrap_or_default();
+
+                    errs.extend(rule_errs);
+                }
+
                 if let Some((type_expr, type_expr_span)) = &stmt_assign.type_expr {
                     let type_expr_errs = self
                         .visit_expr(type_expr, type_expr_span, types)
@@ -108,6 +118,42 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 if !errs.is_empty() {
                     return Err(errs);
                 }
+
+                match (&stmt_assign.type_expr, &stmt_assign.value) {
+                    (None, None) => todo!(),
+                    (None, Some((value_expr, value_span))) => {
+                        let value_typeref = types.resolve_expr_type(value_expr, value_span)?;
+                        types.set(
+                            &stmt_assign.identifier.name,
+                            TypeEnvValue {
+                                typeref: value_typeref,
+                                is_const: stmt_assign.is_const,
+                            },
+                        );
+                    }
+                    (Some((type_expr, type_span)), None) => {
+                        let type_typeref = types.resolve_expr_type(type_expr, type_span)?;
+
+                        types.set(
+                            &stmt_assign.identifier.name,
+                            TypeEnvValue {
+                                typeref: type_typeref,
+                                is_const: stmt_assign.is_const,
+                            },
+                        );
+                    }
+                    (Some((type_expr, type_span)), Some((_value_expr, _value_span))) => {
+                        let type_typeref = types.resolve_expr_type(type_expr, type_span)?;
+
+                        types.set(
+                            &stmt_assign.identifier.name,
+                            TypeEnvValue {
+                                typeref: type_typeref,
+                                is_const: stmt_assign.is_const,
+                            },
+                        );
+                    }
+                };
 
                 Ok(())
             }
