@@ -678,6 +678,24 @@ impl Display for ExprType {
 pub struct TypeRef(pub String, pub Vec<TypeRef>);
 
 impl TypeRef {
+    pub fn is_list(&self) -> bool {
+        self.0 == *"list"
+    }
+
+    pub fn is_known_list(&self) -> bool {
+        if self.is_list() {
+            let f = self.1.first().unwrap();
+
+            TypeRef::unknown() != *f
+        } else {
+            false
+        }
+    }
+
+    pub fn is_unknown_list(&self) -> bool {
+        !self.is_known_list()
+    }
+
     pub fn string() -> TypeRef {
         TypeRef("string".to_string(), vec![])
     }

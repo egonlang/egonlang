@@ -10,7 +10,7 @@ use crate::{
         reassigning_const_values::ReassigningConstValueRule, rule::Rule,
         type_mismatch_list_items::TypeMisMatchListItemsRule,
         type_mismatch_negate_prefix::TypeMisMatchNegatePrefixRule,
-        type_mismatch_on_assignment::TypeMisMatchOnAssignmentRule,
+        type_mismatch_on_declarations::TypeMismatchOnDeclarationsRule,
         undefined_identifier::UndefinedIdentifierRule,
     },
     type_env::{TypeEnv, TypeEnvValue},
@@ -30,7 +30,9 @@ impl Verifier<'_> {
 
         verifier.rules.push(Box::from(TypeMisMatchNegatePrefixRule));
         verifier.rules.push(Box::from(TypeMisMatchListItemsRule));
-        verifier.rules.push(Box::from(TypeMisMatchOnAssignmentRule));
+        verifier
+            .rules
+            .push(Box::from(TypeMismatchOnDeclarationsRule));
         verifier.rules.push(Box::from(DeclareConstWithoutValue));
         verifier.rules.push(Box::from(ReassigningConstValueRule));
         verifier.rules.push(Box::from(UndefinedIdentifierRule));
