@@ -144,6 +144,12 @@ impl From<Box<ExprBlock>> for Expr {
     }
 }
 
+impl From<ExprBlock> for Expr {
+    fn from(value: ExprBlock) -> Self {
+        Expr::Block(Box::from(value))
+    }
+}
+
 impl From<ExprList> for Expr {
     fn from(value: ExprList) -> Self {
         Expr::List(value)
@@ -365,6 +371,18 @@ impl Display for ExprIdentifier {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Identifier {
     pub name: String,
+}
+
+impl From<Identifier> for ExprIdentifier {
+    fn from(value: Identifier) -> Self {
+        ExprIdentifier { identifier: value }
+    }
+}
+
+impl From<Identifier> for Expr {
+    fn from(value: Identifier) -> Self {
+        Expr::Identifier(value.into())
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -695,7 +713,8 @@ mod ast_tests {
         ($test_name:ident, $expr:expr, $expected:expr) => {
             #[test]
             fn $test_name() {
-                assert_eq!($expected, $expr.to_string());
+                let expr: ast::Expr = $expr;
+                assert_eq!($expected, expr.to_string());
             }
         };
     }
@@ -704,47 +723,46 @@ mod ast_tests {
 
     expr_display_test!(
         test_expr_literal_bool_true,
-        crate::ast::Expr::Literal(crate::ast::ExprLiteral::Bool(true)),
+        ast::ExprLiteral::Bool(true).into(),
         "true"
     );
 
     expr_display_test!(
         test_expr_literal_bool_false,
-        crate::ast::Expr::Literal(crate::ast::ExprLiteral::Bool(false)),
+        ast::ExprLiteral::Bool(false).into(),
         "false"
     );
 
     expr_display_test!(
         test_expr_literal_number_zero,
-        crate::ast::Expr::Literal(crate::ast::ExprLiteral::Number(0f64)),
+        ast::ExprLiteral::Number(0f64).into(),
         "0"
     );
 
     expr_display_test!(
         test_expr_literal_number_positive,
-        crate::ast::Expr::Literal(crate::ast::ExprLiteral::Number(3842f64)),
+        ast::ExprLiteral::Number(3842f64).into(),
         "3842"
     );
 
     expr_display_test!(
         test_expr_literal_number_negative,
-        crate::ast::Expr::Literal(crate::ast::ExprLiteral::Number(-1546f64)),
+        ast::ExprLiteral::Number(-1546f64).into(),
         "-1546"
     );
 
     expr_display_test!(
         test_expr_literal_number_float,
-        crate::ast::Expr::Literal(crate::ast::ExprLiteral::Number(987.123f64)),
+        ast::ExprLiteral::Number(987.123f64).into(),
         "987.123"
     );
 
     expr_display_test!(
         test_expr_identifier,
-        crate::ast::Expr::Identifier(crate::ast::ExprIdentifier {
-            identifier: crate::ast::Identifier {
-                name: "foo".to_string()
-            }
-        }),
+        ast::Identifier {
+            name: "foo".to_string()
+        }
+        .into(),
         "foo"
     );
 
@@ -925,10 +943,11 @@ mod ast_tests {
                 0..0
             ),
             then: (
-                crate::ast::Expr::Block(Box::new(crate::ast::ExprBlock {
+                ast::ExprBlock {
                     stmts: vec![],
                     return_expr: Some((ast::ExprLiteral::Number(123f64).into(), 0..0))
-                })),
+                }
+                .into(),
                 0..0
             ),
             else_: None
@@ -939,12 +958,9 @@ mod ast_tests {
     expr_display_test!(
         test_expr_if_with_stmts,
         crate::ast::Expr::If(Box::new(crate::ast::ExprIf {
-            cond: (
-                crate::ast::Expr::Literal(crate::ast::ExprLiteral::Bool(true)),
-                0..0
-            ),
+            cond: (ast::ExprLiteral::Bool(true).into(), 0..0),
             then: (
-                crate::ast::Expr::Block(Box::new(crate::ast::ExprBlock {
+                ast::ExprBlock {
                     stmts: vec![(
                         crate::ast::Stmt::Expr(crate::ast::StmtExpr {
                             expr: (ast::ExprLiteral::Number(123f64).into(), 0..0)
@@ -952,7 +968,8 @@ mod ast_tests {
                         0..0
                     )],
                     return_expr: Some((ast::ExprLiteral::Number(456f64).into(), 0..0))
-                })),
+                }
+                .into(),
                 0..0
             ),
             else_: None
@@ -963,22 +980,21 @@ mod ast_tests {
     expr_display_test!(
         test_expr_if_else,
         crate::ast::Expr::If(Box::new(crate::ast::ExprIf {
-            cond: (
-                crate::ast::Expr::Literal(crate::ast::ExprLiteral::Bool(true)),
-                0..0
-            ),
+            cond: (ast::ExprLiteral::Bool(true).into(), 0..0),
             then: (
-                crate::ast::Expr::Block(Box::new(crate::ast::ExprBlock {
+                ast::ExprBlock {
                     stmts: vec![],
                     return_expr: Some((ast::ExprLiteral::Number(123f64).into(), 0..0))
-                })),
+                }
+                .into(),
                 0..0
             ),
             else_: Some((
-                crate::ast::Expr::Block(Box::new(crate::ast::ExprBlock {
+                ast::ExprBlock {
                     stmts: vec![],
                     return_expr: Some((ast::ExprLiteral::Number(456f64).into(), 0..0))
-                })),
+                }
+                .into(),
                 0..0
             ))
         })),
@@ -988,32 +1004,31 @@ mod ast_tests {
     expr_display_test!(
         test_expr_if_else_with_stmts,
         crate::ast::Expr::If(Box::new(crate::ast::ExprIf {
-            cond: (
-                crate::ast::Expr::Literal(crate::ast::ExprLiteral::Bool(true)),
-                0..0
-            ),
+            cond: (ast::ExprLiteral::Bool(true).into(), 0..0),
             then: (
-                crate::ast::Expr::Block(Box::new(crate::ast::ExprBlock {
+                ast::ExprBlock {
                     stmts: vec![(
-                        crate::ast::Stmt::Expr(crate::ast::StmtExpr {
+                        ast::Stmt::Expr(ast::StmtExpr {
                             expr: (ast::ExprLiteral::Number(123f64).into(), 0..0)
                         }),
                         0..0
                     )],
                     return_expr: Some((ast::ExprLiteral::Number(456f64).into(), 0..0))
-                })),
+                }
+                .into(),
                 0..0
             ),
             else_: Some((
-                crate::ast::Expr::Block(Box::new(crate::ast::ExprBlock {
+                ast::ExprBlock {
                     stmts: vec![(
-                        crate::ast::Stmt::Expr(crate::ast::StmtExpr {
+                        ast::Stmt::Expr(ast::StmtExpr {
                             expr: (ast::ExprLiteral::Number(789f64).into(), 0..0)
                         }),
                         0..0
                     )],
                     return_expr: Some((ast::ExprLiteral::Number(0f64).into(), 0..0))
-                })),
+                }
+                .into(),
                 0..0
             ))
         })),
@@ -1057,10 +1072,11 @@ mod ast_tests {
             params: vec![],
             return_type: (crate::ast::TypeRef::unit(), 0..0),
             body: (
-                crate::ast::Expr::Block(Box::new(ast::ExprBlock {
+                ast::ExprBlock {
                     stmts: vec![],
                     return_expr: None
-                })),
+                }
+                .into(),
                 0..0
             )
         })),
@@ -1082,10 +1098,11 @@ mod ast_tests {
             )],
             return_type: (crate::ast::TypeRef::unit(), 0..0),
             body: (
-                crate::ast::Expr::Block(Box::new(ast::ExprBlock {
+                ast::ExprBlock {
                     stmts: vec![],
                     return_expr: None
-                })),
+                }
+                .into(),
                 0..0
             )
         })),
@@ -1118,10 +1135,11 @@ mod ast_tests {
             ],
             return_type: (crate::ast::TypeRef::unit(), 0..0),
             body: (
-                crate::ast::Expr::Block(Box::new(ast::ExprBlock {
+                ast::ExprBlock {
                     stmts: vec![],
                     return_expr: None
-                })),
+                }
+                .into(),
                 0..0
             )
         })),
@@ -1154,10 +1172,11 @@ mod ast_tests {
             ],
             return_type: (crate::ast::TypeRef::number(), 0..0),
             body: (
-                crate::ast::Expr::Block(Box::new(ast::ExprBlock {
+                ast::ExprBlock {
                     stmts: vec![],
                     return_expr: None
-                })),
+                }
+                .into(),
                 0..0
             )
         })),
@@ -1190,31 +1209,30 @@ mod ast_tests {
             ],
             return_type: (crate::ast::TypeRef::number(), 0..0),
             body: (
-                crate::ast::Expr::Block(Box::new(ast::ExprBlock {
+                ast::ExprBlock {
                     stmts: vec![],
                     return_expr: Some((
                         crate::ast::Expr::Infix(Box::new(crate::ast::ExprInfix {
                             lt: (
-                                crate::ast::Expr::Identifier(crate::ast::ExprIdentifier {
-                                    identifier: ast::Identifier {
-                                        name: "a".to_string()
-                                    }
-                                }),
+                                ast::Identifier {
+                                    name: "a".to_string()
+                                }
+                                .into(),
                                 0..0
                             ),
                             op: crate::ast::OpInfix::Add,
                             rt: (
-                                crate::ast::Expr::Identifier(crate::ast::ExprIdentifier {
-                                    identifier: ast::Identifier {
-                                        name: "b".to_string()
-                                    }
-                                }),
+                                ast::Identifier {
+                                    name: "b".to_string()
+                                }
+                                .into(),
                                 0..0
                             )
                         })),
                         0..0
                     ))
-                })),
+                }
+                .into(),
                 0..0
             )
         })),
