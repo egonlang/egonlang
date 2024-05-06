@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use egonlang_core::{
-    ast::{Expr, ExprIdentifier, ExprList, ExprS, ExprTuple, TypeRef},
+    ast::{Expr, ExprIdentifier, ExprList, ExprTuple, TypeRef},
     errors::{ErrorS, TypeError},
     span::Span,
 };
