@@ -15,6 +15,7 @@ use crate::{
         undefined_identifier::UndefinedIdentifierRule,
     },
     type_env::{TypeEnv, TypeEnvValue},
+    verify_trace,
     visitor::Visitor,
 };
 
@@ -64,16 +65,18 @@ impl Verifier<'_> {
 
 impl<'a> Visitor<'a> for Verifier<'a> {
     fn visit_stmt(&self, stmt: &Stmt, span: &Span, types: &mut TypeEnv) -> Result<(), Vec<ErrorS>> {
+        let mut errs: Vec<ErrorS> = vec![];
+
+        verify_trace!("Visiting statement: {stmt}");
+
+        for rule in &self.rules {
+            let rule_errs = rule.visit_stmt(stmt, span, types).err().unwrap_or_default();
+
+            errs.extend(rule_errs);
+        }
+
         match stmt {
             Stmt::Expr(stmt_expr) => {
-                let mut errs: Vec<ErrorS> = vec![];
-
-                for rule in &self.rules {
-                    let rule_errs = rule.visit_stmt(stmt, span, types).err().unwrap_or_default();
-
-                    errs.extend(rule_errs);
-                }
-
                 let (expr, expr_span) = &stmt_expr.expr;
                 let expr_errs = self
                     .visit_expr(expr, expr_span, types)
@@ -89,14 +92,6 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 Ok(())
             }
             Stmt::Assign(stmt_assign) => {
-                let mut errs: Vec<ErrorS> = vec![];
-
-                for rule in &self.rules {
-                    let rule_errs = rule.visit_stmt(stmt, span, types).err().unwrap_or_default();
-
-                    errs.extend(rule_errs);
-                }
-
                 if let Some((type_expr, type_expr_span)) = &stmt_assign.type_expr {
                     let type_expr_errs = self
                         .visit_expr(type_expr, type_expr_span, types)
@@ -158,8 +153,6 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 Ok(())
             }
             Stmt::Fn(stmt_fn) => {
-                let mut errs: Vec<ErrorS> = vec![];
-
                 let (fn_expr, fn_expr_span) = &stmt_fn.fn_expr;
 
                 let fn_expr_errs = self
@@ -182,6 +175,8 @@ impl<'a> Visitor<'a> for Verifier<'a> {
 
     fn visit_expr(&self, expr: &Expr, span: &Span, types: &mut TypeEnv) -> Result<(), Vec<ErrorS>> {
         let mut errs: Vec<ErrorS> = vec![];
+
+        verify_trace!("Visiting expression: {expr}");
 
         for rule in &self.rules {
             let rule_errs = rule.visit_expr(expr, span, types).err().unwrap_or_default();

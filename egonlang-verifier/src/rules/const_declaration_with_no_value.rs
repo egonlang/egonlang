@@ -15,7 +15,11 @@ impl<'a> Rule<'a> for DeclareConstWithoutValue {
 
         match stmt {
             Stmt::Assign(stmt_assign) => {
+                crate::verify_trace!("Verifying const declaration has value: {stmt}");
+
                 if stmt_assign.is_const && stmt_assign.value.is_none() {
+                    crate::verify_trace!("Error: const declaration has no value: {stmt}");
+
                     errs.push((
                         SyntaxError::UninitializedConst {
                             name: stmt_assign.identifier.name.clone(),

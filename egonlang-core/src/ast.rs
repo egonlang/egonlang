@@ -404,7 +404,7 @@ impl Display for ExprLiteral {
         match self {
             ExprLiteral::Bool(expr) => f.write_fmt(format_args!("{}", expr)),
             ExprLiteral::Number(expr) => f.write_fmt(format_args!("{}", expr)),
-            ExprLiteral::String(expr) => f.write_fmt(format_args!("{}", expr)),
+            ExprLiteral::String(expr) => f.write_fmt(format_args!(r#""{}""#, expr)),
         }
     }
 }

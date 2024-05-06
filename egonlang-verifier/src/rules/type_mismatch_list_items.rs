@@ -7,6 +7,7 @@ use egonlang_core::{
 use crate::{type_env::TypeEnv, verifier::VerificationResult};
 
 use crate::rules::rule::Rule;
+use crate::verify_trace;
 
 pub struct TypeMisMatchListItemsRule;
 impl<'a> Rule<'a> for TypeMisMatchListItemsRule {
@@ -19,6 +20,8 @@ impl<'a> Rule<'a> for TypeMisMatchListItemsRule {
 
         match expr {
             Expr::List(expr_list) => {
+                verify_trace!("Verifying list expression for matching item types: {expr}");
+
                 let items = &expr_list.items;
 
                 if !items.is_empty() {
@@ -32,6 +35,8 @@ impl<'a> Rule<'a> for TypeMisMatchListItemsRule {
                         let item_typeref = types.resolve_expr_type(item, item_span)?;
 
                         if item_typeref != first_item_typeref {
+                            verify_trace!("Error: List item '{item}' ({item_typeref}) doesn't match list type ({first_item_typeref})");
+
                             errs.push((
                                 TypeError::MismatchType {
                                     expected: first_item_typeref.to_string(),

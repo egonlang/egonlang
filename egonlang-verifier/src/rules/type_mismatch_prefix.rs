@@ -7,6 +7,7 @@ use egonlang_core::{
 use crate::{type_env::TypeEnv, verifier::VerificationResult};
 
 use crate::rules::rule::Rule;
+use crate::verify_trace;
 
 pub struct TypeMismatchPrefixRule;
 impl<'a> Rule<'a> for TypeMismatchPrefixRule {
@@ -16,38 +17,44 @@ impl<'a> Rule<'a> for TypeMismatchPrefixRule {
 
     fn visit_expr(&self, expr: &Expr, _span: &Span, types: &mut TypeEnv) -> VerificationResult {
         match expr {
-            Expr::Prefix(prefix_expr) => match prefix_expr.op {
-                OpPrefix::Negate => {
-                    let (value_expr, value_span) = &prefix_expr.rt;
-                    let value_typeref = types.resolve_expr_type(value_expr, value_span)?;
+            Expr::Prefix(prefix_expr) => {
+                verify_trace!("Verifying prefix expression: {expr}");
 
-                    if value_typeref != TypeRef::number() {
-                        return Err(vec![(
-                            TypeError::MismatchType {
-                                expected: TypeRef::number().to_string(),
-                                actual: value_typeref.to_string(),
-                            }
-                            .into(),
-                            value_span.clone(),
-                        )]);
+                match prefix_expr.op {
+                    OpPrefix::Negate => {
+                        let (value_expr, value_span) = &prefix_expr.rt;
+                        let value_typeref = types.resolve_expr_type(value_expr, value_span)?;
+
+                        if value_typeref != TypeRef::number() {
+                            verify_trace!("Error: negate prefix on a none number value: {expr}");
+                            return Err(vec![(
+                                TypeError::MismatchType {
+                                    expected: TypeRef::number().to_string(),
+                                    actual: value_typeref.to_string(),
+                                }
+                                .into(),
+                                value_span.clone(),
+                            )]);
+                        }
+                    }
+                    OpPrefix::Not => {
+                        let (value_expr, value_span) = &prefix_expr.rt;
+                        let value_typeref = types.resolve_expr_type(value_expr, value_span)?;
+
+                        if value_typeref != TypeRef::bool() {
+                            verify_trace!("Error: not prefix on a none bool value: {expr}");
+                            return Err(vec![(
+                                TypeError::MismatchType {
+                                    expected: TypeRef::bool().to_string(),
+                                    actual: value_typeref.to_string(),
+                                }
+                                .into(),
+                                value_span.clone(),
+                            )]);
+                        }
                     }
                 }
-                OpPrefix::Not => {
-                    let (value_expr, value_span) = &prefix_expr.rt;
-                    let value_typeref = types.resolve_expr_type(value_expr, value_span)?;
-
-                    if value_typeref != TypeRef::bool() {
-                        return Err(vec![(
-                            TypeError::MismatchType {
-                                expected: TypeRef::bool().to_string(),
-                                actual: value_typeref.to_string(),
-                            }
-                            .into(),
-                            value_span.clone(),
-                        )]);
-                    }
-                }
-            },
+            }
             _ => {}
         };
 

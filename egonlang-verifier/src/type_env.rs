@@ -6,6 +6,8 @@ use egonlang_core::{
     span::Span,
 };
 
+use crate::verify_trace;
+
 /// Typing information stored about an identifier
 #[derive(Debug, PartialEq, Clone)]
 pub struct TypeEnvValue {
@@ -147,6 +149,8 @@ impl<'a> TypeEnv<'a> {
             }
             _ => Ok(expr.clone().get_type_expr()),
         };
+
+        verify_trace!("Resolving expr `{expr}` to type `{resolved_type:?}`");
 
         resolved_type
     }

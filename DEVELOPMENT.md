@@ -22,8 +22,10 @@
 | Command                        | Description                                                                              |
 | ------------------------------ | ---------------------------------------------------------------------------------------- |
 | `just test`                    | Run all the tests                                                                        |
+| `just test-trace`              | Run all the tests and log using `verify-trace!` macro                                    |
 | `just lint`                    | Run lint and any report errors                                                           |
 | `just verify`                  | Runs tests and linting                                                                   |
+| `just verify-trace`            | Runs tests (logging with `verify-trace!` macro) and linting                              |
 | `just verify-with-logs`        | Runs tests and linting but dumps stdout and stderr to `out.log` & `err.log` respectively |
 | `just format`                  | Run formatting                                                                           |
 | `just build`                   | Build the project (debug)                                                                |

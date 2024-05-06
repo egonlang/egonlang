@@ -1,6 +1,7 @@
 use egonlang_core::ast::{Expr, ExprInfix, OpInfix, TypeRef};
 use egonlang_core::{ast::Stmt, errors::TypeError, span::Span};
 
+use crate::verify_trace;
 use crate::{type_env::TypeEnv, verifier::VerificationResult};
 
 use crate::rules::rule::Rule;
@@ -23,6 +24,8 @@ impl TypeMismatchInfixRule {
         let rt_type = types.resolve_expr_type(rt_expr, rt_span)?;
 
         if lt_type != expected_type {
+            verify_trace!("Error: infix operation received non number: {lt_expr}");
+
             errs.push((
                 TypeError::MismatchType {
                     expected: expected_type.to_string(),
@@ -33,6 +36,8 @@ impl TypeMismatchInfixRule {
             ));
         }
         if rt_type != expected_type {
+            verify_trace!("Error: infix operation received non number: {rt_expr}");
+
             errs.push((
                 TypeError::MismatchType {
                     expected: expected_type.to_string(),
@@ -60,6 +65,8 @@ impl<'a> Rule<'a> for TypeMismatchInfixRule {
         match expr {
             Expr::Infix(infix) => {
                 let mut errs = vec![];
+
+                verify_trace!("Verifying infix expression: {expr}");
 
                 match infix.op {
                     OpInfix::Greater => {

@@ -4,7 +4,7 @@ use egonlang_core::{
     span::Span,
 };
 
-use crate::{type_env::TypeEnv, verifier::VerificationResult};
+use crate::{type_env::TypeEnv, verifier::VerificationResult, verify_trace};
 
 use crate::rules::rule::Rule;
 
@@ -16,9 +16,13 @@ impl<'a> Rule<'a> for UndefinedIdentifierRule {
 
     fn visit_expr(&self, expr: &Expr, span: &Span, types: &mut TypeEnv) -> VerificationResult {
         if let Expr::Identifier(ExprIdentifier { identifier }) = expr {
+            verify_trace!("Verifying identifier expression: {expr}");
+
             let name = &identifier.name;
 
             if types.get(name).is_none() {
+                verify_trace!("Error: identifier not defined: {expr}");
+
                 return Err(vec![(
                     TypeError::Undefined(name.to_string()).into(),
                     span.clone(),

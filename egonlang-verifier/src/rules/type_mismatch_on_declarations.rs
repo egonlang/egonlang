@@ -5,10 +5,14 @@ use crate::{type_env::TypeEnv, verifier::VerificationResult};
 
 use crate::rules::rule::Rule;
 
+use crate::verify_trace;
+
 pub struct TypeMismatchOnDeclarationsRule;
 impl<'a> Rule<'a> for TypeMismatchOnDeclarationsRule {
     fn visit_stmt(&self, stmt: &Stmt, span: &Span, types: &mut TypeEnv) -> VerificationResult {
         if let Stmt::Assign(stmt_assign) = stmt {
+            verify_trace!("Verifying assignment statement: {stmt}");
+
             match (&stmt_assign.type_expr, &stmt_assign.value) {
                 // let a;
                 (None, None) => {
@@ -22,6 +26,7 @@ impl<'a> Rule<'a> for TypeMismatchOnDeclarationsRule {
                     // Example:
                     // let a = [];
                     if value_typeref == TypeRef::list(TypeRef::unknown()) {
+                        verify_trace!("Error: Unknown list type in declaration: {stmt}");
                         return Err(vec![(TypeError::UknownListType.into(), value_span.clone())]);
                     }
                 }
@@ -55,6 +60,8 @@ impl<'a> Rule<'a> for TypeMismatchOnDeclarationsRule {
                             }
                         }
 
+                        verify_trace!("Error: Type mismatch in declaration: {stmt}");
+
                         return Err(vec![(
                             TypeError::MismatchType {
                                 expected: assign_typeref.to_string(),
@@ -69,10 +76,8 @@ impl<'a> Rule<'a> for TypeMismatchOnDeclarationsRule {
                         // let a: list<unknown> = [];
                         if value_typeref == TypeRef::list(TypeRef::unknown()) {
                             if assign_typeref.is_unknown_list() {
-                                return Err(vec![(
-                                    TypeError::UknownListType.into(),
-                                    value_span.clone(),
-                                )]);
+                                verify_trace!("Error: Unknown list type in declaration: {stmt}");
+                                return Err(vec![(TypeError::UknownListType.into(), span.clone())]);
                             }
                         }
                     }
