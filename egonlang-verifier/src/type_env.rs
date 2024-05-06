@@ -179,29 +179,6 @@ impl<'a> TypeEnv<'a> {
         let (first_item_expr, first_item_span) = list_expr.items.first().unwrap().clone();
         let first_item_type = self.resolve_expr_type(&first_item_expr, &first_item_span)?;
 
-        let remaining_items: Vec<ExprS> = list_expr.items.clone().into_iter().skip(1).collect();
-
-        let mut errs = vec![];
-
-        for (item_expr, item_span) in remaining_items {
-            let item_type = self.resolve_expr_type(&item_expr, &item_span)?;
-
-            if item_type != first_item_type {
-                errs.push((
-                    TypeError::MismatchType {
-                        expected: first_item_type.to_string(),
-                        actual: item_type.to_string(),
-                    }
-                    .into(),
-                    item_span.clone(),
-                ));
-            }
-        }
-
-        if !errs.is_empty() {
-            return Err(errs);
-        }
-
         Ok(TypeRef::list(first_item_type))
     }
 
