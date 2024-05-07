@@ -36,7 +36,7 @@ test *args:
     cargo nextest run --workspace {{args}}
 
 test-trace *args:
-    just test --features='verify-trace' --no-capture
+    just test --features='verify-trace' --no-capture {{args}}
 
 clean-git-branches:
     git branch -d $(git branch --merged=main | grep -v main) && git fetch --prune

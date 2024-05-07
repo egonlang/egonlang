@@ -35,6 +35,18 @@
 | `just build-docker`            | Build the docker image for the egon language                                             |
 | `just run-docker COMMAND PATH` | Run the egon command in docker e.g. `$ just run docker parse ./path/to/file.eg`          |
 
+## Run Single Test
+
+```shell
+just test path_056__UP_res_examples_invalid_infix_type_mismatch_string_eg
+```
+
+### With Trace
+
+```shell
+just test-trace path_056__UP_res_examples_invalid_infix_type_mismatch_string_eg
+```
+
 ## VS Code Extension
 
 ### Requirements

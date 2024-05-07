@@ -148,6 +148,14 @@ impl<'a> Rule<'a> for TypeMismatchInfixRule {
 
                     errs.extend(infix_errs);
                 }
+                OpInfix::Modulus => {
+                    let infix_errs = self
+                        .validate_infix_types(infix, TypeRef::number(), types)
+                        .err()
+                        .unwrap_or_default();
+
+                    errs.extend(infix_errs);
+                }
                 _ => {}
             };
 
