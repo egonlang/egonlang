@@ -95,4 +95,6 @@ just test-trace path_056__UP_res_examples_invalid_infix_type_mismatch_string_eg
 
 Builds the extension to `./vsc/out/egon-language-*.vsix`
 
-> $ just build
+```shell 
+just build
+```
