@@ -37,9 +37,8 @@ use egonlang_core::{ast::Module, parser::parse};
 use verifier::{VerificationResult, Verifier};
 use verify_trace;
 
-pub fn verify(source: &str) -> VerificationResult {
-    let verifier = Verifier::new();
-    parse(source, 0).and_then(|module| verifier.verify(&module))
+pub fn verify_source(source: &str) -> VerificationResult {
+    parse(source, 0).and_then(|module| verify_module(&module))
 }
 
 pub fn verify_module(module: &Module) -> VerificationResult {
