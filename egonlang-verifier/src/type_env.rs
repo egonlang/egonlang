@@ -147,10 +147,20 @@ impl<'a> TypeEnv<'a> {
 
                 Ok(type_expr.0.clone())
             }
+            Expr::Assign(assign_expr) => {
+                let name = &assign_expr.identifier.name;
+
+                Ok(self.get(name).map(|x| x.typeref).unwrap_or_else(|| {
+                    let (value_expr, value_span) = &assign_expr.value;
+                    let value_typeref = self.resolve_expr_type(value_expr, value_span).unwrap();
+
+                    value_typeref
+                }))
+            }
             _ => Ok(expr.clone().get_type_expr()),
         };
 
-        verify_trace!("Resolving expr `{expr}` to type `{resolved_type:?}`");
+        verify_trace!("Resolving type:      {expr} => `{resolved_type:?}`");
 
         resolved_type
     }
