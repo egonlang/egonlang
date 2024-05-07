@@ -20,27 +20,27 @@
 
 ## Build, test, verify, etc...
 
-| Command                        | Description                                                                              |
-| ------------------------------ | ---------------------------------------------------------------------------------------- |
-| `just test`                    | Run all the tests                                                                        |
-| `just test-trace`              | Run all the tests and log using `verify-trace!` macro                                    |
-| `just lint`                    | Run lint and any report errors                                                           |
-| `just verify`                  | Runs tests and linting                                                                   |
-| `just verify-trace`            | Runs tests (logging with `verify-trace!` macro) and linting                              |
-| `just verify-with-logs`        | Runs tests and linting but dumps stdout and stderr to `out.log` & `err.log` respectively |
-| `just format`                  | Run formatting                                                                           |
-| `just build`                   | Build the project (debug)                                                                |
-| `just build-release`           | Build the project (release)                                                              |
-| `just clean`                   | Clean build artifacts                                                                    |
-| `just cli COMMAND PATH`        | Run the egon command with the `COMMAND` (`lex` or `parse`) and the file `PATH` in `PWD`  |
-| `just cli-trace COMMAND PATH`  | Run the egon command (logging with `verify-trace!` macro)                                |
-| `just build-docker`            | Build the docker image for the egon language                                             |
-| `just run-docker COMMAND PATH` | Run the egon command in docker e.g. `$ just run docker parse ./path/to/file.eg`          |
+| Command                        | Description                                                                                        |
+| ------------------------------ | -------------------------------------------------------------------------------------------------- |
+| `just test`                    | Run all the tests                                                                                  |
+| `just test-trace`              | Run all the tests and log using `verify-trace!` macro                                              |
+| `just lint`                    | Run lint and any report errors                                                                     |
+| `just verify`                  | Runs tests and linting                                                                             |
+| `just verify-trace`            | Runs tests (logging with `verify-trace!` macro) and linting                                        |
+| `just verify-with-logs`        | Runs tests and linting but dumps stdout and stderr to `out.log` & `err.log` respectively           |
+| `just format`                  | Run formatting                                                                                     |
+| `just build`                   | Build the project (debug)                                                                          |
+| `just build-release`           | Build the project (release)                                                                        |
+| `just clean`                   | Clean build artifacts                                                                              |
+| `just cli COMMAND PATH`        | Run the egon command with the `COMMAND` (`lex`, `parse`, or `verify`) and the file `PATH` in `PWD` |
+| `just cli-trace COMMAND PATH`  | Run the egon command (logging with `verify-trace!` macro)                                          |
+| `just build-docker`            | Build the docker image for the egon language                                                       |
+| `just run-docker COMMAND PATH` | Run the egon command in docker e.g. `$ just run docker parse ./path/to/file.eg`                    |
 
 ## CLI
 
 ```shell
-just cli parse ./res/examples/valid/range_expression_start_only.eg 
+just cli verify ./res/examples/valid/range_expression_start_only.eg 
 ```
 
 ### With Verify Tracing
@@ -48,7 +48,7 @@ just cli parse ./res/examples/valid/range_expression_start_only.eg
 This will enable trace logs from the verifier.
 
 ```shell
-just cli-trace parse ./res/examples/valid/range_expression_start_only.eg 
+just cli-trace verify ./res/examples/valid/range_expression_start_only.eg 
 ```
 
 ## Run Single Test

@@ -12,6 +12,11 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    /// Parse file and verify AST
+    Verify {
+        /// Path to file
+        path: PathBuf,
+    },
     /// Parse file in to an serialized AST
     Parse {
         /// Path to file
@@ -33,10 +38,7 @@ fn main() {
 
     match &cli.command {
         Some(command) => match command {
-            Commands::Parse {
-                path,
-                use_tokens_file: _,
-            } => {
+            Commands::Verify { path } => {
                 let content = std::fs::read_to_string(path).expect("Unable to read file");
                 let path = std::fs::canonicalize(path).unwrap();
 
@@ -50,6 +52,29 @@ fn main() {
                             Ok(serde_json::to_string(&module).unwrap())
                         }
                     }
+                    Err(errs) => Err(errs),
+                };
+
+                match module {
+                    Ok(module) => {
+                        println!("{module}");
+                    }
+                    Err(errs) => {
+                        println!("Path:\n\n{:?}\n", &path);
+                        println!("Input:\n\n{content}\n");
+                        println!("Errors:\n\n{errs:#?}");
+                    }
+                };
+            }
+            Commands::Parse {
+                path,
+                use_tokens_file: _,
+            } => {
+                let content = std::fs::read_to_string(path).expect("Unable to read file");
+                let path = std::fs::canonicalize(path).unwrap();
+
+                let module = match egonlang_core::parser::parse(&content, 0) {
+                    Ok(module) => Ok(serde_json::to_string(&module).unwrap()),
                     Err(errs) => Err(errs),
                 };
 
@@ -83,7 +108,7 @@ fn main() {
             }
         },
         None => {
-            println!("Invalid command! Expected one of [\"lex\", \"parse\"] ");
+            println!("Invalid command! Expected one of [\"lex\", \"parse\", \"verify\"]");
         }
     }
 }
