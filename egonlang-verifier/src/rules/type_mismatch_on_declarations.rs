@@ -31,7 +31,21 @@ impl<'a> Rule<'a> for TypeMismatchOnDeclarationsRule {
                     }
                 }
                 // let a: number;
-                (Some(_), None) => {}
+                (Some((assign_type_expr, assign_type_span)), None) => {
+                    let assign_typeref =
+                        types.resolve_expr_type(assign_type_expr, assign_type_span)?;
+
+                    // Check for empty list assignment
+                    // Example:
+                    // let a: unknown;
+                    if assign_typeref == TypeRef::unknown() {
+                        verify_trace!("Error: Unknown type in declaration: {stmt}");
+                        return Err(vec![(
+                            TypeError::UnknownType.into(),
+                            assign_type_span.clone(),
+                        )]);
+                    }
+                }
                 // let a: number = 123;
                 (Some((assign_type_expr, assign_type_span)), Some((value_expr, value_span))) => {
                     let assign_typeref =

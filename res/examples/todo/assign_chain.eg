@@ -1,0 +1,5 @@
+let c = 123;
+let b: number;
+let a: number;
+
+a = b = c;

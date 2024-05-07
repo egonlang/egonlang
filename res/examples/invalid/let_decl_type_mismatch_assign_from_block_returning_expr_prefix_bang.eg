@@ -1,3 +1,4 @@
-let a: number = { !a };
+let b: bool = false;
+let a: number = { !b };
 
 // out: TypeError: mismatched types: expected type `number` but received `bool`

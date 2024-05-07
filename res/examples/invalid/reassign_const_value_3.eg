@@ -2,6 +2,6 @@ const a: number = 123;
 
 {
     a = 456;
-}
+};
 
-// out: SyntaxError: `a` is a const value and can't be reassigned"
+// out: SyntaxError: `a` is a const value and can't be reassigned
