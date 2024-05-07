@@ -14,10 +14,16 @@ impl<'a> Rule<'a> for DeclareConstWithoutValue {
         let mut errs = vec![];
 
         if let Stmt::Assign(stmt_assign) = stmt {
-            crate::verify_trace!("Verifying const declaration has value: {stmt}");
+            crate::verify_trace!(
+                "Verifying const declaration has value: {}",
+                stmt.to_string().cyan()
+            );
 
             if stmt_assign.is_const && stmt_assign.value.is_none() {
-                crate::verify_trace!("Error: const declaration has no value: {stmt}");
+                crate::verify_trace!(
+                    "Error: const declaration has no value: {}",
+                    stmt.to_string().cyan()
+                );
 
                 errs.push((
                     SyntaxError::UninitializedConst {

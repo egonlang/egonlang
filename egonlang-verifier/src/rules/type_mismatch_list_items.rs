@@ -19,7 +19,10 @@ impl<'a> Rule<'a> for TypeMisMatchListItemsRule {
         let mut errs = vec![];
 
         if let Expr::List(expr_list) = expr {
-            verify_trace!("Verifying list expression for matching item types: {expr}");
+            verify_trace!(
+                "Verifying list expression for matching item types: {}",
+                expr.to_string().cyan()
+            );
 
             let items = &expr_list.items;
 
@@ -34,7 +37,11 @@ impl<'a> Rule<'a> for TypeMisMatchListItemsRule {
                     let item_typeref = types.resolve_expr_type(item, item_span)?;
 
                     if item_typeref != first_item_typeref {
-                        verify_trace!("Error: List item '{item}' ({item_typeref}) doesn't match list type ({first_item_typeref})");
+                        verify_trace!(
+                            "Error: Found {} in a list of {}",
+                            item_typeref.to_string().yellow(),
+                            first_item_typeref.to_string().yellow()
+                        );
 
                         errs.push((
                             TypeError::MismatchType {

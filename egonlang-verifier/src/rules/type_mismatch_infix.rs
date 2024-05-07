@@ -65,7 +65,7 @@ impl<'a> Rule<'a> for TypeMismatchInfixRule {
         if let Expr::Infix(infix) = expr {
             let mut errs = vec![];
 
-            verify_trace!("Verifying infix expression: {expr}");
+            verify_trace!("Verifying infix expression: {}", expr.to_string().cyan());
 
             match infix.op {
                 OpInfix::Greater => {

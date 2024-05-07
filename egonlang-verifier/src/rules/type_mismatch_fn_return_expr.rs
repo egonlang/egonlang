@@ -17,7 +17,10 @@ impl<'a> Rule<'a> for TypeMismatchFnReturnExprRule {
 
     fn visit_expr(&self, expr: &Expr, _span: &Span, types: &mut TypeEnv) -> VerificationResult {
         if let Expr::Fn(fn_expr) = expr {
-            verify_trace!("Verifying fn return type and body expression: {expr}");
+            verify_trace!(
+                "Verifying fn return type and body expression: {}",
+                expr.to_string().cyan()
+            );
 
             let (fn_return_type_typeref, _) = &fn_expr.return_type;
             let (body_expr, body_span) = &fn_expr.body;
@@ -25,7 +28,9 @@ impl<'a> Rule<'a> for TypeMismatchFnReturnExprRule {
 
             if body_typeref != *fn_return_type_typeref {
                 verify_trace!(
-                    "Error: fn body type ({body_typeref}) doesn't match fn return type ({fn_return_type_typeref})"
+                    "Error: fn body type {} doesn't match fn return type {}",
+                    body_typeref.to_string().yellow().italic(),
+                    fn_return_type_typeref.to_string().yellow().italic()
                 );
 
                 return Err(vec![(

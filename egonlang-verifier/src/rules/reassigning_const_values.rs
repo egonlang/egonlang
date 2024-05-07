@@ -18,14 +18,17 @@ impl<'a> Rule<'a> for ReassigningConstValueRule {
         let mut errs = vec![];
 
         if let Expr::Assign(expr_assign) = expr {
-            verify_trace!("Verifying assign expression doesn't reassign const: {expr}");
+            verify_trace!(
+                "Verifying assign expression doesn't reassign const: {}",
+                expr.to_string().cyan()
+            );
 
             let identifier = &expr_assign.identifier.name;
             let type_env_value = types.get(identifier);
             let is_const = type_env_value.map(|x| x.is_const).unwrap_or(false);
 
             if is_const {
-                verify_trace!("Error: Reassigned const: {expr}");
+                verify_trace!("Error: Reassigned const: {}", expr.to_string().cyan());
 
                 errs.push((
                     SyntaxError::ReassigningConst {

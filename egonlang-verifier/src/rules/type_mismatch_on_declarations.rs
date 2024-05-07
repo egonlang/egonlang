@@ -11,7 +11,10 @@ pub struct TypeMismatchOnDeclarationsRule;
 impl<'a> Rule<'a> for TypeMismatchOnDeclarationsRule {
     fn visit_stmt(&self, stmt: &Stmt, span: &Span, types: &mut TypeEnv) -> VerificationResult {
         if let Stmt::Assign(stmt_assign) = stmt {
-            verify_trace!("Verifying assignment statement: {stmt}");
+            verify_trace!(
+                "Verifying assignment statement: {}",
+                stmt.to_string().cyan()
+            );
 
             match (&stmt_assign.type_expr, &stmt_assign.value) {
                 // let a;
@@ -26,7 +29,10 @@ impl<'a> Rule<'a> for TypeMismatchOnDeclarationsRule {
                     // Example:
                     // let a = [];
                     if value_typeref == TypeRef::list(TypeRef::unknown()) {
-                        verify_trace!("Error: Unknown list type in declaration: {stmt}");
+                        verify_trace!(
+                            "Error: Unknown list type in declaration: {}",
+                            stmt.to_string().cyan()
+                        );
                         return Err(vec![(TypeError::UknownListType.into(), value_span.clone())]);
                     }
                 }
@@ -91,7 +97,10 @@ impl<'a> Rule<'a> for TypeMismatchOnDeclarationsRule {
                         if value_typeref == TypeRef::list(TypeRef::unknown())
                             && assign_typeref.is_unknown_list()
                         {
-                            verify_trace!("Error: Unknown list type in declaration: {stmt}");
+                            verify_trace!(
+                                "Error: Unknown list type in declaration: {}",
+                                stmt.to_string().cyan()
+                            );
                             return Err(vec![(TypeError::UknownListType.into(), span.clone())]);
                         }
                     }

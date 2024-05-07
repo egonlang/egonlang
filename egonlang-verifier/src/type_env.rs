@@ -37,6 +37,8 @@ impl<'a> TypeEnv<'a> {
 
     /// Create a new type environment by extending the current one
     pub fn extend(&self) -> Box<TypeEnv> {
+        verify_trace!("Extending type env...");
+
         Box::from(TypeEnv {
             root: Some(self),
             values: HashMap::new(),
@@ -57,7 +59,29 @@ impl<'a> TypeEnv<'a> {
             let result = result.clone().unwrap();
 
             if result.typeref.0 == *"type" {
+                verify_trace!(
+                    "Got type alias {} for {}",
+                    result.typeref.to_string().italic().yellow(),
+                    identifier.cyan()
+                );
+
                 return Some(result.map_typeref(result.typeref.1.first().unwrap().clone()));
+            }
+        }
+
+        match &result {
+            Some(result) => {
+                verify_trace!(
+                    "Got type {} for {}",
+                    result.typeref.to_string().italic().yellow(),
+                    identifier.cyan()
+                );
+            }
+            None => {
+                verify_trace!(
+                    "Error: Unable to find type for {} in type env",
+                    identifier.cyan()
+                );
             }
         }
 
@@ -84,6 +108,12 @@ impl<'a> TypeEnv<'a> {
             // ---------^ TypeRef::typed(TypeRef::number())
             return match self.get(&new_typeref.to_string()) {
                 Some(aliased_type) => {
+                    verify_trace!(
+                        "Setting {} to type alias {}",
+                        identifier.italic().underline(),
+                        aliased_type.typeref.to_string().italic().yellow()
+                    );
+
                     // Set the name to the flattened resolved type in the type env
                     //
                     // type A = number;
@@ -94,6 +124,11 @@ impl<'a> TypeEnv<'a> {
                     self.values.insert(identifier.to_string(), aliased_type)
                 }
                 None => {
+                    verify_trace!(
+                        "Setting {} to the type alias {}",
+                        identifier.italic().underline(),
+                        new_typeref.to_string().italic().yellow()
+                    );
                     // Set the name to the type
                     //
                     // type A = number;
@@ -105,6 +140,12 @@ impl<'a> TypeEnv<'a> {
                 }
             };
         }
+
+        verify_trace!(
+            "Setting {} to the type {}",
+            identifier.cyan(),
+            value.typeref.to_string().italic().yellow()
+        );
 
         // Type isn't aliased, set name to the value's type
         // println!("Set `{name}` from type env as {value:?}");
@@ -166,7 +207,31 @@ impl<'a> TypeEnv<'a> {
             _ => Ok(expr.clone().get_type_expr()),
         };
 
-        verify_trace!("Resolving type:      {expr} => `{resolved_type:?}`");
+        {
+            match &resolved_type {
+                Ok(resolved_type) => {
+                    let resolved_type_string = format!("{resolved_type}");
+                    verify_trace!(
+                        "Resolved {} to the type {}",
+                        expr.to_string().cyan(),
+                        resolved_type_string.italic().yellow()
+                    );
+                }
+                Err(err) => {
+                    let err_string = err
+                        .into_iter()
+                        .map(|(e, e_span)| format!("{e} @ {e_span:?}"))
+                        .collect::<Vec<String>>()
+                        .join("; ");
+
+                    verify_trace!(
+                        "Error resolving {} to a type: {}",
+                        expr.to_string().cyan(),
+                        err_string.italic().red()
+                    );
+                }
+            }
+        };
 
         resolved_type
     }

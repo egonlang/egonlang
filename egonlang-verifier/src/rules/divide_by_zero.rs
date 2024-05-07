@@ -19,7 +19,10 @@ impl<'a> Rule<'a> for DivideByZeroRule {
 
         if let Expr::Infix(infix_expr) = &expr {
             if let OpInfix::Divide = infix_expr.op {
-                verify_trace!("Verifying division infix expression doesn't divide by zero: {expr}");
+                verify_trace!(
+                    "Verifying division infix expression doesn't divide by zero: {}",
+                    expr.to_string().cyan()
+                );
 
                 let (lt_expr, lt_span) = &infix_expr.lt;
 
@@ -29,12 +32,18 @@ impl<'a> Rule<'a> for DivideByZeroRule {
                 let rt_value: f64 = rt_expr.clone().try_into().unwrap();
 
                 if lt_value == 0f64 {
-                    verify_trace!("Error: Trying to divide by zero on the left side: {lt_expr}");
+                    verify_trace!(
+                        "Error: Trying to divide by zero on the left side: {}",
+                        lt_expr.to_string().cyan()
+                    );
                     errs.push((SyntaxError::DivideByZero.into(), lt_span.clone()));
                 }
 
                 if rt_value == 0f64 {
-                    verify_trace!("Error: Trying to divide by zero on the right side: {rt_expr}");
+                    verify_trace!(
+                        "Error: Trying to divide by zero on the right side: {}",
+                        rt_expr.to_string().cyan()
+                    );
                     errs.push((SyntaxError::DivideByZero.into(), rt_span.clone()));
                 }
             }

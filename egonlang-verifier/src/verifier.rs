@@ -82,7 +82,10 @@ impl<'a> Visitor<'a> for Verifier<'a> {
     fn visit_stmt(&self, stmt: &Stmt, span: &Span, types: &mut TypeEnv) -> Result<(), Vec<ErrorS>> {
         let mut errs: Vec<ErrorS> = vec![];
 
-        verify_trace!("Visiting statement:  {stmt}");
+        {
+            let stmt_string = stmt.to_string();
+            verify_trace!("Visiting statement: {}", stmt_string.cyan());
+        };
 
         for rule in &self.rules {
             let rule_errs = rule.visit_stmt(stmt, span, types).err().unwrap_or_default();
@@ -191,7 +194,10 @@ impl<'a> Visitor<'a> for Verifier<'a> {
     fn visit_expr(&self, expr: &Expr, span: &Span, types: &mut TypeEnv) -> Result<(), Vec<ErrorS>> {
         let mut errs: Vec<ErrorS> = vec![];
 
-        verify_trace!("Visiting expression: {expr}");
+        {
+            let expr_string = expr.to_string();
+            verify_trace!("Visiting expression: {}", expr_string.cyan());
+        };
 
         for rule in &self.rules {
             let rule_errs = rule.visit_expr(expr, span, types).err().unwrap_or_default();
@@ -1017,6 +1023,25 @@ mod verifier_tests {
             (SyntaxError::DivideByZero.into(), 4..5)
         ])
     );
+
+    // verifier_test!(
+    //     validate_mismatch_type_when_let_decl_with_block_value,
+    //     r#"
+    //     let a: number = {
+    //         let a: string = "foo";
+
+    //         a
+    //     };
+    //     "#,
+    //     Err(vec![(
+    //         TypeError::MismatchType {
+    //             expected: TypeRef::number().to_string(),
+    //             actual: TypeRef::string().to_string()
+    //         }
+    //         .into(),
+    //         25..93
+    //     )])
+    // );
 
     #[test]
     fn errors_when_referencing_undefined_identifier() {

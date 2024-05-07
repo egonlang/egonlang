@@ -16,7 +16,10 @@ impl<'a> Rule<'a> for UndefinedIdentifierRule {
 
     fn visit_expr(&self, expr: &Expr, span: &Span, types: &mut TypeEnv) -> VerificationResult {
         if let Expr::Identifier(ExprIdentifier { identifier }) = expr {
-            verify_trace!("Verifying identifier expression: {expr}");
+            verify_trace!(
+                "Verifying identifier expression: {}",
+                expr.to_string().cyan()
+            );
 
             let name = &identifier.name;
 

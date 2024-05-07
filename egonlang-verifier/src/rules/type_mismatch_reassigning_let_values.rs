@@ -21,7 +21,10 @@ impl<'a> Rule<'a> for TypeMismatchReassigningLetValuesRule {
             let identifier = &expr_assign.identifier.name;
 
             if let Some(type_env_value) = types.get(identifier) {
-                verify_trace!("Verifying assign expression types: {expr}");
+                verify_trace!(
+                    "Verifying assign expression types: {}",
+                    expr.to_string().cyan()
+                );
 
                 let type_env_typeref = type_env_value.typeref;
                 let is_const = &type_env_value.is_const;
