@@ -32,8 +32,23 @@
 | `just build-release`           | Build the project (release)                                                              |
 | `just clean`                   | Clean build artifacts                                                                    |
 | `just cli COMMAND PATH`        | Run the egon command with the `COMMAND` (`lex` or `parse`) and the file `PATH` in `PWD`  |
+| `just cli-trace COMMAND PATH`  | Run the egon command (logging with `verify-trace!` macro)                                |
 | `just build-docker`            | Build the docker image for the egon language                                             |
 | `just run-docker COMMAND PATH` | Run the egon command in docker e.g. `$ just run docker parse ./path/to/file.eg`          |
+
+## CLI
+
+```shell
+just cli parse ./res/examples/valid/range_expression_start_only.eg 
+```
+
+### With Verify Tracing
+
+This will enable trace logs from the verifier.
+
+```shell
+just cli-trace parse ./res/examples/valid/range_expression_start_only.eg 
+```
 
 ## Run Single Test
 
@@ -41,7 +56,9 @@
 just test path_056__UP_res_examples_invalid_infix_type_mismatch_string_eg
 ```
 
-### With Trace
+### With Verify Tracing
+
+This will enable trace logs from the verifier.
 
 ```shell
 just test-trace path_056__UP_res_examples_invalid_infix_type_mismatch_string_eg
