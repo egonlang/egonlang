@@ -17,27 +17,24 @@ impl<'a> Rule<'a> for ReassigningConstValueRule {
     fn visit_expr(&self, expr: &Expr, span: &Span, types: &mut TypeEnv) -> VerificationResult {
         let mut errs = vec![];
 
-        match expr {
-            Expr::Assign(expr_assign) => {
-                verify_trace!("Verifying assign expression doesn't reassign const: {expr}");
+        if let Expr::Assign(expr_assign) = expr {
+            verify_trace!("Verifying assign expression doesn't reassign const: {expr}");
 
-                let identifier = &expr_assign.identifier.name;
-                let type_env_value = types.get(identifier);
-                let is_const = type_env_value.map(|x| x.is_const).unwrap_or(false);
+            let identifier = &expr_assign.identifier.name;
+            let type_env_value = types.get(identifier);
+            let is_const = type_env_value.map(|x| x.is_const).unwrap_or(false);
 
-                if is_const {
-                    verify_trace!("Error: Reassigned const: {expr}");
+            if is_const {
+                verify_trace!("Error: Reassigned const: {expr}");
 
-                    errs.push((
-                        SyntaxError::ReassigningConst {
-                            name: identifier.clone(),
-                        }
-                        .into(),
-                        span.clone(),
-                    ));
-                }
+                errs.push((
+                    SyntaxError::ReassigningConst {
+                        name: identifier.clone(),
+                    }
+                    .into(),
+                    span.clone(),
+                ));
             }
-            _ => {}
         };
 
         if !errs.is_empty() {

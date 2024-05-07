@@ -13,23 +13,20 @@ impl<'a> Rule<'a> for DeclareConstWithoutValue {
     fn visit_stmt(&self, stmt: &Stmt, span: &Span, _types: &mut TypeEnv) -> VerificationResult {
         let mut errs = vec![];
 
-        match stmt {
-            Stmt::Assign(stmt_assign) => {
-                crate::verify_trace!("Verifying const declaration has value: {stmt}");
+        if let Stmt::Assign(stmt_assign) = stmt {
+            crate::verify_trace!("Verifying const declaration has value: {stmt}");
 
-                if stmt_assign.is_const && stmt_assign.value.is_none() {
-                    crate::verify_trace!("Error: const declaration has no value: {stmt}");
+            if stmt_assign.is_const && stmt_assign.value.is_none() {
+                crate::verify_trace!("Error: const declaration has no value: {stmt}");
 
-                    errs.push((
-                        SyntaxError::UninitializedConst {
-                            name: stmt_assign.identifier.name.clone(),
-                        }
-                        .into(),
-                        span.clone(),
-                    ));
-                }
+                errs.push((
+                    SyntaxError::UninitializedConst {
+                        name: stmt_assign.identifier.name.clone(),
+                    }
+                    .into(),
+                    span.clone(),
+                ));
             }
-            _ => {}
         };
 
         if !errs.is_empty() {

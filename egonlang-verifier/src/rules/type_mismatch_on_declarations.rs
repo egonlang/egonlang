@@ -58,10 +58,10 @@ impl<'a> Rule<'a> for TypeMismatchOnDeclarationsRule {
                         // Check for empty list assignment
                         // Example:
                         // let a: list<number> = [];
-                        if value_typeref == TypeRef::list(TypeRef::unknown()) {
-                            if assign_typeref.is_known_list() {
-                                return Ok(());
-                            }
+                        if value_typeref == TypeRef::list(TypeRef::unknown())
+                            && assign_typeref.is_known_list()
+                        {
+                            return Ok(());
                         }
 
                         if value_typeref.0 == *"identifier" {
@@ -88,11 +88,11 @@ impl<'a> Rule<'a> for TypeMismatchOnDeclarationsRule {
                         // Check for empty list assignment
                         // Example:
                         // let a: list<unknown> = [];
-                        if value_typeref == TypeRef::list(TypeRef::unknown()) {
-                            if assign_typeref.is_unknown_list() {
-                                verify_trace!("Error: Unknown list type in declaration: {stmt}");
-                                return Err(vec![(TypeError::UknownListType.into(), span.clone())]);
-                            }
+                        if value_typeref == TypeRef::list(TypeRef::unknown())
+                            && assign_typeref.is_unknown_list()
+                        {
+                            verify_trace!("Error: Unknown list type in declaration: {stmt}");
+                            return Err(vec![(TypeError::UknownListType.into(), span.clone())]);
                         }
                     }
                 }

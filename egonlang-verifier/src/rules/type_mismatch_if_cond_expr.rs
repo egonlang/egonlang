@@ -16,25 +16,22 @@ impl<'a> Rule<'a> for TypeMismatchIfCondExprRule {
     }
 
     fn visit_expr(&self, expr: &Expr, _span: &Span, types: &mut TypeEnv) -> VerificationResult {
-        match expr {
-            Expr::If(if_expr) => {
-                verify_trace!("Verifying if expression cond: {expr}");
+        if let Expr::If(if_expr) = expr {
+            verify_trace!("Verifying if expression cond: {expr}");
 
-                let (cond_expr, cond_span) = &if_expr.cond;
-                let cond_typeref = types.resolve_expr_type(cond_expr, cond_span)?;
+            let (cond_expr, cond_span) = &if_expr.cond;
+            let cond_typeref = types.resolve_expr_type(cond_expr, cond_span)?;
 
-                if cond_typeref != TypeRef::bool() {
-                    return Err(vec![(
-                        TypeError::MismatchType {
-                            expected: TypeRef::bool().to_string(),
-                            actual: cond_typeref.to_string(),
-                        }
-                        .into(),
-                        cond_span.clone(),
-                    )]);
-                }
+            if cond_typeref != TypeRef::bool() {
+                return Err(vec![(
+                    TypeError::MismatchType {
+                        expected: TypeRef::bool().to_string(),
+                        actual: cond_typeref.to_string(),
+                    }
+                    .into(),
+                    cond_span.clone(),
+                )]);
             }
-            _ => {}
         };
 
         Ok(())

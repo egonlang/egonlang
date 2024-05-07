@@ -62,101 +62,98 @@ impl<'a> Rule<'a> for TypeMismatchInfixRule {
     }
 
     fn visit_expr(&self, expr: &Expr, _span: &Span, types: &mut TypeEnv) -> VerificationResult {
-        match expr {
-            Expr::Infix(infix) => {
-                let mut errs = vec![];
+        if let Expr::Infix(infix) = expr {
+            let mut errs = vec![];
 
-                verify_trace!("Verifying infix expression: {expr}");
+            verify_trace!("Verifying infix expression: {expr}");
 
-                match infix.op {
-                    OpInfix::Greater => {
-                        let infix_errs = self
-                            .validate_infix_types(infix, TypeRef::number(), types)
-                            .err()
-                            .unwrap_or_default();
+            match infix.op {
+                OpInfix::Greater => {
+                    let infix_errs = self
+                        .validate_infix_types(infix, TypeRef::number(), types)
+                        .err()
+                        .unwrap_or_default();
 
-                        errs.extend(infix_errs);
-                    }
-                    OpInfix::GreaterEqual => {
-                        let infix_errs = self
-                            .validate_infix_types(infix, TypeRef::number(), types)
-                            .err()
-                            .unwrap_or_default();
-
-                        errs.extend(infix_errs);
-                    }
-                    OpInfix::Less => {
-                        let infix_errs = self
-                            .validate_infix_types(infix, TypeRef::number(), types)
-                            .err()
-                            .unwrap_or_default();
-
-                        errs.extend(infix_errs);
-                    }
-                    OpInfix::LessEqual => {
-                        let infix_errs = self
-                            .validate_infix_types(infix, TypeRef::number(), types)
-                            .err()
-                            .unwrap_or_default();
-
-                        errs.extend(infix_errs);
-                    }
-                    OpInfix::Add => {
-                        let infix_errs = self
-                            .validate_infix_types(infix, TypeRef::number(), types)
-                            .err()
-                            .unwrap_or_default();
-
-                        errs.extend(infix_errs);
-                    }
-                    OpInfix::Subtract => {
-                        let infix_errs = self
-                            .validate_infix_types(infix, TypeRef::number(), types)
-                            .err()
-                            .unwrap_or_default();
-
-                        errs.extend(infix_errs);
-                    }
-                    OpInfix::Multiply => {
-                        let infix_errs = self
-                            .validate_infix_types(infix, TypeRef::number(), types)
-                            .err()
-                            .unwrap_or_default();
-
-                        errs.extend(infix_errs);
-                    }
-                    OpInfix::Divide => {
-                        let infix_errs = self
-                            .validate_infix_types(infix, TypeRef::number(), types)
-                            .err()
-                            .unwrap_or_default();
-
-                        errs.extend(infix_errs);
-                    }
-                    OpInfix::LogicAnd => {
-                        let infix_errs = self
-                            .validate_infix_types(infix, TypeRef::bool(), types)
-                            .err()
-                            .unwrap_or_default();
-
-                        errs.extend(infix_errs);
-                    }
-                    OpInfix::LogicOr => {
-                        let infix_errs = self
-                            .validate_infix_types(infix, TypeRef::bool(), types)
-                            .err()
-                            .unwrap_or_default();
-
-                        errs.extend(infix_errs);
-                    }
-                    _ => {}
-                };
-
-                if !errs.is_empty() {
-                    return Err(errs);
+                    errs.extend(infix_errs);
                 }
+                OpInfix::GreaterEqual => {
+                    let infix_errs = self
+                        .validate_infix_types(infix, TypeRef::number(), types)
+                        .err()
+                        .unwrap_or_default();
+
+                    errs.extend(infix_errs);
+                }
+                OpInfix::Less => {
+                    let infix_errs = self
+                        .validate_infix_types(infix, TypeRef::number(), types)
+                        .err()
+                        .unwrap_or_default();
+
+                    errs.extend(infix_errs);
+                }
+                OpInfix::LessEqual => {
+                    let infix_errs = self
+                        .validate_infix_types(infix, TypeRef::number(), types)
+                        .err()
+                        .unwrap_or_default();
+
+                    errs.extend(infix_errs);
+                }
+                OpInfix::Add => {
+                    let infix_errs = self
+                        .validate_infix_types(infix, TypeRef::number(), types)
+                        .err()
+                        .unwrap_or_default();
+
+                    errs.extend(infix_errs);
+                }
+                OpInfix::Subtract => {
+                    let infix_errs = self
+                        .validate_infix_types(infix, TypeRef::number(), types)
+                        .err()
+                        .unwrap_or_default();
+
+                    errs.extend(infix_errs);
+                }
+                OpInfix::Multiply => {
+                    let infix_errs = self
+                        .validate_infix_types(infix, TypeRef::number(), types)
+                        .err()
+                        .unwrap_or_default();
+
+                    errs.extend(infix_errs);
+                }
+                OpInfix::Divide => {
+                    let infix_errs = self
+                        .validate_infix_types(infix, TypeRef::number(), types)
+                        .err()
+                        .unwrap_or_default();
+
+                    errs.extend(infix_errs);
+                }
+                OpInfix::LogicAnd => {
+                    let infix_errs = self
+                        .validate_infix_types(infix, TypeRef::bool(), types)
+                        .err()
+                        .unwrap_or_default();
+
+                    errs.extend(infix_errs);
+                }
+                OpInfix::LogicOr => {
+                    let infix_errs = self
+                        .validate_infix_types(infix, TypeRef::bool(), types)
+                        .err()
+                        .unwrap_or_default();
+
+                    errs.extend(infix_errs);
+                }
+                _ => {}
+            };
+
+            if !errs.is_empty() {
+                return Err(errs);
             }
-            _ => {}
         }
 
         Ok(())

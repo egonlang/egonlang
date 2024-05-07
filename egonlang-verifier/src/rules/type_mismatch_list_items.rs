@@ -18,38 +18,35 @@ impl<'a> Rule<'a> for TypeMisMatchListItemsRule {
     fn visit_expr(&self, expr: &Expr, _span: &Span, types: &mut TypeEnv) -> VerificationResult {
         let mut errs = vec![];
 
-        match expr {
-            Expr::List(expr_list) => {
-                verify_trace!("Verifying list expression for matching item types: {expr}");
+        if let Expr::List(expr_list) = expr {
+            verify_trace!("Verifying list expression for matching item types: {expr}");
 
-                let items = &expr_list.items;
+            let items = &expr_list.items;
 
-                if !items.is_empty() {
-                    let (first_item_expr, first_item_span) = items.first().unwrap();
-                    let first_item_typeref =
-                        types.resolve_expr_type(first_item_expr, first_item_span)?;
+            if !items.is_empty() {
+                let (first_item_expr, first_item_span) = items.first().unwrap();
+                let first_item_typeref =
+                    types.resolve_expr_type(first_item_expr, first_item_span)?;
 
-                    let remaining_items: Vec<ExprS> = items.clone().into_iter().skip(1).collect();
+                let remaining_items: Vec<ExprS> = items.clone().into_iter().skip(1).collect();
 
-                    for (item, item_span) in &remaining_items {
-                        let item_typeref = types.resolve_expr_type(item, item_span)?;
+                for (item, item_span) in &remaining_items {
+                    let item_typeref = types.resolve_expr_type(item, item_span)?;
 
-                        if item_typeref != first_item_typeref {
-                            verify_trace!("Error: List item '{item}' ({item_typeref}) doesn't match list type ({first_item_typeref})");
+                    if item_typeref != first_item_typeref {
+                        verify_trace!("Error: List item '{item}' ({item_typeref}) doesn't match list type ({first_item_typeref})");
 
-                            errs.push((
-                                TypeError::MismatchType {
-                                    expected: first_item_typeref.to_string(),
-                                    actual: item_typeref.to_string(),
-                                }
-                                .into(),
-                                item_span.clone(),
-                            ));
-                        }
+                        errs.push((
+                            TypeError::MismatchType {
+                                expected: first_item_typeref.to_string(),
+                                actual: item_typeref.to_string(),
+                            }
+                            .into(),
+                            item_span.clone(),
+                        ));
                     }
                 }
             }
-            _ => {}
         };
 
         if !errs.is_empty() {
