@@ -110,7 +110,7 @@ impl<'a> TypeEnv<'a> {
                 Some(aliased_type) => {
                     verify_trace!(
                         "Setting {} to type alias {}",
-                        identifier.italic().underline(),
+                        identifier.cyan(),
                         aliased_type.typeref.to_string().italic().yellow()
                     );
 
@@ -126,7 +126,7 @@ impl<'a> TypeEnv<'a> {
                 None => {
                     verify_trace!(
                         "Setting {} to the type alias {}",
-                        identifier.italic().underline(),
+                        identifier.cyan(),
                         new_typeref.to_string().italic().yellow()
                     );
                     // Set the name to the type
