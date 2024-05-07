@@ -157,6 +157,12 @@ impl<'a> TypeEnv<'a> {
                     value_typeref
                 }))
             }
+            Expr::If(if_expr) => {
+                let (then_expr, then_span) = &if_expr.then;
+                let then_typeref = self.resolve_expr_type(&then_expr, &then_span)?;
+
+                Ok(then_typeref)
+            }
             _ => Ok(expr.clone().get_type_expr()),
         };
 
