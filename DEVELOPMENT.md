@@ -39,13 +39,33 @@
 
 ## CLI
 
+### Lex
+
+Lex an input file in to a list of tokens.
+
+```shell
+just cli lex ./res/examples/valid/range_expression_start_only.eg 
+```
+
+### Parse
+
+Parse an input file in to an AST (abstract syntax tree).
+
+```shell
+just cli parse ./res/examples/valid/range_expression_start_only.eg 
+```
+
+### Verify
+
+Parse an input file and verify the AST (e.g. syntax errors, type checking).
+
 ```shell
 just cli verify ./res/examples/valid/range_expression_start_only.eg 
 ```
 
-### With Verify Tracing
+#### With Verify Tracing
 
-This will enable trace logs from the verifier.
+Enable trace logs to help debug the verification command.
 
 ```shell
 just cli-trace verify ./res/examples/valid/range_expression_start_only.eg 
