@@ -13,8 +13,9 @@
 
 ## Project Structure
 
-- [egonlang-core](./egonlang-core/): Library responsible lexing, and parsing egon code
-- [egonlang-cli](./egonlang-cli/): Command line tool to lex and parse egon code files 
+- [core](./egonlang-core/): Library responsible for lexing, and parsing egon code
+- [verifier](./egonlang-verifier/): Library responsible verifying AST (e.g. syntax errors, type checking)
+- [cli](./egonlang-cli/): Command line tool to lex and parse egon code files 
 - [vsc](./vsc/): VS Code language extension
 
 ## Build, test, verify, etc...
