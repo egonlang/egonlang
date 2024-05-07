@@ -242,6 +242,7 @@ version = "0.1.0"
 dependencies = [
  "egonlang-core",
  "pretty_assertions",
+ "regex",
  "rstest",
 ]
 

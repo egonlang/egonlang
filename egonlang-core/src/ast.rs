@@ -684,6 +684,10 @@ impl Display for ExprType {
 pub struct TypeRef(pub String, pub Vec<TypeRef>);
 
 impl TypeRef {
+    pub fn is_type(&self) -> bool {
+        self.0 == *"type"
+    }
+
     pub fn is_list(&self) -> bool {
         self.0 == *"list"
     }

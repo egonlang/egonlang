@@ -1,5 +1,6 @@
 pub mod const_declaration_with_no_value;
 pub mod divide_by_zero;
+pub mod invalid_type_alias_name;
 pub mod reassigning_const_values;
 pub mod rule;
 pub mod type_mismatch_fn_return_expr;

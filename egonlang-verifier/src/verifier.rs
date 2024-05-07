@@ -7,8 +7,9 @@ use egonlang_core::{
 use crate::{
     rules::{
         const_declaration_with_no_value::DeclareConstWithoutValue,
-        divide_by_zero::DivideByZeroRule, reassigning_const_values::ReassigningConstValueRule,
-        rule::Rule, type_mismatch_fn_return_expr::TypeMismatchFnReturnExprRule,
+        divide_by_zero::DivideByZeroRule, invalid_type_alias_name::InvalidTypeAliasNameRule,
+        reassigning_const_values::ReassigningConstValueRule, rule::Rule,
+        type_mismatch_fn_return_expr::TypeMismatchFnReturnExprRule,
         type_mismatch_if_cond_expr::TypeMismatchIfCondExprRule,
         type_mismatch_if_then_else_exprs::TypeMismatchIfthenElseExprRule,
         type_mismatch_infix::TypeMismatchInfixRule,
@@ -53,6 +54,7 @@ impl Verifier<'_> {
         verifier
             .rules
             .push(Box::from(TypeMismatchIfthenElseExprRule));
+        verifier.rules.push(Box::from(InvalidTypeAliasNameRule));
 
         verifier
     }
@@ -951,29 +953,29 @@ mod verifier_tests {
         Ok(())
     );
 
-    // verifier_test!(
-    //     validate_type_alias_pascal_case,
-    //     "type int = number;",
-    //     Err(vec![(
-    //         SyntaxError::InvalidTypeAlias {
-    //             name: "int".to_string()
-    //         }
-    //         .into(),
-    //         0..18
-    //     )])
-    // );
+    verifier_test!(
+        validate_type_alias_pascal_case,
+        "type int = number;",
+        Err(vec![(
+            SyntaxError::InvalidTypeAlias {
+                name: "int".to_string()
+            }
+            .into(),
+            0..18
+        )])
+    );
 
-    // verifier_test!(
-    //     validate_type_alias_pascal_case2,
-    //     "type Number_List = list<number>;",
-    //     Err(vec![(
-    //         SyntaxError::InvalidTypeAlias {
-    //             name: "Number_List".to_string()
-    //         }
-    //         .into(),
-    //         0..32
-    //     )])
-    // );
+    verifier_test!(
+        validate_type_alias_pascal_case2,
+        "type Number_List = list<number>;",
+        Err(vec![(
+            SyntaxError::InvalidTypeAlias {
+                name: "Number_List".to_string()
+            }
+            .into(),
+            0..32
+        )])
+    );
 
     // verifier_test!(
     //     validate_fn_expr_mismatch_return_identifier_declared_in_body,
