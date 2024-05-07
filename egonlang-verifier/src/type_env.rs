@@ -193,43 +193,40 @@ impl<'a> TypeEnv<'a> {
 
                 Ok(self.get(name).map(|x| x.typeref).unwrap_or_else(|| {
                     let (value_expr, value_span) = &assign_expr.value;
-                    let value_typeref = self.resolve_expr_type(value_expr, value_span).unwrap();
 
-                    value_typeref
+                    self.resolve_expr_type(value_expr, value_span).unwrap()
                 }))
             }
             Expr::If(if_expr) => {
                 let (then_expr, then_span) = &if_expr.then;
-                let then_typeref = self.resolve_expr_type(&then_expr, &then_span)?;
+                let then_typeref = self.resolve_expr_type(then_expr, then_span)?;
 
                 Ok(then_typeref)
             }
             _ => Ok(expr.clone().get_type_expr()),
         };
 
-        {
-            match &resolved_type {
-                Ok(resolved_type) => {
-                    let resolved_type_string = format!("{resolved_type}");
-                    verify_trace!(
-                        "Resolved {} to the type {}",
-                        expr.to_string().cyan(),
-                        resolved_type_string.italic().yellow()
-                    );
-                }
-                Err(err) => {
-                    let err_string = err
-                        .into_iter()
-                        .map(|(e, e_span)| format!("{e} @ {e_span:?}"))
-                        .collect::<Vec<String>>()
-                        .join("; ");
+        match &resolved_type {
+            Ok(resolved_type) => {
+                let resolved_type_string = format!("{resolved_type}");
+                verify_trace!(
+                    "Resolved {} to the type {}",
+                    expr.to_string().cyan(),
+                    resolved_type_string.italic().yellow()
+                );
+            }
+            Err(err) => {
+                let err_string = err
+                    .iter()
+                    .map(|(e, e_span)| format!("{e} @ {e_span:?}"))
+                    .collect::<Vec<String>>()
+                    .join("; ");
 
-                    verify_trace!(
-                        "Error resolving {} to a type: {}",
-                        expr.to_string().cyan(),
-                        err_string.italic().red()
-                    );
-                }
+                verify_trace!(
+                    "Error resolving {} to a type: {}",
+                    expr.to_string().cyan(),
+                    err_string.italic().red()
+                );
             }
         };
 

@@ -111,10 +111,7 @@ impl Display for StmtAssign {
         let is_type_alias = self
             .type_expr
             .as_ref()
-            .map(|(type_expr, _)| match type_expr {
-                Expr::Type(_) => true,
-                _ => false,
-            })
+            .map(|(type_expr, _)| matches!(type_expr, Expr::Type(_)))
             .unwrap_or(false);
 
         if is_type_alias {
@@ -773,22 +770,20 @@ impl Display for TypeRef {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let base = if self.1.is_empty() {
             self.0.clone()
+        } else if self.is_type() {
+            self.1.first().unwrap().to_string()
         } else {
-            if self.is_type() {
-                self.1.first().unwrap().to_string()
-            } else {
-                let m = format!(
-                    "{}<{}>",
-                    self.0,
-                    self.1
-                        .clone()
-                        .into_iter()
-                        .map(|typeref| typeref.to_string())
-                        .collect::<Vec<String>>()
-                        .join(", ")
-                );
-                m
-            }
+            let m = format!(
+                "{}<{}>",
+                self.0,
+                self.1
+                    .clone()
+                    .into_iter()
+                    .map(|typeref| typeref.to_string())
+                    .collect::<Vec<String>>()
+                    .join(", ")
+            );
+            m
         };
         f.write_fmt(format_args!("{}", base))
     }
