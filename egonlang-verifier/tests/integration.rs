@@ -2,10 +2,8 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::{fs, str};
 
-use egonlang_verifier::verifier::Verifier;
+use egonlang_verifier::verify;
 use pretty_assertions::assert_eq;
-
-use egonlang_core::parser::parse;
 
 #[rstest::rstest]
 fn integration_valid(#[files("../res/examples/valid/**/*.eg")] path: PathBuf) {
@@ -32,9 +30,7 @@ fn integration_implemented(path: PathBuf) {
 
     let mut got_output = Vec::new();
 
-    let verifier = Verifier::new();
-
-    if let Err(e) = parse(&source, 0).and_then(|module| verifier.verify(&module)) {
+    if let Err(e) = verify(&source) {
         let m = e
             .into_iter()
             .map(|(e, _)| e.to_string())
@@ -64,9 +60,7 @@ fn integration_todo(#[files("../res/examples/todo/**/*.eg")] path: PathBuf) {
 
     let mut output_lines = exp_output.lines();
 
-    let verifier = Verifier::new();
-
-    if let Err(e) = parse(&source, 0).and_then(|module| verifier.verify(&module)) {
+    if let Err(e) = verify(&source) {
         let validation_messages = e
             .into_iter()
             .map(|(e, _)| e.to_string())
