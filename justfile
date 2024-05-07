@@ -19,6 +19,7 @@ cli-trace *args:
 
 format:
     cargo fmt --all
+    cargo clippy --fix --all-targets --no-deps --workspace
 
 lint:
     cargo fmt --all -- --check
