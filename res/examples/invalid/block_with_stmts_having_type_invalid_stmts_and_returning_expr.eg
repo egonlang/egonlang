@@ -25,9 +25,9 @@
 // out: TypeError: mismatched types: expected type `bool` but received `number`
 // out: TypeError: mismatched types: expected type `bool` but received `list<unknown>`
 
-// out: TypeError: mismatched types: expected type `bool` but received `()`
 // out: TypeError: mismatched types: expected type `bool` but received `number`
 // out: TypeError: mismatched types: expected type `bool` but received `list<unknown>`
+// out: TypeError: mismatched types: expected type `bool` but received `()`
 
 // out: TypeError: mismatched types: expected type `number` but received `list<unknown>`
 // out: TypeError: mismatched types: expected type `number` but received `list<unknown>`

@@ -50,7 +50,13 @@ impl<'a> TypeEnv<'a> {
         let result = match self.values.get(identifier) {
             Some(result) => Some(result.clone()),
             None => match &self.root {
-                Some(root) => root.get(identifier),
+                Some(root) => {
+                    verify_trace!(
+                        "Not finding {}, looking in higher type env",
+                        identifier.cyan()
+                    );
+                    root.get(identifier)
+                }
                 _ => None,
             },
         };

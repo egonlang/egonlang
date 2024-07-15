@@ -82,18 +82,9 @@ impl<'a> Visitor<'a> for Verifier<'a> {
     fn visit_stmt(&self, stmt: &Stmt, span: &Span, types: &mut TypeEnv) -> Result<(), Vec<ErrorS>> {
         let mut errs: Vec<ErrorS> = vec![];
 
-        {
-            let stmt_string = stmt.to_string();
-            verify_trace!("Visiting statement: {}", stmt_string.cyan());
-        };
+        verify_trace!("Visiting statement: {}", stmt.to_string().cyan());
 
-        for rule in &self.rules {
-            let rule_errs = rule.visit_stmt(stmt, span, types).err().unwrap_or_default();
-
-            errs.extend(rule_errs);
-        }
-
-        match stmt {
+        let result = match stmt {
             Stmt::Expr(stmt_expr) => {
                 let (expr, expr_span) = &stmt_expr.expr;
                 let expr_errs = self
@@ -188,22 +179,26 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 Ok(())
             }
             Stmt::Error => Ok(()),
+        };
+
+        for rule in &self.rules {
+            let rule_errs = rule.visit_stmt(stmt, span, types).err().unwrap_or_default();
+
+            errs.extend(rule_errs);
         }
+
+        verify_trace!(
+            "========= Exiting statement: {} =========",
+            stmt.to_string().cyan()
+        );
+
+        result
     }
 
     fn visit_expr(&self, expr: &Expr, span: &Span, types: &mut TypeEnv) -> Result<(), Vec<ErrorS>> {
         let mut errs: Vec<ErrorS> = vec![];
 
-        {
-            let expr_string = expr.to_string();
-            verify_trace!("Visiting expression: {}", expr_string.cyan());
-        };
-
-        for rule in &self.rules {
-            let rule_errs = rule.visit_expr(expr, span, types).err().unwrap_or_default();
-
-            errs.extend(rule_errs);
-        }
+        verify_trace!("Visiting expression: {}", expr.to_string().cyan());
 
         match expr {
             Expr::Block(block_expr) => {
@@ -227,6 +222,15 @@ impl<'a> Visitor<'a> for Verifier<'a> {
 
                     errs.extend(expr_errs);
                 }
+
+                for rule in &self.rules {
+                    let rule_errs = rule
+                        .visit_expr(expr, span, &mut block_types)
+                        .err()
+                        .unwrap_or_default();
+
+                    errs.extend(rule_errs);
+                }
             }
             Expr::Assign(assign_expr) => {
                 let (value_expr, value_span) = &assign_expr.value;
@@ -237,6 +241,12 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                     .unwrap_or_default();
 
                 errs.extend(value_errs);
+
+                for rule in &self.rules {
+                    let rule_errs = rule.visit_expr(expr, span, types).err().unwrap_or_default();
+
+                    errs.extend(rule_errs);
+                }
             }
             Expr::Infix(infix_expr) => {
                 let (lt_expr, lt_span) = &infix_expr.lt;
@@ -256,6 +266,12 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                     .unwrap_or_default();
 
                 errs.extend(rt_errs);
+
+                for rule in &self.rules {
+                    let rule_errs = rule.visit_expr(expr, span, types).err().unwrap_or_default();
+
+                    errs.extend(rule_errs);
+                }
             }
             Expr::Fn(fn_expr) => {
                 let mut fn_types = types.extend();
@@ -280,6 +296,15 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                     .unwrap_or_default();
 
                 errs.extend(body_errs);
+
+                for rule in &self.rules {
+                    let rule_errs = rule
+                        .visit_expr(expr, span, &mut fn_types)
+                        .err()
+                        .unwrap_or_default();
+
+                    errs.extend(rule_errs);
+                }
             }
             Expr::If(if_expr) => {
                 let (cond_expr, cond_span) = &if_expr.cond;
@@ -303,9 +328,26 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                         .unwrap_or_default();
                     errs.extend(else_errs);
                 }
+
+                for rule in &self.rules {
+                    let rule_errs = rule.visit_expr(expr, span, types).err().unwrap_or_default();
+
+                    errs.extend(rule_errs);
+                }
             }
-            _ => {}
+            _ => {
+                for rule in &self.rules {
+                    let rule_errs = rule.visit_expr(expr, span, types).err().unwrap_or_default();
+
+                    errs.extend(rule_errs);
+                }
+            }
         };
+
+        verify_trace!(
+            "========= Exiting expression: {} =========",
+            expr.to_string().cyan()
+        );
 
         if !errs.is_empty() {
             return Err(errs);
@@ -860,18 +902,18 @@ mod verifier_tests {
         Ok(())
     );
 
-    // verifier_test!(
-    //     validate_fn_expr_type_mismatch_in_body_identifier,
-    //     "(a: string): number => { a };",
-    //     Err(vec![(
-    //         TypeError::MismatchType {
-    //             expected: "number".to_string(),
-    //             actual: "string".to_string()
-    //         }
-    //         .into(),
-    //         25..26
-    //     )])
-    // );
+    verifier_test!(
+        validate_fn_expr_type_mismatch_in_body_identifier,
+        "(a: string): number => { a };",
+        Err(vec![(
+            TypeError::MismatchType {
+                expected: "number".to_string(),
+                actual: "string".to_string()
+            }
+            .into(),
+            23..28
+        )])
+    );
 
     verifier_test!(
         validate_fn_expr_type_mismatch_in_body_infix_bang,

@@ -685,6 +685,7 @@ impl Validator {
                         }
                     }
 
+                    // TODO:
                     if let Some(block_return) = &block.return_expr {
                         let block_return_type = fn_env.resolve_expr_type(block_return)?;
                         let (_, returning_expr_span) = block_return;
