@@ -124,7 +124,7 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 }
 
                 match (&stmt_assign.type_expr, &stmt_assign.value) {
-                    (None, None) => todo!(),
+                    (None, None) => {}
                     (None, Some((value_expr, value_span))) => {
                         let value_typeref = types.resolve_expr_type(value_expr, value_span)?;
                         types.set(
@@ -187,10 +187,16 @@ impl<'a> Visitor<'a> for Verifier<'a> {
             errs.extend(rule_errs);
         }
 
+        verify_trace!("There were a total of {} errors from rules", errs.len());
+
         verify_trace!(
             "========= Exiting statement: {} =========",
             stmt.to_string().cyan()
         );
+
+        if !errs.is_empty() {
+            return Err(errs);
+        }
 
         result
     }
@@ -359,10 +365,10 @@ impl<'a> Visitor<'a> for Verifier<'a> {
 
 #[cfg(test)]
 mod verifier_tests {
+    use crate::verify_source;
     use egonlang_core::{
         ast::{ExprAssign, ExprList, ExprLiteral, Identifier, Module, StmtExpr, TypeRef},
         errors::{SyntaxError, TypeError},
-        parser::parse,
     };
     use pretty_assertions::assert_eq;
 
@@ -371,6 +377,16 @@ mod verifier_tests {
     macro_rules! verifier_test {
         ($test_name:ident, $input:expr, $expected:expr) => {
             #[test]
+            fn $test_name() {
+                let result = verify_source($input);
+
+                assert_eq!($expected, result);
+            }
+        };
+
+        ($test_name:ident, $input:expr, $expected:expr, $ignore_reason:expr) => {
+            #[test]
+            #[ignore = $ignore_reason]
             fn $test_name() {
                 let result = parse($input, 0).and_then(|module| Verifier::new().verify(&module));
 
@@ -384,7 +400,7 @@ mod verifier_tests {
     verifier_test!(validate_number_expr_stmt, "123;", Ok(()));
 
     verifier_test!(
-        validate_const_declaration_requires_value,
+        validate_const_declaration_errors_without_value,
         "const a;",
         Err(vec![
             (TypeError::UnknownType.into(), 0..8),

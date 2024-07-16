@@ -19,6 +19,10 @@ impl<'a> Rule<'a> for TypeMismatchOnDeclarationsRule {
             match (&stmt_assign.type_expr, &stmt_assign.value) {
                 // let a;
                 (None, None) => {
+                    verify_trace!(
+                        "Error: Declaration of unknown type and no initial value: {}",
+                        stmt.to_string().cyan()
+                    );
                     return Err(vec![(TypeError::UnknownType.into(), span.clone())]);
                 }
                 // let a = 123;

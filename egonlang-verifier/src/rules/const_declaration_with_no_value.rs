@@ -4,7 +4,7 @@ use egonlang_core::{
     span::Span,
 };
 
-use crate::{type_env::TypeEnv, verifier::VerificationResult};
+use crate::{type_env::TypeEnv, verifier::VerificationResult, verify_trace};
 
 use crate::rules::rule::Rule;
 
@@ -36,6 +36,8 @@ impl<'a> Rule<'a> for DeclareConstWithoutValue {
         };
 
         if !errs.is_empty() {
+            verify_trace!("Rule reporting {} errors", errs.len());
+
             return Err(errs);
         }
 
