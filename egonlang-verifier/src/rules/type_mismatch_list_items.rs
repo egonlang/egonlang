@@ -37,8 +37,8 @@ impl<'a> Rule<'a> for TypeMisMatchListItemsRule {
                     let item_typeref = types.resolve_expr_type(item, item_span)?;
 
                     if item_typeref != first_item_typeref {
-                        verify_trace!(
-                            "Error: Found {} in a list of {}",
+                        verify_trace!(error:
+                            "Found {} in a list of {}",
                             item_typeref.to_string().yellow(),
                             first_item_typeref.to_string().yellow()
                         );

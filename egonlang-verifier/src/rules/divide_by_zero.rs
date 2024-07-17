@@ -33,7 +33,7 @@ impl<'a> Rule<'a> for DivideByZeroRule {
 
                 if lt_value == 0f64 {
                     verify_trace!(
-                        "Error: Trying to divide by zero on the left side: {}",
+                        error: "Trying to divide by zero on the left side: {}",
                         lt_expr.to_string().cyan()
                     );
                     errs.push((SyntaxError::DivideByZero.into(), lt_span.clone()));
@@ -41,7 +41,7 @@ impl<'a> Rule<'a> for DivideByZeroRule {
 
                 if rt_value == 0f64 {
                     verify_trace!(
-                        "Error: Trying to divide by zero on the right side: {}",
+                        error: "Trying to divide by zero on the right side: {}",
                         rt_expr.to_string().cyan()
                     );
                     errs.push((SyntaxError::DivideByZero.into(), rt_span.clone()));

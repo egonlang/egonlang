@@ -17,7 +17,7 @@ use crate::{
         type_mismatch_on_declarations::TypeMismatchOnDeclarationsRule,
         type_mismatch_prefix::TypeMismatchPrefixRule,
         type_mismatch_reassigning_let_values::TypeMismatchReassigningLetValuesRule,
-        undefined_identifier::UndefinedIdentifierRule,
+        undefined_identifier::ReferencingUndefinedIdentifierRule,
     },
     type_env::{TypeEnv, TypeEnvValue},
     verify_trace,
@@ -43,7 +43,9 @@ impl Verifier<'_> {
             .push(Box::from(TypeMismatchOnDeclarationsRule));
         verifier.rules.push(Box::from(DeclareConstWithoutValue));
         verifier.rules.push(Box::from(ReassigningConstValueRule));
-        verifier.rules.push(Box::from(UndefinedIdentifierRule));
+        verifier
+            .rules
+            .push(Box::from(ReferencingUndefinedIdentifierRule));
         verifier.rules.push(Box::from(DivideByZeroRule));
         verifier.rules.push(Box::from(TypeMismatchFnReturnExprRule));
         verifier.rules.push(Box::from(TypeMismatchIfCondExprRule));
@@ -82,7 +84,7 @@ impl<'a> Visitor<'a> for Verifier<'a> {
     fn visit_stmt(&self, stmt: &Stmt, span: &Span, types: &mut TypeEnv) -> Result<(), Vec<ErrorS>> {
         let mut errs: Vec<ErrorS> = vec![];
 
-        verify_trace!("Visiting statement: {}", stmt.to_string().cyan());
+        verify_trace!(visit_stmt: "{}", stmt.to_string().cyan());
 
         let result = match stmt {
             Stmt::Expr(stmt_expr) => {
@@ -190,7 +192,8 @@ impl<'a> Visitor<'a> for Verifier<'a> {
         verify_trace!("There were a total of {} errors from rules", errs.len());
 
         verify_trace!(
-            "========= Exiting statement: {} =========",
+            exit_stmt:
+            "{}",
             stmt.to_string().cyan()
         );
 
@@ -204,7 +207,7 @@ impl<'a> Visitor<'a> for Verifier<'a> {
     fn visit_expr(&self, expr: &Expr, span: &Span, types: &mut TypeEnv) -> Result<(), Vec<ErrorS>> {
         let mut errs: Vec<ErrorS> = vec![];
 
-        verify_trace!("Visiting expression: {}", expr.to_string().cyan());
+        verify_trace!(visit_expr: "{}", expr.to_string().cyan());
 
         match expr {
             Expr::Block(block_expr) => {
@@ -351,7 +354,7 @@ impl<'a> Visitor<'a> for Verifier<'a> {
         };
 
         verify_trace!(
-            "========= Exiting expression: {} =========",
+            exit_expr: "{}",
             expr.to_string().cyan()
         );
 

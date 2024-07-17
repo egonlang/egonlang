@@ -33,7 +33,8 @@ impl<'a> Rule<'a> for TypeMismatchReassigningLetValuesRule {
                 let value_typeref = types.resolve_expr_type(value_expr, value_span)?;
 
                 if !is_const && type_env_typeref != value_typeref {
-                    verify_trace!("Error: Type mismatching reassigning value ({type_env_typeref:?} vs {value_typeref:?}): {expr}");
+                    verify_trace!(error:
+                        "Type mismatching reassigning value ({type_env_typeref:?} vs {value_typeref:?}): {expr}");
 
                     errs.push((
                         TypeError::MismatchType {

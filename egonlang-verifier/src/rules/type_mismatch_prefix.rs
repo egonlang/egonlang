@@ -25,7 +25,7 @@ impl<'a> Rule<'a> for TypeMismatchPrefixRule {
                     let value_typeref = types.resolve_expr_type(value_expr, value_span)?;
 
                     if value_typeref != TypeRef::number() {
-                        verify_trace!("Error: negate prefix on a none number value: {expr}");
+                        verify_trace!(error: "negate prefix on a none number value: {expr}");
                         return Err(vec![(
                             TypeError::MismatchType {
                                 expected: TypeRef::number().to_string(),
@@ -41,7 +41,7 @@ impl<'a> Rule<'a> for TypeMismatchPrefixRule {
                     let value_typeref = types.resolve_expr_type(value_expr, value_span)?;
 
                     if value_typeref != TypeRef::bool() {
-                        verify_trace!("Error: not prefix on a none bool value: {expr}");
+                        verify_trace!(error: "not prefix on a none bool value: {expr}");
                         return Err(vec![(
                             TypeError::MismatchType {
                                 expected: TypeRef::bool().to_string(),

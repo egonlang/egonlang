@@ -26,7 +26,7 @@ impl<'a> Rule<'a> for TypeMismatchIfthenElseExprRule {
                 let else_typeref = types.resolve_expr_type(else_expr, else_span)?;
 
                 if then_typeref != else_typeref {
-                    verify_trace!("Error: then and else branches types don't match {then_typeref:?} vs {else_typeref:?} {expr}");
+                    verify_trace!(error: "then and else branches types don't match {then_typeref:?} vs {else_typeref:?} {expr}");
 
                     return Err(vec![(
                         TypeError::MismatchType {

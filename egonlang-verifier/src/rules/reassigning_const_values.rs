@@ -28,7 +28,7 @@ impl<'a> Rule<'a> for ReassigningConstValueRule {
             let is_const = type_env_value.map(|x| x.is_const).unwrap_or(false);
 
             if is_const {
-                verify_trace!("Error: Reassigned const: {}", expr.to_string().cyan());
+                verify_trace!(error: "Reassigned const: {}", expr.to_string().cyan());
 
                 errs.push((
                     SyntaxError::ReassigningConst {

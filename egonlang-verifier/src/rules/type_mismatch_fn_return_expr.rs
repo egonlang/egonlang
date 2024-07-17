@@ -27,8 +27,8 @@ impl<'a> Rule<'a> for TypeMismatchFnReturnExprRule {
             let body_typeref = types.resolve_expr_type(body_expr, body_span)?;
 
             if body_typeref != *fn_return_type_typeref {
-                verify_trace!(
-                    "Error: fn body type {} doesn't match fn return type {}",
+                verify_trace!(error:
+                    "fn body type {} doesn't match fn return type {}",
                     body_typeref.to_string().yellow().italic(),
                     fn_return_type_typeref.to_string().yellow().italic()
                 );

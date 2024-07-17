@@ -24,7 +24,7 @@ impl TypeMismatchInfixRule {
         let rt_type = types.resolve_expr_type(rt_expr, rt_span)?;
 
         if lt_type != expected_type {
-            verify_trace!("Error: infix operation received non number: {lt_expr}");
+            verify_trace!(error: "infix operation received non number: {lt_expr}");
 
             errs.push((
                 TypeError::MismatchType {
@@ -36,7 +36,7 @@ impl TypeMismatchInfixRule {
             ));
         }
         if rt_type != expected_type {
-            verify_trace!("Error: infix operation received non number: {rt_expr}");
+            verify_trace!(error: "infix operation received non number: {rt_expr}");
 
             errs.push((
                 TypeError::MismatchType {

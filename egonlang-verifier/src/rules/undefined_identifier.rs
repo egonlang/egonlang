@@ -8,8 +8,13 @@ use crate::{type_env::TypeEnv, verifier::VerificationResult, verify_trace};
 
 use crate::rules::rule::Rule;
 
-pub struct UndefinedIdentifierRule;
-impl<'a> Rule<'a> for UndefinedIdentifierRule {
+/// Rule to prevent referencing identifiers that haven't been defined
+///
+/// ```egon
+/// a = 123; // Error
+/// ```
+pub struct ReferencingUndefinedIdentifierRule;
+impl<'a> Rule<'a> for ReferencingUndefinedIdentifierRule {
     fn visit_stmt(&self, _stmt: &Stmt, _span: &Span, _types: &mut TypeEnv) -> VerificationResult {
         Ok(())
     }
@@ -17,14 +22,14 @@ impl<'a> Rule<'a> for UndefinedIdentifierRule {
     fn visit_expr(&self, expr: &Expr, span: &Span, types: &mut TypeEnv) -> VerificationResult {
         if let Expr::Identifier(ExprIdentifier { identifier }) = expr {
             verify_trace!(
-                "Verifying identifier expression: {}",
+                "Checking if idenitifer {} has been defined",
                 expr.to_string().cyan()
             );
 
             let name = &identifier.name;
 
             if types.get(name).is_none() {
-                verify_trace!("Error: identifier not defined: {expr}");
+                verify_trace!(error: "identifier not defined: {expr}");
 
                 return Err(vec![(
                     TypeError::Undefined(name.to_string()).into(),
@@ -50,11 +55,11 @@ mod undefined_identifier_test {
         type_env::{TypeEnv, TypeEnvValue},
     };
 
-    use super::UndefinedIdentifierRule;
+    use super::ReferencingUndefinedIdentifierRule;
 
     #[test]
     fn returns_error_if_identifier_is_undefined() {
-        let rule = UndefinedIdentifierRule;
+        let rule = ReferencingUndefinedIdentifierRule;
 
         let mut types = TypeEnv::new();
 
@@ -76,7 +81,7 @@ mod undefined_identifier_test {
 
     #[test]
     fn returns_ok_if_identifier_is_defined() {
-        let rule = UndefinedIdentifierRule;
+        let rule = ReferencingUndefinedIdentifierRule;
 
         let mut types = TypeEnv::new();
 

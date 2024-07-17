@@ -84,8 +84,8 @@ impl<'a> TypeEnv<'a> {
                 );
             }
             None => {
-                verify_trace!(
-                    "Error: Unable to find type for {} in type env",
+                verify_trace!(error:
+                    "Unable to find type for {} in type env",
                     identifier.cyan()
                 );
             }
@@ -215,8 +215,8 @@ impl<'a> TypeEnv<'a> {
         match &resolved_type {
             Ok(resolved_type) => {
                 let resolved_type_string = format!("{resolved_type}");
-                verify_trace!(
-                    "Resolved {} to the type {}",
+                verify_trace!(resolve_type:
+                    "{} to the type {}",
                     expr.to_string().cyan(),
                     resolved_type_string.italic().yellow()
                 );

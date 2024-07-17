@@ -19,8 +19,8 @@ impl<'a> Rule<'a> for TypeMismatchOnDeclarationsRule {
             match (&stmt_assign.type_expr, &stmt_assign.value) {
                 // let a;
                 (None, None) => {
-                    verify_trace!(
-                        "Error: Declaration of unknown type and no initial value: {}",
+                    verify_trace!(error:
+                        "Declaration of unknown type and no initial value: {}",
                         stmt.to_string().cyan()
                     );
                     return Err(vec![(TypeError::UnknownType.into(), span.clone())]);
@@ -33,8 +33,8 @@ impl<'a> Rule<'a> for TypeMismatchOnDeclarationsRule {
                     // Example:
                     // let a = [];
                     if value_typeref == TypeRef::list(TypeRef::unknown()) {
-                        verify_trace!(
-                            "Error: Unknown list type in declaration: {}",
+                        verify_trace!(error:
+                            "Unknown list type in declaration: {}",
                             stmt.to_string().cyan()
                         );
                         return Err(vec![(TypeError::UknownListType.into(), value_span.clone())]);
@@ -49,7 +49,7 @@ impl<'a> Rule<'a> for TypeMismatchOnDeclarationsRule {
                     // Example:
                     // let a: unknown;
                     if assign_typeref == TypeRef::unknown() {
-                        verify_trace!("Error: Unknown type in declaration: {stmt}");
+                        verify_trace!(error: "Unknown type in declaration: {stmt}");
                         return Err(vec![(
                             TypeError::UnknownType.into(),
                             assign_type_span.clone(),
@@ -84,7 +84,7 @@ impl<'a> Rule<'a> for TypeMismatchOnDeclarationsRule {
                             }
                         }
 
-                        verify_trace!("Error: Type mismatch in declaration: {stmt}");
+                        verify_trace!(error: "Type mismatch in declaration: {stmt}");
 
                         return Err(vec![(
                             TypeError::MismatchType {
@@ -101,8 +101,8 @@ impl<'a> Rule<'a> for TypeMismatchOnDeclarationsRule {
                         if value_typeref == TypeRef::list(TypeRef::unknown())
                             && assign_typeref.is_unknown_list()
                         {
-                            verify_trace!(
-                                "Error: Unknown list type in declaration: {}",
+                            verify_trace!(error:
+                                "Unknown list type in declaration: {}",
                                 stmt.to_string().cyan()
                             );
                             return Err(vec![(TypeError::UknownListType.into(), span.clone())]);

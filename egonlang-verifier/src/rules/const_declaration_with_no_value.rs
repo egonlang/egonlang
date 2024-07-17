@@ -21,7 +21,7 @@ impl<'a> Rule<'a> for DeclareConstWithoutValue {
 
             if stmt_assign.is_const && stmt_assign.value.is_none() {
                 crate::verify_trace!(
-                    "Error: const declaration has no value: {}",
+                    error: "const declaration has no value: {}",
                     stmt.to_string().cyan()
                 );
 

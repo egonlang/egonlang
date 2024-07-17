@@ -9,6 +9,7 @@ edition = "2021"
 regex = "1.10.4"
 egonlang-core = { path = "../egonlang-core" }
 colored = "2"
+paste = "1.0.15"
 
 [dev-dependencies]
 pretty_assertions = "1.1.0"
