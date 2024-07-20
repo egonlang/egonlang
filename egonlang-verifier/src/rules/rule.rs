@@ -1,3 +1,4 @@
+/// Rule for verifying statements and expressions
 pub trait Rule<'a> {
     fn visit_stmt(
         &self,
@@ -14,23 +15,10 @@ pub trait Rule<'a> {
     ) -> crate::VerificationResult;
 }
 
+/// Create a verifier [`Rule`] for an expression
 #[macro_export]
 macro_rules! expr_rule {
     ($name:ident, fn $params:tt $body:expr) => {
-        $crate::create_verifier_rule!($name, fn visit_expr $params $body);
-    };
-}
-
-#[macro_export]
-macro_rules! stmt_rule {
-    ($name:ident, fn $params:tt $body:expr) => {
-        $crate::create_verifier_rule!($name, fn visit_stmt $params $body);
-    };
-}
-
-#[macro_export]
-macro_rules! create_verifier_rule {
-    ($name:ident, fn visit_expr $params:tt $body:expr $(,)*) => {
         pub struct $name;
 
         impl<'a> $crate::rules::rule::Rule<'a> for $name {
@@ -63,8 +51,12 @@ macro_rules! create_verifier_rule {
             }
         }
     };
+}
 
-    ($name:ident, fn visit_stmt $params:tt $body:expr $(,)*) => {
+/// Create a verifier [`Rule`] for a statement
+#[macro_export]
+macro_rules! stmt_rule {
+    ($name:ident, fn $params:tt $body:expr) => {
         pub struct $name;
 
         impl<'a> Rule<'a> for $name {
