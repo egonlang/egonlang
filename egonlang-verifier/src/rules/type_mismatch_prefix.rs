@@ -4,9 +4,7 @@ use egonlang_core::{
     span::Span,
 };
 
-use crate::{expr_rule, type_env::TypeEnv, verifier::VerificationResult};
-
-use crate::verify_trace;
+use crate::prelude::*;
 
 expr_rule!(
     TypeMismatchPrefixRule,

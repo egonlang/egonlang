@@ -2,7 +2,7 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::{fs, str};
 
-use egonlang_verifier::verify_source;
+use egonlang_verifier::prelude::verify_source;
 use pretty_assertions::assert_eq;
 
 #[rstest::rstest]

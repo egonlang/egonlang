@@ -2,8 +2,7 @@ use egonlang_core::ast::{Expr, ExprInfix, OpInfix, TypeRef};
 use egonlang_core::errors::ErrorS;
 use egonlang_core::{errors::TypeError, span::Span};
 
-use crate::{expr_rule, verify_trace};
-use crate::{type_env::TypeEnv, verifier::VerificationResult};
+use crate::prelude::*;
 
 expr_rule!(
     TypeMismatchInfixRule,

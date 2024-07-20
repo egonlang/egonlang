@@ -1,11 +1,7 @@
 use egonlang_core::ast::TypeRef;
 use egonlang_core::{ast::Stmt, errors::TypeError, span::Span};
 
-use crate::{type_env::TypeEnv, verifier::VerificationResult};
-
-use crate::rules::rule::Rule;
-
-use crate::{stmt_rule, verify_trace};
+use crate::prelude::*;
 
 stmt_rule!(
     TypeMismatchOnDeclarationsRule,

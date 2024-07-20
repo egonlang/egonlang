@@ -1,8 +1,6 @@
 use egonlang_core::{ast::Stmt, errors::SyntaxError, span::Span};
 
-use crate::{stmt_rule, type_env::TypeEnv, verifier::VerificationResult};
-
-use crate::rules::rule::Rule;
+use crate::prelude::*;
 
 stmt_rule!(
     DeclareConstWithoutValue,
@@ -10,13 +8,13 @@ stmt_rule!(
         let mut errs = vec![];
 
         if let Stmt::Assign(stmt_assign) = stmt {
-            crate::verify_trace!(
+            verify_trace!(
                 "Verifying const declaration has value: {}",
                 stmt.to_string().cyan()
             );
 
             if stmt_assign.is_const && stmt_assign.value.is_none() {
-                crate::verify_trace!(
+                verify_trace!(
                     error: "const declaration has no value: {}",
                     stmt.to_string().cyan()
                 );

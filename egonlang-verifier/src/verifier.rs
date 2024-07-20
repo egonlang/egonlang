@@ -368,7 +368,7 @@ impl<'a> Visitor<'a> for Verifier<'a> {
 
 #[cfg(test)]
 mod verifier_tests {
-    use crate::verify_source;
+    use crate::prelude::*;
     use egonlang_core::{
         ast::{ExprAssign, ExprList, ExprLiteral, Identifier, Module, StmtExpr, TypeRef},
         errors::{SyntaxError, TypeError},

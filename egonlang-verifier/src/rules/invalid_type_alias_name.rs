@@ -1,9 +1,7 @@
 use egonlang_core::{ast::Stmt, errors::SyntaxError, span::Span};
 use regex::Regex;
 
-use crate::{stmt_rule, type_env::TypeEnv, verifier::VerificationResult};
-
-use crate::rules::rule::Rule;
+use crate::prelude::*;
 
 stmt_rule!(
     InvalidTypeAliasNameRule,
