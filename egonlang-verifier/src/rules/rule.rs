@@ -17,14 +17,14 @@ pub trait Rule<'a> {
 #[macro_export]
 macro_rules! expr_rule {
     ($name:ident, fn $params:tt $body:expr) => {
-        crate::create_verifier_rule!($name, fn visit_expr $params $body);
+        $crate::create_verifier_rule!($name, fn visit_expr $params $body);
     };
 }
 
 #[macro_export]
 macro_rules! stmt_rule {
     ($name:ident, fn $params:tt $body:expr) => {
-        crate::create_verifier_rule!($name, fn visit_stmt $params $body);
+        $crate::create_verifier_rule!($name, fn visit_stmt $params $body);
     };
 }
 
@@ -38,7 +38,7 @@ macro_rules! create_verifier_rule {
                 &self,
                 _stmt: &::egonlang_core::ast::Stmt,
                 _span: &::egonlang_core::span::Span,
-                _types: &mut crate::TypeEnv,
+                _types: &mut $crate::TypeEnv,
             ) -> VerificationResult {
                 Ok(())
             }
@@ -72,7 +72,7 @@ macro_rules! create_verifier_rule {
                 &self,
                 stmt: &::egonlang_core::ast::Stmt,
                 span: &::egonlang_core::span::Span,
-                types: &mut crate::TypeEnv,
+                types: &mut $crate::TypeEnv,
             ) -> VerificationResult {
                 fn internal $params -> Vec<::egonlang_core::errors::ErrorS> {
                     $body
