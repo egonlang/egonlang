@@ -1,16 +1,16 @@
 use egonlang_core::{
     ast::{Expr, Stmt},
-    errors::SyntaxError,
+    errors::{ErrorS, SyntaxError},
     span::Span,
 };
 
-use crate::{type_env::TypeEnv, verifier::VerificationResult, verify_trace};
+use crate::{rule, type_env::TypeEnv, verifier::VerificationResult};
 
 use crate::rules::rule::Rule;
 
-pub struct DeclareConstWithoutValue;
-impl<'a> Rule<'a> for DeclareConstWithoutValue {
-    fn visit_stmt(&self, stmt: &Stmt, span: &Span, _types: &mut TypeEnv) -> VerificationResult {
+rule!(
+    DeclareConstWithoutValue,
+    fn visit_stmt(stmt: &Stmt, span: &Span, _types: &mut TypeEnv) {
         let mut errs = vec![];
 
         if let Stmt::Assign(stmt_assign) = stmt {
@@ -35,19 +35,9 @@ impl<'a> Rule<'a> for DeclareConstWithoutValue {
             }
         };
 
-        if !errs.is_empty() {
-            verify_trace!("Rule reporting {} errors", errs.len());
-
-            return Err(errs);
-        }
-
-        Ok(())
+        errs
     }
-
-    fn visit_expr(&self, _expr: &Expr, _span: &Span, _types: &mut TypeEnv) -> VerificationResult {
-        Ok(())
-    }
-}
+);
 
 #[cfg(test)]
 mod declare_const_without_value_tests {

@@ -1,25 +1,18 @@
 use egonlang_core::{
     ast::{Expr, ExprIdentifier, Stmt},
-    errors::TypeError,
+    errors::{ErrorS, TypeError},
     span::Span,
 };
 
-use crate::{type_env::TypeEnv, verifier::VerificationResult, verify_trace};
+use crate::{rule, type_env::TypeEnv, verifier::VerificationResult, verify_trace};
 
 use crate::rules::rule::Rule;
 
-/// Rule to prevent referencing identifiers that haven't been defined
-///
-/// ```egon
-/// a = 123; // Error
-/// ```
-pub struct ReferencingUndefinedIdentifierRule;
-impl<'a> Rule<'a> for ReferencingUndefinedIdentifierRule {
-    fn visit_stmt(&self, _stmt: &Stmt, _span: &Span, _types: &mut TypeEnv) -> VerificationResult {
-        Ok(())
-    }
+rule!(
+    ReferencingUndefinedIdentifierRule,
+    fn visit_expr(expr: &Expr, span: &Span, types: &mut TypeEnv) {
+        let mut errs = vec![];
 
-    fn visit_expr(&self, expr: &Expr, span: &Span, types: &mut TypeEnv) -> VerificationResult {
         if let Expr::Identifier(ExprIdentifier { identifier }) = expr {
             verify_trace!(
                 "Checking if idenitifer {} has been defined",
@@ -31,16 +24,13 @@ impl<'a> Rule<'a> for ReferencingUndefinedIdentifierRule {
             if types.get(name).is_none() {
                 verify_trace!(error: "identifier not defined: {expr}");
 
-                return Err(vec![(
-                    TypeError::Undefined(name.to_string()).into(),
-                    span.clone(),
-                )]);
+                errs.push((TypeError::Undefined(name.to_string()).into(), span.clone()));
             }
         }
 
-        Ok(())
+        errs
     }
-}
+);
 
 #[cfg(test)]
 mod undefined_identifier_test {

@@ -1,20 +1,16 @@
 use egonlang_core::{
     ast::{Expr, OpInfix, Stmt},
-    errors::SyntaxError,
+    errors::{ErrorS, SyntaxError},
     span::Span,
 };
 
-use crate::{type_env::TypeEnv, verifier::VerificationResult, verify_trace};
+use crate::{rule, type_env::TypeEnv, verifier::VerificationResult, verify_trace};
 
 use crate::rules::rule::Rule;
 
-pub struct DivideByZeroRule;
-impl<'a> Rule<'a> for DivideByZeroRule {
-    fn visit_stmt(&self, _stmt: &Stmt, _span: &Span, _types: &mut TypeEnv) -> VerificationResult {
-        Ok(())
-    }
-
-    fn visit_expr(&self, expr: &Expr, _span: &Span, _types: &mut TypeEnv) -> VerificationResult {
+rule!(
+    DivideByZeroRule,
+    fn visit_expr(expr: &Expr, _span: &Span, _types: &mut TypeEnv) {
         let mut errs = vec![];
 
         if let Expr::Infix(infix_expr) = &expr {
@@ -49,13 +45,9 @@ impl<'a> Rule<'a> for DivideByZeroRule {
             }
         }
 
-        if !errs.is_empty() {
-            return Err(errs);
-        }
-
-        Ok(())
+        errs
     }
-}
+);
 
 #[cfg(test)]
 mod divide_by_zero_tests {

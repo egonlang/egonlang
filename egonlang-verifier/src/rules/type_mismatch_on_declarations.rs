@@ -1,15 +1,22 @@
 use egonlang_core::ast::TypeRef;
-use egonlang_core::{ast::Stmt, errors::TypeError, span::Span};
+use egonlang_core::{
+    ast::Expr,
+    ast::Stmt,
+    errors::{ErrorS, TypeError},
+    span::Span,
+};
 
 use crate::{type_env::TypeEnv, verifier::VerificationResult};
 
 use crate::rules::rule::Rule;
 
-use crate::verify_trace;
+use crate::{rule, verify_trace};
 
-pub struct TypeMismatchOnDeclarationsRule;
-impl<'a> Rule<'a> for TypeMismatchOnDeclarationsRule {
-    fn visit_stmt(&self, stmt: &Stmt, span: &Span, types: &mut TypeEnv) -> VerificationResult {
+rule!(
+    TypeMismatchOnDeclarationsRule,
+    fn visit_stmt(stmt: &Stmt, span: &Span, types: &mut TypeEnv) {
+        let mut errs = vec![];
+
         if let Stmt::Assign(stmt_assign) = stmt {
             verify_trace!(
                 "Verifying assignment statement: {}",
@@ -23,11 +30,11 @@ impl<'a> Rule<'a> for TypeMismatchOnDeclarationsRule {
                         "Declaration of unknown type and no initial value: {}",
                         stmt.to_string().cyan()
                     );
-                    return Err(vec![(TypeError::UnknownType.into(), span.clone())]);
+                    errs.push((TypeError::UnknownType.into(), span.clone()));
                 }
                 // let a = 123;
                 (None, Some((value_expr, value_span))) => {
-                    let value_typeref = types.resolve_expr_type(value_expr, value_span)?;
+                    let value_typeref = types.resolve_expr_type(value_expr, value_span).unwrap();
 
                     // Check for empty list assignment
                     // Example:
@@ -37,31 +44,30 @@ impl<'a> Rule<'a> for TypeMismatchOnDeclarationsRule {
                             "Unknown list type in declaration: {}",
                             stmt.to_string().cyan()
                         );
-                        return Err(vec![(TypeError::UknownListType.into(), value_span.clone())]);
+                        errs.push((TypeError::UknownListType.into(), value_span.clone()));
                     }
                 }
                 // let a: number;
                 (Some((assign_type_expr, assign_type_span)), None) => {
-                    let assign_typeref =
-                        types.resolve_expr_type(assign_type_expr, assign_type_span)?;
+                    let assign_typeref = types
+                        .resolve_expr_type(assign_type_expr, assign_type_span)
+                        .unwrap();
 
                     // Check for empty list assignment
                     // Example:
                     // let a: unknown;
                     if assign_typeref == TypeRef::unknown() {
                         verify_trace!(error: "Unknown type in declaration: {stmt}");
-                        return Err(vec![(
-                            TypeError::UnknownType.into(),
-                            assign_type_span.clone(),
-                        )]);
+                        errs.push((TypeError::UnknownType.into(), assign_type_span.clone()));
                     }
                 }
                 // let a: number = 123;
                 (Some((assign_type_expr, assign_type_span)), Some((value_expr, value_span))) => {
-                    let assign_typeref =
-                        types.resolve_expr_type(assign_type_expr, assign_type_span)?;
+                    let assign_typeref = types
+                        .resolve_expr_type(assign_type_expr, assign_type_span)
+                        .unwrap();
 
-                    let value_typeref = types.resolve_expr_type(value_expr, value_span)?;
+                    let value_typeref = types.resolve_expr_type(value_expr, value_span).unwrap();
 
                     // Types mismatched
                     if assign_typeref != value_typeref {
@@ -71,7 +77,7 @@ impl<'a> Rule<'a> for TypeMismatchOnDeclarationsRule {
                         if value_typeref == TypeRef::list(TypeRef::unknown())
                             && assign_typeref.is_known_list()
                         {
-                            return Ok(());
+                            return vec![];
                         }
 
                         if value_typeref.0 == *"identifier" {
@@ -79,21 +85,21 @@ impl<'a> Rule<'a> for TypeMismatchOnDeclarationsRule {
 
                             if let Some(identifier_type) = types.get(identifier) {
                                 if assign_typeref == identifier_type.typeref {
-                                    return Ok(());
+                                    return vec![];
                                 }
                             }
                         }
 
                         verify_trace!(error: "Type mismatch in declaration: {stmt}");
 
-                        return Err(vec![(
+                        errs.push((
                             TypeError::MismatchType {
                                 expected: assign_typeref.to_string(),
                                 actual: value_typeref.to_string(),
                             }
                             .into(),
                             value_span.clone(),
-                        )]);
+                        ));
                     } else {
                         // Check for empty list assignment
                         // Example:
@@ -105,26 +111,16 @@ impl<'a> Rule<'a> for TypeMismatchOnDeclarationsRule {
                                 "Unknown list type in declaration: {}",
                                 stmt.to_string().cyan()
                             );
-                            return Err(vec![(TypeError::UknownListType.into(), span.clone())]);
+                            errs.push((TypeError::UknownListType.into(), span.clone()));
                         }
                     }
                 }
             }
         }
 
-        Ok(())
+        errs
     }
-
-    fn visit_expr(
-        &self,
-        expr: &egonlang_core::ast::Expr,
-        _span: &Span,
-        _types: &mut TypeEnv,
-    ) -> VerificationResult {
-        let _ = expr;
-        Ok(())
-    }
-}
+);
 
 #[cfg(test)]
 mod type_mismatch_on_assignment_tests {

@@ -1,21 +1,17 @@
 use egonlang_core::{
     ast::{Expr, ExprS, Stmt},
-    errors::TypeError,
+    errors::{ErrorS, TypeError},
     span::Span,
 };
 
-use crate::{type_env::TypeEnv, verifier::VerificationResult};
+use crate::{rule, type_env::TypeEnv, verifier::VerificationResult};
 
 use crate::rules::rule::Rule;
 use crate::verify_trace;
 
-pub struct TypeMisMatchListItemsRule;
-impl<'a> Rule<'a> for TypeMisMatchListItemsRule {
-    fn visit_stmt(&self, _stmt: &Stmt, _span: &Span, _types: &mut TypeEnv) -> VerificationResult {
-        Ok(())
-    }
-
-    fn visit_expr(&self, expr: &Expr, _span: &Span, types: &mut TypeEnv) -> VerificationResult {
+rule!(
+    TypeMisMatchListItemsRule,
+    fn visit_expr(expr: &Expr, _span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];
 
         if let Expr::List(expr_list) = expr {
@@ -28,41 +24,41 @@ impl<'a> Rule<'a> for TypeMisMatchListItemsRule {
 
             if !items.is_empty() {
                 let (first_item_expr, first_item_span) = items.first().unwrap();
-                let first_item_typeref =
-                    types.resolve_expr_type(first_item_expr, first_item_span)?;
+                let first_item_typeref = types
+                    .resolve_expr_type(first_item_expr, first_item_span)
+                    .unwrap();
 
                 let remaining_items: Vec<ExprS> = items.clone().into_iter().skip(1).collect();
 
                 for (item, item_span) in &remaining_items {
-                    let item_typeref = types.resolve_expr_type(item, item_span)?;
+                    match types.resolve_expr_type(item, item_span) {
+                        Ok(item_typeref) => {
+                            if item_typeref != first_item_typeref {
+                                verify_trace!(error:
+                                    "Found {} in a list of {}",
+                                    item_typeref.to_string().yellow(),
+                                    first_item_typeref.to_string().yellow()
+                                );
 
-                    if item_typeref != first_item_typeref {
-                        verify_trace!(error:
-                            "Found {} in a list of {}",
-                            item_typeref.to_string().yellow(),
-                            first_item_typeref.to_string().yellow()
-                        );
-
-                        errs.push((
-                            TypeError::MismatchType {
-                                expected: first_item_typeref.to_string(),
-                                actual: item_typeref.to_string(),
+                                errs.push((
+                                    TypeError::MismatchType {
+                                        expected: first_item_typeref.to_string(),
+                                        actual: item_typeref.to_string(),
+                                    }
+                                    .into(),
+                                    item_span.clone(),
+                                ));
                             }
-                            .into(),
-                            item_span.clone(),
-                        ));
+                        }
+                        Err(e) => errs.extend(e),
                     }
                 }
             }
         };
 
-        if !errs.is_empty() {
-            return Err(errs);
-        }
-
-        Ok(())
+        errs
     }
-}
+);
 
 #[cfg(test)]
 mod type_mismatch_negate_prefix_tests {

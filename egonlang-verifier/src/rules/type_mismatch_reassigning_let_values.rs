@@ -1,20 +1,16 @@
 use egonlang_core::{
     ast::{Expr, Stmt},
-    errors::TypeError,
+    errors::{ErrorS, TypeError},
     span::Span,
 };
 
-use crate::{type_env::TypeEnv, verifier::VerificationResult, verify_trace};
+use crate::{rule, type_env::TypeEnv, verifier::VerificationResult, verify_trace};
 
 use crate::rules::rule::Rule;
 
-pub struct TypeMismatchReassigningLetValuesRule;
-impl<'a> Rule<'a> for TypeMismatchReassigningLetValuesRule {
-    fn visit_stmt(&self, _stmt: &Stmt, _span: &Span, _types: &mut TypeEnv) -> VerificationResult {
-        Ok(())
-    }
-
-    fn visit_expr(&self, expr: &Expr, _span: &Span, types: &mut TypeEnv) -> VerificationResult {
+rule!(
+    TypeMismatchReassigningLetValuesRule,
+    fn visit_expr(expr: &Expr, _span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];
 
         if let Expr::Assign(expr_assign) = expr {
@@ -30,7 +26,7 @@ impl<'a> Rule<'a> for TypeMismatchReassigningLetValuesRule {
                 let is_const = &type_env_value.is_const;
 
                 let (value_expr, value_span) = &expr_assign.value;
-                let value_typeref = types.resolve_expr_type(value_expr, value_span)?;
+                let value_typeref = types.resolve_expr_type(value_expr, value_span).unwrap();
 
                 if !is_const && type_env_typeref != value_typeref {
                     verify_trace!(error:
@@ -48,10 +44,6 @@ impl<'a> Rule<'a> for TypeMismatchReassigningLetValuesRule {
             }
         };
 
-        if !errs.is_empty() {
-            return Err(errs);
-        }
-
-        Ok(())
+        errs
     }
-}
+);

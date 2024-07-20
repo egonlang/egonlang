@@ -1,63 +1,61 @@
 use egonlang_core::{
     ast::{Expr, OpPrefix, Stmt, TypeRef},
-    errors::TypeError,
+    errors::{ErrorS, TypeError},
     span::Span,
 };
 
-use crate::{type_env::TypeEnv, verifier::VerificationResult};
+use crate::{rule, type_env::TypeEnv, verifier::VerificationResult};
 
 use crate::rules::rule::Rule;
 use crate::verify_trace;
 
-pub struct TypeMismatchPrefixRule;
-impl<'a> Rule<'a> for TypeMismatchPrefixRule {
-    fn visit_stmt(&self, _stmt: &Stmt, _span: &Span, _types: &mut TypeEnv) -> VerificationResult {
-        Ok(())
-    }
+rule!(
+    TypeMismatchPrefixRule,
+    fn visit_expr(expr: &Expr, _span: &Span, types: &mut TypeEnv) {
+        let mut errs = vec![];
 
-    fn visit_expr(&self, expr: &Expr, _span: &Span, types: &mut TypeEnv) -> VerificationResult {
         if let Expr::Prefix(prefix_expr) = expr {
             verify_trace!("Verifying prefix expression: {expr}");
 
             match prefix_expr.op {
                 OpPrefix::Negate => {
                     let (value_expr, value_span) = &prefix_expr.rt;
-                    let value_typeref = types.resolve_expr_type(value_expr, value_span)?;
+                    let value_typeref = types.resolve_expr_type(value_expr, value_span).unwrap();
 
                     if value_typeref != TypeRef::number() {
                         verify_trace!(error: "negate prefix on a none number value: {expr}");
-                        return Err(vec![(
+                        errs.push((
                             TypeError::MismatchType {
                                 expected: TypeRef::number().to_string(),
                                 actual: value_typeref.to_string(),
                             }
                             .into(),
                             value_span.clone(),
-                        )]);
+                        ));
                     }
                 }
                 OpPrefix::Not => {
                     let (value_expr, value_span) = &prefix_expr.rt;
-                    let value_typeref = types.resolve_expr_type(value_expr, value_span)?;
+                    let value_typeref = types.resolve_expr_type(value_expr, value_span).unwrap();
 
                     if value_typeref != TypeRef::bool() {
                         verify_trace!(error: "not prefix on a none bool value: {expr}");
-                        return Err(vec![(
+                        errs.push((
                             TypeError::MismatchType {
                                 expected: TypeRef::bool().to_string(),
                                 actual: value_typeref.to_string(),
                             }
                             .into(),
                             value_span.clone(),
-                        )]);
+                        ));
                     }
                 }
             }
         };
 
-        Ok(())
+        errs
     }
-}
+);
 
 #[cfg(test)]
 mod type_mismatch_prefix_tests {

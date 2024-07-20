@@ -1,20 +1,16 @@
 use egonlang_core::{
     ast::{Expr, Stmt},
-    errors::SyntaxError,
+    errors::{ErrorS, SyntaxError},
     span::Span,
 };
 
-use crate::{type_env::TypeEnv, verifier::VerificationResult, verify_trace};
+use crate::{rule, type_env::TypeEnv, verifier::VerificationResult, verify_trace};
 
 use crate::rules::rule::Rule;
 
-pub struct ReassigningConstValueRule;
-impl<'a> Rule<'a> for ReassigningConstValueRule {
-    fn visit_stmt(&self, _stmt: &Stmt, _span: &Span, _types: &mut TypeEnv) -> VerificationResult {
-        Ok(())
-    }
-
-    fn visit_expr(&self, expr: &Expr, span: &Span, types: &mut TypeEnv) -> VerificationResult {
+rule!(
+    ReassigningConstValueRule,
+    fn visit_expr(expr: &Expr, span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];
 
         if let Expr::Assign(expr_assign) = expr {
@@ -40,13 +36,9 @@ impl<'a> Rule<'a> for ReassigningConstValueRule {
             }
         };
 
-        if !errs.is_empty() {
-            return Err(errs);
-        }
-
-        Ok(())
+        errs
     }
-}
+);
 
 #[cfg(test)]
 mod reassigning_const_values_tests {
