@@ -6,7 +6,6 @@ use egonlang_core::{
 
 use crate::{expr_rule, type_env::TypeEnv, verifier::VerificationResult};
 
-use crate::rules::rule::Rule;
 use crate::verify_trace;
 
 expr_rule!(

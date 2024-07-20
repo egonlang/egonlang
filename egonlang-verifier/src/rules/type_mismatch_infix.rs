@@ -5,8 +5,6 @@ use egonlang_core::{errors::TypeError, span::Span};
 use crate::{expr_rule, verify_trace};
 use crate::{type_env::TypeEnv, verifier::VerificationResult};
 
-use crate::rules::rule::Rule;
-
 expr_rule!(
     TypeMismatchInfixRule,
     fn (expr: &Expr, _span: &Span, types: &mut TypeEnv) {

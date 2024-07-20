@@ -2,8 +2,6 @@ use egonlang_core::{ast::Expr, errors::TypeError, span::Span};
 
 use crate::{expr_rule, type_env::TypeEnv, verifier::VerificationResult, verify_trace};
 
-use crate::rules::rule::Rule;
-
 expr_rule!(
     TypeMismatchReassigningLetValuesRule,
     fn (expr: &Expr, _span: &Span, types: &mut TypeEnv) {

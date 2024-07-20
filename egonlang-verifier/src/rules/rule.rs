@@ -33,7 +33,7 @@ macro_rules! create_verifier_rule {
     ($name:ident, fn visit_expr $params:tt $body:expr $(,)*) => {
         pub struct $name;
 
-        impl<'a> Rule<'a> for $name {
+        impl<'a> $crate::rules::rule::Rule<'a> for $name {
             fn visit_stmt(
                 &self,
                 _stmt: &::egonlang_core::ast::Stmt,

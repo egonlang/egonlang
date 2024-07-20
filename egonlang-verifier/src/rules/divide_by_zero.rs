@@ -6,8 +6,6 @@ use egonlang_core::{
 
 use crate::{expr_rule, type_env::TypeEnv, verifier::VerificationResult, verify_trace};
 
-use crate::rules::rule::Rule;
-
 expr_rule!(
     DivideByZeroRule,
     fn (expr: &Expr, _span: &Span, _types: &mut TypeEnv) {

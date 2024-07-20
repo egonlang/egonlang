@@ -6,8 +6,6 @@ use egonlang_core::{
 
 use crate::{expr_rule, type_env::TypeEnv, verifier::VerificationResult, verify_trace};
 
-use crate::rules::rule::Rule;
-
 expr_rule!(
     ReferencingUndefinedIdentifierRule,
     fn (expr: &Expr, span: &Span, types: &mut TypeEnv) {
