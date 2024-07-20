@@ -1,8 +1,4 @@
-use egonlang_core::{
-    ast::{Expr, OpPrefix, TypeRef},
-    errors::TypeError,
-    span::Span,
-};
+use egonlang_core::{ast::OpPrefix, errors::TypeError, prelude::*};
 
 use crate::prelude::*;
 
@@ -57,12 +53,13 @@ expr_rule!(
 #[cfg(test)]
 mod type_mismatch_prefix_tests {
     use egonlang_core::{
-        ast::{Expr, ExprLiteral, ExprPrefix, TypeRef},
+        ast::{ExprLiteral, ExprPrefix},
         errors::TypeError,
+        prelude::*,
     };
     use pretty_assertions::assert_eq;
 
-    use crate::{rules::rule::Rule, type_env::TypeEnv};
+    use crate::prelude::*;
 
     use super::TypeMismatchPrefixRule;
 

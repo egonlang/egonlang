@@ -1,8 +1,4 @@
-use egonlang_core::{
-    ast::{Expr, OpInfix},
-    errors::SyntaxError,
-    span::Span,
-};
+use egonlang_core::{ast::OpInfix, errors::SyntaxError, prelude::*};
 
 use crate::prelude::*;
 
@@ -50,12 +46,13 @@ expr_rule!(
 #[cfg(test)]
 mod divide_by_zero_tests {
     use egonlang_core::{
-        ast::{Expr, ExprInfix, ExprLiteral, OpInfix},
+        ast::{ExprInfix, ExprLiteral, OpInfix},
         errors::SyntaxError,
+        prelude::*,
     };
     use pretty_assertions::assert_eq;
 
-    use crate::{rules::rule::Rule, type_env::TypeEnv};
+    use crate::prelude::*;
 
     use super::DivideByZeroRule;
 

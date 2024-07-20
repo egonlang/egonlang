@@ -1,6 +1,8 @@
-use egonlang_core::ast::{Expr, ExprInfix, OpInfix, TypeRef};
-use egonlang_core::errors::ErrorS;
-use egonlang_core::{errors::TypeError, span::Span};
+use egonlang_core::{
+    ast::{ExprInfix, OpInfix},
+    errors::{ErrorS, TypeError},
+    prelude::*,
+};
 
 use crate::prelude::*;
 
@@ -145,12 +147,13 @@ fn validate_infix_types(
 #[cfg(test)]
 mod type_mismatch_infix_tests {
     use egonlang_core::{
-        ast::{Expr, ExprInfix, ExprLiteral, OpInfix, TypeRef},
+        ast::{ExprInfix, ExprLiteral, OpInfix},
         errors::TypeError,
+        prelude::*,
     };
     use pretty_assertions::assert_eq;
 
-    use crate::{rules::rule::Rule, type_env::TypeEnv};
+    use crate::prelude::*;
 
     use super::TypeMismatchInfixRule;
 

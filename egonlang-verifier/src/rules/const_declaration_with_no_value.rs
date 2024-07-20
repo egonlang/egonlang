@@ -1,4 +1,4 @@
-use egonlang_core::{ast::Stmt, errors::SyntaxError, span::Span};
+use egonlang_core::{errors::SyntaxError, prelude::*};
 
 use crate::prelude::*;
 
@@ -36,12 +36,13 @@ stmt_rule!(
 #[cfg(test)]
 mod declare_const_without_value_tests {
     use egonlang_core::{
-        ast::{ExprLiteral, ExprType, Identifier, Stmt, StmtAssign, TypeRef},
+        ast::{ExprLiteral, ExprType, Identifier, StmtAssign},
         errors::SyntaxError,
+        prelude::*,
     };
     use pretty_assertions::assert_eq;
 
-    use crate::{rules::rule::Rule, type_env::TypeEnv};
+    use crate::prelude::*;
 
     use super::DeclareConstWithoutValue;
 

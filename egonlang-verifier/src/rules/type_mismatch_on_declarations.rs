@@ -1,7 +1,5 @@
-use egonlang_core::ast::TypeRef;
-use egonlang_core::{ast::Stmt, errors::TypeError, span::Span};
-
 use crate::prelude::*;
+use egonlang_core::{errors::TypeError, prelude::*};
 
 stmt_rule!(
     TypeMismatchOnDeclarationsRule,
@@ -116,8 +114,9 @@ stmt_rule!(
 #[cfg(test)]
 mod type_mismatch_on_assignment_tests {
     use egonlang_core::{
-        ast::{ExprList, ExprLiteral, ExprType, Identifier, Stmt, StmtAssign, TypeRef},
+        ast::{ExprList, ExprLiteral, ExprType, Identifier, StmtAssign},
         errors::TypeError,
+        prelude::*,
     };
     use pretty_assertions::assert_eq;
 

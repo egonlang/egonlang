@@ -1,4 +1,4 @@
-use egonlang_core::{ast::Expr, errors::TypeError, span::Span};
+use egonlang_core::{errors::TypeError, prelude::*};
 
 use crate::prelude::*;
 

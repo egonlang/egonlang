@@ -1,10 +1,5 @@
-use egonlang_core::{
-    ast::{Expr, ExprIdentifier},
-    errors::TypeError,
-    span::Span,
-};
-
 use crate::prelude::*;
+use egonlang_core::{ast::ExprIdentifier, errors::TypeError, prelude::*};
 
 expr_rule!(
     ReferencingUndefinedIdentifierRule,
@@ -32,16 +27,10 @@ expr_rule!(
 
 #[cfg(test)]
 mod undefined_identifier_test {
-    use egonlang_core::{
-        ast::{Expr, Identifier, TypeRef},
-        errors::TypeError,
-    };
+    use egonlang_core::{ast::Identifier, errors::TypeError, prelude::*};
     use pretty_assertions::assert_eq;
 
-    use crate::{
-        rules::rule::Rule,
-        type_env::{TypeEnv, TypeEnvValue},
-    };
+    use crate::prelude::*;
 
     use super::ReferencingUndefinedIdentifierRule;
 

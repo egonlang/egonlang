@@ -1,7 +1,8 @@
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
-use egonlang_verifier::verifier::Verifier;
+use egonlang_core::prelude::*;
+use egonlang_verifier::prelude::*;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -42,15 +43,9 @@ fn main() {
                 let content = std::fs::read_to_string(path).expect("Unable to read file");
                 let path = std::fs::canonicalize(path).unwrap();
 
-                let module = match egonlang_core::parser::parse(&content, 0) {
+                let module = match parse(&content, 0) {
                     Ok(module) => {
-                        let verifier = Verifier::new();
-
-                        if let Err(errs) = verifier.verify(&module) {
-                            Err(errs)
-                        } else {
-                            Ok(serde_json::to_string(&module).unwrap())
-                        }
+                        verify_module(&module).map(|m| serde_json::to_string(&m).unwrap())
                     }
                     Err(errs) => Err(errs),
                 };

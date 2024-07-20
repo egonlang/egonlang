@@ -1,4 +1,4 @@
-use egonlang_core::{ast::Stmt, errors::SyntaxError, span::Span};
+use egonlang_core::{errors::SyntaxError, prelude::*};
 use regex::Regex;
 
 use crate::prelude::*;

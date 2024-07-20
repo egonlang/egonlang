@@ -1,10 +1,5 @@
-use egonlang_core::{
-    ast::{Expr, TypeRef},
-    errors::TypeError,
-    span::Span,
-};
-
 use crate::prelude::*;
+use egonlang_core::{errors::TypeError, prelude::*};
 
 expr_rule!(
     TypeMismatchIfCondExprRule,

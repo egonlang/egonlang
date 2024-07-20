@@ -1,4 +1,4 @@
-use egonlang_core::{ast::Expr, errors::SyntaxError, span::Span};
+use egonlang_core::{errors::SyntaxError, prelude::*};
 
 use crate::prelude::*;
 
@@ -37,8 +37,9 @@ expr_rule!(
 #[cfg(test)]
 mod reassigning_const_values_tests {
     use egonlang_core::{
-        ast::{Expr, ExprAssign, ExprLiteral, Identifier, TypeRef},
+        ast::{ExprAssign, ExprLiteral, Identifier},
         errors::SyntaxError,
+        prelude::*,
     };
     use pretty_assertions::assert_eq;
 

@@ -370,8 +370,9 @@ impl<'a> Visitor<'a> for Verifier<'a> {
 mod verifier_tests {
     use crate::prelude::*;
     use egonlang_core::{
-        ast::{ExprAssign, ExprList, ExprLiteral, Identifier, Module, StmtExpr, TypeRef},
+        ast::{ExprAssign, ExprList, ExprLiteral, Identifier, Module, StmtExpr},
         errors::{SyntaxError, TypeError},
+        prelude::*,
     };
     use pretty_assertions::assert_eq;
 
@@ -381,7 +382,7 @@ mod verifier_tests {
         ($test_name:ident, $input:expr, $expected:expr) => {
             #[test]
             fn $test_name() {
-                let result = verify_source($input);
+                let result = parse($input, 0).and_then(|module| verify_module(&module));
 
                 assert_eq!($expected, result);
             }
