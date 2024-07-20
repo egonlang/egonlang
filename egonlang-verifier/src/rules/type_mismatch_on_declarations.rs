@@ -1,20 +1,15 @@
 use egonlang_core::ast::TypeRef;
-use egonlang_core::{
-    ast::Expr,
-    ast::Stmt,
-    errors::{ErrorS, TypeError},
-    span::Span,
-};
+use egonlang_core::{ast::Stmt, errors::TypeError, span::Span};
 
 use crate::{type_env::TypeEnv, verifier::VerificationResult};
 
 use crate::rules::rule::Rule;
 
-use crate::{rule, verify_trace};
+use crate::{stmt_rule, verify_trace};
 
-rule!(
+stmt_rule!(
     TypeMismatchOnDeclarationsRule,
-    fn visit_stmt(stmt: &Stmt, span: &Span, types: &mut TypeEnv) {
+    fn (stmt: &Stmt, span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];
 
         if let Stmt::Assign(stmt_assign) = stmt {

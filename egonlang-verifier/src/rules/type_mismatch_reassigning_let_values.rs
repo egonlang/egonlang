@@ -1,16 +1,12 @@
-use egonlang_core::{
-    ast::{Expr, Stmt},
-    errors::{ErrorS, TypeError},
-    span::Span,
-};
+use egonlang_core::{ast::Expr, errors::TypeError, span::Span};
 
-use crate::{rule, type_env::TypeEnv, verifier::VerificationResult, verify_trace};
+use crate::{expr_rule, type_env::TypeEnv, verifier::VerificationResult, verify_trace};
 
 use crate::rules::rule::Rule;
 
-rule!(
+expr_rule!(
     TypeMismatchReassigningLetValuesRule,
-    fn visit_expr(expr: &Expr, _span: &Span, types: &mut TypeEnv) {
+    fn (expr: &Expr, _span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];
 
         if let Expr::Assign(expr_assign) = expr {

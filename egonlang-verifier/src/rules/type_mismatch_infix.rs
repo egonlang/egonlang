@@ -1,15 +1,15 @@
 use egonlang_core::ast::{Expr, ExprInfix, OpInfix, TypeRef};
 use egonlang_core::errors::ErrorS;
-use egonlang_core::{ast::Stmt, errors::TypeError, span::Span};
+use egonlang_core::{errors::TypeError, span::Span};
 
-use crate::{rule, verify_trace};
+use crate::{expr_rule, verify_trace};
 use crate::{type_env::TypeEnv, verifier::VerificationResult};
 
 use crate::rules::rule::Rule;
 
-rule!(
+expr_rule!(
     TypeMismatchInfixRule,
-    fn visit_expr(expr: &Expr, _span: &Span, types: &mut TypeEnv) {
+    fn (expr: &Expr, _span: &Span, types: &mut TypeEnv) {
         let mut errs: Vec<ErrorS> = vec![];
 
         if let Expr::Infix(infix) = expr {

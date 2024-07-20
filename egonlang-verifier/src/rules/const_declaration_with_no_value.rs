@@ -1,16 +1,12 @@
-use egonlang_core::{
-    ast::{Expr, Stmt},
-    errors::{ErrorS, SyntaxError},
-    span::Span,
-};
+use egonlang_core::{ast::Stmt, errors::SyntaxError, span::Span};
 
-use crate::{rule, type_env::TypeEnv, verifier::VerificationResult};
+use crate::{stmt_rule, type_env::TypeEnv, verifier::VerificationResult};
 
 use crate::rules::rule::Rule;
 
-rule!(
+stmt_rule!(
     DeclareConstWithoutValue,
-    fn visit_stmt(stmt: &Stmt, span: &Span, _types: &mut TypeEnv) {
+    fn (stmt: &Stmt, span: &Span, _types: &mut TypeEnv) {
         let mut errs = vec![];
 
         if let Stmt::Assign(stmt_assign) = stmt {

@@ -5,6 +5,7 @@ mod verify_trace;
 pub mod visitor;
 
 use egonlang_core::{ast::Module, parser::parse};
+use type_env::TypeEnv;
 use verifier::{VerificationResult, Verifier};
 
 /// Parse source string and verify the module AST

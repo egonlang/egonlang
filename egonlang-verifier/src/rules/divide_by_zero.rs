@@ -1,16 +1,16 @@
 use egonlang_core::{
-    ast::{Expr, OpInfix, Stmt},
-    errors::{ErrorS, SyntaxError},
+    ast::{Expr, OpInfix},
+    errors::SyntaxError,
     span::Span,
 };
 
-use crate::{rule, type_env::TypeEnv, verifier::VerificationResult, verify_trace};
+use crate::{expr_rule, type_env::TypeEnv, verifier::VerificationResult, verify_trace};
 
 use crate::rules::rule::Rule;
 
-rule!(
+expr_rule!(
     DivideByZeroRule,
-    fn visit_expr(expr: &Expr, _span: &Span, _types: &mut TypeEnv) {
+    fn (expr: &Expr, _span: &Span, _types: &mut TypeEnv) {
         let mut errs = vec![];
 
         if let Expr::Infix(infix_expr) = &expr {

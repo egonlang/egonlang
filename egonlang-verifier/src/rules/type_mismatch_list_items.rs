@@ -1,17 +1,17 @@
 use egonlang_core::{
-    ast::{Expr, ExprS, Stmt},
-    errors::{ErrorS, TypeError},
+    ast::{Expr, ExprS},
+    errors::TypeError,
     span::Span,
 };
 
-use crate::{rule, type_env::TypeEnv, verifier::VerificationResult};
+use crate::{expr_rule, type_env::TypeEnv, verifier::VerificationResult};
 
 use crate::rules::rule::Rule;
 use crate::verify_trace;
 
-rule!(
+expr_rule!(
     TypeMisMatchListItemsRule,
-    fn visit_expr(expr: &Expr, _span: &Span, types: &mut TypeEnv) {
+    fn (expr: &Expr, _span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];
 
         if let Expr::List(expr_list) = expr {

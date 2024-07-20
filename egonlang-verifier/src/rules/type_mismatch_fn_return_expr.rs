@@ -1,17 +1,13 @@
-use egonlang_core::{
-    ast::{Expr, Stmt},
-    errors::{ErrorS, TypeError},
-    span::Span,
-};
+use egonlang_core::{ast::Expr, errors::TypeError, span::Span};
 
-use crate::{rule, type_env::TypeEnv, verifier::VerificationResult};
+use crate::{expr_rule, type_env::TypeEnv, verifier::VerificationResult};
 
 use crate::rules::rule::Rule;
 use crate::verify_trace;
 
-rule!(
+expr_rule!(
     TypeMismatchFnReturnExprRule,
-    fn visit_expr(expr: &Expr, _span: &Span, types: &mut TypeEnv) {
+    fn (expr: &Expr, _span: &Span, types: &mut TypeEnv) {
         if let Expr::Fn(fn_expr) = expr {
             verify_trace!(
                 "Verifying fn return type and body expression: {}",

@@ -1,16 +1,16 @@
 use egonlang_core::{
-    ast::{Expr, ExprIdentifier, Stmt},
-    errors::{ErrorS, TypeError},
+    ast::{Expr, ExprIdentifier},
+    errors::TypeError,
     span::Span,
 };
 
-use crate::{rule, type_env::TypeEnv, verifier::VerificationResult, verify_trace};
+use crate::{expr_rule, type_env::TypeEnv, verifier::VerificationResult, verify_trace};
 
 use crate::rules::rule::Rule;
 
-rule!(
+expr_rule!(
     ReferencingUndefinedIdentifierRule,
-    fn visit_expr(expr: &Expr, span: &Span, types: &mut TypeEnv) {
+    fn (expr: &Expr, span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];
 
         if let Expr::Identifier(ExprIdentifier { identifier }) = expr {
