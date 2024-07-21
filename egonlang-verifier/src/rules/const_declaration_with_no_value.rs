@@ -36,11 +36,7 @@ stmt_rule!(
 
 #[cfg(test)]
 mod declare_const_without_value_tests {
-    use egonlang_core::{
-        ast::{ExprLiteral, ExprType, Identifier, StmtAssign},
-        errors::SyntaxError,
-        prelude::*,
-    };
+    use egonlang_core::{errors::SyntaxError, prelude::*};
     use pretty_assertions::assert_eq;
 
     use crate::prelude::*;
@@ -49,42 +45,21 @@ mod declare_const_without_value_tests {
 
     #[test]
     fn returns_ok_const_declared_with_value() {
-        let rule = DeclareConstWithoutValueRule;
-
+        let stmt: Stmt = "const a = 123;".try_into().unwrap();
+        let span = 0..0;
         let mut types = TypeEnv::new();
 
-        let stmt: Stmt = StmtAssign {
-            identifier: Identifier {
-                name: "a".to_string(),
-            },
-            type_expr: None,
-            is_const: true,
-            value: Some((ExprLiteral::Number(123f64).into(), 0..0)),
-        }
-        .into();
-
-        let span = 0..0;
-
-        assert_eq!(Ok(()), rule.visit_stmt(&stmt, &span, &mut types));
+        assert_eq!(
+            Ok(()),
+            DeclareConstWithoutValueRule.visit_stmt(&stmt, &span, &mut types)
+        );
     }
 
     #[test]
     fn returns_err_const_declared_without_type_or_value() {
-        let rule = DeclareConstWithoutValueRule;
-
-        let mut types = TypeEnv::new();
-
-        let stmt: Stmt = StmtAssign {
-            identifier: Identifier {
-                name: "a".to_string(),
-            },
-            type_expr: None,
-            is_const: true,
-            value: None,
-        }
-        .into();
-
+        let stmt: Stmt = "const a;".try_into().unwrap();
         let span = 0..0;
+        let mut types = TypeEnv::new();
 
         assert_eq!(
             Err(vec![(
@@ -94,27 +69,15 @@ mod declare_const_without_value_tests {
                 .into(),
                 span.clone()
             )]),
-            rule.visit_stmt(&stmt, &span, &mut types)
+            DeclareConstWithoutValueRule.visit_stmt(&stmt, &span, &mut types)
         );
     }
 
     #[test]
     fn returns_err_const_declared_without_value() {
-        let rule = DeclareConstWithoutValueRule;
-
-        let mut types = TypeEnv::new();
-
-        let stmt: Stmt = StmtAssign {
-            identifier: Identifier {
-                name: "a".to_string(),
-            },
-            type_expr: Some((ExprType(TypeRef::number()).into(), 0..0)),
-            is_const: true,
-            value: None,
-        }
-        .into();
-
+        let stmt: Stmt = "const a: number;".try_into().unwrap();
         let span = 0..0;
+        let mut types = TypeEnv::new();
 
         assert_eq!(
             Err(vec![(
@@ -124,7 +87,7 @@ mod declare_const_without_value_tests {
                 .into(),
                 span.clone()
             )]),
-            rule.visit_stmt(&stmt, &span, &mut types)
+            DeclareConstWithoutValueRule.visit_stmt(&stmt, &span, &mut types)
         );
     }
 }

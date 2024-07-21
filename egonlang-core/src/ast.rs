@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     errors::{self, Error, TypeError},
+    prelude::parse,
     span::Spanned,
 };
 use std::fmt::{self, Debug, Display, Formatter};
@@ -49,6 +50,18 @@ impl From<StmtAssign> for Stmt {
 impl From<StmtFn> for Stmt {
     fn from(value: StmtFn) -> Self {
         Stmt::Fn(Box::from(value))
+    }
+}
+
+impl TryFrom<&str> for Stmt {
+    type Error = errors::Error;
+
+    fn try_from(value: &str) -> Result<Stmt, errors::Error> {
+        let module = parse(value, 0).unwrap();
+
+        let stmt_spanned = module.stmts.first().unwrap();
+
+        Ok(stmt_spanned.0.clone())
     }
 }
 

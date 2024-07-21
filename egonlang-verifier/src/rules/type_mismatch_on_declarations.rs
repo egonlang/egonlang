@@ -120,11 +120,7 @@ stmt_rule!(
 
 #[cfg(test)]
 mod type_mismatch_on_assignment_tests {
-    use egonlang_core::{
-        ast::{ExprList, ExprLiteral, ExprType, Identifier, StmtAssign},
-        errors::TypeError,
-        prelude::*,
-    };
+    use egonlang_core::{errors::TypeError, prelude::*};
     use pretty_assertions::assert_eq;
 
     use crate::{rules::rule::Rule, type_env::TypeEnv};
@@ -133,42 +129,21 @@ mod type_mismatch_on_assignment_tests {
 
     #[test]
     fn returns_ok_if_assignment_type_and_value_type_match() {
-        let rule = TypeMismatchOnDeclarationsRule;
-
+        let stmt: Stmt = "const a: number = 123;".try_into().unwrap();
+        let span = 0..0;
         let mut types = TypeEnv::new();
 
-        let stmt: Stmt = StmtAssign {
-            identifier: Identifier {
-                name: "a".to_string(),
-            },
-            type_expr: Some((ExprType(TypeRef::number()).into(), 0..0)),
-            is_const: true,
-            value: Some((ExprLiteral::Number(123f64).into(), 0..0)),
-        }
-        .into();
-
-        let span = 0..0;
-
-        assert_eq!(Ok(()), rule.visit_stmt(&stmt, &span, &mut types));
+        assert_eq!(
+            Ok(()),
+            TypeMismatchOnDeclarationsRule.visit_stmt(&stmt, &span, &mut types)
+        );
     }
 
     #[test]
     fn returns_err_if_assignment_type_and_value_type_mismatch() {
-        let rule = TypeMismatchOnDeclarationsRule;
-
-        let mut types = TypeEnv::new();
-
-        let stmt: Stmt = StmtAssign {
-            identifier: Identifier {
-                name: "a".to_string(),
-            },
-            type_expr: Some((ExprType(TypeRef::unit()).into(), 0..1)),
-            is_const: true,
-            value: Some((ExprLiteral::Number(123f64).into(), 2..3)),
-        }
-        .into();
-
+        let stmt: Stmt = "const a: () = 123;".try_into().unwrap();
         let span = 0..0;
+        let mut types = TypeEnv::new();
 
         assert_eq!(
             Err(vec![(
@@ -177,54 +152,33 @@ mod type_mismatch_on_assignment_tests {
                     actual: TypeRef::number().to_string()
                 }
                 .into(),
-                2..3
+                14..17
             )]),
-            rule.visit_stmt(&stmt, &span, &mut types)
+            TypeMismatchOnDeclarationsRule.visit_stmt(&stmt, &span, &mut types)
         );
     }
 
     #[test]
     fn returns_ok_if_empty_list_assigned_to_known_list_type() {
-        let rule = TypeMismatchOnDeclarationsRule;
-
+        let stmt: Stmt = "const a: list<number> = [];".try_into().unwrap();
+        let span = 0..0;
         let mut types = TypeEnv::new();
 
-        let stmt: Stmt = StmtAssign {
-            identifier: Identifier {
-                name: "a".to_string(),
-            },
-            type_expr: Some((ExprType(TypeRef::list(TypeRef::number())).into(), 0..0)),
-            is_const: true,
-            value: Some((ExprList { items: vec![] }.into(), 0..0)),
-        }
-        .into();
-
-        let span = 0..0;
-
-        assert_eq!(Ok(()), rule.visit_stmt(&stmt, &span, &mut types));
+        assert_eq!(
+            Ok(()),
+            TypeMismatchOnDeclarationsRule.visit_stmt(&stmt, &span, &mut types)
+        );
     }
 
     #[test]
     fn returns_err_if_empty_list_assigned_to_unknown_list_type() {
-        let rule = TypeMismatchOnDeclarationsRule;
-
-        let mut types = TypeEnv::new();
-
-        let stmt: Stmt = StmtAssign {
-            identifier: Identifier {
-                name: "a".to_string(),
-            },
-            type_expr: Some((ExprType(TypeRef::list(TypeRef::unknown())).into(), 0..0)),
-            is_const: true,
-            value: Some((ExprList { items: vec![] }.into(), 0..0)),
-        }
-        .into();
-
+        let stmt: Stmt = "const a: list<unknown> = [];".try_into().unwrap();
         let span = 0..0;
+        let mut types = TypeEnv::new();
 
         assert_eq!(
             Err(vec![(TypeError::UknownListType.into(), 0..0)]),
-            rule.visit_stmt(&stmt, &span, &mut types)
+            TypeMismatchOnDeclarationsRule.visit_stmt(&stmt, &span, &mut types)
         );
     }
 }
