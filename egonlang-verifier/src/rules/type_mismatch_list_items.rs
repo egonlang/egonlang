@@ -3,6 +3,13 @@ use egonlang_core::{ast::ExprS, errors::TypeError, prelude::*};
 use crate::prelude::*;
 
 expr_rule!(
+    /// Checks that all items of a list are of the same type
+    ///
+    /// ```egon
+    /// [1, 2, "a"]; // TypeError
+    /// [true, false, 0]; // TypeError
+    /// ["a", "b", "c"];
+    /// ```
     TypeMisMatchListItemsRule,
     fn (expr: &Expr, _span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];

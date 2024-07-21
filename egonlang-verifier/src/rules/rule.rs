@@ -18,7 +18,8 @@ pub trait Rule<'a> {
 /// Create a verifier [`Rule`] for an expression
 #[macro_export]
 macro_rules! expr_rule {
-    ($name:ident, fn $params:tt $body:expr) => {
+    ($(#[$attributes:meta])* $name:ident, fn $params:tt $body:expr) => {
+        $(#[$attributes])*
         pub struct $name;
 
         impl<'a> $crate::rules::rule::Rule<'a> for $name {
@@ -56,7 +57,8 @@ macro_rules! expr_rule {
 /// Create a verifier [`Rule`] for a statement
 #[macro_export]
 macro_rules! stmt_rule {
-    ($name:ident, fn $params:tt $body:expr) => {
+    ($(#[$attributes:meta])* $name:ident, fn $params:tt $body:expr) => {
+        $(#[$attributes])*
         pub struct $name;
 
         impl<'a> Rule<'a> for $name {

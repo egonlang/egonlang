@@ -3,6 +3,21 @@ use egonlang_core::{errors::TypeError, prelude::*};
 use crate::prelude::*;
 
 expr_rule!(
+    /// Check that let variables can't be assigned with a different type
+    ///
+    /// ```egon
+    /// let a = 123;
+    /// a = 456;
+    /// a = "foo"; // TypeError
+    ///
+    /// let b: string;
+    /// b = 123; // TypeError
+    /// b = "bar";
+    ///
+    /// let c: bool = false;
+    /// c = 123; // TypeRrror
+    /// c = true;
+    /// ```
     TypeMismatchReassigningLetValuesRule,
     fn (expr: &Expr, _span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];

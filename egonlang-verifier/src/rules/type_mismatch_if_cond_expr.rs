@@ -2,6 +2,12 @@ use crate::prelude::*;
 use egonlang_core::{errors::TypeError, prelude::*};
 
 expr_rule!(
+    /// Checks the condition expression of a if statement is a boolean
+    ///
+    /// ```egon
+    /// if (123) {}; // TypeError
+    /// if ("example") {} else {}; // TypeError
+    /// ```
     TypeMismatchIfCondExprRule,
     fn (expr: &Expr, _span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];

@@ -4,6 +4,12 @@ use regex::Regex;
 use crate::prelude::*;
 
 stmt_rule!(
+    /// Checks type aliases are formatted correctly
+    ///
+    /// ```egon
+    /// type ValidTypeAlias = string;
+    /// type invalidTypeAlias = string; // SyntaxError∂
+    /// ```
     InvalidTypeAliasNameRule,
     fn (stmt: &Stmt, span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];

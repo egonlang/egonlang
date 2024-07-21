@@ -3,6 +3,7 @@ use egonlang_core::{errors::SyntaxError, prelude::*};
 use crate::prelude::*;
 
 stmt_rule!(
+    /// Checks assignment statements initialize consts with a value
     DeclareConstWithoutValue,
     fn (stmt: &Stmt, span: &Span, _types: &mut TypeEnv) {
         let mut errs = vec![];

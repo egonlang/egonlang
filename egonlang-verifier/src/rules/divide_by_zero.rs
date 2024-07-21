@@ -3,6 +3,11 @@ use egonlang_core::{ast::OpInfix, errors::SyntaxError, prelude::*};
 use crate::prelude::*;
 
 expr_rule!(
+    /// Checks infix expressions for dividing by zero
+    ///
+    /// ```egon
+    /// let a = 10 / 0; // SyntaxError
+    /// ```
     DivideByZeroRule,
     fn (expr: &Expr, _span: &Span, _types: &mut TypeEnv) {
         let mut errs = vec![];

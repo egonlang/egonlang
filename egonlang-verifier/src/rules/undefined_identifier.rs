@@ -2,6 +2,13 @@ use crate::prelude::*;
 use egonlang_core::{ast::ExprIdentifier, errors::TypeError, prelude::*};
 
 expr_rule!(
+    /// Checks for references to undefined variables
+    ///
+    /// ```egon
+    /// let a = 123;
+    /// b; // TypeError
+    /// a;
+    /// ```
     ReferencingUndefinedIdentifierRule,
     fn (expr: &Expr, span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];

@@ -3,6 +3,12 @@ use egonlang_core::{errors::SyntaxError, prelude::*};
 use crate::prelude::*;
 
 expr_rule!(
+    /// Check that consts can not be reassigned
+    ///
+    /// ```egon
+    /// const a = 123;
+    /// a = 456; // SyntaxError
+    /// ```
     ReassigningConstValueRule,
     fn (expr: &Expr, span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];

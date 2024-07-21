@@ -3,6 +3,13 @@ use egonlang_core::{errors::TypeError, prelude::*};
 use crate::prelude::*;
 
 expr_rule!(
+    /// Checks that both branches of an if/else expression/statement return the same type
+    ///
+    /// ```egon
+    /// if (true) { 123 } else { "foo" }; // TypeError
+    /// if (true) { 123 } else { }; // TypeError
+    /// if (true) { 123 } else { 456 };
+    /// ```
     TypeMismatchIfthenElseExprRule,
     fn (expr: &Expr, _span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];

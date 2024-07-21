@@ -3,6 +3,18 @@ use egonlang_core::{errors::TypeError, prelude::*};
 use crate::prelude::*;
 
 expr_rule!(
+    /// Checks the return type of a function matches function body's
+    /// returning expression, if one is present.
+    ///
+    /// ```egon
+    /// fn example1(): string => {
+    ///     123 // TypeError
+    /// }
+    ///
+    /// fn example2(): number => {
+    ///     123
+    /// }
+    /// ```
     TypeMismatchFnReturnExprRule,
     fn (expr: &Expr, _span: &Span, types: &mut TypeEnv) {
         if let Expr::Fn(fn_expr) = expr {

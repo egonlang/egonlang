@@ -3,6 +3,15 @@ use egonlang_core::{ast::OpPrefix, errors::TypeError, prelude::*};
 use crate::prelude::*;
 
 expr_rule!(
+    /// Checks value types for all prefix operation expressions
+    /// e.g. `!, -`
+    ///
+    /// ```egon
+    /// !0 // TypeError
+    /// -false // TypeError
+    /// -10
+    /// !true
+    /// ```
     TypeMismatchPrefixRule,
     fn (expr: &Expr, _span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];

@@ -7,6 +7,13 @@ use egonlang_core::{
 use crate::prelude::*;
 
 expr_rule!(
+    /// Checks value types for all infix operation expressions
+    /// e.g. `+, -, /, *, <, <=, >, >=, ==, !=`
+    ///
+    /// ```egon
+    /// 1 + "foo"; // TypeError
+    /// 1 + 2;
+    /// ```
     TypeMismatchInfixRule,
     fn (expr: &Expr, _span: &Span, types: &mut TypeEnv) {
         let mut errs: Vec<ErrorS> = vec![];

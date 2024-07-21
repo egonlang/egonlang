@@ -2,6 +2,13 @@ use crate::prelude::*;
 use egonlang_core::{errors::TypeError, prelude::*};
 
 stmt_rule!(
+    /// Checks the value type of an assignment declaration matches the declaration type
+    ///
+    /// ```egon
+    /// const a: number = "foo"; // TypeError
+    /// let b: string = false; // TypeError
+    /// let c: bool = true;
+    /// ```
     TypeMismatchOnDeclarationsRule,
     fn (stmt: &Stmt, span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];
