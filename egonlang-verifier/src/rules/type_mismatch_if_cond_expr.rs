@@ -8,7 +8,7 @@ expr_rule!(
     /// if (123) {}; // TypeError
     /// if ("example") {} else {}; // TypeError
     /// ```
-    TypeMismatchIfCondExprRule,
+    TypeMismatchIfCondExpr,
     fn (expr: &Expr, _span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];
 

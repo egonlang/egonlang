@@ -10,7 +10,7 @@ expr_rule!(
     /// [true, false, 0]; // TypeError
     /// ["a", "b", "c"];
     /// ```
-    TypeMisMatchListItemsRule,
+    TypeMisMatchListItems,
     fn (expr: &Expr, _span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];
 

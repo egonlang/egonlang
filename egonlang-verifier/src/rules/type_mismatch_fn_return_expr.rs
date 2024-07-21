@@ -15,7 +15,7 @@ expr_rule!(
     ///     123
     /// }
     /// ```
-    TypeMismatchFnReturnExprRule,
+    TypeMismatchFnReturnExpr,
     fn (expr: &Expr, _span: &Span, types: &mut TypeEnv) {
         if let Expr::Fn(fn_expr) = expr {
             verify_trace!(

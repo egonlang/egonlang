@@ -9,7 +9,7 @@ stmt_rule!(
     /// let b: string = false; // TypeError
     /// let c: bool = true;
     /// ```
-    TypeMismatchOnDeclarationsRule,
+    TypeMismatchOnDeclarations,
     fn (stmt: &Stmt, span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];
 

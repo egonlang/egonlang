@@ -5,10 +5,11 @@ use egonlang_core::{
 };
 
 use crate::{
+    prelude::Rule,
     rules::{
-        const_declaration_with_no_value::DeclareConstWithoutValue,
+        const_declaration_with_no_value::DeclareConstWithoutValueRule,
         divide_by_zero::DivideByZeroRule, invalid_type_alias_name::InvalidTypeAliasNameRule,
-        reassigning_const_values::ReassigningConstValueRule, rule::Rule,
+        reassigning_const_values::ReassigningConstValueRule,
         type_mismatch_fn_return_expr::TypeMismatchFnReturnExprRule,
         type_mismatch_if_cond_expr::TypeMismatchIfCondExprRule,
         type_mismatch_if_then_else_exprs::TypeMismatchIfthenElseExprRule,
@@ -26,41 +27,49 @@ use crate::{
 
 pub type VerificationResult = Result<(), Vec<ErrorS>>;
 
-#[derive(Default)]
+/// Verify an AST [`Module`] using the registered [`Rule`] set
 pub struct Verifier<'a> {
     rules: Vec<Box<dyn Rule<'a>>>,
 }
 
+impl Default for Verifier<'_> {
+    /// Create a [`Verifier`] with the [`Rule`] set
+    fn default() -> Self {
+        Self::new().with_default_rules()
+    }
+}
+
 impl Verifier<'_> {
+    /// Create a [`Verifier`] with no default [`Rule`] set
     pub fn new() -> Self {
-        let mut verifier = Verifier::default();
-
-        verifier.rules.push(Box::from(TypeMismatchInfixRule));
-        verifier.rules.push(Box::from(TypeMismatchPrefixRule));
-        verifier.rules.push(Box::from(TypeMisMatchListItemsRule));
-        verifier
-            .rules
-            .push(Box::from(TypeMismatchOnDeclarationsRule));
-        verifier.rules.push(Box::from(DeclareConstWithoutValue));
-        verifier.rules.push(Box::from(ReassigningConstValueRule));
-        verifier
-            .rules
-            .push(Box::from(ReferencingUndefinedIdentifierRule));
-        verifier.rules.push(Box::from(DivideByZeroRule));
-        verifier.rules.push(Box::from(TypeMismatchFnReturnExprRule));
-        verifier.rules.push(Box::from(TypeMismatchIfCondExprRule));
-        verifier
-            .rules
-            .push(Box::from(TypeMismatchReassigningLetValuesRule));
-
-        verifier
-            .rules
-            .push(Box::from(TypeMismatchIfthenElseExprRule));
-        verifier.rules.push(Box::from(InvalidTypeAliasNameRule));
-
-        verifier
+        Verifier {
+            rules: Default::default(),
+        }
     }
 
+    /// Register the default [`Rule`] set
+    pub fn with_default_rules(mut self) -> Self {
+        self.rules.push(Box::from(TypeMismatchInfixRule));
+        self.rules.push(Box::from(TypeMismatchPrefixRule));
+        self.rules.push(Box::from(TypeMisMatchListItemsRule));
+        self.rules.push(Box::from(TypeMismatchOnDeclarationsRule));
+        self.rules.push(Box::from(DeclareConstWithoutValueRule));
+        self.rules.push(Box::from(ReassigningConstValueRule));
+        self.rules
+            .push(Box::from(ReferencingUndefinedIdentifierRule));
+        self.rules.push(Box::from(DivideByZeroRule));
+        self.rules.push(Box::from(TypeMismatchFnReturnExprRule));
+        self.rules.push(Box::from(TypeMismatchIfCondExprRule));
+        self.rules
+            .push(Box::from(TypeMismatchReassigningLetValuesRule));
+
+        self.rules.push(Box::from(TypeMismatchIfthenElseExprRule));
+        self.rules.push(Box::from(InvalidTypeAliasNameRule));
+
+        self
+    }
+
+    /// Verify an AST [`Module`] using the registered [`Rule`] set
     pub fn verify(&self, module: &Module) -> VerificationResult {
         let mut all_errs: Vec<ErrorS> = vec![];
 
@@ -1107,7 +1116,7 @@ mod verifier_tests {
 
     #[test]
     fn errors_when_referencing_undefined_identifier() {
-        let verifier = Verifier::new();
+        let verifier = Verifier::default();
 
         let module = Module::from(vec![(
             StmtExpr {
@@ -1133,7 +1142,7 @@ mod verifier_tests {
 
     #[test]
     fn errors_when_referencing_multiple_undefined_identifiers() {
-        let verifier = Verifier::new();
+        let verifier = Verifier::default();
 
         let module = Module::from(vec![
             (
@@ -1177,7 +1186,7 @@ mod verifier_tests {
 
     #[test]
     fn errors_when_assigning_list_with_type_mismatched_items() {
-        let verifier = Verifier::new();
+        let verifier = Verifier::default();
 
         let module = Module::from(vec![(
             StmtExpr {

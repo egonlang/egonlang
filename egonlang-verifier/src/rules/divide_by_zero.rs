@@ -8,7 +8,7 @@ expr_rule!(
     /// ```egon
     /// let a = 10 / 0; // SyntaxError
     /// ```
-    DivideByZeroRule,
+    DivideByZero,
     fn (expr: &Expr, _span: &Span, _types: &mut TypeEnv) {
         let mut errs = vec![];
 

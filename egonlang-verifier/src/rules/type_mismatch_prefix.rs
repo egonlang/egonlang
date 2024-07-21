@@ -12,7 +12,7 @@ expr_rule!(
     /// -10
     /// !true
     /// ```
-    TypeMismatchPrefixRule,
+    TypeMismatchPrefix,
     fn (expr: &Expr, _span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];
 

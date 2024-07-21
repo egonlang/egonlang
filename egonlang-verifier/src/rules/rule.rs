@@ -19,36 +19,41 @@ pub trait Rule<'a> {
 #[macro_export]
 macro_rules! expr_rule {
     ($(#[$attributes:meta])* $name:ident, fn $params:tt $body:expr) => {
-        $(#[$attributes])*
-        pub struct $name;
+        paste::paste! {
+            /// Egon Verifier Expression Rule
+            ///
+            $(#[$attributes])*
+            pub struct [<$name Rule>];
 
-        impl<'a> $crate::rules::rule::Rule<'a> for $name {
-            fn visit_stmt(
-                &self,
-                _stmt: &::egonlang_core::ast::Stmt,
-                _span: &::egonlang_core::span::Span,
-                _types: &mut $crate::TypeEnv,
-            ) -> VerificationResult {
-                Ok(())
-            }
 
-            fn visit_expr(
-                &self,
-                expr: &::egonlang_core::ast::Expr,
-                span: &::egonlang_core::span::Span,
-                types: &mut TypeEnv,
-            ) -> VerificationResult {
-                fn internal $params -> Vec<::egonlang_core::errors::ErrorS> {
-                    $body
+            impl<'a> $crate::rules::rule::Rule<'a> for [<$name Rule>] {
+                fn visit_stmt(
+                    &self,
+                    _stmt: &::egonlang_core::ast::Stmt,
+                    _span: &::egonlang_core::span::Span,
+                    _types: &mut $crate::TypeEnv,
+                ) -> VerificationResult {
+                    Ok(())
                 }
 
-                let errs = internal(expr, span, types);
+                fn visit_expr(
+                    &self,
+                    expr: &::egonlang_core::ast::Expr,
+                    span: &::egonlang_core::span::Span,
+                    types: &mut TypeEnv,
+                ) -> VerificationResult {
+                    fn internal $params -> Vec<::egonlang_core::errors::ErrorS> {
+                        $body
+                    }
 
-                if !errs.is_empty() {
-                    return Err(errs);
+                    let errs = internal(expr, span, types);
+
+                    if !errs.is_empty() {
+                        return Err(errs);
+                    }
+
+                    Ok(())
                 }
-
-                Ok(())
             }
         }
     };
@@ -58,36 +63,40 @@ macro_rules! expr_rule {
 #[macro_export]
 macro_rules! stmt_rule {
     ($(#[$attributes:meta])* $name:ident, fn $params:tt $body:expr) => {
-        $(#[$attributes])*
-        pub struct $name;
+        paste::paste! {
+            /// Egon Verifier Statement Rule
+            ///
+            $(#[$attributes])*
+            pub struct [<$name Rule>];
 
-        impl<'a> Rule<'a> for $name {
-            fn visit_stmt(
-                &self,
-                stmt: &::egonlang_core::ast::Stmt,
-                span: &::egonlang_core::span::Span,
-                types: &mut $crate::TypeEnv,
-            ) -> VerificationResult {
-                fn internal $params -> Vec<::egonlang_core::errors::ErrorS> {
-                    $body
+            impl<'a> Rule<'a> for [<$name Rule>] {
+                fn visit_stmt(
+                    &self,
+                    stmt: &::egonlang_core::ast::Stmt,
+                    span: &::egonlang_core::span::Span,
+                    types: &mut $crate::TypeEnv,
+                ) -> VerificationResult {
+                    fn internal $params -> Vec<::egonlang_core::errors::ErrorS> {
+                        $body
+                    }
+
+                    let errs = internal(stmt, span, types);
+
+                    if !errs.is_empty() {
+                        return Err(errs);
+                    }
+
+                    Ok(())
                 }
 
-                let errs = internal(stmt, span, types);
-
-                if !errs.is_empty() {
-                    return Err(errs);
+                fn visit_expr(
+                    &self,
+                    _expr: &::egonlang_core::ast::Expr,
+                    _span: &::egonlang_core::span::Span,
+                    _types: &mut TypeEnv,
+                ) -> VerificationResult {
+                    Ok(())
                 }
-
-                Ok(())
-            }
-
-            fn visit_expr(
-                &self,
-                _expr: &::egonlang_core::ast::Expr,
-                _span: &::egonlang_core::span::Span,
-                _types: &mut TypeEnv,
-            ) -> VerificationResult {
-                Ok(())
             }
         }
     };

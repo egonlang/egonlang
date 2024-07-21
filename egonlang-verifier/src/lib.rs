@@ -10,7 +10,7 @@ use verifier::{VerificationResult, Verifier};
 
 /// Verify the module AST
 pub fn verify_module(module: &Module) -> VerificationResult {
-    Verifier::new().verify(module)
+    Verifier::default().verify(module)
 }
 
 pub mod prelude {

@@ -9,7 +9,7 @@ expr_rule!(
     /// b; // TypeError
     /// a;
     /// ```
-    ReferencingUndefinedIdentifierRule,
+    ReferencingUndefinedIdentifier,
     fn (expr: &Expr, span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];
 

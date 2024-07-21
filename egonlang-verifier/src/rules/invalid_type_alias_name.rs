@@ -10,7 +10,7 @@ stmt_rule!(
     /// type ValidTypeAlias = string;
     /// type invalidTypeAlias = string; // SyntaxError∂
     /// ```
-    InvalidTypeAliasNameRule,
+    InvalidTypeAliasName,
     fn (stmt: &Stmt, span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];
 

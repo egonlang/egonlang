@@ -14,7 +14,7 @@ expr_rule!(
     /// 1 + "foo"; // TypeError
     /// 1 + 2;
     /// ```
-    TypeMismatchInfixRule,
+    TypeMismatchInfix,
     fn (expr: &Expr, _span: &Span, types: &mut TypeEnv) {
         let mut errs: Vec<ErrorS> = vec![];
 

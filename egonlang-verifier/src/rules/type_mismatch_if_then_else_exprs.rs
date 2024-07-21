@@ -10,7 +10,7 @@ expr_rule!(
     /// if (true) { 123 } else { }; // TypeError
     /// if (true) { 123 } else { 456 };
     /// ```
-    TypeMismatchIfthenElseExprRule,
+    TypeMismatchIfthenElseExpr,
     fn (expr: &Expr, _span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];
 

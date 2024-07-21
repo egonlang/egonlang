@@ -9,7 +9,7 @@ expr_rule!(
     /// const a = 123;
     /// a = 456; // SyntaxError
     /// ```
-    ReassigningConstValueRule,
+    ReassigningConstValue,
     fn (expr: &Expr, span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];
 

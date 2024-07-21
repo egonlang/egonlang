@@ -18,7 +18,7 @@ expr_rule!(
     /// c = 123; // TypeRrror
     /// c = true;
     /// ```
-    TypeMismatchReassigningLetValuesRule,
+    TypeMismatchReassigningLetValues,
     fn (expr: &Expr, _span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];
 

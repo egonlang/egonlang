@@ -45,11 +45,11 @@ mod declare_const_without_value_tests {
 
     use crate::prelude::*;
 
-    use super::DeclareConstWithoutValue;
+    use super::DeclareConstWithoutValueRule;
 
     #[test]
     fn returns_ok_const_declared_with_value() {
-        let rule = DeclareConstWithoutValue;
+        let rule = DeclareConstWithoutValueRule;
 
         let mut types = TypeEnv::new();
 
@@ -70,7 +70,7 @@ mod declare_const_without_value_tests {
 
     #[test]
     fn returns_err_const_declared_without_type_or_value() {
-        let rule = DeclareConstWithoutValue;
+        let rule = DeclareConstWithoutValueRule;
 
         let mut types = TypeEnv::new();
 
@@ -100,7 +100,7 @@ mod declare_const_without_value_tests {
 
     #[test]
     fn returns_err_const_declared_without_value() {
-        let rule = DeclareConstWithoutValue;
+        let rule = DeclareConstWithoutValueRule;
 
         let mut types = TypeEnv::new();
 
