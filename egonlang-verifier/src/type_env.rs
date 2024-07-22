@@ -229,7 +229,7 @@ impl<'a> TypeEnv<'a> {
                     .join("; ");
 
                 verify_trace!(
-                    "Error resolving {} to a type: {}",
+                    error: "Unable to resolve {} to a type: {}",
                     expr.to_string().cyan(),
                     err_string.italic().red()
                 );
