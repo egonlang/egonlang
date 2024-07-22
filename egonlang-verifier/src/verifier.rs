@@ -28,6 +28,20 @@ use crate::{
 pub type VerificationResult = Result<(), Vec<ErrorS>>;
 
 /// Verify an AST [`Module`] using the registered [`Rule`] set
+///
+/// ```
+/// use egonlang_core::prelude::*;
+/// use egonlang_verifier::prelude::*;
+///
+/// /// Verifier with the default [`Rule`] set
+/// let verifier = Verifier::default();
+///
+/// let module = parse("let a = 123;", 0).expect("Unable to parse");
+///
+/// let result = verify_module(&module);
+///
+/// matches!(result, Ok(()));
+/// ```
 pub struct Verifier<'a> {
     rules: Vec<Box<dyn Rule<'a>>>,
 }
@@ -39,7 +53,7 @@ impl Default for Verifier<'_> {
     }
 }
 
-impl Verifier<'_> {
+impl<'a> Verifier<'a> {
     /// Create a [`Verifier`] with no default [`Rule`] set
     pub fn new() -> Self {
         Verifier {
@@ -47,24 +61,40 @@ impl Verifier<'_> {
         }
     }
 
-    /// Register the default [`Rule`] set
-    pub fn with_default_rules(mut self) -> Self {
-        self.rules.push(Box::from(TypeMismatchInfixRule));
-        self.rules.push(Box::from(TypeMismatchPrefixRule));
-        self.rules.push(Box::from(TypeMisMatchListItemsRule));
-        self.rules.push(Box::from(TypeMismatchOnDeclarationsRule));
-        self.rules.push(Box::from(DeclareConstWithoutValueRule));
-        self.rules.push(Box::from(ReassigningConstValueRule));
-        self.rules
-            .push(Box::from(ReferencingUndefinedIdentifierRule));
-        self.rules.push(Box::from(DivideByZeroRule));
-        self.rules.push(Box::from(TypeMismatchFnReturnExprRule));
-        self.rules.push(Box::from(TypeMismatchIfCondExprRule));
-        self.rules
-            .push(Box::from(TypeMismatchReassigningLetValuesRule));
+    /// Register a [`Rule`]
+    ///
+    /// ```ignore
+    /// use egonlang_verifier::prelude::*;
+    ///
+    /// let verifier = Verifier::new().with_rule(TypeMismatchInfixRule);
+    /// ```
+    pub fn add_rule<R: Rule<'a> + 'static>(&mut self, rule: R) {
+        self.rules.push(Box::new(rule));
+    }
 
-        self.rules.push(Box::from(TypeMismatchIfthenElseExprRule));
-        self.rules.push(Box::from(InvalidTypeAliasNameRule));
+    /// Register the default [`Rule`] set
+    ///
+    /// ```
+    /// use egonlang_verifier::prelude::*;
+    ///
+    /// // These are the same
+    /// let verifier = Verifier::new().with_default_rules();
+    /// let verifier = Verifier::default();
+    /// ```
+    pub fn with_default_rules(mut self) -> Self {
+        self.add_rule(TypeMismatchInfixRule);
+        self.add_rule(TypeMismatchPrefixRule);
+        self.add_rule(TypeMisMatchListItemsRule);
+        self.add_rule(TypeMismatchOnDeclarationsRule);
+        self.add_rule(DeclareConstWithoutValueRule);
+        self.add_rule(ReassigningConstValueRule);
+        self.add_rule(ReferencingUndefinedIdentifierRule);
+        self.add_rule(DivideByZeroRule);
+        self.add_rule(TypeMismatchFnReturnExprRule);
+        self.add_rule(TypeMismatchIfCondExprRule);
+        self.add_rule(TypeMismatchReassigningLetValuesRule);
+        self.add_rule(TypeMismatchIfthenElseExprRule);
+        self.add_rule(InvalidTypeAliasNameRule);
 
         self
     }

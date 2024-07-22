@@ -38,6 +38,7 @@ verify-with-logs:
 
 test *args:
     cargo nextest run --workspace {{args}}
+    cargo test --doc
 
 test-trace *args:
     just test --features='verify-trace' --no-capture {{args}}
