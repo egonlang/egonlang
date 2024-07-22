@@ -62,11 +62,7 @@ expr_rule!(
 
 #[cfg(test)]
 mod type_mismatch_negate_prefix_tests {
-    use egonlang_core::{
-        ast::{ExprList, ExprLiteral},
-        errors::TypeError,
-        prelude::*,
-    };
+    use egonlang_core::{errors::TypeError, prelude::*};
     use pretty_assertions::assert_eq;
 
     use crate::prelude::*;
@@ -75,68 +71,45 @@ mod type_mismatch_negate_prefix_tests {
 
     #[test]
     fn returns_ok_if_list_is_empty() {
-        let rule = TypeMisMatchListItemsRule;
-
+        let expr: Expr = "[];".try_into().unwrap();
+        let span = 0..0;
         let mut types = TypeEnv::new();
 
-        let expr: Expr = ExprList { items: vec![] }.into();
-
-        let span = 0..0;
-
-        assert_eq!(Ok(()), rule.visit_expr(&expr, &span, &mut types));
+        assert_eq!(
+            Ok(()),
+            TypeMisMatchListItemsRule.visit_expr(&expr, &span, &mut types)
+        );
     }
 
     #[test]
     fn returns_ok_if_list_has_one_item() {
-        let rule = TypeMisMatchListItemsRule;
-
+        let expr: Expr = "[10];".try_into().unwrap();
+        let span = 0..0;
         let mut types = TypeEnv::new();
 
-        let expr: Expr = ExprList {
-            items: vec![(ExprLiteral::Number(10f64).into(), 0..0)],
-        }
-        .into();
-
-        let span = 0..0;
-
-        assert_eq!(Ok(()), rule.visit_expr(&expr, &span, &mut types));
+        assert_eq!(
+            Ok(()),
+            TypeMisMatchListItemsRule.visit_expr(&expr, &span, &mut types)
+        );
     }
 
     #[test]
     fn returns_ok_if_list_has_multiple_items_of_same_type() {
-        let rule = TypeMisMatchListItemsRule;
-
+        let expr: Expr = "[10, 100];".try_into().unwrap();
+        let span = 0..0;
         let mut types = TypeEnv::new();
 
-        let expr: Expr = ExprList {
-            items: vec![
-                (ExprLiteral::Number(10f64).into(), 0..0),
-                (ExprLiteral::Number(100f64).into(), 0..0),
-            ],
-        }
-        .into();
-
-        let span = 0..0;
-
-        assert_eq!(Ok(()), rule.visit_expr(&expr, &span, &mut types));
+        assert_eq!(
+            Ok(()),
+            TypeMisMatchListItemsRule.visit_expr(&expr, &span, &mut types)
+        );
     }
 
     #[test]
-    fn returns_ok_if_list_has_multiple_items_of_different_types() {
-        let rule = TypeMisMatchListItemsRule;
-
-        let mut types = TypeEnv::new();
-
-        let expr: Expr = ExprList {
-            items: vec![
-                (ExprLiteral::Number(10f64).into(), 0..1),
-                (ExprLiteral::Bool(false).into(), 2..3),
-                (ExprLiteral::String("foo".to_string()).into(), 4..7),
-            ],
-        }
-        .into();
-
+    fn returns_err_if_list_has_multiple_items_of_different_types() {
+        let expr: Expr = r#"[10, false, "foo"];"#.try_into().unwrap();
         let span = 0..0;
+        let mut types = TypeEnv::new();
 
         assert_eq!(
             Err(vec![
@@ -146,7 +119,7 @@ mod type_mismatch_negate_prefix_tests {
                         actual: TypeRef::bool().to_string()
                     }
                     .into(),
-                    2..3
+                    5..10
                 ),
                 (
                     TypeError::MismatchType {
@@ -154,10 +127,10 @@ mod type_mismatch_negate_prefix_tests {
                         actual: TypeRef::string().to_string()
                     }
                     .into(),
-                    4..7
+                    12..17
                 )
             ]),
-            rule.visit_expr(&expr, &span, &mut types)
+            TypeMisMatchListItemsRule.visit_expr(&expr, &span, &mut types)
         );
     }
 }

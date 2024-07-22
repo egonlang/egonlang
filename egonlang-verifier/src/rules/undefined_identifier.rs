@@ -34,7 +34,7 @@ expr_rule!(
 
 #[cfg(test)]
 mod undefined_identifier_test {
-    use egonlang_core::{ast::Identifier, errors::TypeError, prelude::*};
+    use egonlang_core::{errors::TypeError, prelude::*};
     use pretty_assertions::assert_eq;
 
     use crate::prelude::*;
@@ -43,32 +43,25 @@ mod undefined_identifier_test {
 
     #[test]
     fn returns_error_if_identifier_is_undefined() {
-        let rule = ReferencingUndefinedIdentifierRule;
-
-        let mut types = TypeEnv::new();
-
-        let expr: Expr = Identifier {
-            name: "a".to_string(),
-        }
-        .into();
-
+        let expr: Expr = "a;".try_into().unwrap();
         let span = 0..0;
+        let mut types = TypeEnv::new();
 
         assert_eq!(
             Err(vec![(
                 TypeError::Undefined("a".to_string()).into(),
                 span.clone()
             )]),
-            rule.visit_expr(&expr, &span, &mut types)
+            ReferencingUndefinedIdentifierRule.visit_expr(&expr, &span, &mut types)
         );
     }
 
     #[test]
     fn returns_ok_if_identifier_is_defined() {
-        let rule = ReferencingUndefinedIdentifierRule;
+        let expr: Expr = "a;".try_into().unwrap();
+        let span = 0..0;
 
         let mut types = TypeEnv::new();
-
         types.set(
             "a",
             TypeEnvValue {
@@ -77,13 +70,9 @@ mod undefined_identifier_test {
             },
         );
 
-        let expr: Expr = Identifier {
-            name: "a".to_string(),
-        }
-        .into();
-
-        let span = 0..0;
-
-        assert_eq!(Ok(()), rule.visit_expr(&expr, &span, &mut types));
+        assert_eq!(
+            Ok(()),
+            ReferencingUndefinedIdentifierRule.visit_expr(&expr, &span, &mut types)
+        );
     }
 }

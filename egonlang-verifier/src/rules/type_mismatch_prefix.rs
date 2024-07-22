@@ -61,11 +61,7 @@ expr_rule!(
 
 #[cfg(test)]
 mod type_mismatch_prefix_tests {
-    use egonlang_core::{
-        ast::{ExprLiteral, ExprPrefix},
-        errors::TypeError,
-        prelude::*,
-    };
+    use egonlang_core::{errors::TypeError, prelude::*};
     use pretty_assertions::assert_eq;
 
     use crate::prelude::*;
@@ -74,34 +70,21 @@ mod type_mismatch_prefix_tests {
 
     #[test]
     fn returns_ok_if_negate_prefix_on_number_literal_expr() {
-        let rule = TypeMismatchPrefixRule;
-
+        let expr: Expr = "-100;".try_into().unwrap();
+        let span = 0..0;
         let mut types = TypeEnv::new();
 
-        let expr: Expr = ExprPrefix {
-            op: egonlang_core::ast::OpPrefix::Negate,
-            rt: (ExprLiteral::Number(100f64).into(), 0..0),
-        }
-        .into();
-
-        let span = 0..0;
-
-        assert_eq!(Ok(()), rule.visit_expr(&expr, &span, &mut types));
+        assert_eq!(
+            Ok(()),
+            TypeMismatchPrefixRule.visit_expr(&expr, &span, &mut types)
+        );
     }
 
     #[test]
     fn returns_err_if_negate_prefix_on_bool_literal_expr() {
-        let rule = TypeMismatchPrefixRule;
-
-        let mut types = TypeEnv::new();
-
-        let expr: Expr = ExprPrefix {
-            op: egonlang_core::ast::OpPrefix::Negate,
-            rt: (ExprLiteral::Bool(true).into(), 0..0),
-        }
-        .into();
-
+        let expr: Expr = "-true;".try_into().unwrap();
         let span = 0..0;
+        let mut types = TypeEnv::new();
 
         assert_eq!(
             Err(vec![(
@@ -110,42 +93,29 @@ mod type_mismatch_prefix_tests {
                     actual: TypeRef::bool().to_string()
                 }
                 .into(),
-                0..0
+                1..5
             )]),
-            rule.visit_expr(&expr, &span, &mut types)
+            TypeMismatchPrefixRule.visit_expr(&expr, &span, &mut types)
         );
     }
 
     #[test]
     fn returns_ok_if_not_prefix_on_number_literal_expr() {
-        let rule = TypeMismatchPrefixRule;
-
+        let expr: Expr = "!false;".try_into().unwrap();
+        let span = 0..0;
         let mut types = TypeEnv::new();
 
-        let expr: Expr = ExprPrefix {
-            op: egonlang_core::ast::OpPrefix::Not,
-            rt: (ExprLiteral::Bool(false).into(), 0..0),
-        }
-        .into();
-
-        let span = 0..0;
-
-        assert_eq!(Ok(()), rule.visit_expr(&expr, &span, &mut types));
+        assert_eq!(
+            Ok(()),
+            TypeMismatchPrefixRule.visit_expr(&expr, &span, &mut types)
+        );
     }
 
     #[test]
     fn returns_err_if_not_prefix_on_number_literal_expr() {
-        let rule = TypeMismatchPrefixRule;
-
-        let mut types = TypeEnv::new();
-
-        let expr: Expr = ExprPrefix {
-            op: egonlang_core::ast::OpPrefix::Not,
-            rt: (ExprLiteral::Number(123f64).into(), 0..0),
-        }
-        .into();
-
+        let expr: Expr = "!123;".try_into().unwrap();
         let span = 0..0;
+        let mut types = TypeEnv::new();
 
         assert_eq!(
             Err(vec![(
@@ -154,25 +124,17 @@ mod type_mismatch_prefix_tests {
                     actual: TypeRef::number().to_string()
                 }
                 .into(),
-                0..0
+                1..4
             )]),
-            rule.visit_expr(&expr, &span, &mut types)
+            TypeMismatchPrefixRule.visit_expr(&expr, &span, &mut types)
         );
     }
 
     #[test]
     fn returns_err_if_not_prefix_on_string_literal_expr() {
-        let rule = TypeMismatchPrefixRule;
-
-        let mut types = TypeEnv::new();
-
-        let expr: Expr = ExprPrefix {
-            op: egonlang_core::ast::OpPrefix::Not,
-            rt: (ExprLiteral::String("test".to_string()).into(), 0..0),
-        }
-        .into();
-
+        let expr: Expr = r#"!"test";"#.try_into().unwrap();
         let span = 0..0;
+        let mut types = TypeEnv::new();
 
         assert_eq!(
             Err(vec![(
@@ -181,9 +143,9 @@ mod type_mismatch_prefix_tests {
                     actual: TypeRef::string().to_string()
                 }
                 .into(),
-                0..0
+                1..7
             )]),
-            rule.visit_expr(&expr, &span, &mut types)
+            TypeMismatchPrefixRule.visit_expr(&expr, &span, &mut types)
         );
     }
 }

@@ -56,3 +56,120 @@ expr_rule!(
         }
     }
 );
+
+#[cfg(test)]
+mod tests {
+    use pretty_assertions::assert_eq;
+
+    use crate::prelude::*;
+    use egonlang_core::{errors::TypeError, prelude::*};
+
+    use super::TypeMismatchFnReturnExprRule;
+
+    #[test]
+    fn returns_ok_fn_body_type_matches_fn_return_type() {
+        let expr: Expr = r#"(): string => { "foo" };"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Ok(()),
+            TypeMismatchFnReturnExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_err_fn_body_type_does_not_match_fn_return_type() {
+        let expr: Expr = r#"(): string => { 123 };"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Err(vec![(
+                TypeError::MismatchType {
+                    expected: "string".to_string(),
+                    actual: "number".to_string()
+                }
+                .into(),
+                14..21
+            )]),
+            TypeMismatchFnReturnExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_err_fn_body_type_does_not_match_fn_return_type_2() {
+        let expr: Expr = r#"(): string => { { 123 } };"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Err(vec![(
+                TypeError::MismatchType {
+                    expected: "string".to_string(),
+                    actual: "number".to_string()
+                }
+                .into(),
+                14..25
+            )]),
+            TypeMismatchFnReturnExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_err_fn_body_type_does_not_match_fn_return_type_3() {
+        let expr: Expr = r#"(): () => { 123 };"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Err(vec![(
+                TypeError::MismatchType {
+                    expected: "()".to_string(),
+                    actual: "number".to_string()
+                }
+                .into(),
+                10..17
+            )]),
+            TypeMismatchFnReturnExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_err_fn_body_type_does_not_match_fn_return_type_4() {
+        let expr: Expr = r#"(): string => { { 123; } };"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Err(vec![(
+                TypeError::MismatchType {
+                    expected: "string".to_string(),
+                    actual: "()".to_string()
+                }
+                .into(),
+                14..26
+            )]),
+            TypeMismatchFnReturnExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_err_fn_body_type_does_not_match_fn_return_type_5() {
+        let expr: Expr = r#"(): string => { { 123 }; };"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Err(vec![(
+                TypeError::MismatchType {
+                    expected: "string".to_string(),
+                    actual: "()".to_string()
+                }
+                .into(),
+                14..26
+            )]),
+            TypeMismatchFnReturnExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+}

@@ -42,3 +42,385 @@ expr_rule!(
         errs
     }
 );
+
+#[cfg(test)]
+mod tests {
+    use pretty_assertions::assert_eq;
+
+    use crate::prelude::*;
+    use egonlang_core::{errors::TypeError, prelude::*};
+
+    use super::TypeMismatchIfCondExprRule;
+
+    #[test]
+    fn returns_ok_if_condition_expr_is_bool_true() {
+        let expr: Expr = r#"if (true) {};"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Ok(()),
+            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_ok_ifelse_condition_expr_is_bool_true() {
+        let expr: Expr = r#"if (true) {} else {};"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Ok(()),
+            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_ok_if_condition_expr_is_bool_false() {
+        let expr: Expr = r#"if (false) {};"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Ok(()),
+            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_ok_ifelse_condition_expr_is_bool_false() {
+        let expr: Expr = r#"if (false) {} else {};"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Ok(()),
+            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_err_if_condition_expr_is_number() {
+        let expr: Expr = r#"if (123) {};"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Err(vec![(
+                TypeError::MismatchType {
+                    expected: "bool".to_string(),
+                    actual: "number".to_string()
+                }
+                .into(),
+                4..7
+            )]),
+            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_err_ifelse_condition_expr_is_number() {
+        let expr: Expr = r#"if (123) {} else {};"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Err(vec![(
+                TypeError::MismatchType {
+                    expected: "bool".to_string(),
+                    actual: "number".to_string()
+                }
+                .into(),
+                4..7
+            )]),
+            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    #[ignore = "todo"]
+    fn returns_err_elif_condition_expr_is_number() {
+        let expr: Expr = r#"if (true) {} else if (123) {} else {};"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Err(vec![(
+                TypeError::MismatchType {
+                    expected: "bool".to_string(),
+                    actual: "number".to_string()
+                }
+                .into(),
+                22..25
+            )]),
+            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_err_if_condition_expr_is_number_is_zero() {
+        let expr: Expr = r#"if (0) {};"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Err(vec![(
+                TypeError::MismatchType {
+                    expected: "bool".to_string(),
+                    actual: "number".to_string()
+                }
+                .into(),
+                4..5
+            )]),
+            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_err_ifelse_condition_expr_is_number_is_zero() {
+        let expr: Expr = r#"if (0) {} else {};"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Err(vec![(
+                TypeError::MismatchType {
+                    expected: "bool".to_string(),
+                    actual: "number".to_string()
+                }
+                .into(),
+                4..5
+            )]),
+            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_err_if_condition_expr_is_empty_string() {
+        let expr: Expr = r#"if ("") {};"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Err(vec![(
+                TypeError::MismatchType {
+                    expected: "bool".to_string(),
+                    actual: "string".to_string()
+                }
+                .into(),
+                4..6
+            )]),
+            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_err_ifelse_condition_expr_is_empty_string() {
+        let expr: Expr = r#"if ("") {} else {};"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Err(vec![(
+                TypeError::MismatchType {
+                    expected: "bool".to_string(),
+                    actual: "string".to_string()
+                }
+                .into(),
+                4..6
+            )]),
+            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_err_if_condition_expr_is_string() {
+        let expr: Expr = r#"if ("foo") {};"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Err(vec![(
+                TypeError::MismatchType {
+                    expected: "bool".to_string(),
+                    actual: "string".to_string()
+                }
+                .into(),
+                4..9
+            )]),
+            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_err_ifelse_condition_expr_is_string() {
+        let expr: Expr = r#"if ("foo") {} else {};"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Err(vec![(
+                TypeError::MismatchType {
+                    expected: "bool".to_string(),
+                    actual: "string".to_string()
+                }
+                .into(),
+                4..9
+            )]),
+            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_err_if_condition_expr_is_string_of_false() {
+        let expr: Expr = r#"if ("false") {};"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Err(vec![(
+                TypeError::MismatchType {
+                    expected: "bool".to_string(),
+                    actual: "string".to_string()
+                }
+                .into(),
+                4..11
+            )]),
+            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_err_ifelse_condition_expr_is_string_of_false() {
+        let expr: Expr = r#"if ("false") {} else {};"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Err(vec![(
+                TypeError::MismatchType {
+                    expected: "bool".to_string(),
+                    actual: "string".to_string()
+                }
+                .into(),
+                4..11
+            )]),
+            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_err_if_condition_expr_is_unit() {
+        let expr: Expr = r#"if (()) {};"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Err(vec![(
+                TypeError::MismatchType {
+                    expected: "bool".to_string(),
+                    actual: "()".to_string()
+                }
+                .into(),
+                4..6
+            )]),
+            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_err_ifelse_condition_expr_is_unit() {
+        let expr: Expr = r#"if (()) {} else {};"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Err(vec![(
+                TypeError::MismatchType {
+                    expected: "bool".to_string(),
+                    actual: "()".to_string()
+                }
+                .into(),
+                4..6
+            )]),
+            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_err_if_condition_expr_is_empty_list() {
+        let expr: Expr = r#"if ([]) {};"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Err(vec![(
+                TypeError::MismatchType {
+                    expected: "bool".to_string(),
+                    actual: "list<unknown>".to_string()
+                }
+                .into(),
+                4..6
+            )]),
+            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_err_ifelse_condition_expr_is_empty_list() {
+        let expr: Expr = r#"if ([]) {} else {};"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Err(vec![(
+                TypeError::MismatchType {
+                    expected: "bool".to_string(),
+                    actual: "list<unknown>".to_string()
+                }
+                .into(),
+                4..6
+            )]),
+            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_err_if_condition_expr_is_list_of_bools() {
+        let expr: Expr = r#"if ([true, false]) {};"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Err(vec![(
+                TypeError::MismatchType {
+                    expected: "bool".to_string(),
+                    actual: "list<bool>".to_string()
+                }
+                .into(),
+                4..17
+            )]),
+            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_err_ifelse_condition_expr_is_list_of_bools() {
+        let expr: Expr = r#"if ([true, false]) {} else {};"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Err(vec![(
+                TypeError::MismatchType {
+                    expected: "bool".to_string(),
+                    actual: "list<bool>".to_string()
+                }
+                .into(),
+                4..17
+            )]),
+            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+}

@@ -41,3 +41,192 @@ expr_rule!(
         errs
     }
 );
+
+#[cfg(test)]
+mod tests {
+    use pretty_assertions::assert_eq;
+
+    use crate::prelude::*;
+    use egonlang_core::{errors::TypeError, prelude::*};
+
+    use super::TypeMismatchIfthenElseExprRule;
+
+    #[test]
+    fn returns_ok_if_both_branches_return_numbers() {
+        let expr: Expr = r#"if (true) { 123 } else { 456 };"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Ok(()),
+            TypeMismatchIfthenElseExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_ok_if_both_branches_return_bools() {
+        let expr: Expr = r#"if (true) { true } else { false };"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Ok(()),
+            TypeMismatchIfthenElseExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_ok_if_both_branches_return_units() {
+        let expr: Expr = r#"if (true) { () } else { () };"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Ok(()),
+            TypeMismatchIfthenElseExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_ok_if_both_branches_return_implicit_units() {
+        let expr: Expr = r#"if (true) {} else {};"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Ok(()),
+            TypeMismatchIfthenElseExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_ok_if_both_branches_return_lists_of_same_type() {
+        let expr: Expr = r#"if (true) { [1, 2, 3] } else { [4, 5, 6] };"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Ok(()),
+            TypeMismatchIfthenElseExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_ok_if_all_branches_of_elseif_return_lists_of_same_type() {
+        let expr: Expr =
+            r#"if (true) { [1, 2, 3] } else if (true) { [4, 5, 6] } else { [7, 8, 9] };"#
+                .try_into()
+                .unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Ok(()),
+            TypeMismatchIfthenElseExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_ok_if_all_branches_of_elseif_elseif_return_lists_of_same_type() {
+        let expr: Expr =
+            r#"if (true) { [1, 2, 3] } else if (true) { [4, 5, 6] } else if (true) { [7, 8, 9] } else { [10, 11, 12] };"#
+                .try_into()
+                .unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Ok(()),
+            TypeMismatchIfthenElseExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    #[ignore = "todo"]
+    fn returns_ok_if_both_branches_return_lists_of_same_type_using_typed_list_and_empty_list() {
+        let expr: Expr = r#"if (true) { [1, 2, 3] } else { [] };"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Ok(()),
+            TypeMismatchIfthenElseExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    #[ignore = "todo"]
+    fn returns_ok_if_both_branches_return_lists_of_same_type_using_empty_list_and_typed_list() {
+        let expr: Expr = r#"if (true) { [] } else { [1, 2, 3] };"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Ok(()),
+            TypeMismatchIfthenElseExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_ok_if_both_branches_return_lists_of_same_type_using_empty_lists() {
+        let expr: Expr = r#"if (true) { [] } else { [] };"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Ok(()),
+            TypeMismatchIfthenElseExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    fn returns_err_if_the_else_branch_returns_different_type() {
+        let expr: Expr = r#"if (true) { [1, 2, 3] } else { "foo" };"#.try_into().unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Err(vec![(
+                TypeError::MismatchType {
+                    expected: "list<number>".to_string(),
+                    actual: "string".to_string()
+                }
+                .into(),
+                29..38
+            )]),
+            TypeMismatchIfthenElseExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+
+    #[test]
+    #[ignore = "todo"]
+    fn returns_err_if_the_elseif_branches_return_different_types() {
+        let expr: Expr = r#"if (true) { [1, 2, 3] } else if (true) { 123 } else { "foo" };"#
+            .try_into()
+            .unwrap();
+        let span = 0..0;
+        let mut types = TypeEnv::new();
+
+        assert_eq!(
+            Err(vec![
+                (
+                    TypeError::MismatchType {
+                        expected: "list<number>".to_string(),
+                        actual: "number".to_string()
+                    }
+                    .into(),
+                    29..61
+                ),
+                (
+                    TypeError::MismatchType {
+                        expected: "number".to_string(),
+                        actual: "string".to_string()
+                    }
+                    .into(),
+                    54..59
+                )
+            ]),
+            TypeMismatchIfthenElseExprRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
+}

@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    errors::{self, Error, TypeError},
+    errors::{self, Error, SyntaxError, TypeError},
     prelude::parse,
     span::Spanned,
 };
@@ -183,6 +183,24 @@ pub enum Expr {
     Fn(Box<ExprFn>),
     Range(ExprRange),
     Type(ExprType),
+}
+
+impl TryFrom<&str> for Expr {
+    type Error = errors::Error;
+
+    fn try_from(value: &str) -> Result<Expr, errors::Error> {
+        let module = parse(value, 0).unwrap();
+
+        let (stmt, _) = module.stmts.first().unwrap();
+
+        if let Stmt::Expr(stmt_expr) = stmt {
+            let expr = &stmt_expr.expr;
+
+            return Ok(expr.0.clone());
+        };
+
+        Err(SyntaxError::InvalidToken.into())
+    }
 }
 
 impl From<ExprLiteral> for Expr {

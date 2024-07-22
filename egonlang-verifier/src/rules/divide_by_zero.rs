@@ -50,11 +50,7 @@ expr_rule!(
 
 #[cfg(test)]
 mod divide_by_zero_tests {
-    use egonlang_core::{
-        ast::{ExprInfix, ExprLiteral, OpInfix},
-        errors::SyntaxError,
-        prelude::*,
-    };
+    use egonlang_core::{errors::SyntaxError, prelude::*};
     use pretty_assertions::assert_eq;
 
     use crate::prelude::*;
@@ -63,85 +59,52 @@ mod divide_by_zero_tests {
 
     #[test]
     fn returns_ok_if_dividing_non_zero_numbers() {
-        let rule = DivideByZeroRule;
-
-        let mut types = TypeEnv::new();
-
-        let expr: Expr = ExprInfix {
-            lt: (ExprLiteral::Number(100f64).into(), 0..1),
-            op: OpInfix::Divide,
-            rt: (ExprLiteral::Number(50f64).into(), 1..2),
-        }
-        .into();
-
+        let expr: Expr = "100 / 50;".try_into().unwrap();
         let span = 0..0;
-
-        assert_eq!(Ok(()), rule.visit_expr(&expr, &span, &mut types));
-    }
-
-    #[test]
-    fn returns_ok_if_dividing_zero_numbers_1() {
-        let rule = DivideByZeroRule;
-
         let mut types = TypeEnv::new();
-
-        let expr: Expr = ExprInfix {
-            lt: (ExprLiteral::Number(0f64).into(), 0..1),
-            op: OpInfix::Divide,
-            rt: (ExprLiteral::Number(50f64).into(), 1..2),
-        }
-        .into();
-
-        let span = 0..0;
 
         assert_eq!(
-            Err(vec![(SyntaxError::DivideByZero.into(), 0..1)]),
-            rule.visit_expr(&expr, &span, &mut types)
+            Ok(()),
+            DivideByZeroRule.visit_expr(&expr, &span, &mut types)
         );
     }
 
     #[test]
-    fn returns_ok_if_dividing_zero_numbers_2() {
-        let rule = DivideByZeroRule;
-
+    fn returns_err_if_dividing_zero_numbers() {
+        let expr: Expr = "0 / 50;".try_into().unwrap();
+        let span = 0..0;
         let mut types = TypeEnv::new();
 
-        let expr: Expr = ExprInfix {
-            lt: (ExprLiteral::Number(50f64).into(), 0..1),
-            op: OpInfix::Divide,
-            rt: (ExprLiteral::Number(0f64).into(), 1..2),
-        }
-        .into();
+        assert_eq!(
+            Err(vec![(SyntaxError::DivideByZero.into(), 0..1)]),
+            DivideByZeroRule.visit_expr(&expr, &span, &mut types)
+        );
+    }
 
+    #[test]
+    fn returns_err_if_dividing_zero_numbers_2() {
+        let expr: Expr = "50 / 0;".try_into().unwrap();
         let span = 0..0;
+        let mut types = TypeEnv::new();
 
         assert_eq!(
-            Err(vec![(SyntaxError::DivideByZero.into(), 1..2)]),
-            rule.visit_expr(&expr, &span, &mut types)
+            Err(vec![(SyntaxError::DivideByZero.into(), 5..6)]),
+            DivideByZeroRule.visit_expr(&expr, &span, &mut types)
         );
     }
 
     #[test]
     fn returns_ok_if_dividing_zero_numbers_3() {
-        let rule = DivideByZeroRule;
-
-        let mut types = TypeEnv::new();
-
-        let expr: Expr = ExprInfix {
-            lt: (ExprLiteral::Number(0f64).into(), 0..1),
-            op: OpInfix::Divide,
-            rt: (ExprLiteral::Number(0f64).into(), 1..2),
-        }
-        .into();
-
+        let expr: Expr = "0 / 0;".try_into().unwrap();
         let span = 0..0;
+        let mut types = TypeEnv::new();
 
         assert_eq!(
             Err(vec![
                 (SyntaxError::DivideByZero.into(), 0..1),
-                (SyntaxError::DivideByZero.into(), 1..2)
+                (SyntaxError::DivideByZero.into(), 4..5)
             ]),
-            rule.visit_expr(&expr, &span, &mut types)
+            DivideByZeroRule.visit_expr(&expr, &span, &mut types)
         );
     }
 }

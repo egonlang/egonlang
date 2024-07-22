@@ -153,11 +153,7 @@ fn validate_infix_types(
 }
 #[cfg(test)]
 mod type_mismatch_infix_tests {
-    use egonlang_core::{
-        ast::{ExprInfix, ExprLiteral, OpInfix},
-        errors::TypeError,
-        prelude::*,
-    };
+    use egonlang_core::{errors::TypeError, prelude::*};
     use pretty_assertions::assert_eq;
 
     use crate::prelude::*;
@@ -166,36 +162,21 @@ mod type_mismatch_infix_tests {
 
     #[test]
     fn returns_ok_if_infix_gt_values_are_numbers() {
-        let rule = TypeMismatchInfixRule;
-
+        let expr: Expr = "10 > 100;".try_into().unwrap();
+        let span = 0..0;
         let mut types = TypeEnv::new();
 
-        let expr: Expr = ExprInfix {
-            lt: (ExprLiteral::Number(10f64).into(), 0..0),
-            op: OpInfix::Greater,
-            rt: (ExprLiteral::Number(100f64).into(), 0..0),
-        }
-        .into();
-
-        let span = 0..0;
-
-        assert_eq!(Ok(()), rule.visit_expr(&expr, &span, &mut types));
+        assert_eq!(
+            Ok(()),
+            TypeMismatchInfixRule.visit_expr(&expr, &span, &mut types)
+        );
     }
 
     #[test]
     fn returns_err_if_infix_gt_values_are_not_numbers_1() {
-        let rule = TypeMismatchInfixRule;
-
-        let mut types = TypeEnv::new();
-
-        let expr: Expr = ExprInfix {
-            lt: (ExprLiteral::Bool(true).into(), 0..1),
-            op: OpInfix::Greater,
-            rt: (ExprLiteral::Number(100f64).into(), 1..2),
-        }
-        .into();
-
+        let expr: Expr = "true > 100;".try_into().unwrap();
         let span = 0..0;
+        let mut types = TypeEnv::new();
 
         assert_eq!(
             Err(vec![(
@@ -204,26 +185,17 @@ mod type_mismatch_infix_tests {
                     actual: TypeRef::bool().to_string()
                 }
                 .into(),
-                0..1
+                0..4
             )]),
-            rule.visit_expr(&expr, &span, &mut types)
+            TypeMismatchInfixRule.visit_expr(&expr, &span, &mut types)
         );
     }
 
     #[test]
     fn returns_err_if_infix_gt_values_are_not_numbers_2() {
-        let rule = TypeMismatchInfixRule;
-
-        let mut types = TypeEnv::new();
-
-        let expr: Expr = ExprInfix {
-            lt: (ExprLiteral::Number(10f64).into(), 0..1),
-            op: OpInfix::Greater,
-            rt: (ExprLiteral::Bool(false).into(), 1..2),
-        }
-        .into();
-
+        let expr: Expr = "10 > false;".try_into().unwrap();
         let span = 0..0;
+        let mut types = TypeEnv::new();
 
         assert_eq!(
             Err(vec![(
@@ -232,26 +204,17 @@ mod type_mismatch_infix_tests {
                     actual: TypeRef::bool().to_string()
                 }
                 .into(),
-                1..2
+                5..10
             )]),
-            rule.visit_expr(&expr, &span, &mut types)
+            TypeMismatchInfixRule.visit_expr(&expr, &span, &mut types)
         );
     }
 
     #[test]
     fn returns_err_if_infix_gt_values_are_not_numbers_3() {
-        let rule = TypeMismatchInfixRule;
-
-        let mut types = TypeEnv::new();
-
-        let expr: Expr = ExprInfix {
-            lt: (ExprLiteral::Bool(false).into(), 0..1),
-            op: OpInfix::Greater,
-            rt: (ExprLiteral::Bool(false).into(), 1..2),
-        }
-        .into();
-
+        let expr: Expr = "false > false;".try_into().unwrap();
         let span = 0..0;
+        let mut types = TypeEnv::new();
 
         assert_eq!(
             Err(vec![
@@ -261,7 +224,7 @@ mod type_mismatch_infix_tests {
                         actual: TypeRef::bool().to_string()
                     }
                     .into(),
-                    0..1
+                    0..5
                 ),
                 (
                     TypeError::MismatchType {
@@ -269,10 +232,10 @@ mod type_mismatch_infix_tests {
                         actual: TypeRef::bool().to_string()
                     }
                     .into(),
-                    1..2
+                    8..13
                 )
             ]),
-            rule.visit_expr(&expr, &span, &mut types)
+            TypeMismatchInfixRule.visit_expr(&expr, &span, &mut types)
         );
     }
 }
