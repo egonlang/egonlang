@@ -24,16 +24,32 @@ expr_rule!(
                 let else_typeref = types.resolve_expr_type(else_expr, else_span).unwrap();
 
                 if then_typeref != else_typeref {
-                    verify_trace!(error: "then and else branches types don't match {then_typeref:?} vs {else_typeref:?} {expr}");
+                    if then_typeref.is_list() && else_typeref.is_list() {
+                        if then_typeref.is_known_list() && else_typeref.is_known_list() {
+                            verify_trace!(error: "then and else branches types don't match {then_typeref:?} vs {else_typeref:?} {expr}");
 
-                    errs.push((
-                        TypeError::MismatchType {
-                            expected: then_typeref.to_string(),
-                            actual: else_typeref.to_string(),
+                            errs.push((
+                                TypeError::MismatchType {
+                                    expected: then_typeref.to_string(),
+                                    actual: else_typeref.to_string(),
+                                }
+                                .into(),
+                                else_span.clone(),
+                            ));
                         }
-                        .into(),
-                        else_span.clone(),
-                    ));
+                    } else {
+                        verify_trace!(error: "then and else branches types don't match {then_typeref:?} vs {else_typeref:?} {expr}");
+
+                        errs.push((
+                            TypeError::MismatchType {
+                                expected: then_typeref.to_string(),
+                                actual: else_typeref.to_string(),
+                            }
+                            .into(),
+                            else_span.clone(),
+                        ));
+                    }
+
                 }
             }
         };
@@ -91,14 +107,12 @@ mod tests {
     }
 
     verifier_rule_test! {
-        #[ignore = "todo"]
         TypeMismatchIfthenElseExprRule,
         returns_ok_if_both_branches_return_lists_of_same_type_using_typed_list_and_empty_list,
         r#"if (true) { [1, 2, 3] } else { [] };"#
     }
 
     verifier_rule_test! {
-        #[ignore = "todo"]
         TypeMismatchIfthenElseExprRule,
         returns_ok_if_both_branches_return_lists_of_same_type_using_empty_list_and_typed_list,
         r#"if (true) { [] } else { [1, 2, 3] };"#
