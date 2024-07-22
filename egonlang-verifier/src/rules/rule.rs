@@ -19,7 +19,7 @@ pub trait Rule<'a> {
 #[macro_export]
 macro_rules! expr_rule {
     ($(#[$attributes:meta])* $name:ident, fn $params:tt $body:expr) => {
-        paste::paste! {
+        ::paste::paste! {
             /// Egon Verifier Expression Rule
             ///
             $(#[$attributes])*
@@ -140,7 +140,7 @@ macro_rules! stmt_rule {
 #[macro_export]
 macro_rules! verifier_rule_test {
     ($(#[$attributes:meta])* $rule:ident, $name:ident, $input:expr) => {
-        verifier_rule_test!($(#[$attributes])* $rule, $name, $input, Ok(()));
+        $crate::verifier_rule_test!($(#[$attributes])* $rule, $name, $input, Ok(()));
     };
 
     ($(#[$attributes:meta])* $rule:ident, $name:ident, $input:expr, $expected:expr) => {
