@@ -45,14 +45,15 @@ fn main() {
 
                 let module = match parse(&content, 0) {
                     Ok(module) => {
-                        verify_module(&module).map(|m| serde_json::to_string(&m).unwrap())
+                        let verifier = Verifier::default();
+                        verifier.verify(&module)
                     }
                     Err(errs) => Err(errs),
                 };
 
                 match module {
-                    Ok(module) => {
-                        println!("{module}");
+                    Ok(_) => {
+                        println!("Passed!");
                     }
                     Err(errs) => {
                         println!("Path:\n\n{:?}\n", &path);
