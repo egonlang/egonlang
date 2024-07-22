@@ -1,0 +1,5 @@
+let a: number = 123;
+let b: number = 456;
+let c: number = 789;
+
+a = if (1 < 2) { b } else { c };

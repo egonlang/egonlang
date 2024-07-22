@@ -2,20 +2,17 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::{fs, str};
 
-use egonlang_core::validator::TypeEnvironment;
-use egonlang_core::validator::Validator;
-
+use egonlang_core::prelude::parse;
+use egonlang_verifier::prelude::verify_module;
 use pretty_assertions::assert_eq;
 
-use egonlang_core::parser::parse;
-
 #[rstest::rstest]
-fn integration_valid(#[files("res/examples/valid/**/*.eg")] path: PathBuf) {
+fn integration_valid(#[files("../res/examples/valid/**/*.eg")] path: PathBuf) {
     integration_implemented(path);
 }
 
 #[rstest::rstest]
-fn integration_invalid(#[files("res/examples/invalid/**/*.eg")] path: PathBuf) {
+fn integration_invalid(#[files("../res/examples/invalid/**/*.eg")] path: PathBuf) {
     integration_implemented(path);
 }
 
@@ -34,11 +31,7 @@ fn integration_implemented(path: PathBuf) {
 
     let mut got_output = Vec::new();
 
-    let mut env = TypeEnvironment::new();
-
-    if let Err(e) =
-        parse(&source, 0).and_then(|module| Validator::default().validate(&module, &mut env))
-    {
+    if let Err(e) = parse(&source, 0).and_then(|module| verify_module(&module)) {
         let m = e
             .into_iter()
             .map(|(e, _)| e.to_string())
@@ -52,9 +45,9 @@ fn integration_implemented(path: PathBuf) {
 }
 
 /// Runs tests on features that will be implemented
-/// These tests will fail an expected error message matches a returned validation error
+/// These tests will fail an expected error messages matches actual error messages
 #[rstest::rstest]
-fn integration_todo(#[files("res/examples/todo/**/*.eg")] path: PathBuf) {
+fn integration_todo(#[files("../res/examples/todo/**/*.eg")] path: PathBuf) {
     let source = fs::read_to_string(path).expect("unable to read test file");
     let mut exp_output = String::new();
 
@@ -66,30 +59,17 @@ fn integration_todo(#[files("res/examples/todo/**/*.eg")] path: PathBuf) {
         }
     }
 
-    let mut output_lines = exp_output.lines();
+    let mut got_output = Vec::new();
 
-    let mut env = TypeEnvironment::new();
-
-    if let Err(e) =
-        parse(&source, 0).and_then(|module| Validator::default().validate(&module, &mut env))
-    {
-        let validation_messages = e
+    if let Err(e) = parse(&source, 0).and_then(|module| verify_module(&module)) {
+        let m = e
             .into_iter()
             .map(|(e, _)| e.to_string())
-            .collect::<Vec<String>>();
+            .collect::<Vec<String>>()
+            .join("\n");
 
-        let mut errs: Vec<&str> = vec![];
-
-        for message in &validation_messages {
-            let matching = output_lines.find(|line| line == message);
-
-            if let Some(matching) = matching {
-                errs.push(matching);
-            }
-        }
-
-        let expected_errs: Vec<&str> = vec![];
-
-        assert_eq!(expected_errs, errs);
+        writeln!(&mut got_output, "{m}").expect("could not write to output");
     }
+    let got_output = str::from_utf8(&got_output).expect("invalid UTF-8 in output");
+    assert_ne!(exp_output, got_output);
 }

@@ -1,0 +1,98 @@
+use egonlang_core::{errors::SyntaxError, prelude::*};
+use regex::Regex;
+
+use crate::prelude::*;
+
+stmt_rule!(
+    /// Checks type aliases are formatted correctly
+    ///
+    /// ```egon
+    /// type ValidTypeAlias = string;
+    /// type invalidTypeAlias = string; // SyntaxError∂
+    /// ```
+    InvalidTypeAliasName,
+    fn (stmt: &Stmt, span: &Span, types: &mut TypeEnv) {
+        let mut errs = vec![];
+
+        if let Stmt::Assign(assign_stmt) = &stmt {
+            if let Some((value_expr, value_span)) = &assign_stmt.value {
+                let value_typeref = types.resolve_expr_type(value_expr, value_span).unwrap();
+
+                if value_typeref.is_type() {
+                    let name = &assign_stmt.identifier.name;
+                    let pattern = Regex::new("^[A-Z][A-Za-z0-9]*$").unwrap();
+
+                    if !pattern.is_match(name) {
+                        errs.push((
+                            SyntaxError::InvalidTypeAlias {
+                                name: name.to_string(),
+                            }
+                            .into(),
+                            span.clone(),
+                        ));
+                    }
+                }
+            }
+        }
+
+        errs
+    }
+);
+
+#[cfg(test)]
+mod tests {
+    use super::InvalidTypeAliasNameRule;
+    use crate::verifier_rule_test;
+    use egonlang_core::errors::SyntaxError;
+
+    verifier_rule_test!(
+        InvalidTypeAliasNameRule,
+        returns_ok_if_alias_capitalized,
+        "type Bool = bool;"
+    );
+
+    verifier_rule_test!(
+        InvalidTypeAliasNameRule,
+        returns_ok_if_alias_contains_number,
+        "type Bool2 = bool;"
+    );
+
+    verifier_rule_test!(
+        InvalidTypeAliasNameRule,
+        returns_err_if_alias_is_lowercase,
+        "type booly = bool;",
+        Err(vec![(
+            SyntaxError::InvalidTypeAlias {
+                name: "booly".to_string()
+            }
+            .into(),
+            0..18
+        )])
+    );
+
+    verifier_rule_test!(
+        InvalidTypeAliasNameRule,
+        returns_err_if_alias_contains_underscore,
+        "type Bool_Value = bool;",
+        Err(vec![(
+            SyntaxError::InvalidTypeAlias {
+                name: "Bool_Value".to_string()
+            }
+            .into(),
+            0..23
+        )])
+    );
+
+    verifier_rule_test!(
+        InvalidTypeAliasNameRule,
+        returns_err_if_alias_starts_with_an_underscore,
+        "type _Bool = bool;",
+        Err(vec![(
+            SyntaxError::InvalidTypeAlias {
+                name: "_Bool".to_string()
+            }
+            .into(),
+            0..18
+        )])
+    );
+}

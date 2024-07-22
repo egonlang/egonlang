@@ -1,0 +1,2 @@
+let b: bool = false;
+let a: bool = { !b };
