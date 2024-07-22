@@ -40,8 +40,10 @@ fn main() {
     match &cli.command {
         Some(command) => match command {
             Commands::Verify { path } => {
-                let content = std::fs::read_to_string(path).expect("Unable to read file");
+                println!("Path:\n\n{:?}\n", &path);
                 let path = std::fs::canonicalize(path).unwrap();
+
+                let content = std::fs::read_to_string(&path).expect("Unable to read file");
 
                 let module = match parse(&content, 0) {
                     Ok(module) => {
@@ -106,5 +108,26 @@ fn main() {
         None => {
             println!("Invalid command! Expected one of [\"lex\", \"parse\", \"verify\"]");
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use assert_cmd::prelude::*;
+    use predicates::prelude::*;
+    use std::process::Command;
+
+    #[test]
+    fn can_verify_a_valid_file() -> Result<(), Box<dyn std::error::Error>> {
+        let mut cmd = Command::cargo_bin("egon")?;
+
+        cmd.current_dir(std::env::current_dir()?);
+
+        cmd.arg("verify").arg("../res/examples/valid/assign.eg");
+        cmd.assert()
+            .success()
+            .stdout(predicate::eq(b"Passed!\n" as &[u8]));
+
+        Ok(())
     }
 }

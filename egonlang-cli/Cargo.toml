@@ -11,6 +11,10 @@ egonlang-core = { path = "../egonlang-core" }
 egonlang-verifier = { path = "../egonlang-verifier" }
 serde_json = "1.0"
 
+[dev-dependencies]
+assert_cmd = "2.0.14"
+predicates = "3.1.0"
+
 [[bin]]
 name = "egon"
 path = "src/main.rs"
