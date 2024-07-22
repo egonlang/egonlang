@@ -49,62 +49,31 @@ expr_rule!(
 );
 
 #[cfg(test)]
-mod divide_by_zero_tests {
-    use egonlang_core::{errors::SyntaxError, prelude::*};
-    use pretty_assertions::assert_eq;
-
-    use crate::prelude::*;
-
+mod tests {
     use super::DivideByZeroRule;
+    use crate::verifier_rule_test;
+    use egonlang_core::errors::SyntaxError;
 
-    #[test]
-    fn returns_ok_if_dividing_non_zero_numbers() {
-        let expr: Expr = "100 / 50;".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
+    verifier_rule_test!(
+        DivideByZeroRule,
+        returns_ok_if_dividing_non_zero_numbers,
+        "100 / 50;"
+    );
 
-        assert_eq!(
-            Ok(()),
-            DivideByZeroRule.visit_expr(&expr, &span, &mut types)
-        );
-    }
+    verifier_rule_test!(
+        DivideByZeroRule,
+        returns_err_if_dividing_zero_numbers,
+        "50 / 0;",
+        Err(vec![(SyntaxError::DivideByZero.into(), 5..6)])
+    );
 
-    #[test]
-    fn returns_err_if_dividing_zero_numbers() {
-        let expr: Expr = "0 / 50;".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Err(vec![(SyntaxError::DivideByZero.into(), 0..1)]),
-            DivideByZeroRule.visit_expr(&expr, &span, &mut types)
-        );
-    }
-
-    #[test]
-    fn returns_err_if_dividing_zero_numbers_2() {
-        let expr: Expr = "50 / 0;".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Err(vec![(SyntaxError::DivideByZero.into(), 5..6)]),
-            DivideByZeroRule.visit_expr(&expr, &span, &mut types)
-        );
-    }
-
-    #[test]
-    fn returns_ok_if_dividing_zero_numbers_3() {
-        let expr: Expr = "0 / 0;".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Err(vec![
-                (SyntaxError::DivideByZero.into(), 0..1),
-                (SyntaxError::DivideByZero.into(), 4..5)
-            ]),
-            DivideByZeroRule.visit_expr(&expr, &span, &mut types)
-        );
-    }
+    verifier_rule_test!(
+        DivideByZeroRule,
+        returns_ok_if_dividing_zero_numbers_2,
+        "0 / 0;",
+        Err(vec![
+            (SyntaxError::DivideByZero.into(), 0..1),
+            (SyntaxError::DivideByZero.into(), 4..5)
+        ])
+    );
 }

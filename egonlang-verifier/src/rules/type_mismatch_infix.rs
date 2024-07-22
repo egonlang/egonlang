@@ -154,88 +154,66 @@ fn validate_infix_types(
 #[cfg(test)]
 mod type_mismatch_infix_tests {
     use egonlang_core::{errors::TypeError, prelude::*};
-    use pretty_assertions::assert_eq;
 
-    use crate::prelude::*;
+    use crate::verifier_rule_test;
 
     use super::TypeMismatchInfixRule;
 
-    #[test]
-    fn returns_ok_if_infix_gt_values_are_numbers() {
-        let expr: Expr = "10 > 100;".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
+    verifier_rule_test!(
+        TypeMismatchInfixRule,
+        returns_ok_if_infix_gt_values_are_numbers,
+        "10 > 100;"
+    );
 
-        assert_eq!(
-            Ok(()),
-            TypeMismatchInfixRule.visit_expr(&expr, &span, &mut types)
-        );
-    }
+    verifier_rule_test!(
+        TypeMismatchInfixRule,
+        returns_err_if_infix_gt_values_are_not_numbers_1,
+        "true > 100;",
+        Err(vec![(
+            TypeError::MismatchType {
+                expected: TypeRef::number().to_string(),
+                actual: TypeRef::bool().to_string()
+            }
+            .into(),
+            0..4
+        )])
+    );
 
-    #[test]
-    fn returns_err_if_infix_gt_values_are_not_numbers_1() {
-        let expr: Expr = "true > 100;".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
+    verifier_rule_test!(
+        TypeMismatchInfixRule,
+        returns_err_if_infix_gt_values_are_not_numbers_2,
+        "10 > false;",
+        Err(vec![(
+            TypeError::MismatchType {
+                expected: TypeRef::number().to_string(),
+                actual: TypeRef::bool().to_string()
+            }
+            .into(),
+            5..10
+        )])
+    );
 
-        assert_eq!(
-            Err(vec![(
+    verifier_rule_test!(
+        TypeMismatchInfixRule,
+        returns_err_if_infix_gt_values_are_not_numbers_3,
+        "false > false;",
+        Err(vec![
+            (
                 TypeError::MismatchType {
                     expected: TypeRef::number().to_string(),
                     actual: TypeRef::bool().to_string()
                 }
                 .into(),
-                0..4
-            )]),
-            TypeMismatchInfixRule.visit_expr(&expr, &span, &mut types)
-        );
-    }
-
-    #[test]
-    fn returns_err_if_infix_gt_values_are_not_numbers_2() {
-        let expr: Expr = "10 > false;".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Err(vec![(
+                0..5
+            ),
+            (
                 TypeError::MismatchType {
                     expected: TypeRef::number().to_string(),
                     actual: TypeRef::bool().to_string()
                 }
                 .into(),
-                5..10
-            )]),
-            TypeMismatchInfixRule.visit_expr(&expr, &span, &mut types)
-        );
-    }
-
-    #[test]
-    fn returns_err_if_infix_gt_values_are_not_numbers_3() {
-        let expr: Expr = "false > false;".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Err(vec![
-                (
-                    TypeError::MismatchType {
-                        expected: TypeRef::number().to_string(),
-                        actual: TypeRef::bool().to_string()
-                    }
-                    .into(),
-                    0..5
-                ),
-                (
-                    TypeError::MismatchType {
-                        expected: TypeRef::number().to_string(),
-                        actual: TypeRef::bool().to_string()
-                    }
-                    .into(),
-                    8..13
-                )
-            ]),
-            TypeMismatchInfixRule.visit_expr(&expr, &span, &mut types)
-        );
-    }
+                8..13
+            )
+        ])
+    );
 }

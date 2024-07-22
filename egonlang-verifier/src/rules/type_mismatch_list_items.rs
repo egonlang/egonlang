@@ -61,76 +61,50 @@ expr_rule!(
 );
 
 #[cfg(test)]
-mod type_mismatch_negate_prefix_tests {
-    use egonlang_core::{errors::TypeError, prelude::*};
-    use pretty_assertions::assert_eq;
-
-    use crate::prelude::*;
-
+mod tests {
     use super::TypeMisMatchListItemsRule;
+    use crate::verifier_rule_test;
+    use egonlang_core::{errors::TypeError, prelude::*};
 
-    #[test]
-    fn returns_ok_if_list_is_empty() {
-        let expr: Expr = "[];".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
+    verifier_rule_test!(
+        TypeMisMatchListItemsRule,
+        returns_ok_if_list_is_empty,
+        "[];"
+    );
 
-        assert_eq!(
-            Ok(()),
-            TypeMisMatchListItemsRule.visit_expr(&expr, &span, &mut types)
-        );
-    }
+    verifier_rule_test!(
+        TypeMisMatchListItemsRule,
+        returns_ok_if_list_has_one_item,
+        "[10];"
+    );
 
-    #[test]
-    fn returns_ok_if_list_has_one_item() {
-        let expr: Expr = "[10];".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
+    verifier_rule_test!(
+        TypeMisMatchListItemsRule,
+        returns_ok_if_list_has_multiple_items_of_same_type,
+        "[10, 100];"
+    );
 
-        assert_eq!(
-            Ok(()),
-            TypeMisMatchListItemsRule.visit_expr(&expr, &span, &mut types)
-        );
-    }
-
-    #[test]
-    fn returns_ok_if_list_has_multiple_items_of_same_type() {
-        let expr: Expr = "[10, 100];".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Ok(()),
-            TypeMisMatchListItemsRule.visit_expr(&expr, &span, &mut types)
-        );
-    }
-
-    #[test]
-    fn returns_err_if_list_has_multiple_items_of_different_types() {
-        let expr: Expr = r#"[10, false, "foo"];"#.try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Err(vec![
-                (
-                    TypeError::MismatchType {
-                        expected: TypeRef::number().to_string(),
-                        actual: TypeRef::bool().to_string()
-                    }
-                    .into(),
-                    5..10
-                ),
-                (
-                    TypeError::MismatchType {
-                        expected: TypeRef::number().to_string(),
-                        actual: TypeRef::string().to_string()
-                    }
-                    .into(),
-                    12..17
-                )
-            ]),
-            TypeMisMatchListItemsRule.visit_expr(&expr, &span, &mut types)
-        );
-    }
+    verifier_rule_test!(
+        TypeMisMatchListItemsRule,
+        returns_err_if_list_has_multiple_items_of_different_types,
+        r#"[10, false, "foo"];"#,
+        Err(vec![
+            (
+                TypeError::MismatchType {
+                    expected: TypeRef::number().to_string(),
+                    actual: TypeRef::bool().to_string()
+                }
+                .into(),
+                5..10
+            ),
+            (
+                TypeError::MismatchType {
+                    expected: TypeRef::number().to_string(),
+                    actual: TypeRef::string().to_string()
+                }
+                .into(),
+                12..17
+            )
+        ])
+    );
 }

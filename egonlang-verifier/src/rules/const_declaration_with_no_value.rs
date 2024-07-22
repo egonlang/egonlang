@@ -35,59 +35,40 @@ stmt_rule!(
 );
 
 #[cfg(test)]
-mod declare_const_without_value_tests {
-    use egonlang_core::{errors::SyntaxError, prelude::*};
-    use pretty_assertions::assert_eq;
-
-    use crate::prelude::*;
-
+mod tests {
     use super::DeclareConstWithoutValueRule;
+    use crate::verifier_rule_test;
+    use egonlang_core::errors::SyntaxError;
 
-    #[test]
-    fn returns_ok_const_declared_with_value() {
-        let stmt: Stmt = "const a = 123;".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
+    verifier_rule_test!(
+        DeclareConstWithoutValueRule,
+        returns_ok_const_declared_with_value,
+        "const a = 123;"
+    );
 
-        assert_eq!(
-            Ok(()),
-            DeclareConstWithoutValueRule.visit_stmt(&stmt, &span, &mut types)
-        );
-    }
+    verifier_rule_test!(
+        DeclareConstWithoutValueRule,
+        returns_err_const_declared_without_type_or_value,
+        "const a;",
+        Err(vec![(
+            SyntaxError::UninitializedConst {
+                name: "a".to_string()
+            }
+            .into(),
+            0..8
+        )])
+    );
 
-    #[test]
-    fn returns_err_const_declared_without_type_or_value() {
-        let stmt: Stmt = "const a;".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Err(vec![(
-                SyntaxError::UninitializedConst {
-                    name: "a".to_string()
-                }
-                .into(),
-                span.clone()
-            )]),
-            DeclareConstWithoutValueRule.visit_stmt(&stmt, &span, &mut types)
-        );
-    }
-
-    #[test]
-    fn returns_err_const_declared_without_value() {
-        let stmt: Stmt = "const a: number;".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Err(vec![(
-                SyntaxError::UninitializedConst {
-                    name: "a".to_string()
-                }
-                .into(),
-                span.clone()
-            )]),
-            DeclareConstWithoutValueRule.visit_stmt(&stmt, &span, &mut types)
-        );
-    }
+    verifier_rule_test!(
+        DeclareConstWithoutValueRule,
+        returns_err_const_declared_without_value,
+        "const a: number;",
+        Err(vec![(
+            SyntaxError::UninitializedConst {
+                name: "a".to_string()
+            }
+            .into(),
+            0..16
+        )])
+    );
 }

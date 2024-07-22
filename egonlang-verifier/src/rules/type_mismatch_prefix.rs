@@ -60,92 +60,62 @@ expr_rule!(
 );
 
 #[cfg(test)]
-mod type_mismatch_prefix_tests {
-    use egonlang_core::{errors::TypeError, prelude::*};
-    use pretty_assertions::assert_eq;
-
-    use crate::prelude::*;
-
+mod tests {
     use super::TypeMismatchPrefixRule;
+    use crate::verifier_rule_test;
+    use egonlang_core::{errors::TypeError, prelude::*};
 
-    #[test]
-    fn returns_ok_if_negate_prefix_on_number_literal_expr() {
-        let expr: Expr = "-100;".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Ok(()),
-            TypeMismatchPrefixRule.visit_expr(&expr, &span, &mut types)
-        );
+    verifier_rule_test! {
+        TypeMismatchPrefixRule,
+        returns_ok_if_negate_prefix_on_number_literal_expr,
+        "-100;"
     }
 
-    #[test]
-    fn returns_err_if_negate_prefix_on_bool_literal_expr() {
-        let expr: Expr = "-true;".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Err(vec![(
-                TypeError::MismatchType {
-                    expected: TypeRef::number().to_string(),
-                    actual: TypeRef::bool().to_string()
-                }
-                .into(),
-                1..5
-            )]),
-            TypeMismatchPrefixRule.visit_expr(&expr, &span, &mut types)
-        );
+    verifier_rule_test! {
+        TypeMismatchPrefixRule,
+        returns_err_if_negate_prefix_on_bool_literal_expr,
+        "-true;",
+        Err(vec![(
+            TypeError::MismatchType {
+                expected: TypeRef::number().to_string(),
+                actual: TypeRef::bool().to_string()
+            }
+            .into(),
+            1..5
+        )])
     }
 
-    #[test]
-    fn returns_ok_if_not_prefix_on_number_literal_expr() {
-        let expr: Expr = "!false;".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Ok(()),
-            TypeMismatchPrefixRule.visit_expr(&expr, &span, &mut types)
-        );
+    verifier_rule_test! {
+        TypeMismatchPrefixRule,
+        returns_ok_if_not_prefix_on_number_literal_expr,
+        "!false;"
     }
 
-    #[test]
-    fn returns_err_if_not_prefix_on_number_literal_expr() {
-        let expr: Expr = "!123;".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Err(vec![(
-                TypeError::MismatchType {
-                    expected: TypeRef::bool().to_string(),
-                    actual: TypeRef::number().to_string()
-                }
-                .into(),
-                1..4
-            )]),
-            TypeMismatchPrefixRule.visit_expr(&expr, &span, &mut types)
-        );
+    verifier_rule_test! {
+        TypeMismatchPrefixRule,
+        returns_err_if_not_prefix_on_number_literal_expr,
+        "!123;",
+        Err(vec![(
+            TypeError::MismatchType {
+                expected: TypeRef::bool().to_string(),
+                actual: TypeRef::number().to_string()
+            }
+            .into(),
+            1..4
+        )])
     }
 
-    #[test]
-    fn returns_err_if_not_prefix_on_string_literal_expr() {
-        let expr: Expr = r#"!"test";"#.try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Err(vec![(
-                TypeError::MismatchType {
-                    expected: TypeRef::bool().to_string(),
-                    actual: TypeRef::string().to_string()
-                }
-                .into(),
-                1..7
-            )]),
-            TypeMismatchPrefixRule.visit_expr(&expr, &span, &mut types)
-        );
+    verifier_rule_test! {
+        TypeMismatchPrefixRule,
+        returns_err_if_not_prefix_on_string_literal_expr,
+        r#"!"test";"#,
+        Err(vec![(
+            TypeError::MismatchType {
+                expected: TypeRef::bool().to_string(),
+                actual: TypeRef::string().to_string()
+            }
+            .into(),
+            1..7
+        )])
     }
 }

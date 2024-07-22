@@ -40,107 +40,59 @@ stmt_rule!(
 );
 
 #[cfg(test)]
-mod invalid_type_alias_name_tests {
-    use pretty_assertions::assert_eq;
-
-    use crate::prelude::*;
-    use egonlang_core::{errors, prelude::*};
-
+mod tests {
     use super::InvalidTypeAliasNameRule;
+    use crate::verifier_rule_test;
+    use egonlang_core::errors::SyntaxError;
 
-    #[test]
-    fn returns_ok_if_alias_capitalized() {
-        let stmt: Stmt = "type Bool = bool;".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
+    verifier_rule_test!(
+        InvalidTypeAliasNameRule,
+        returns_ok_if_alias_capitalized,
+        "type Bool = bool;"
+    );
 
-        assert_eq!(
-            Ok(()),
-            InvalidTypeAliasNameRule.visit_stmt(&stmt, &span, &mut types)
-        );
-    }
+    verifier_rule_test!(
+        InvalidTypeAliasNameRule,
+        returns_ok_if_alias_contains_number,
+        "type Bool2 = bool;"
+    );
 
-    #[test]
-    fn returns_ok_if_alias_contains_number() {
-        let stmt: Stmt = "type Bool2 = bool;".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
+    verifier_rule_test!(
+        InvalidTypeAliasNameRule,
+        returns_err_if_alias_is_lowercase,
+        "type booly = bool;",
+        Err(vec![(
+            SyntaxError::InvalidTypeAlias {
+                name: "booly".to_string()
+            }
+            .into(),
+            0..18
+        )])
+    );
 
-        assert_eq!(
-            Ok(()),
-            InvalidTypeAliasNameRule.visit_stmt(&stmt, &span, &mut types)
-        );
-    }
+    verifier_rule_test!(
+        InvalidTypeAliasNameRule,
+        returns_err_if_alias_contains_underscore,
+        "type Bool_Value = bool;",
+        Err(vec![(
+            SyntaxError::InvalidTypeAlias {
+                name: "Bool_Value".to_string()
+            }
+            .into(),
+            0..23
+        )])
+    );
 
-    #[test]
-    fn returns_err_if_alias_is_lowercase() {
-        let stmt: Stmt = "type booly = bool;".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Err(vec![(
-                errors::SyntaxError::InvalidTypeAlias {
-                    name: "booly".to_string()
-                }
-                .into(),
-                0..0
-            )]),
-            InvalidTypeAliasNameRule.visit_stmt(&stmt, &span, &mut types)
-        );
-    }
-
-    #[test]
-    fn returns_err_if_alias_contains_underscore() {
-        let stmt: Stmt = "type Bool_Value = bool;".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Err(vec![(
-                errors::SyntaxError::InvalidTypeAlias {
-                    name: "Bool_Value".to_string()
-                }
-                .into(),
-                0..0
-            )]),
-            InvalidTypeAliasNameRule.visit_stmt(&stmt, &span, &mut types)
-        );
-    }
-
-    #[test]
-    fn returns_err_if_alias_starts_with_an_underscore() {
-        let stmt: Stmt = "type _Bool = bool;".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Err(vec![(
-                errors::SyntaxError::InvalidTypeAlias {
-                    name: "_Bool".to_string()
-                }
-                .into(),
-                0..0
-            )]),
-            InvalidTypeAliasNameRule.visit_stmt(&stmt, &span, &mut types)
-        );
-    }
-
-    #[test]
-    fn returns_err_if_alias_duplicates_primitive_type() {
-        let stmt: Stmt = "type bool = bool;".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Err(vec![(
-                errors::SyntaxError::InvalidTypeAlias {
-                    name: "bool".to_string()
-                }
-                .into(),
-                0..0
-            )]),
-            InvalidTypeAliasNameRule.visit_stmt(&stmt, &span, &mut types)
-        );
-    }
+    verifier_rule_test!(
+        InvalidTypeAliasNameRule,
+        returns_err_if_alias_starts_with_an_underscore,
+        "type _Bool = bool;",
+        Err(vec![(
+            SyntaxError::InvalidTypeAlias {
+                name: "_Bool".to_string()
+            }
+            .into(),
+            0..18
+        )])
+    );
 }

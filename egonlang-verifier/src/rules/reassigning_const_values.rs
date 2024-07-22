@@ -41,81 +41,27 @@ expr_rule!(
 );
 
 #[cfg(test)]
-mod reassigning_const_values_tests {
-    use egonlang_core::{
-        ast::{ExprAssign, ExprLiteral, Identifier},
-        errors::SyntaxError,
-        prelude::*,
-    };
-    use pretty_assertions::assert_eq;
-
-    use crate::{
-        rules::rule::Rule,
-        type_env::{TypeEnv, TypeEnvValue},
-    };
-
+mod tests {
     use super::ReassigningConstValueRule;
+    use crate::verifier_rule_test;
+    use egonlang_core::errors::SyntaxError;
 
-    #[test]
-    fn returns_ok_if_identifier_not_const() {
-        let rule = ReassigningConstValueRule;
+    verifier_rule_test!(
+        ReassigningConstValueRule,
+        returns_ok_if_identifier_not_const,
+        "let a: number; a = 100;"
+    );
 
-        let mut types = TypeEnv::new();
-
-        types.set(
-            "a",
-            TypeEnvValue {
-                typeref: TypeRef::number(),
-                is_const: false,
-            },
-        );
-
-        let expr: Expr = ExprAssign {
-            identifier: Identifier {
-                name: "a".to_string(),
-            },
-            value: (ExprLiteral::Number(100f64).into(), 0..0),
-        }
-        .into();
-
-        let span = 0..0;
-
-        assert_eq!(Ok(()), rule.visit_expr(&expr, &span, &mut types));
-    }
-
-    #[test]
-    fn returns_err_if_identifier_is_const() {
-        let rule = ReassigningConstValueRule;
-
-        let mut types = TypeEnv::new();
-
-        types.set(
-            "a",
-            TypeEnvValue {
-                typeref: TypeRef::number(),
-                is_const: true,
-            },
-        );
-
-        let expr: Expr = ExprAssign {
-            identifier: Identifier {
-                name: "a".to_string(),
-            },
-            value: (ExprLiteral::Number(100f64).into(), 0..0),
-        }
-        .into();
-
-        let span = 0..10;
-
-        assert_eq!(
-            Err(vec![(
-                SyntaxError::ReassigningConst {
-                    name: "a".to_string()
-                }
-                .into(),
-                span.clone()
-            )]),
-            rule.visit_expr(&expr, &span, &mut types)
-        );
-    }
+    verifier_rule_test!(
+        ReassigningConstValueRule,
+        returns_err_if_identifier_is_const,
+        "const a = 5; a = 100;",
+        Err(vec![(
+            SyntaxError::ReassigningConst {
+                name: "a".to_string()
+            }
+            .into(),
+            13..20
+        )])
+    );
 }

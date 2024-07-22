@@ -56,3 +56,42 @@ expr_rule!(
         errs
     }
 );
+
+#[cfg(test)]
+mod tests {
+    use super::TypeMismatchReassigningLetValuesRule;
+    use crate::verifier_rule_test;
+    use egonlang_core::errors::TypeError;
+
+    verifier_rule_test! {
+        TypeMismatchReassigningLetValuesRule,
+        returns_ok_reassigning_with_the_same_type,
+        "let a = 123; a = 456;"
+    }
+
+    verifier_rule_test! {
+        TypeMismatchReassigningLetValuesRule,
+        returns_err_reassigning_with_different_type,
+        "let a = 123; a = false;",
+        Err(vec![(
+            TypeError::MismatchType {
+                expected: "number".to_string(),
+                actual: "bool".to_string()
+            }.into(),
+            17..22
+        )])
+    }
+
+    verifier_rule_test! {
+        TypeMismatchReassigningLetValuesRule,
+        returns_err_reassigning_with_different_type_2,
+        "let a = [1, 2, 3]; a = [false, true];",
+        Err(vec![(
+            TypeError::MismatchType {
+                expected: "list<number>".to_string(),
+                actual: "list<bool>".to_string()
+            }.into(),
+            23..36
+        )])
+    }
+}

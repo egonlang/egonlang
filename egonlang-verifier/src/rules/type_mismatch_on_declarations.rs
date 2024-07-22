@@ -119,66 +119,41 @@ stmt_rule!(
 );
 
 #[cfg(test)]
-mod type_mismatch_on_assignment_tests {
-    use egonlang_core::{errors::TypeError, prelude::*};
-    use pretty_assertions::assert_eq;
-
-    use crate::{rules::rule::Rule, type_env::TypeEnv};
-
+mod tests {
     use super::TypeMismatchOnDeclarationsRule;
+    use crate::verifier_rule_test;
+    use egonlang_core::{errors::TypeError, prelude::*};
 
-    #[test]
-    fn returns_ok_if_assignment_type_and_value_type_match() {
-        let stmt: Stmt = "const a: number = 123;".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Ok(()),
-            TypeMismatchOnDeclarationsRule.visit_stmt(&stmt, &span, &mut types)
-        );
+    verifier_rule_test! {
+        TypeMismatchOnDeclarationsRule,
+        returns_ok_if_assignment_type_and_value_type_match,
+        "const a: number = 123;"
     }
 
-    #[test]
-    fn returns_err_if_assignment_type_and_value_type_mismatch() {
-        let stmt: Stmt = "const a: () = 123;".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Err(vec![(
-                TypeError::MismatchType {
-                    expected: TypeRef::unit().to_string(),
-                    actual: TypeRef::number().to_string()
-                }
-                .into(),
-                14..17
-            )]),
-            TypeMismatchOnDeclarationsRule.visit_stmt(&stmt, &span, &mut types)
-        );
+    verifier_rule_test! {
+        TypeMismatchOnDeclarationsRule,
+        returns_err_if_assignment_type_and_value_type_mismatch,
+        "const a: () = 123;",
+        Err(vec![(
+            TypeError::MismatchType {
+                expected: TypeRef::unit().to_string(),
+                actual: TypeRef::number().to_string()
+            }
+            .into(),
+            14..17
+        )])
     }
 
-    #[test]
-    fn returns_ok_if_empty_list_assigned_to_known_list_type() {
-        let stmt: Stmt = "const a: list<number> = [];".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Ok(()),
-            TypeMismatchOnDeclarationsRule.visit_stmt(&stmt, &span, &mut types)
-        );
+    verifier_rule_test! {
+        TypeMismatchOnDeclarationsRule,
+        returns_ok_if_empty_list_assigned_to_known_list_type,
+        "const a: list<number> = [];"
     }
 
-    #[test]
-    fn returns_err_if_empty_list_assigned_to_unknown_list_type() {
-        let stmt: Stmt = "const a: list<unknown> = [];".try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Err(vec![(TypeError::UknownListType.into(), 0..0)]),
-            TypeMismatchOnDeclarationsRule.visit_stmt(&stmt, &span, &mut types)
-        );
+    verifier_rule_test! {
+        TypeMismatchOnDeclarationsRule,
+        returns_err_if_empty_list_assigned_to_unknown_list_type,
+        "const a: list<unknown> = [];",
+        Err(vec![(TypeError::UknownListType.into(), 0..28)])
     }
 }

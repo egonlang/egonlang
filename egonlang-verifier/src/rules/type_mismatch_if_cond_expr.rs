@@ -44,6 +44,93 @@ expr_rule!(
 );
 
 #[cfg(test)]
+mod testss {
+    use super::TypeMismatchIfCondExprRule;
+    use crate::verifier_rule_test;
+    use egonlang_core::errors::TypeError;
+
+    verifier_rule_test!(
+        TypeMismatchIfCondExprRule,
+        returns_ok_if_condition_expr_is_bool_true,
+        r#"if (true) {};"#
+    );
+
+    verifier_rule_test!(
+        TypeMismatchIfCondExprRule,
+        returns_ok_ifelse_condition_expr_is_bool_true,
+        r#"if (true) {} else {};"#
+    );
+
+    verifier_rule_test!(
+        TypeMismatchIfCondExprRule,
+        returns_ok_if_condition_expr_is_bool_false,
+        r#"if (false) {};"#
+    );
+
+    verifier_rule_test!(
+        TypeMismatchIfCondExprRule,
+        returns_ok_ifelse_condition_expr_is_bool_false,
+        r#"if (false) {} else {};"#
+    );
+
+    verifier_rule_test!(
+        TypeMismatchIfCondExprRule,
+        returns_err_if_condition_expr_is_number,
+        r#"if (123) {};"#,
+        Err(vec![(
+            TypeError::MismatchType {
+                expected: "bool".to_string(),
+                actual: "number".to_string()
+            }
+            .into(),
+            4..7
+        )])
+    );
+
+    verifier_rule_test!(
+        TypeMismatchIfCondExprRule,
+        returns_err_ifelse_condition_expr_is_number,
+        r#"if (123) {} else {};"#,
+        Err(vec![(
+            TypeError::MismatchType {
+                expected: "bool".to_string(),
+                actual: "number".to_string()
+            }
+            .into(),
+            4..7
+        )])
+    );
+
+    verifier_rule_test!(
+        TypeMismatchIfCondExprRule,
+        returns_err_if_condition_expr_is_number_is_zero,
+        r#"if (0) {};"#,
+        Err(vec![(
+            TypeError::MismatchType {
+                expected: "bool".to_string(),
+                actual: "number".to_string()
+            }
+            .into(),
+            4..5
+        )])
+    );
+
+    verifier_rule_test!(
+        TypeMismatchIfCondExprRule,
+        returns_err_ifelse_condition_expr_is_number_is_zero,
+        r#"if (0) {} else {};"#,
+        Err(vec![(
+            TypeError::MismatchType {
+                expected: "bool".to_string(),
+                actual: "number".to_string()
+            }
+            .into(),
+            4..5
+        )])
+    );
+}
+
+#[cfg(test)]
 mod tests {
     use pretty_assertions::assert_eq;
 
@@ -51,92 +138,6 @@ mod tests {
     use egonlang_core::{errors::TypeError, prelude::*};
 
     use super::TypeMismatchIfCondExprRule;
-
-    #[test]
-    fn returns_ok_if_condition_expr_is_bool_true() {
-        let expr: Expr = r#"if (true) {};"#.try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Ok(()),
-            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
-        );
-    }
-
-    #[test]
-    fn returns_ok_ifelse_condition_expr_is_bool_true() {
-        let expr: Expr = r#"if (true) {} else {};"#.try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Ok(()),
-            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
-        );
-    }
-
-    #[test]
-    fn returns_ok_if_condition_expr_is_bool_false() {
-        let expr: Expr = r#"if (false) {};"#.try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Ok(()),
-            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
-        );
-    }
-
-    #[test]
-    fn returns_ok_ifelse_condition_expr_is_bool_false() {
-        let expr: Expr = r#"if (false) {} else {};"#.try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Ok(()),
-            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
-        );
-    }
-
-    #[test]
-    fn returns_err_if_condition_expr_is_number() {
-        let expr: Expr = r#"if (123) {};"#.try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Err(vec![(
-                TypeError::MismatchType {
-                    expected: "bool".to_string(),
-                    actual: "number".to_string()
-                }
-                .into(),
-                4..7
-            )]),
-            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
-        );
-    }
-
-    #[test]
-    fn returns_err_ifelse_condition_expr_is_number() {
-        let expr: Expr = r#"if (123) {} else {};"#.try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Err(vec![(
-                TypeError::MismatchType {
-                    expected: "bool".to_string(),
-                    actual: "number".to_string()
-                }
-                .into(),
-                4..7
-            )]),
-            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
-        );
-    }
 
     #[test]
     #[ignore = "todo"]
@@ -153,44 +154,6 @@ mod tests {
                 }
                 .into(),
                 22..25
-            )]),
-            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
-        );
-    }
-
-    #[test]
-    fn returns_err_if_condition_expr_is_number_is_zero() {
-        let expr: Expr = r#"if (0) {};"#.try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Err(vec![(
-                TypeError::MismatchType {
-                    expected: "bool".to_string(),
-                    actual: "number".to_string()
-                }
-                .into(),
-                4..5
-            )]),
-            TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
-        );
-    }
-
-    #[test]
-    fn returns_err_ifelse_condition_expr_is_number_is_zero() {
-        let expr: Expr = r#"if (0) {} else {};"#.try_into().unwrap();
-        let span = 0..0;
-        let mut types = TypeEnv::new();
-
-        assert_eq!(
-            Err(vec![(
-                TypeError::MismatchType {
-                    expected: "bool".to_string(),
-                    actual: "number".to_string()
-                }
-                .into(),
-                4..5
             )]),
             TypeMismatchIfCondExprRule.visit_expr(&expr, &span, &mut types)
         );
