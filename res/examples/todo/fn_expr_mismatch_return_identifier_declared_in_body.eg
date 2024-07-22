@@ -6,3 +6,4 @@
 };
 
 // out: TypeError: mismatched types: expected type `()` but received `number`
+// TODO: See: https://github.com/egonlang/egonlang/issues/19
