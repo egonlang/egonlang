@@ -124,15 +124,28 @@ macro_rules! stmt_rule {
 ///   Err(vec![]) // Expected errors
 /// );
 /// ```
+///
+/// Attributes can still be used
+///
+/// ```ignore
+/// verifier_rule_test!(
+///   #[ignore = "Example test"]
+///   NameOfRule, // Rule under test
+///   should_return_err_if, // Test name/description
+///   "let a = 123", // Egon code under test,
+///   Err(vec![]) // Expected errors
+/// );
+/// ```
 #[cfg(test)]
 #[macro_export]
 macro_rules! verifier_rule_test {
-    ($rule:ident, $name:ident, $input:expr) => {
-        verifier_rule_test!($rule, $name, $input, Ok(()));
+    ($(#[$attributes:meta])* $rule:ident, $name:ident, $input:expr) => {
+        verifier_rule_test!($(#[$attributes])* $rule, $name, $input, Ok(()));
     };
 
     ($(#[$attributes:meta])* $rule:ident, $name:ident, $input:expr, $expected:expr) => {
         #[test]
+        $(#[$attributes])*
         fn $name() {
             let module = ::egonlang_core::parser::parse($input, 0)
                 .expect("Unable to parse source to module");
