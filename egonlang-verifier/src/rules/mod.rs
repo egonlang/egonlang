@@ -1,14 +1,4 @@
-pub mod const_declaration_with_no_value;
-pub mod divide_by_zero;
-pub mod invalid_type_alias_name;
-pub mod reassigning_const_values;
-pub mod rule;
-pub mod type_mismatch_fn_return_expr;
-pub mod type_mismatch_if_cond_expr;
-pub mod type_mismatch_if_then_else_exprs;
-pub mod type_mismatch_infix;
-pub mod type_mismatch_list_items;
-pub mod type_mismatch_on_declarations;
-pub mod type_mismatch_prefix;
-pub mod type_mismatch_reassigning_let_values;
-pub mod undefined_identifier;
+pub mod core;
+mod rule;
+
+pub use rule::Rule;

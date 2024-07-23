@@ -5,21 +5,7 @@ use egonlang_core::{
 };
 
 use crate::{
-    prelude::Rule,
-    rules::{
-        const_declaration_with_no_value::DeclareConstWithoutValueRule,
-        divide_by_zero::DivideByZeroRule, invalid_type_alias_name::InvalidTypeAliasNameRule,
-        reassigning_const_values::ReassigningConstValueRule,
-        type_mismatch_fn_return_expr::TypeMismatchFnReturnExprRule,
-        type_mismatch_if_cond_expr::TypeMismatchIfCondExprRule,
-        type_mismatch_if_then_else_exprs::TypeMismatchIfthenElseExprRule,
-        type_mismatch_infix::TypeMismatchInfixRule,
-        type_mismatch_list_items::TypeMisMatchListItemsRule,
-        type_mismatch_on_declarations::TypeMismatchOnDeclarationsRule,
-        type_mismatch_prefix::TypeMismatchPrefixRule,
-        type_mismatch_reassigning_let_values::TypeMismatchReassigningLetValuesRule,
-        undefined_identifier::ReferencingUndefinedIdentifierRule,
-    },
+    prelude::*,
     type_env::{TypeEnv, TypeEnvValue},
     verify_trace,
     visitor::Visitor,
@@ -43,7 +29,7 @@ pub type VerificationResult = Result<(), Vec<ErrorS>>;
 /// matches!(result, Ok(()));
 /// ```
 pub struct Verifier<'a> {
-    rules: Vec<Box<dyn Rule<'a>>>,
+    rules: Vec<Box<dyn rules::Rule<'a>>>,
 }
 
 impl Default for Verifier<'_> {
@@ -68,11 +54,11 @@ impl<'a> Verifier<'a> {
     ///
     /// let verifier = Verifier::new().with_rule(TypeMismatchInfixRule);
     /// ```
-    pub fn add_rule<R: Rule<'a> + 'static>(&mut self, rule: R) {
+    pub fn add_rule<R: rules::Rule<'a> + 'static>(&mut self, rule: R) {
         self.rules.push(Box::new(rule));
     }
 
-    /// Register the default [`Rule`] set
+    /// Register the core language [`Rule`] set
     ///
     /// ```
     /// use egonlang_verifier::prelude::*;
@@ -82,19 +68,19 @@ impl<'a> Verifier<'a> {
     /// let verifier = Verifier::default();
     /// ```
     pub fn with_default_rules(mut self) -> Self {
-        self.add_rule(TypeMismatchInfixRule);
-        self.add_rule(TypeMismatchPrefixRule);
-        self.add_rule(TypeMisMatchListItemsRule);
-        self.add_rule(TypeMismatchOnDeclarationsRule);
-        self.add_rule(DeclareConstWithoutValueRule);
-        self.add_rule(ReassigningConstValueRule);
-        self.add_rule(ReferencingUndefinedIdentifierRule);
-        self.add_rule(DivideByZeroRule);
-        self.add_rule(TypeMismatchFnReturnExprRule);
-        self.add_rule(TypeMismatchIfCondExprRule);
-        self.add_rule(TypeMismatchReassigningLetValuesRule);
-        self.add_rule(TypeMismatchIfthenElseExprRule);
-        self.add_rule(InvalidTypeAliasNameRule);
+        self.add_rule(rules::core::TypeMismatchInfixRule);
+        self.add_rule(rules::core::TypeMismatchPrefixRule);
+        self.add_rule(rules::core::TypeMisMatchListItemsRule);
+        self.add_rule(rules::core::TypeMismatchOnDeclarationsRule);
+        self.add_rule(rules::core::DeclareConstWithoutValueRule);
+        self.add_rule(rules::core::ReassigningConstValueRule);
+        self.add_rule(rules::core::ReferencingUndefinedIdentifierRule);
+        self.add_rule(rules::core::DivideByZeroRule);
+        self.add_rule(rules::core::TypeMismatchFnReturnExprRule);
+        self.add_rule(rules::core::TypeMismatchIfCondExprRule);
+        self.add_rule(rules::core::TypeMismatchReassigningLetValuesRule);
+        self.add_rule(rules::core::TypeMismatchIfthenElseExprRule);
+        self.add_rule(rules::core::InvalidTypeAliasNameRule);
 
         self
     }

@@ -15,7 +15,7 @@ pub fn verify_module(module: &Module) -> VerificationResult {
 
 pub mod prelude {
     pub use crate::expr_rule;
-    pub use crate::rules::rule::Rule;
+    pub use crate::rules;
     pub use crate::stmt_rule;
     pub use crate::type_env::{TypeEnv, TypeEnvValue};
     pub use crate::verifier::VerificationResult;

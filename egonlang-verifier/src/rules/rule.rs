@@ -69,7 +69,7 @@ macro_rules! stmt_rule {
             $(#[$attributes])*
             pub struct [<$name Rule>];
 
-            impl<'a> Rule<'a> for [<$name Rule>] {
+            impl<'a> $crate::rules::Rule<'a> for [<$name Rule>] {
                 fn visit_stmt(
                     &self,
                     stmt: &::egonlang_core::ast::Stmt,
