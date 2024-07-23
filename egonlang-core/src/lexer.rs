@@ -3,7 +3,7 @@ use std::num::ParseFloatError;
 use logos::Logos;
 use serde::{Deserialize, Serialize};
 
-use crate::errors::{Error, ErrorS, SyntaxError};
+use crate::errors::{EgonError, EgonErrorS, EgonSyntaxError};
 
 /// Converts a [`String`] source in to a vector of [`Token`]
 #[derive(Debug)]
@@ -22,7 +22,7 @@ impl<'a> Lexer<'a> {
 }
 
 impl<'a> Iterator for Lexer<'a> {
-    type Item = Result<(usize, Token, usize), ErrorS>;
+    type Item = Result<(usize, Token, usize), EgonErrorS>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(token) = self.pending.take() {
@@ -36,7 +36,7 @@ impl<'a> Iterator for Lexer<'a> {
                 // Check for unterminated string.
                 if self.inner.slice().starts_with('"') {
                     return Some(Err((
-                        Error::SyntaxError(SyntaxError::UnterminatedString),
+                        EgonError::SyntaxError(EgonSyntaxError::UnterminatedString),
                         span,
                     )));
                 }
@@ -53,7 +53,7 @@ impl<'a> Iterator for Lexer<'a> {
                 }
 
                 Some(Err((
-                    Error::SyntaxError(SyntaxError::UnexpectedInput {
+                    EgonError::SyntaxError(EgonSyntaxError::UnexpectedInput {
                         token: self.inner.source()[span.start..span.end].to_string(),
                     }),
                     span,
@@ -277,7 +277,7 @@ mod lexer_tests {
         "@foo bar",
         vec![
             Err((
-                Error::SyntaxError(SyntaxError::UnexpectedInput {
+                EgonError::SyntaxError(EgonSyntaxError::UnexpectedInput {
                     token: "@foo".to_string()
                 }),
                 0..4,
@@ -290,7 +290,7 @@ mod lexer_tests {
         lex_error_unterminated_string,
         "\"\nfoo",
         vec![Err((
-            Error::SyntaxError(SyntaxError::UnterminatedString),
+            EgonError::SyntaxError(EgonSyntaxError::UnterminatedString),
             0..5
         ))]
     );

@@ -280,6 +280,7 @@ dependencies = [
  "lalrpop",
  "lalrpop-util",
  "logos",
+ "paste",
  "pretty_assertions",
  "regex",
  "serde",

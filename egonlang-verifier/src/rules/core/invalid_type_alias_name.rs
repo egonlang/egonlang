@@ -1,7 +1,6 @@
+use crate::prelude::*;
 use egonlang_core::prelude::*;
 use regex::Regex;
-
-use crate::prelude::*;
 
 stmt_rule!(
     /// Checks type aliases are formatted correctly

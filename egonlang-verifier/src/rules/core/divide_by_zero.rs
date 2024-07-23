@@ -1,6 +1,5 @@
-use egonlang_core::prelude::*;
-
 use crate::prelude::*;
+use egonlang_core::prelude::*;
 
 expr_rule!(
     /// Checks infix expressions for dividing by zero

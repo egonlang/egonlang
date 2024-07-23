@@ -1,10 +1,10 @@
 use lalrpop_util::ParseError;
-use crate::errors::ErrorS;
+use crate::errors::EgonErrorS;
 
 use crate::{ast, lexer, span};
 
 grammar<'err>(
-    errors: &'err mut Vec<ParseError<usize, lexer::Token, ErrorS>>
+    errors: &'err mut Vec<ParseError<usize, lexer::Token, EgonErrorS>>
 );
 
 pub Module: ast::Module = <stmts:Spanned<Decl>*> => ast::Module { <> };
@@ -289,7 +289,7 @@ SeperatedTrailing<E, T>: Vec<ast::ExprS> =
 
 extern {
     type Location = usize;
-    type Error = ErrorS;
+    type Error = EgonErrorS;
 
     enum lexer::Token {
         "{" => lexer::Token::BraceOpen,

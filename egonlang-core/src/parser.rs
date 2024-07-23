@@ -5,7 +5,7 @@ use crate::lexer::Lexer;
 use lalrpop_util::ParseError;
 
 use crate::ast::Module;
-use crate::errors::{Error, ErrorS, SyntaxError};
+use crate::errors::{EgonError, EgonErrorS, EgonSyntaxError};
 
 lalrpop_mod!(
     #[allow(clippy::all)]
@@ -29,7 +29,7 @@ pub fn is_complete(source: &str) -> bool {
 }
 
 /// Parse a string source in to an AST [`Module`]
-pub fn parse(source: &str, offset: usize) -> Result<Module, Vec<ErrorS>> {
+pub fn parse(source: &str, offset: usize) -> Result<Module, Vec<EgonErrorS>> {
     let lexer = Lexer::new(source).map(|token| match token {
         Ok((l, token, r)) => Ok((l + offset, token, r + offset)),
         Err((e, span)) => Err((e, span.start + offset..span.end + offset)),
@@ -51,24 +51,24 @@ pub fn parse(source: &str, offset: usize) -> Result<Module, Vec<ErrorS>> {
         ParseError::ExtraToken {
             token: (start, _, end),
         } => (
-            Error::SyntaxError(SyntaxError::ExtraToken {
+            EgonError::SyntaxError(EgonSyntaxError::ExtraToken {
                 token: source[start..end].to_string(),
             }),
             start..end,
         ),
         ParseError::InvalidToken { location } => (
-            Error::SyntaxError(SyntaxError::InvalidToken),
+            EgonError::SyntaxError(EgonSyntaxError::InvalidToken),
             location..location,
         ),
         ParseError::UnrecognizedEOF { location, expected } => (
-            Error::SyntaxError(SyntaxError::UnrecognizedEOF { expected }),
+            EgonError::SyntaxError(EgonSyntaxError::UnrecognizedEOF { expected }),
             location..location,
         ),
         ParseError::UnrecognizedToken {
             token: (start, _, end),
             expected,
         } => (
-            Error::SyntaxError(SyntaxError::UnrecognizedToken {
+            EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
                 token: source[start - offset..end - offset].to_string(),
                 expected,
             }),
@@ -96,7 +96,7 @@ mod parser_tests {
         StmtExpr, TypeRef,
     };
 
-    use crate::errors::{Error, SyntaxError};
+    use crate::errors::{EgonError, EgonSyntaxError};
 
     macro_rules! parser_test {
         ($test_name:ident, $input:expr, $expected:expr) => {
@@ -113,7 +113,7 @@ mod parser_tests {
         parse_error_with_bare_number_expression,
         "123",
         Err(vec![(
-            Error::SyntaxError(SyntaxError::UnrecognizedEOF {
+            EgonError::SyntaxError(EgonSyntaxError::UnrecognizedEOF {
                 expected: vec![
                     "\"!=\"".to_string(),
                     "\"%\"".to_string(),
@@ -144,7 +144,7 @@ mod parser_tests {
         parse_error_with_bare_string_expression,
         r#""foo""#,
         Err(vec![(
-            Error::SyntaxError(SyntaxError::UnrecognizedEOF {
+            EgonError::SyntaxError(EgonSyntaxError::UnrecognizedEOF {
                 expected: vec![
                     "\"!=\"".to_string(),
                     "\"%\"".to_string(),
@@ -174,7 +174,7 @@ mod parser_tests {
         parse_error_with_bare_identifier_expression,
         r#"foo"#,
         Err(vec![(
-            Error::SyntaxError(SyntaxError::UnrecognizedEOF {
+            EgonError::SyntaxError(EgonSyntaxError::UnrecognizedEOF {
                 expected: vec![
                     "\"!=\"".to_string(),
                     "\"%\"".to_string(),
@@ -205,7 +205,7 @@ mod parser_tests {
         parse_error_with_bare_true_expression,
         r#"true"#,
         Err(vec![(
-            Error::SyntaxError(SyntaxError::UnrecognizedEOF {
+            EgonError::SyntaxError(EgonSyntaxError::UnrecognizedEOF {
                 expected: vec![
                     "\"!=\"".to_string(),
                     "\"%\"".to_string(),
@@ -235,7 +235,7 @@ mod parser_tests {
         parse_error_with_bare_false_expression,
         r#"false"#,
         Err(vec![(
-            Error::SyntaxError(SyntaxError::UnrecognizedEOF {
+            EgonError::SyntaxError(EgonSyntaxError::UnrecognizedEOF {
                 expected: vec![
                     "\"!=\"".to_string(),
                     "\"%\"".to_string(),
@@ -265,7 +265,7 @@ mod parser_tests {
         parse_error_with_bare_block_expression,
         r#"{}"#,
         Err(vec![(
-            Error::SyntaxError(SyntaxError::UnrecognizedEOF {
+            EgonError::SyntaxError(EgonSyntaxError::UnrecognizedEOF {
                 expected: vec![
                     "\")\"".to_string(),
                     "\",\"".to_string(),
@@ -282,7 +282,7 @@ mod parser_tests {
         parse_error_with_bare_list_expression,
         r#"[]"#,
         Err(vec![(
-            Error::SyntaxError(SyntaxError::UnrecognizedEOF {
+            EgonError::SyntaxError(EgonSyntaxError::UnrecognizedEOF {
                 expected: vec![
                     "\"!=\"".to_string(),
                     "\"%\"".to_string(),
@@ -699,7 +699,7 @@ mod parser_tests {
         parse_list_empty_with_comma,
         "[,];",
         Err(vec![(
-            Error::SyntaxError(SyntaxError::UnrecognizedToken {
+            EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
                 token: ",".to_string(),
                 expected: vec![
                     "\"!\"".to_string(),
@@ -768,7 +768,7 @@ mod parser_tests {
         parse_list_with_items_and_trailing_commas,
         "[a, b, c,];",
         Err(vec![(
-            Error::SyntaxError(SyntaxError::UnrecognizedToken {
+            EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
                 token: "]".to_string(),
                 expected: vec![
                     "\"!\"".to_string(),
@@ -854,7 +854,7 @@ mod parser_tests {
         parse_tuple_empty,
         "(,);",
         Err(vec![(
-            Error::SyntaxError(SyntaxError::UnrecognizedToken {
+            EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
                 token: ",".to_string(),
                 expected: vec![
                     "\"!\"".to_string(),
@@ -1217,14 +1217,14 @@ mod parser_tests {
         "if true {};",
         Err(vec![
             (
-                Error::SyntaxError(SyntaxError::UnrecognizedToken {
+                EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
                     token: "true".to_string(),
                     expected: vec!["\"(\"".to_string()]
                 }),
                 3..7
             ),
             (
-                Error::SyntaxError(SyntaxError::UnrecognizedToken {
+                EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
                     token: "{".to_string(),
                     expected: vec![
                         "\"!=\"".to_string(),
@@ -1457,14 +1457,14 @@ mod parser_tests {
         "if (true) 123 else if (true) 456 else 789",
         Err(vec![
             (
-                Error::SyntaxError(SyntaxError::UnrecognizedToken {
+                EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
                     token: "123".to_string(),
                     expected: vec!["\"{\"".to_string()]
                 }),
                 10..13
             ),
             (
-                Error::SyntaxError(SyntaxError::UnrecognizedToken {
+                EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
                     token: "else".to_string(),
                     expected: vec![
                         "\"!=\"".to_string(),
@@ -1491,14 +1491,14 @@ mod parser_tests {
                 14..18
             ),
             (
-                Error::SyntaxError(SyntaxError::UnrecognizedToken {
+                EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
                     token: "456".to_string(),
                     expected: vec!["\"{\"".to_string()]
                 }),
                 29..32
             ),
             (
-                Error::SyntaxError(SyntaxError::UnrecognizedToken {
+                EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
                     token: "else".to_string(),
                     expected: vec![
                         "\"!=\"".to_string(),
@@ -1525,7 +1525,7 @@ mod parser_tests {
                 33..37
             ),
             (
-                Error::SyntaxError(SyntaxError::UnrecognizedEOF {
+                EgonError::SyntaxError(EgonSyntaxError::UnrecognizedEOF {
                     expected: vec![
                         "\"!=\"".to_string(),
                         "\"%\"".to_string(),
@@ -1657,7 +1657,7 @@ mod parser_tests {
         parse_range_empty,
         "..;",
         Err(vec![(
-            Error::SyntaxError(SyntaxError::UnrecognizedToken {
+            EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
                 token: ";".to_string(),
                 expected: vec!["\"=\"".to_string(), "number".to_string()]
             }),
@@ -1669,7 +1669,7 @@ mod parser_tests {
         parse_range_empty_inclusive_no_end,
         "..=;",
         Err(vec![(
-            Error::SyntaxError(SyntaxError::UnrecognizedToken {
+            EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
                 token: ";".to_string(),
                 expected: vec!["number".to_string()]
             }),
@@ -1681,7 +1681,7 @@ mod parser_tests {
         parse_range_start_inclusive_no_end,
         "1..=;",
         Err(vec![(
-            Error::SyntaxError(SyntaxError::UnrecognizedToken {
+            EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
                 token: ";".to_string(),
                 expected: vec!["number".to_string()]
             }),

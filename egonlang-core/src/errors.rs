@@ -3,18 +3,18 @@ use thiserror::Error;
 
 use crate::span::Spanned;
 
-pub type ErrorS = Spanned<Error>;
+pub type EgonErrorS = Spanned<EgonError>;
 
 #[derive(Debug, Error, PartialEq, Serialize, Deserialize)]
-pub enum Error {
+pub enum EgonError {
     #[error("SyntaxError: {0}")]
-    SyntaxError(SyntaxError),
+    SyntaxError(EgonSyntaxError),
     #[error("TypeError: {0}")]
-    TypeError(TypeError),
+    TypeError(EgonTypeError),
 }
 
 #[derive(Debug, Error, Eq, PartialEq, Serialize, Deserialize)]
-pub enum SyntaxError {
+pub enum EgonSyntaxError {
     #[error("extraneous input: {token:?}")]
     ExtraToken { token: String },
     #[error("invalid input")]
@@ -45,7 +45,7 @@ pub enum SyntaxError {
 }
 
 #[derive(Debug, Error, Eq, PartialEq, Serialize, Deserialize)]
-pub enum TypeError {
+pub enum EgonTypeError {
     #[error("mismatched types: expected type `{expected}` but received `{actual}`")]
     MismatchType { expected: String, actual: String },
 
@@ -59,14 +59,15 @@ pub enum TypeError {
 }
 
 macro_rules! impl_from_error {
-    ($($error:tt),+) => {$(
-        impl From<$error> for Error {
-            fn from(e: $error) -> Self {
-                Error::$error(e)
+    ($($error:ident),+) => {$(
+        ::paste::paste! {
+        impl From<[<Egon $error>]> for EgonError {
+                fn from(e: [<Egon $error>]) -> Self {
+                    EgonError::$error(e)
+                }
             }
         }
     )+};
 }
 
-impl_from_error!(SyntaxError);
-impl_from_error!(TypeError);
+impl_from_error!(SyntaxError, TypeError);

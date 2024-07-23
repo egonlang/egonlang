@@ -1,6 +1,5 @@
-use egonlang_core::prelude::*;
-
 use crate::prelude::*;
+use egonlang_core::prelude::*;
 
 stmt_rule!(
     /// Checks assignment statements initialize consts with a value

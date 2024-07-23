@@ -1,6 +1,5 @@
-use egonlang_core::prelude::*;
-
 use crate::prelude::*;
+use egonlang_core::prelude::*;
 
 expr_rule!(
     /// Checks value types for all infix operation expressions
@@ -149,11 +148,9 @@ fn validate_infix_types(
 }
 #[cfg(test)]
 mod type_mismatch_infix_tests {
-    use egonlang_core::prelude::*;
-
-    use crate::verifier_rule_test;
-
     use super::TypeMismatchInfixRule;
+    use crate::verifier_rule_test;
+    use egonlang_core::prelude::*;
 
     verifier_rule_test!(
         TypeMismatchInfixRule,

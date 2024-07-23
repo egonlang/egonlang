@@ -1,6 +1,5 @@
-use egonlang_core::prelude::*;
-
 use crate::prelude::*;
+use egonlang_core::prelude::*;
 
 expr_rule!(
     /// Checks the return type of a function matches function body's

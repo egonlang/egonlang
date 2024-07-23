@@ -36,7 +36,7 @@ expr_rule!(
 mod tests {
     use super::ReferencingUndefinedIdentifierRule;
     use crate::verifier_rule_test;
-    use egonlang_core::errors::TypeError;
+    use egonlang_core::prelude::*;
 
     verifier_rule_test! {
         ReferencingUndefinedIdentifierRule,
@@ -49,7 +49,7 @@ mod tests {
         returns_error_if_identifier_is_undefined,
         "a;",
         Err(vec![(
-            TypeError::Undefined("a".to_string()).into(),
+            EgonTypeError::Undefined("a".to_string()).into(),
             0..1
         )])
     }

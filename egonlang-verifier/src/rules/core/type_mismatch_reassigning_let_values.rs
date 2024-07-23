@@ -1,6 +1,5 @@
-use egonlang_core::prelude::*;
-
 use crate::prelude::*;
+use egonlang_core::prelude::*;
 
 expr_rule!(
     /// Check that let variables can't be assigned with a different type

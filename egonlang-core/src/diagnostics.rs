@@ -1,4 +1,4 @@
-use crate::errors::{Error, SyntaxError, TypeError};
+use crate::errors::{EgonError, EgonSyntaxError, EgonTypeError};
 use crate::span::Span;
 use codespan_reporting::diagnostic::{Diagnostic, Label};
 use serde::{Deserialize, Serialize};
@@ -114,13 +114,13 @@ macro_rules! impl_as_dianostic {
     )+};
 }
 
-impl_as_dianostic!(SyntaxError, TypeError);
+impl_as_dianostic!(EgonSyntaxError, EgonTypeError);
 
-impl AsDiagnostic for Error {
+impl AsDiagnostic for EgonError {
     fn as_diagnostic(&self, span: &Span) -> Diagnostic<()> {
         match self {
-            Error::SyntaxError(e) => e.as_diagnostic(span),
-            Error::TypeError(e) => e.as_diagnostic(span),
+            EgonError::SyntaxError(e) => e.as_diagnostic(span),
+            EgonError::TypeError(e) => e.as_diagnostic(span),
         }
     }
 }

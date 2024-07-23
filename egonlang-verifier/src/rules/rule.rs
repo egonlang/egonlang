@@ -31,7 +31,7 @@ macro_rules! expr_rule {
                     &self,
                     _stmt: &::egonlang_core::ast::Stmt,
                     _span: &::egonlang_core::span::Span,
-                    _types: &mut $crate::type_env::TypeEnv,
+                    _types: &mut $crate::TypeEnv,
                 ) -> VerificationResult {
                     Ok(())
                 }
@@ -40,9 +40,9 @@ macro_rules! expr_rule {
                     &self,
                     expr: &::egonlang_core::ast::Expr,
                     span: &::egonlang_core::span::Span,
-                    types: &mut TypeEnv,
+                    types: &mut $crate::TypeEnv,
                 ) -> VerificationResult {
-                    fn internal $params -> Vec<::egonlang_core::errors::ErrorS> {
+                    fn internal $params -> Vec<::egonlang_core::errors::EgonErrorS> {
                         $body
                     }
 
@@ -74,9 +74,9 @@ macro_rules! stmt_rule {
                     &self,
                     stmt: &::egonlang_core::ast::Stmt,
                     span: &::egonlang_core::span::Span,
-                    types: &mut $crate::type_env::TypeEnv,
-                ) -> VerificationResult {
-                    fn internal $params -> Vec<::egonlang_core::errors::ErrorS> {
+                    types: &mut $crate::TypeEnv,
+                ) -> $crate::VerificationResult {
+                    fn internal $params -> Vec<::egonlang_core::errors::EgonErrorS> {
                         $body
                     }
 
@@ -93,8 +93,8 @@ macro_rules! stmt_rule {
                     &self,
                     _expr: &::egonlang_core::ast::Expr,
                     _span: &::egonlang_core::span::Span,
-                    _types: &mut TypeEnv,
-                ) -> VerificationResult {
+                    _types: &mut $crate::TypeEnv,
+                ) -> $crate::VerificationResult {
                     Ok(())
                 }
             }
