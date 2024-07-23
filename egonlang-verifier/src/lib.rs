@@ -1,8 +1,8 @@
 pub mod rules;
-pub mod type_env;
-pub mod verifier;
+mod type_env;
+mod verifier;
 mod verify_trace;
-pub mod visitor;
+mod visitor;
 
 use egonlang_core::ast::Module;
 pub use type_env::TypeEnv;
