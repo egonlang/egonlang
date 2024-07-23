@@ -1,4 +1,4 @@
-use egonlang_core::{errors::SyntaxError, prelude::*};
+use egonlang_core::prelude::*;
 use regex::Regex;
 
 use crate::prelude::*;
@@ -11,10 +11,10 @@ stmt_rule!(
     /// type invalidTypeAlias = string; // SyntaxError∂
     /// ```
     InvalidTypeAliasName,
-    fn (stmt: &Stmt, span: &Span, types: &mut TypeEnv) {
+    fn (stmt: &ast::Stmt, span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];
 
-        if let Stmt::Assign(assign_stmt) = &stmt {
+        if let ast::Stmt::Assign(assign_stmt) = &stmt {
             if let Some((value_expr, value_span)) = &assign_stmt.value {
                 let value_typeref = types.resolve_expr_type(value_expr, value_span).unwrap();
 
@@ -24,7 +24,7 @@ stmt_rule!(
 
                     if !pattern.is_match(name) {
                         errs.push((
-                            SyntaxError::InvalidTypeAlias {
+                            EgonSyntaxError::InvalidTypeAlias {
                                 name: name.to_string(),
                             }
                             .into(),
@@ -43,7 +43,7 @@ stmt_rule!(
 mod tests {
     use super::InvalidTypeAliasNameRule;
     use crate::verifier_rule_test;
-    use egonlang_core::errors::SyntaxError;
+    use egonlang_core::prelude::*;
 
     verifier_rule_test!(
         InvalidTypeAliasNameRule,
@@ -62,7 +62,7 @@ mod tests {
         returns_err_if_alias_is_lowercase,
         "type booly = bool;",
         Err(vec![(
-            SyntaxError::InvalidTypeAlias {
+            EgonSyntaxError::InvalidTypeAlias {
                 name: "booly".to_string()
             }
             .into(),
@@ -75,7 +75,7 @@ mod tests {
         returns_err_if_alias_contains_underscore,
         "type Bool_Value = bool;",
         Err(vec![(
-            SyntaxError::InvalidTypeAlias {
+            EgonSyntaxError::InvalidTypeAlias {
                 name: "Bool_Value".to_string()
             }
             .into(),
@@ -88,7 +88,7 @@ mod tests {
         returns_err_if_alias_starts_with_an_underscore,
         "type _Bool = bool;",
         Err(vec![(
-            SyntaxError::InvalidTypeAlias {
+            EgonSyntaxError::InvalidTypeAlias {
                 name: "_Bool".to_string()
             }
             .into(),

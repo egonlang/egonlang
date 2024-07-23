@@ -1,4 +1,4 @@
-use egonlang_core::{ast::OpInfix, errors::SyntaxError, prelude::*};
+use egonlang_core::prelude::*;
 
 use crate::prelude::*;
 
@@ -9,11 +9,11 @@ expr_rule!(
     /// let a = 10 / 0; // SyntaxError
     /// ```
     DivideByZero,
-    fn (expr: &Expr, _span: &Span, _types: &mut TypeEnv) {
+    fn (expr: &ast::Expr, _span: &Span, _types: &mut TypeEnv) {
         let mut errs = vec![];
 
-        if let Expr::Infix(infix_expr) = &expr {
-            if let OpInfix::Divide = infix_expr.op {
+        if let ast::Expr::Infix(infix_expr) = &expr {
+            if let ast::OpInfix::Divide = infix_expr.op {
                 verify_trace!(
                     "Verifying division infix expression doesn't divide by zero: {}",
                     expr.to_string().cyan()
@@ -31,7 +31,7 @@ expr_rule!(
                         error: "Trying to divide by zero on the left side: {}",
                         lt_expr.to_string().cyan()
                     );
-                    errs.push((SyntaxError::DivideByZero.into(), lt_span.clone()));
+                    errs.push((EgonSyntaxError::DivideByZero.into(), lt_span.clone()));
                 }
 
                 if rt_value == 0f64 {
@@ -39,7 +39,7 @@ expr_rule!(
                         error: "Trying to divide by zero on the right side: {}",
                         rt_expr.to_string().cyan()
                     );
-                    errs.push((SyntaxError::DivideByZero.into(), rt_span.clone()));
+                    errs.push((EgonSyntaxError::DivideByZero.into(), rt_span.clone()));
                 }
             }
         }
@@ -52,7 +52,7 @@ expr_rule!(
 mod tests {
     use super::DivideByZeroRule;
     use crate::verifier_rule_test;
-    use egonlang_core::errors::SyntaxError;
+    use egonlang_core::prelude::*;
 
     verifier_rule_test!(
         DivideByZeroRule,
@@ -64,7 +64,7 @@ mod tests {
         DivideByZeroRule,
         returns_err_if_dividing_zero_numbers,
         "50 / 0;",
-        Err(vec![(SyntaxError::DivideByZero.into(), 5..6)])
+        Err(vec![(EgonSyntaxError::DivideByZero.into(), 5..6)])
     );
 
     verifier_rule_test!(
@@ -72,8 +72,8 @@ mod tests {
         returns_ok_if_dividing_zero_numbers_2,
         "0 / 0;",
         Err(vec![
-            (SyntaxError::DivideByZero.into(), 0..1),
-            (SyntaxError::DivideByZero.into(), 4..5)
+            (EgonSyntaxError::DivideByZero.into(), 0..1),
+            (EgonSyntaxError::DivideByZero.into(), 4..5)
         ])
     );
 }

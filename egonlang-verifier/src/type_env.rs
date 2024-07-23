@@ -1,22 +1,18 @@
 use std::collections::HashMap;
 
-use egonlang_core::{
-    ast::{Expr, ExprIdentifier, ExprList, ExprTuple, TypeRef},
-    errors::{ErrorS, TypeError},
-    span::Span,
-};
+use egonlang_core::prelude::*;
 
 use crate::verify_trace;
 
 /// Typing information stored about an identifier
 #[derive(Debug, PartialEq, Clone)]
 pub struct TypeEnvValue {
-    pub typeref: TypeRef,
+    pub typeref: ast::TypeRef,
     pub is_const: bool,
 }
 
 impl TypeEnvValue {
-    fn map_typeref(&self, typeref: TypeRef) -> TypeEnvValue {
+    fn map_typeref(&self, typeref: ast::TypeRef) -> TypeEnvValue {
         let mut env_var = self.clone();
         env_var.typeref = typeref;
 
@@ -168,12 +164,16 @@ impl<'a> TypeEnv<'a> {
     /// let b = false;
     ///
     /// (a, b,); // This expression's type resolves to (number, bool,)
-    pub fn resolve_expr_type(&self, expr: &Expr, span: &Span) -> Result<TypeRef, Vec<ErrorS>> {
+    pub fn resolve_expr_type(
+        &self,
+        expr: &ast::Expr,
+        span: &Span,
+    ) -> Result<ast::TypeRef, Vec<EgonErrorS>> {
         let resolved_type = match expr {
-            Expr::Identifier(ident_expr) => self.resolve_identifier_type(ident_expr, span),
-            Expr::List(list_expr) => self.resolve_list_type(list_expr),
-            Expr::Tuple(tuple_expr) => self.resolve_tuple_type(tuple_expr),
-            Expr::Block(block_expr) => {
+            ast::Expr::Identifier(ident_expr) => self.resolve_identifier_type(ident_expr, span),
+            ast::Expr::List(list_expr) => self.resolve_list_type(list_expr),
+            ast::Expr::Tuple(tuple_expr) => self.resolve_tuple_type(tuple_expr),
+            ast::Expr::Block(block_expr) => {
                 let a = block_expr.return_expr.clone();
 
                 if let Some((a, a_span)) = a {
@@ -181,10 +181,10 @@ impl<'a> TypeEnv<'a> {
 
                     return result;
                 } else {
-                    return Ok(TypeRef::unit());
+                    return Ok(ast::TypeRef::unit());
                 }
             }
-            Expr::Type(type_expr) => {
+            ast::Expr::Type(type_expr) => {
                 let type_string = type_expr.0.to_string();
                 let a = self.get(type_string.as_str());
 
@@ -194,7 +194,7 @@ impl<'a> TypeEnv<'a> {
 
                 Ok(type_expr.0.clone())
             }
-            Expr::Assign(assign_expr) => {
+            ast::Expr::Assign(assign_expr) => {
                 let name = &assign_expr.identifier.name;
 
                 Ok(self.get(name).map(|x| x.typeref).unwrap_or_else(|| {
@@ -203,7 +203,7 @@ impl<'a> TypeEnv<'a> {
                     self.resolve_expr_type(value_expr, value_span).unwrap()
                 }))
             }
-            Expr::If(if_expr) => {
+            ast::Expr::If(if_expr) => {
                 let (then_expr, then_span) = &if_expr.then;
                 let then_typeref = self.resolve_expr_type(then_expr, then_span)?;
 
@@ -241,34 +241,40 @@ impl<'a> TypeEnv<'a> {
 
     fn resolve_identifier_type(
         &self,
-        ident_expr: &ExprIdentifier,
+        ident_expr: &ast::ExprIdentifier,
         span: &Span,
-    ) -> Result<TypeRef, Vec<ErrorS>> {
+    ) -> Result<ast::TypeRef, Vec<EgonErrorS>> {
         let name = &ident_expr.identifier.name;
 
         match self.get(name) {
             Some(env_var) => Ok(env_var.typeref),
             None => Err(vec![(
-                TypeError::Undefined(name.to_string()).into(),
+                EgonTypeError::Undefined(name.to_string()).into(),
                 span.clone(),
             )]),
         }
     }
 
-    fn resolve_list_type(&self, list_expr: &ExprList) -> Result<TypeRef, Vec<ErrorS>> {
+    fn resolve_list_type(
+        &self,
+        list_expr: &ast::ExprList,
+    ) -> Result<ast::TypeRef, Vec<EgonErrorS>> {
         if list_expr.items.is_empty() {
-            return Ok(TypeRef::list(TypeRef::unknown()));
+            return Ok(ast::TypeRef::list(ast::TypeRef::unknown()));
         }
 
         let (first_item_expr, first_item_span) = list_expr.items.first().unwrap().clone();
         let first_item_type = self.resolve_expr_type(&first_item_expr, &first_item_span)?;
 
-        Ok(TypeRef::list(first_item_type))
+        Ok(ast::TypeRef::list(first_item_type))
     }
 
-    fn resolve_tuple_type(&self, tuple_expr: &ExprTuple) -> Result<TypeRef, Vec<ErrorS>> {
+    fn resolve_tuple_type(
+        &self,
+        tuple_expr: &ast::ExprTuple,
+    ) -> Result<ast::TypeRef, Vec<EgonErrorS>> {
         if tuple_expr.items.is_empty() {
-            return Ok(TypeRef::list(TypeRef::unknown()));
+            return Ok(ast::TypeRef::list(ast::TypeRef::unknown()));
         }
 
         let item_types = tuple_expr
@@ -278,7 +284,7 @@ impl<'a> TypeEnv<'a> {
             .map(|(x_expr, x_span)| self.resolve_expr_type(&x_expr, &x_span).unwrap())
             .collect();
 
-        Ok(TypeRef::tuple(item_types))
+        Ok(ast::TypeRef::tuple(item_types))
     }
 }
 

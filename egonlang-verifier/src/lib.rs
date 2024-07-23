@@ -4,12 +4,13 @@ mod verifier;
 mod verify_trace;
 mod visitor;
 
-use egonlang_core::ast::Module;
-pub use type_env::TypeEnv;
-use verifier::{VerificationResult, Verifier};
+pub use type_env::{TypeEnv, TypeEnvValue};
+pub use verifier::{VerificationResult, Verifier};
 
-/// Verify the module AST
-pub fn verify_module(module: &Module) -> VerificationResult {
+/// Verify a [`egonlang_core::ast::Module`] using the core [`rules::Rule`] set
+///
+/// See: [`rules::core`]
+pub fn verify_module(module: &egonlang_core::ast::Module) -> VerificationResult {
     Verifier::default().verify(module)
 }
 

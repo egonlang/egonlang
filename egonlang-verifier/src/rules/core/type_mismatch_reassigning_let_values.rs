@@ -1,4 +1,4 @@
-use egonlang_core::{errors::TypeError, prelude::*};
+use egonlang_core::prelude::*;
 
 use crate::prelude::*;
 
@@ -19,10 +19,10 @@ expr_rule!(
     /// c = true;
     /// ```
     TypeMismatchReassigningLetValues,
-    fn (expr: &Expr, _span: &Span, types: &mut TypeEnv) {
+    fn (expr: &ast::Expr, _span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];
 
-        if let Expr::Assign(expr_assign) = expr {
+        if let ast::Expr::Assign(expr_assign) = expr {
             let identifier = &expr_assign.identifier.name;
 
             if let Some(type_env_value) = types.get(identifier) {
@@ -42,7 +42,7 @@ expr_rule!(
                         "Type mismatching reassigning value ({type_env_typeref:?} vs {value_typeref:?}): {expr}");
 
                     errs.push((
-                        TypeError::MismatchType {
+                        EgonTypeError::MismatchType {
                             expected: type_env_typeref.to_string(),
                             actual: value_typeref.to_string(),
                         }
@@ -61,7 +61,7 @@ expr_rule!(
 mod tests {
     use super::TypeMismatchReassigningLetValuesRule;
     use crate::verifier_rule_test;
-    use egonlang_core::errors::TypeError;
+    use egonlang_core::prelude::*;
 
     verifier_rule_test! {
         TypeMismatchReassigningLetValuesRule,
@@ -74,9 +74,9 @@ mod tests {
         returns_err_reassigning_with_different_type,
         "let a = 123; a = false;",
         Err(vec![(
-            TypeError::MismatchType {
-                expected: "number".to_string(),
-                actual: "bool".to_string()
+            EgonTypeError::MismatchType {
+                expected: ast::TypeRef::number().to_string(),
+                actual: ast::TypeRef::bool().to_string()
             }.into(),
             17..22
         )])
@@ -87,9 +87,9 @@ mod tests {
         returns_err_reassigning_with_different_type_2,
         "let a = [1, 2, 3]; a = [false, true];",
         Err(vec![(
-            TypeError::MismatchType {
-                expected: "list<number>".to_string(),
-                actual: "list<bool>".to_string()
+            EgonTypeError::MismatchType {
+                expected: ast::TypeRef::list(ast::TypeRef::number()).to_string(),
+                actual: ast::TypeRef::list(ast::TypeRef::bool()).to_string()
             }.into(),
             23..36
         )])

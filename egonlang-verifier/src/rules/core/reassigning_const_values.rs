@@ -1,4 +1,4 @@
-use egonlang_core::{errors::SyntaxError, prelude::*};
+use egonlang_core::prelude::*;
 
 use crate::prelude::*;
 
@@ -10,10 +10,10 @@ expr_rule!(
     /// a = 456; // SyntaxError
     /// ```
     ReassigningConstValue,
-    fn (expr: &Expr, span: &Span, types: &mut TypeEnv) {
+    fn (expr: &ast::Expr, span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];
 
-        if let Expr::Assign(expr_assign) = expr {
+        if let ast::Expr::Assign(expr_assign) = expr {
             verify_trace!(
                 "Verifying assign expression doesn't reassign const: {}",
                 expr.to_string().cyan()
@@ -27,7 +27,7 @@ expr_rule!(
                 verify_trace!(error: "Reassigned const: {}", expr.to_string().cyan());
 
                 errs.push((
-                    SyntaxError::ReassigningConst {
+                    EgonSyntaxError::ReassigningConst {
                         name: identifier.clone(),
                     }
                     .into(),
@@ -44,7 +44,7 @@ expr_rule!(
 mod tests {
     use super::ReassigningConstValueRule;
     use crate::verifier_rule_test;
-    use egonlang_core::errors::SyntaxError;
+    use egonlang_core::prelude::*;
 
     verifier_rule_test!(
         ReassigningConstValueRule,
@@ -57,7 +57,7 @@ mod tests {
         returns_err_if_identifier_is_const,
         "const a = 5; a = 100;",
         Err(vec![(
-            SyntaxError::ReassigningConst {
+            EgonSyntaxError::ReassigningConst {
                 name: "a".to_string()
             }
             .into(),

@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use egonlang_core::{ast::ExprIdentifier, errors::TypeError, prelude::*};
+use egonlang_core::prelude::*;
 
 expr_rule!(
     /// Checks for references to undefined variables
@@ -10,10 +10,10 @@ expr_rule!(
     /// a;
     /// ```
     ReferencingUndefinedIdentifier,
-    fn (expr: &Expr, span: &Span, types: &mut TypeEnv) {
+    fn (expr: &ast::Expr, span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];
 
-        if let Expr::Identifier(ExprIdentifier { identifier }) = expr {
+        if let ast::Expr::Identifier(ast::ExprIdentifier { identifier }) = expr {
             verify_trace!(
                 "Checking if idenitifer {} has been defined",
                 expr.to_string().cyan()
@@ -24,7 +24,7 @@ expr_rule!(
             if types.get(name).is_none() {
                 verify_trace!(error: "identifier not defined: {expr}");
 
-                errs.push((TypeError::Undefined(name.to_string()).into(), span.clone()));
+                errs.push((EgonTypeError::Undefined(name.to_string()).into(), span.clone()));
             }
         }
 

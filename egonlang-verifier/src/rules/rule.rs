@@ -4,14 +4,14 @@ pub trait Rule<'a> {
         &self,
         stmt: &::egonlang_core::ast::Stmt,
         span: &::egonlang_core::span::Span,
-        types: &mut crate::TypeEnv,
+        types: &mut crate::type_env::TypeEnv,
     ) -> crate::VerificationResult;
 
     fn visit_expr(
         &self,
         expr: &::egonlang_core::ast::Expr,
         span: &::egonlang_core::span::Span,
-        types: &mut crate::TypeEnv,
+        types: &mut crate::type_env::TypeEnv,
     ) -> crate::VerificationResult;
 }
 
@@ -31,7 +31,7 @@ macro_rules! expr_rule {
                     &self,
                     _stmt: &::egonlang_core::ast::Stmt,
                     _span: &::egonlang_core::span::Span,
-                    _types: &mut $crate::TypeEnv,
+                    _types: &mut $crate::type_env::TypeEnv,
                 ) -> VerificationResult {
                     Ok(())
                 }
@@ -74,7 +74,7 @@ macro_rules! stmt_rule {
                     &self,
                     stmt: &::egonlang_core::ast::Stmt,
                     span: &::egonlang_core::span::Span,
-                    types: &mut $crate::TypeEnv,
+                    types: &mut $crate::type_env::TypeEnv,
                 ) -> VerificationResult {
                     fn internal $params -> Vec<::egonlang_core::errors::ErrorS> {
                         $body

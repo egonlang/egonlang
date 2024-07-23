@@ -1,14 +1,14 @@
-use egonlang_core::{errors::SyntaxError, prelude::*};
+use egonlang_core::prelude::*;
 
 use crate::prelude::*;
 
 stmt_rule!(
     /// Checks assignment statements initialize consts with a value
     DeclareConstWithoutValue,
-    fn (stmt: &Stmt, span: &Span, _types: &mut TypeEnv) {
+    fn (stmt: &ast::Stmt, span: &Span, _types: &mut TypeEnv) {
         let mut errs = vec![];
 
-        if let Stmt::Assign(stmt_assign) = stmt {
+        if let ast::Stmt::Assign(stmt_assign) = stmt {
             verify_trace!(
                 "Verifying const declaration has value: {}",
                 stmt.to_string().cyan()
@@ -21,7 +21,7 @@ stmt_rule!(
                 );
 
                 errs.push((
-                    SyntaxError::UninitializedConst {
+                    EgonSyntaxError::UninitializedConst {
                         name: stmt_assign.identifier.name.clone(),
                     }
                     .into(),
@@ -38,7 +38,7 @@ stmt_rule!(
 mod tests {
     use super::DeclareConstWithoutValueRule;
     use crate::verifier_rule_test;
-    use egonlang_core::errors::SyntaxError;
+    use egonlang_core::prelude::*;
 
     verifier_rule_test!(
         DeclareConstWithoutValueRule,
@@ -51,7 +51,7 @@ mod tests {
         returns_err_const_declared_without_type_or_value,
         "const a;",
         Err(vec![(
-            SyntaxError::UninitializedConst {
+            EgonSyntaxError::UninitializedConst {
                 name: "a".to_string()
             }
             .into(),
@@ -64,7 +64,7 @@ mod tests {
         returns_err_const_declared_without_value,
         "const a: number;",
         Err(vec![(
-            SyntaxError::UninitializedConst {
+            EgonSyntaxError::UninitializedConst {
                 name: "a".to_string()
             }
             .into(),

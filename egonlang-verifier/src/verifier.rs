@@ -1,17 +1,8 @@
-use egonlang_core::{
-    ast::{Expr, Module, Stmt},
-    errors::ErrorS,
-    span::Span,
-};
+use egonlang_core::prelude::*;
 
-use crate::{
-    prelude::*,
-    type_env::{TypeEnv, TypeEnvValue},
-    verify_trace,
-    visitor::Visitor,
-};
+use crate::{rules, verify_trace, visitor::Visitor, TypeEnv, TypeEnvValue};
 
-pub type VerificationResult = Result<(), Vec<ErrorS>>;
+pub type VerificationResult = Result<(), Vec<EgonErrorS>>;
 
 /// Verify an AST [`Module`] using the registered [`Rule`] set
 ///
@@ -86,8 +77,8 @@ impl<'a> Verifier<'a> {
     }
 
     /// Verify an AST [`Module`] using the registered [`Rule`] set
-    pub fn verify(&self, module: &Module) -> VerificationResult {
-        let mut all_errs: Vec<ErrorS> = vec![];
+    pub fn verify(&self, module: &ast::Module) -> VerificationResult {
+        let mut all_errs: Vec<EgonErrorS> = vec![];
 
         let mut types = TypeEnv::new();
 
@@ -106,13 +97,18 @@ impl<'a> Verifier<'a> {
 }
 
 impl<'a> Visitor<'a> for Verifier<'a> {
-    fn visit_stmt(&self, stmt: &Stmt, span: &Span, types: &mut TypeEnv) -> Result<(), Vec<ErrorS>> {
-        let mut errs: Vec<ErrorS> = vec![];
+    fn visit_stmt(
+        &self,
+        stmt: &ast::Stmt,
+        span: &Span,
+        types: &mut TypeEnv,
+    ) -> Result<(), Vec<EgonErrorS>> {
+        let mut errs: Vec<EgonErrorS> = vec![];
 
         verify_trace!(visit_stmt: "{}", stmt.to_string().cyan());
 
         let result = match stmt {
-            Stmt::Expr(stmt_expr) => {
+            ast::Stmt::Expr(stmt_expr) => {
                 let (expr, expr_span) = &stmt_expr.expr;
                 let expr_errs = self
                     .visit_expr(expr, expr_span, types)
@@ -127,7 +123,7 @@ impl<'a> Visitor<'a> for Verifier<'a> {
 
                 Ok(())
             }
-            Stmt::Assign(stmt_assign) => {
+            ast::Stmt::Assign(stmt_assign) => {
                 if let Some((type_expr, type_expr_span)) = &stmt_assign.type_expr {
                     let type_expr_errs = self
                         .visit_expr(type_expr, type_expr_span, types)
@@ -188,7 +184,7 @@ impl<'a> Visitor<'a> for Verifier<'a> {
 
                 Ok(())
             }
-            Stmt::Fn(stmt_fn) => {
+            ast::Stmt::Fn(stmt_fn) => {
                 let (fn_expr, fn_expr_span) = &stmt_fn.fn_expr;
 
                 let fn_expr_errs = self
@@ -205,7 +201,7 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 //
                 Ok(())
             }
-            Stmt::Error => Ok(()),
+            ast::Stmt::Error => Ok(()),
         };
 
         for rule in &self.rules {
@@ -229,13 +225,18 @@ impl<'a> Visitor<'a> for Verifier<'a> {
         result
     }
 
-    fn visit_expr(&self, expr: &Expr, span: &Span, types: &mut TypeEnv) -> Result<(), Vec<ErrorS>> {
-        let mut errs: Vec<ErrorS> = vec![];
+    fn visit_expr(
+        &self,
+        expr: &ast::Expr,
+        span: &Span,
+        types: &mut TypeEnv,
+    ) -> Result<(), Vec<EgonErrorS>> {
+        let mut errs: Vec<EgonErrorS> = vec![];
 
         verify_trace!(visit_expr: "{}", expr.to_string().cyan());
 
         match expr {
-            Expr::Block(block_expr) => {
+            ast::Expr::Block(block_expr) => {
                 let mut block_types = types.extend();
 
                 for (stmt, stmt_span) in &block_expr.stmts {
@@ -266,7 +267,7 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                     errs.extend(rule_errs);
                 }
             }
-            Expr::Assign(assign_expr) => {
+            ast::Expr::Assign(assign_expr) => {
                 let (value_expr, value_span) = &assign_expr.value;
 
                 let value_errs = self
@@ -282,7 +283,7 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                     errs.extend(rule_errs);
                 }
             }
-            Expr::Infix(infix_expr) => {
+            ast::Expr::Infix(infix_expr) => {
                 let (lt_expr, lt_span) = &infix_expr.lt;
 
                 let lt_errs = self
@@ -307,7 +308,7 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                     errs.extend(rule_errs);
                 }
             }
-            Expr::Fn(fn_expr) => {
+            ast::Expr::Fn(fn_expr) => {
                 let mut fn_types = types.extend();
 
                 for ((ident, type_ref), _) in &fn_expr.params {
@@ -340,7 +341,7 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                     errs.extend(rule_errs);
                 }
             }
-            Expr::If(if_expr) => {
+            ast::Expr::If(if_expr) => {
                 let (cond_expr, cond_span) = &if_expr.cond;
                 let cond_errs = self
                     .visit_expr(cond_expr, cond_span, types)
@@ -394,11 +395,7 @@ impl<'a> Visitor<'a> for Verifier<'a> {
 #[cfg(test)]
 mod verifier_tests {
     use crate::prelude::*;
-    use egonlang_core::{
-        ast::{ExprAssign, ExprList, ExprLiteral, Identifier, Module, StmtExpr},
-        errors::{SyntaxError, TypeError},
-        prelude::*,
-    };
+    use egonlang_core::prelude::*;
     use pretty_assertions::assert_eq;
 
     use super::Verifier;
@@ -432,9 +429,9 @@ mod verifier_tests {
         validate_const_declaration_errors_without_value,
         "const a;",
         Err(vec![
-            (TypeError::UnknownType.into(), 0..8),
+            (EgonTypeError::UnknownType.into(), 0..8),
             (
-                SyntaxError::UninitializedConst {
+                EgonSyntaxError::UninitializedConst {
                     name: "a".to_string()
                 }
                 .into(),
@@ -452,7 +449,7 @@ mod verifier_tests {
     verifier_test!(
         validate_let_declaration_requires_type_or_value,
         "let a;",
-        Err(vec![(TypeError::UnknownType.into(), 0..6)])
+        Err(vec![(EgonTypeError::UnknownType.into(), 0..6)])
     );
 
     verifier_test!(
@@ -471,7 +468,7 @@ mod verifier_tests {
         validate_let_declarations_with_value_and_type_must_match,
         "let a: number = \"foo\";",
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "number".to_string(),
                 actual: "string".to_string()
             }
@@ -484,7 +481,7 @@ mod verifier_tests {
         validate_let_decl_typed_as_number_with_range_value_type,
         "let a: number = 0..10;",
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "number".to_string(),
                 actual: "range".to_string()
             }
@@ -497,7 +494,7 @@ mod verifier_tests {
         validate_let_decl_typed_as_number_with_list_value_type,
         "let a: number = [1, 2, 3];",
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "number".to_string(),
                 actual: "list<number>".to_string()
             }
@@ -528,7 +525,7 @@ mod verifier_tests {
         validate_let_decl_with_value_as_block_with_returning_expr_mismatch_types,
         "let a: number = { \"foo\" };",
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "number".to_string(),
                 actual: "string".to_string()
             }
@@ -558,7 +555,7 @@ mod verifier_tests {
         ];",
         Err(vec![
             (
-                TypeError::MismatchType {
+                EgonTypeError::MismatchType {
                     expected: "number".to_string(),
                     actual: "string".to_string()
                 }
@@ -566,7 +563,7 @@ mod verifier_tests {
                 44..49
             ),
             (
-                TypeError::MismatchType {
+                EgonTypeError::MismatchType {
                     expected: "number".to_string(),
                     actual: "()".to_string()
                 }
@@ -574,7 +571,7 @@ mod verifier_tests {
                 63..69
             ),
             (
-                TypeError::MismatchType {
+                EgonTypeError::MismatchType {
                     expected: "number".to_string(),
                     actual: "range".to_string()
                 }
@@ -582,7 +579,7 @@ mod verifier_tests {
                 83..88
             ),
             (
-                TypeError::MismatchType {
+                EgonTypeError::MismatchType {
                     expected: "number".to_string(),
                     actual: "bool".to_string()
                 }
@@ -590,7 +587,7 @@ mod verifier_tests {
                 102..107
             ),
             (
-                TypeError::MismatchType {
+                EgonTypeError::MismatchType {
                     expected: "number".to_string(),
                     actual: "string".to_string()
                 }
@@ -604,7 +601,7 @@ mod verifier_tests {
         validate_assign_mismatch_types_block_returning_string,
         "let a: () = { \"foo\" };",
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "()".to_string(),
                 actual: "string".to_string()
             }
@@ -617,7 +614,7 @@ mod verifier_tests {
         validate_assign_mismatch_types_block_returning_number,
         "let a: () = { 123 };",
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "()".to_string(),
                 actual: "number".to_string()
             }
@@ -636,7 +633,7 @@ mod verifier_tests {
         validate_assign_mismatch_types_block_returning_list,
         "let a: () = { [1, 2, 3] };",
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "()".to_string(),
                 actual: "list<number>".to_string()
             }
@@ -649,7 +646,7 @@ mod verifier_tests {
         validate_assign_mismatch_types_block_returning_tuple,
         "let a: () = { (1, 2, 3,) };",
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "()".to_string(),
                 actual: "tuple<number, number, number>".to_string()
             }
@@ -662,7 +659,7 @@ mod verifier_tests {
         validate_assign_mismatch_types_block_returning_bool,
         "let a: () = { false };",
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "()".to_string(),
                 actual: "bool".to_string()
             }
@@ -675,7 +672,7 @@ mod verifier_tests {
         validate_assign_mismatch_types_nested_block_returning_number,
         "let a: () = { { 123 } };",
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "()".to_string(),
                 actual: "number".to_string()
             }
@@ -688,7 +685,7 @@ mod verifier_tests {
         validate_assign_chain_mismatched_types,
         "let a: () = b = 123;",
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "()".to_string(),
                 actual: "number".to_string()
             }
@@ -707,7 +704,7 @@ mod verifier_tests {
         validate_if_else_mismatched_types,
         "if (true) { 123; } else { 123 };",
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "()".to_string(),
                 actual: "number".to_string()
             }
@@ -720,7 +717,7 @@ mod verifier_tests {
         validate_if_cond_is_bool_mismatch_number,
         "if (123) {} else {};",
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "bool".to_string(),
                 actual: "number".to_string()
             }
@@ -733,7 +730,7 @@ mod verifier_tests {
         validate_if_cond_is_bool_mismatch_number_plus_number,
         "if (123 + 456) {} else {};",
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "bool".to_string(),
                 actual: "number".to_string()
             }
@@ -784,7 +781,7 @@ mod verifier_tests {
         validate_infix_types_plus_type_mismatch_string,
         "1 + \"foo\";",
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "number".to_string(),
                 actual: "string".to_string()
             }
@@ -797,7 +794,7 @@ mod verifier_tests {
         validate_infix_types_plus_type_mismatch_string_flipped,
         "\"foo\" + 1;",
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "number".to_string(),
                 actual: "string".to_string()
             }
@@ -810,7 +807,7 @@ mod verifier_tests {
         testtt,
         "if (true and 1) { (); } else { (); };",
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "bool".to_string(),
                 actual: "number".to_string()
             }
@@ -828,26 +825,26 @@ mod verifier_tests {
     verifier_test!(
         validate_assign_empty_list_to_untyped_list,
         "let a = [];",
-        Err(vec![(TypeError::UknownListType.into(), 8..10)])
+        Err(vec![(EgonTypeError::UknownListType.into(), 8..10)])
     );
 
     verifier_test!(
         validate_let_decl_empty_list_to_unknown_list,
         "let a: list<unknown> = [];",
-        Err(vec![(TypeError::UknownListType.into(), 0..26)])
+        Err(vec![(EgonTypeError::UknownListType.into(), 0..26)])
     );
 
     verifier_test!(
         validate_const_decl_empty_list_to_unknown_list,
         "const a: list<unknown> = [];",
-        Err(vec![(TypeError::UknownListType.into(), 0..28)])
+        Err(vec![(EgonTypeError::UknownListType.into(), 0..28)])
     );
 
     verifier_test!(
         validate_assign_mixed_type_list,
         "a = [1, \"a\"];",
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "number".to_string(),
                 actual: "string".to_string()
             }
@@ -859,7 +856,7 @@ mod verifier_tests {
     verifier_test!(
         validate_let_decl_unknown_type,
         "let a: unknown;",
-        Err(vec![(TypeError::UnknownType.into(), 7..14)])
+        Err(vec![(EgonTypeError::UnknownType.into(), 7..14)])
     );
 
     verifier_test!(
@@ -869,9 +866,9 @@ mod verifier_tests {
         a = \"foo\";
         ",
         Err(vec![(
-            TypeError::MismatchType {
-                expected: TypeRef::number().to_string(),
-                actual: TypeRef::string().to_string()
+            EgonTypeError::MismatchType {
+                expected: ast::TypeRef::number().to_string(),
+                actual: ast::TypeRef::string().to_string()
             }
             .into(),
             34..39
@@ -885,9 +882,9 @@ mod verifier_tests {
         let b: string = a;
         ",
         Err(vec![(
-            TypeError::MismatchType {
-                expected: TypeRef::string().to_string(),
-                actual: TypeRef::number().to_string()
+            EgonTypeError::MismatchType {
+                expected: ast::TypeRef::string().to_string(),
+                actual: ast::TypeRef::number().to_string()
             }
             .into(),
             46..47
@@ -901,7 +898,7 @@ mod verifier_tests {
         a = \"foo\";
         ",
         Err(vec![(
-            SyntaxError::ReassigningConst {
+            EgonSyntaxError::ReassigningConst {
                 name: "a".to_string()
             }
             .into(),
@@ -916,9 +913,9 @@ mod verifier_tests {
         let b = [1, 2, a];
         ",
         Err(vec![(
-            TypeError::MismatchType {
-                expected: TypeRef::number().to_string(),
-                actual: TypeRef::string().to_string()
+            EgonTypeError::MismatchType {
+                expected: ast::TypeRef::number().to_string(),
+                actual: ast::TypeRef::string().to_string()
             }
             .into(),
             47..48
@@ -932,9 +929,9 @@ mod verifier_tests {
         let b = [a, \"bar\", 3];
         ",
         Err(vec![(
-            TypeError::MismatchType {
-                expected: TypeRef::string().to_string(),
-                actual: TypeRef::number().to_string()
+            EgonTypeError::MismatchType {
+                expected: ast::TypeRef::string().to_string(),
+                actual: ast::TypeRef::number().to_string()
             }
             .into(),
             51..52
@@ -951,7 +948,7 @@ mod verifier_tests {
         validate_fn_expr_type_mismatch_in_body_identifier,
         "(a: string): number => { a };",
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "number".to_string(),
                 actual: "string".to_string()
             }
@@ -964,7 +961,7 @@ mod verifier_tests {
         validate_fn_expr_type_mismatch_in_body_infix_bang,
         "(a: string): bool => { !a };",
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "bool".to_string(),
                 actual: "string".to_string()
             }
@@ -977,7 +974,7 @@ mod verifier_tests {
         validate_fn_expr_type_mismatch_in_body_infix_bang_and_fn_return_type_mismatch,
         "(a: bool): number => { !a };",
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "number".to_string(),
                 actual: "bool".to_string()
             }
@@ -993,7 +990,7 @@ mod verifier_tests {
         let b: number = { !a };
         ",
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "number".to_string(),
                 actual: "bool".to_string()
             }
@@ -1007,7 +1004,7 @@ mod verifier_tests {
         "(a: string, b: ()): number => { a + b };",
         Err(vec![
             (
-                TypeError::MismatchType {
+                EgonTypeError::MismatchType {
                     expected: "number".to_string(),
                     actual: "string".to_string()
                 }
@@ -1015,7 +1012,7 @@ mod verifier_tests {
                 32..33
             ),
             (
-                TypeError::MismatchType {
+                EgonTypeError::MismatchType {
                     expected: "number".to_string(),
                     actual: "()".to_string()
                 }
@@ -1050,7 +1047,7 @@ mod verifier_tests {
         validate_type_alias_pascal_case,
         "type int = number;",
         Err(vec![(
-            SyntaxError::InvalidTypeAlias {
+            EgonSyntaxError::InvalidTypeAlias {
                 name: "int".to_string()
             }
             .into(),
@@ -1062,7 +1059,7 @@ mod verifier_tests {
         validate_type_alias_pascal_case2,
         "type Number_List = list<number>;",
         Err(vec![(
-            SyntaxError::InvalidTypeAlias {
+            EgonSyntaxError::InvalidTypeAlias {
                 name: "Number_List".to_string()
             }
             .into(),
@@ -1081,7 +1078,7 @@ mod verifier_tests {
     //     };
     //     ",
     //     Err(vec![(
-    //         TypeError::MismatchType {
+    //         EgonTypeError::MismatchType {
     //             expected: "()".to_string(),
     //             actual: "number".to_string()
     //         }
@@ -1093,21 +1090,21 @@ mod verifier_tests {
     verifier_test!(
         validate_divide_by_zero,
         "0 / 1;",
-        Err(vec![(SyntaxError::DivideByZero.into(), 0..1)])
+        Err(vec![(EgonSyntaxError::DivideByZero.into(), 0..1)])
     );
 
     verifier_test!(
         validate_divide_by_zero_2,
         "1 / 0;",
-        Err(vec![(SyntaxError::DivideByZero.into(), 4..5)])
+        Err(vec![(EgonSyntaxError::DivideByZero.into(), 4..5)])
     );
 
     verifier_test!(
         validate_divide_by_zero_3,
         "0 / 0;",
         Err(vec![
-            (SyntaxError::DivideByZero.into(), 0..1),
-            (SyntaxError::DivideByZero.into(), 4..5)
+            (EgonSyntaxError::DivideByZero.into(), 0..1),
+            (EgonSyntaxError::DivideByZero.into(), 4..5)
         ])
     );
 
@@ -1121,7 +1118,7 @@ mod verifier_tests {
     //     };
     //     "#,
     //     Err(vec![(
-    //         TypeError::MismatchType {
+    //         EgonTypeError::MismatchType {
     //             expected: TypeRef::number().to_string(),
     //             actual: TypeRef::string().to_string()
     //         }
@@ -1134,10 +1131,10 @@ mod verifier_tests {
     fn errors_when_referencing_undefined_identifier() {
         let verifier = Verifier::default();
 
-        let module = Module::from(vec![(
-            StmtExpr {
+        let module = ast::Module::from(vec![(
+            ast::StmtExpr {
                 expr: (
-                    Identifier {
+                    ast::Identifier {
                         name: "a".to_string(),
                     }
                     .into(),
@@ -1151,7 +1148,10 @@ mod verifier_tests {
         let results = verifier.verify(&module);
 
         assert_eq!(
-            Err(vec![(TypeError::Undefined("a".to_string()).into(), 1..2)]),
+            Err(vec![(
+                EgonTypeError::Undefined("a".to_string()).into(),
+                1..2
+            )]),
             results
         );
     }
@@ -1160,11 +1160,11 @@ mod verifier_tests {
     fn errors_when_referencing_multiple_undefined_identifiers() {
         let verifier = Verifier::default();
 
-        let module = Module::from(vec![
+        let module = ast::Module::from(vec![
             (
-                StmtExpr {
+                ast::StmtExpr {
                     expr: (
-                        Identifier {
+                        ast::Identifier {
                             name: "a".to_string(),
                         }
                         .into(),
@@ -1175,9 +1175,9 @@ mod verifier_tests {
                 0..0,
             ),
             (
-                StmtExpr {
+                ast::StmtExpr {
                     expr: (
-                        Identifier {
+                        ast::Identifier {
                             name: "b".to_string(),
                         }
                         .into(),
@@ -1193,8 +1193,8 @@ mod verifier_tests {
 
         assert_eq!(
             Err(vec![
-                (TypeError::Undefined("a".to_string()).into(), 1..2),
-                (TypeError::Undefined("b".to_string()).into(), 5..6)
+                (EgonTypeError::Undefined("a".to_string()).into(), 1..2),
+                (EgonTypeError::Undefined("b".to_string()).into(), 5..6)
             ]),
             results
         );
@@ -1204,18 +1204,18 @@ mod verifier_tests {
     fn errors_when_assigning_list_with_type_mismatched_items() {
         let verifier = Verifier::default();
 
-        let module = Module::from(vec![(
-            StmtExpr {
+        let module = ast::Module::from(vec![(
+            ast::StmtExpr {
                 expr: (
-                    ExprAssign {
-                        identifier: Identifier {
+                    ast::ExprAssign {
+                        identifier: ast::Identifier {
                             name: "a".to_string(),
                         },
                         value: (
-                            ExprList {
+                            ast::ExprList {
                                 items: vec![
-                                    (ExprLiteral::Number(10f64).into(), 0..1),
-                                    (ExprLiteral::Bool(false).into(), 2..3),
+                                    (ast::ExprLiteral::Number(10f64).into(), 0..1),
+                                    (ast::ExprLiteral::Bool(false).into(), 2..3),
                                 ],
                             }
                             .into(),
@@ -1234,9 +1234,9 @@ mod verifier_tests {
 
         assert_eq!(
             Err(vec![(
-                TypeError::MismatchType {
-                    expected: TypeRef::number().to_string(),
-                    actual: TypeRef::bool().to_string()
+                EgonTypeError::MismatchType {
+                    expected: ast::TypeRef::number().to_string(),
+                    actual: ast::TypeRef::bool().to_string()
                 }
                 .into(),
                 2..3

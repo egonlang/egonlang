@@ -1,4 +1,4 @@
-use egonlang_core::{errors::TypeError, prelude::*};
+use egonlang_core::prelude::*;
 
 use crate::prelude::*;
 
@@ -11,10 +11,10 @@ expr_rule!(
     /// if (true) { 123 } else { 456 };
     /// ```
     TypeMismatchIfthenElseExpr,
-    fn (expr: &Expr, _span: &Span, types: &mut TypeEnv) {
+    fn (expr: &ast::Expr, _span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];
 
-        if let Expr::If(if_expr) = expr {
+        if let ast::Expr::If(if_expr) = expr {
             verify_trace!("Verifying if expression then/else types: {expr}");
 
             let (then_expr, then_span) = &if_expr.then;
@@ -29,7 +29,7 @@ expr_rule!(
                             verify_trace!(error: "then and else branches types don't match {then_typeref:?} vs {else_typeref:?} {expr}");
 
                             errs.push((
-                                TypeError::MismatchType {
+                                EgonTypeError::MismatchType {
                                     expected: then_typeref.to_string(),
                                     actual: else_typeref.to_string(),
                                 }
@@ -41,7 +41,7 @@ expr_rule!(
                         verify_trace!(error: "then and else branches types don't match {then_typeref:?} vs {else_typeref:?} {expr}");
 
                         errs.push((
-                            TypeError::MismatchType {
+                            EgonTypeError::MismatchType {
                                 expected: then_typeref.to_string(),
                                 actual: else_typeref.to_string(),
                             }
@@ -62,7 +62,7 @@ expr_rule!(
 mod tests {
     use super::TypeMismatchIfthenElseExprRule;
     use crate::verifier_rule_test;
-    use egonlang_core::errors::TypeError;
+    use egonlang_core::prelude::*;
 
     verifier_rule_test! {
         TypeMismatchIfthenElseExprRule,
@@ -129,7 +129,7 @@ mod tests {
         returns_err_if_the_else_branch_returns_different_type,
         r#"if (true) { [1, 2, 3] } else { "foo" };"#,
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "list<number>".to_string(),
                 actual: "string".to_string()
             }
@@ -144,7 +144,7 @@ mod tests {
         r#"if (true) { [1, 2, 3] } else if (true) { 123 } else { "foo" };"#,
         Err(vec![
             (
-                TypeError::MismatchType {
+                EgonTypeError::MismatchType {
                     expected: "number".to_string(),
                     actual: "string".to_string()
                 }
@@ -152,7 +152,7 @@ mod tests {
                 52..61
             ),
             (
-                TypeError::MismatchType {
+                EgonTypeError::MismatchType {
                     expected: "list<number>".to_string(),
                     actual: "number".to_string()
                 }

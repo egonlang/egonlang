@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use egonlang_core::{errors::TypeError, prelude::*};
+use egonlang_core::prelude::*;
 
 stmt_rule!(
     /// Checks the value type of an assignment declaration matches the declaration type
@@ -10,10 +10,10 @@ stmt_rule!(
     /// let c: bool = true;
     /// ```
     TypeMismatchOnDeclarations,
-    fn (stmt: &Stmt, span: &Span, types: &mut TypeEnv) {
+    fn (stmt: &ast::Stmt, span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];
 
-        if let Stmt::Assign(stmt_assign) = stmt {
+        if let ast::Stmt::Assign(stmt_assign) = stmt {
             verify_trace!(
                 "Verifying assignment statement: {}",
                 stmt.to_string().cyan()
@@ -26,7 +26,7 @@ stmt_rule!(
                         "Declaration of unknown type and no initial value: {}",
                         stmt.to_string().cyan()
                     );
-                    errs.push((TypeError::UnknownType.into(), span.clone()));
+                    errs.push((EgonTypeError::UnknownType.into(), span.clone()));
                 }
                 // let a = 123;
                 (None, Some((value_expr, value_span))) => {
@@ -35,12 +35,12 @@ stmt_rule!(
                     // Check for empty list assignment
                     // Example:
                     // let a = [];
-                    if value_typeref == TypeRef::list(TypeRef::unknown()) {
+                    if value_typeref == ast::TypeRef::list(ast::TypeRef::unknown()) {
                         verify_trace!(error:
                             "Unknown list type in declaration: {}",
                             stmt.to_string().cyan()
                         );
-                        errs.push((TypeError::UknownListType.into(), value_span.clone()));
+                        errs.push((EgonTypeError::UknownListType.into(), value_span.clone()));
                     }
                 }
                 // let a: number;
@@ -52,9 +52,9 @@ stmt_rule!(
                     // Check for empty list assignment
                     // Example:
                     // let a: unknown;
-                    if assign_typeref == TypeRef::unknown() {
+                    if assign_typeref == ast::TypeRef::unknown() {
                         verify_trace!(error: "Unknown type in declaration: {stmt}");
-                        errs.push((TypeError::UnknownType.into(), assign_type_span.clone()));
+                        errs.push((EgonTypeError::UnknownType.into(), assign_type_span.clone()));
                     }
                 }
                 // let a: number = 123;
@@ -70,7 +70,7 @@ stmt_rule!(
                         // Check for empty list assignment
                         // Example:
                         // let a: list<number> = [];
-                        if value_typeref == TypeRef::list(TypeRef::unknown())
+                        if value_typeref == ast::TypeRef::list(ast::TypeRef::unknown())
                             && assign_typeref.is_known_list()
                         {
                             return vec![];
@@ -89,7 +89,7 @@ stmt_rule!(
                         verify_trace!(error: "Type mismatch in declaration: {stmt}");
 
                         errs.push((
-                            TypeError::MismatchType {
+                            EgonTypeError::MismatchType {
                                 expected: assign_typeref.to_string(),
                                 actual: value_typeref.to_string(),
                             }
@@ -100,14 +100,14 @@ stmt_rule!(
                         // Check for empty list assignment
                         // Example:
                         // let a: list<unknown> = [];
-                        if value_typeref == TypeRef::list(TypeRef::unknown())
+                        if value_typeref == ast::TypeRef::list(ast::TypeRef::unknown())
                             && assign_typeref.is_unknown_list()
                         {
                             verify_trace!(error:
                                 "Unknown list type in declaration: {}",
                                 stmt.to_string().cyan()
                             );
-                            errs.push((TypeError::UknownListType.into(), span.clone()));
+                            errs.push((EgonTypeError::UknownListType.into(), span.clone()));
                         }
                     }
                 }
@@ -122,7 +122,7 @@ stmt_rule!(
 mod tests {
     use super::TypeMismatchOnDeclarationsRule;
     use crate::verifier_rule_test;
-    use egonlang_core::{errors::TypeError, prelude::*};
+    use egonlang_core::prelude::*;
 
     verifier_rule_test! {
         TypeMismatchOnDeclarationsRule,
@@ -135,9 +135,9 @@ mod tests {
         returns_err_if_assignment_type_and_value_type_mismatch,
         "const a: () = 123;",
         Err(vec![(
-            TypeError::MismatchType {
-                expected: TypeRef::unit().to_string(),
-                actual: TypeRef::number().to_string()
+            EgonTypeError::MismatchType {
+                expected: ast::TypeRef::unit().to_string(),
+                actual: ast::TypeRef::number().to_string()
             }
             .into(),
             14..17
@@ -154,6 +154,6 @@ mod tests {
         TypeMismatchOnDeclarationsRule,
         returns_err_if_empty_list_assigned_to_unknown_list_type,
         "const a: list<unknown> = [];",
-        Err(vec![(TypeError::UknownListType.into(), 0..28)])
+        Err(vec![(EgonTypeError::UknownListType.into(), 0..28)])
     }
 }

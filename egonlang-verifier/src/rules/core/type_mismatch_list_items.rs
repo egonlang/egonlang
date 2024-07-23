@@ -1,4 +1,4 @@
-use egonlang_core::{ast::ExprS, errors::TypeError, prelude::*};
+use egonlang_core::prelude::*;
 
 use crate::prelude::*;
 
@@ -11,10 +11,10 @@ expr_rule!(
     /// ["a", "b", "c"];
     /// ```
     TypeMisMatchListItems,
-    fn (expr: &Expr, _span: &Span, types: &mut TypeEnv) {
+    fn (expr: &ast::Expr, _span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];
 
-        if let Expr::List(expr_list) = expr {
+        if let ast::Expr::List(expr_list) = expr {
             verify_trace!(
                 "Verifying list expression for matching item types: {}",
                 expr.to_string().cyan()
@@ -28,7 +28,7 @@ expr_rule!(
                     .resolve_expr_type(first_item_expr, first_item_span)
                     .unwrap();
 
-                let remaining_items: Vec<ExprS> = items.clone().into_iter().skip(1).collect();
+                let remaining_items: Vec<Spanned<ast::Expr>> = items.clone().into_iter().skip(1).collect();
 
                 for (item, item_span) in &remaining_items {
                     match types.resolve_expr_type(item, item_span) {
@@ -41,7 +41,7 @@ expr_rule!(
                                 );
 
                                 errs.push((
-                                    TypeError::MismatchType {
+                                    EgonTypeError::MismatchType {
                                         expected: first_item_typeref.to_string(),
                                         actual: item_typeref.to_string(),
                                     }
@@ -64,7 +64,7 @@ expr_rule!(
 mod tests {
     use super::TypeMisMatchListItemsRule;
     use crate::verifier_rule_test;
-    use egonlang_core::{errors::TypeError, prelude::*};
+    use egonlang_core::prelude::*;
 
     verifier_rule_test!(
         TypeMisMatchListItemsRule,
@@ -90,17 +90,17 @@ mod tests {
         r#"[10, false, "foo"];"#,
         Err(vec![
             (
-                TypeError::MismatchType {
-                    expected: TypeRef::number().to_string(),
-                    actual: TypeRef::bool().to_string()
+                EgonTypeError::MismatchType {
+                    expected: ast::TypeRef::number().to_string(),
+                    actual: ast::TypeRef::bool().to_string()
                 }
                 .into(),
                 5..10
             ),
             (
-                TypeError::MismatchType {
-                    expected: TypeRef::number().to_string(),
-                    actual: TypeRef::string().to_string()
+                EgonTypeError::MismatchType {
+                    expected: ast::TypeRef::number().to_string(),
+                    actual: ast::TypeRef::string().to_string()
                 }
                 .into(),
                 12..17

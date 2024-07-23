@@ -1,4 +1,4 @@
-use egonlang_core::{ast::OpPrefix, errors::TypeError, prelude::*};
+use egonlang_core::prelude::*;
 
 use crate::prelude::*;
 
@@ -13,22 +13,22 @@ expr_rule!(
     /// !true
     /// ```
     TypeMismatchPrefix,
-    fn (expr: &Expr, _span: &Span, types: &mut TypeEnv) {
+    fn (expr: &ast::Expr, _span: &Span, types: &mut TypeEnv) {
         let mut errs = vec![];
 
-        if let Expr::Prefix(prefix_expr) = expr {
+        if let ast::Expr::Prefix(prefix_expr) = expr {
             verify_trace!("Verifying prefix expression: {expr}");
 
             match prefix_expr.op {
-                OpPrefix::Negate => {
+                ast::OpPrefix::Negate => {
                     let (value_expr, value_span) = &prefix_expr.rt;
                     let value_typeref = types.resolve_expr_type(value_expr, value_span).unwrap();
 
-                    if value_typeref != TypeRef::number() {
+                    if value_typeref != ast::TypeRef::number() {
                         verify_trace!(error: "negate prefix on a none number value: {expr}");
                         errs.push((
-                            TypeError::MismatchType {
-                                expected: TypeRef::number().to_string(),
+                            EgonTypeError::MismatchType {
+                                expected: ast::TypeRef::number().to_string(),
                                 actual: value_typeref.to_string(),
                             }
                             .into(),
@@ -36,15 +36,15 @@ expr_rule!(
                         ));
                     }
                 }
-                OpPrefix::Not => {
+                ast::OpPrefix::Not => {
                     let (value_expr, value_span) = &prefix_expr.rt;
                     let value_typeref = types.resolve_expr_type(value_expr, value_span).unwrap();
 
-                    if value_typeref != TypeRef::bool() {
+                    if value_typeref != ast::TypeRef::bool() {
                         verify_trace!(error: "not prefix on a none bool value: {expr}");
                         errs.push((
-                            TypeError::MismatchType {
-                                expected: TypeRef::bool().to_string(),
+                            EgonTypeError::MismatchType {
+                                expected: ast::TypeRef::bool().to_string(),
                                 actual: value_typeref.to_string(),
                             }
                             .into(),
@@ -63,7 +63,7 @@ expr_rule!(
 mod tests {
     use super::TypeMismatchPrefixRule;
     use crate::verifier_rule_test;
-    use egonlang_core::{errors::TypeError, prelude::*};
+    use egonlang_core::prelude::*;
 
     verifier_rule_test! {
         TypeMismatchPrefixRule,
@@ -76,9 +76,9 @@ mod tests {
         returns_err_if_negate_prefix_on_bool_literal_expr,
         "-true;",
         Err(vec![(
-            TypeError::MismatchType {
-                expected: TypeRef::number().to_string(),
-                actual: TypeRef::bool().to_string()
+            EgonTypeError::MismatchType {
+                expected: ast::TypeRef::number().to_string(),
+                actual: ast::TypeRef::bool().to_string()
             }
             .into(),
             1..5
@@ -96,9 +96,9 @@ mod tests {
         returns_err_if_not_prefix_on_number_literal_expr,
         "!123;",
         Err(vec![(
-            TypeError::MismatchType {
-                expected: TypeRef::bool().to_string(),
-                actual: TypeRef::number().to_string()
+            EgonTypeError::MismatchType {
+                expected: ast::TypeRef::bool().to_string(),
+                actual: ast::TypeRef::number().to_string()
             }
             .into(),
             1..4
@@ -110,9 +110,9 @@ mod tests {
         returns_err_if_not_prefix_on_string_literal_expr,
         r#"!"test";"#,
         Err(vec![(
-            TypeError::MismatchType {
-                expected: TypeRef::bool().to_string(),
-                actual: TypeRef::string().to_string()
+            EgonTypeError::MismatchType {
+                expected: ast::TypeRef::bool().to_string(),
+                actual: ast::TypeRef::string().to_string()
             }
             .into(),
             1..7

@@ -1,4 +1,4 @@
-use egonlang_core::{errors::TypeError, prelude::*};
+use egonlang_core::prelude::*;
 
 use crate::prelude::*;
 
@@ -16,8 +16,8 @@ expr_rule!(
     /// }
     /// ```
     TypeMismatchFnReturnExpr,
-    fn (expr: &Expr, _span: &Span, types: &mut TypeEnv) {
-        if let Expr::Fn(fn_expr) = expr {
+    fn (expr: &ast::Expr, _span: &Span, types: &mut TypeEnv) {
+        if let ast::Expr::Fn(fn_expr) = expr {
             verify_trace!(
                 "Verifying fn return type and body expression: {}",
                 expr.to_string().cyan()
@@ -38,7 +38,7 @@ expr_rule!(
                         );
 
                         errs.push((
-                            TypeError::MismatchType {
+                            EgonTypeError::MismatchType {
                                 expected: fn_return_type_typeref.to_string(),
                                 actual: body_typeref.to_string(),
                             }
@@ -61,7 +61,7 @@ expr_rule!(
 mod tests {
     use super::TypeMismatchFnReturnExprRule;
     use crate::verifier_rule_test;
-    use egonlang_core::errors::TypeError;
+    use egonlang_core::prelude::*;
 
     verifier_rule_test!(
         TypeMismatchFnReturnExprRule,
@@ -74,7 +74,7 @@ mod tests {
         returns_err_fn_body_type_does_not_match_fn_return_type,
         r#"(): string => { 123 };"#,
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "string".to_string(),
                 actual: "number".to_string()
             }
@@ -88,7 +88,7 @@ mod tests {
         returns_err_fn_body_type_does_not_match_fn_return_type_2,
         r#"(): string => { { 123 } };"#,
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "string".to_string(),
                 actual: "number".to_string()
             }
@@ -102,7 +102,7 @@ mod tests {
         returns_err_fn_body_type_does_not_match_fn_return_type_3,
         r#"(): () => { { 123 } };"#,
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "()".to_string(),
                 actual: "number".to_string()
             }
@@ -116,7 +116,7 @@ mod tests {
         returns_err_fn_body_type_does_not_match_fn_return_type_4,
         r#"(): string => { { 123; } };"#,
         Err(vec![(
-            TypeError::MismatchType {
+            EgonTypeError::MismatchType {
                 expected: "string".to_string(),
                 actual: "()".to_string()
             }
