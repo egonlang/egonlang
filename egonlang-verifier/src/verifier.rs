@@ -82,6 +82,8 @@ impl<'a> Verifier<'a> {
 
         let mut types = TypeEnv::new();
 
+        verify_trace!(verifier_verify: "Verifying module...");
+
         for (stmt, stmt_span) in &module.stmts {
             if let Err(stmt_errs) = self.visit_stmt(stmt, stmt_span, &mut types) {
                 all_errs.extend(stmt_errs);

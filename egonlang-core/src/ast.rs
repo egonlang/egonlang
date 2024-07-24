@@ -122,7 +122,7 @@ impl Display for StmtAssign {
         let name = &self.identifier.name;
 
         let is_type_alias = self
-            .type_expr
+            .value
             .as_ref()
             .map(|(type_expr, _)| matches!(type_expr, Expr::Type(_)))
             .unwrap_or(false);
@@ -832,6 +832,16 @@ mod ast_tests {
 
     use super::*;
 
+    macro_rules! stmt_display_test {
+        ($test_name:ident, $stmt:expr, $expected:expr) => {
+            #[test]
+            fn $test_name() {
+                let stmt: Stmt = $stmt;
+                assert_eq!($expected, stmt.to_string());
+            }
+        };
+    }
+
     macro_rules! expr_display_test {
         ($test_name:ident, $expr:expr, $expected:expr) => {
             #[test]
@@ -1403,4 +1413,22 @@ mod ast_tests {
         })),
         "(a: number, b: number): number => { a + b }"
     );
+
+    stmt_display_test! {
+        test_stmt_assign_with_non_type_value,
+        "let a: number = 123;".try_into().unwrap(),
+        "let a: number = 123;"
+    }
+
+    stmt_display_test! {
+        test_stmt_assign_with_no_value,
+        "let a: number;".try_into().unwrap(),
+        "let a: number;"
+    }
+
+    stmt_display_test! {
+        test_stmt_assign_with_type_value,
+        "type Number = number;".try_into().unwrap(),
+        "type Number = number;"
+    }
 }
