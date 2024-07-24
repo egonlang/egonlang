@@ -109,6 +109,8 @@ impl<'a> Visitor<'a> for Verifier<'a> {
 
         let result = match stmt {
             ast::Stmt::Expr(stmt_expr) => {
+                verify_trace!(visit_stmt: "{} is an expression statement", stmt.to_string().cyan());
+
                 let (expr, expr_span) = &stmt_expr.expr;
                 let expr_errs = self
                     .visit_expr(expr, expr_span, types)
@@ -124,6 +126,8 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 Ok(())
             }
             ast::Stmt::Assign(stmt_assign) => {
+                verify_trace!(visit_stmt: "{} is an assignment statement", stmt.to_string().cyan());
+
                 if let Some((type_expr, type_expr_span)) = &stmt_assign.type_expr {
                     let type_expr_errs = self
                         .visit_expr(type_expr, type_expr_span, types)
@@ -185,6 +189,8 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 Ok(())
             }
             ast::Stmt::Fn(stmt_fn) => {
+                verify_trace!(visit_stmt: "{} is an function statement", stmt.to_string().cyan());
+
                 let (fn_expr, fn_expr_span) = &stmt_fn.fn_expr;
 
                 let fn_expr_errs = self
@@ -201,8 +207,13 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 //
                 Ok(())
             }
-            ast::Stmt::Error => Ok(()),
+            ast::Stmt::Error => {
+                verify_trace!(visit_stmt: "{} is an error statement", stmt.to_string().cyan());
+                Ok(())
+            }
         };
+
+        verify_trace!(visit_stmt: "Running rules for statement {}", stmt.to_string().cyan());
 
         for rule in &self.rules {
             let rule_errs = rule.visit_stmt(stmt, span, types).err().unwrap_or_default();
@@ -210,7 +221,7 @@ impl<'a> Visitor<'a> for Verifier<'a> {
             errs.extend(rule_errs);
         }
 
-        verify_trace!("There were a total of {} errors from rules", errs.len());
+        verify_trace!(visit_stmt: "There were a total of {} rule errors with statement {}", errs.len(), stmt.to_string().cyan());
 
         verify_trace!(
             exit_stmt:
@@ -237,6 +248,8 @@ impl<'a> Visitor<'a> for Verifier<'a> {
 
         match expr {
             ast::Expr::Block(block_expr) => {
+                verify_trace!(visit_expr: "{} is a block expression", expr.to_string().cyan());
+
                 let mut block_types = types.extend();
 
                 for (stmt, stmt_span) in &block_expr.stmts {
@@ -268,6 +281,8 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 }
             }
             ast::Expr::Assign(assign_expr) => {
+                verify_trace!(visit_expr: "{} is an assign expression", expr.to_string().cyan());
+
                 let (value_expr, value_span) = &assign_expr.value;
 
                 let value_errs = self
@@ -284,6 +299,8 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 }
             }
             ast::Expr::Infix(infix_expr) => {
+                verify_trace!(visit_expr: "{} is an infix expression", expr.to_string().cyan());
+
                 let (lt_expr, lt_span) = &infix_expr.lt;
 
                 let lt_errs = self
@@ -309,6 +326,8 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 }
             }
             ast::Expr::Fn(fn_expr) => {
+                verify_trace!(visit_expr: "{} is a function expression", expr.to_string().cyan());
+
                 let mut fn_types = types.extend();
 
                 for ((ident, type_ref), _) in &fn_expr.params {
@@ -342,6 +361,8 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 }
             }
             ast::Expr::If(if_expr) => {
+                verify_trace!(visit_expr: "{} is an if expression", expr.to_string().cyan());
+
                 let (cond_expr, cond_span) = &if_expr.cond;
                 let cond_errs = self
                     .visit_expr(cond_expr, cond_span, types)
@@ -371,6 +392,8 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 }
             }
             _ => {
+                verify_trace!(visit_expr: "{} is a another type of expression", expr.to_string().cyan());
+
                 for rule in &self.rules {
                     let rule_errs = rule.visit_expr(expr, span, types).err().unwrap_or_default();
 
