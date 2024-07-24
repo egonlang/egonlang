@@ -33,7 +33,7 @@ impl<'a> TypeEnv<'a> {
 
     /// Create a new type environment by extending the current one
     pub fn extend(&self) -> Box<TypeEnv> {
-        verify_trace!("Extending type env...");
+        verify_trace!(type_env extend: "Extending type env...");
 
         Box::from(TypeEnv {
             root: Some(self),
@@ -43,12 +43,17 @@ impl<'a> TypeEnv<'a> {
 
     /// Attempt to resolve an identifier's type
     pub fn get(&self, identifier: &str) -> Option<TypeEnvValue> {
+        verify_trace!(
+            type_env get: "Looking up identifier {}",
+            identifier.cyan()
+        );
+
         let result = match self.values.get(identifier) {
             Some(result) => Some(result.clone()),
             None => match &self.root {
                 Some(root) => {
                     verify_trace!(
-                        "Not finding {}, looking in higher type env",
+                        type_env get error: "Not finding {}, looking in higher type env",
                         identifier.cyan()
                     );
                     root.get(identifier)
@@ -74,13 +79,14 @@ impl<'a> TypeEnv<'a> {
         match &result {
             Some(result) => {
                 verify_trace!(
-                    "Got type {} for {}",
+                    type_env get: "Got type {} for {}",
                     result.typeref.to_string().italic().yellow(),
                     identifier.cyan()
                 );
             }
             None => {
-                verify_trace!(error:
+                verify_trace!(
+                    type_env get error:
                     "Unable to find type for {} in type env",
                     identifier.cyan()
                 );
@@ -144,6 +150,7 @@ impl<'a> TypeEnv<'a> {
         }
 
         verify_trace!(
+            type_env set:
             "Setting {} to the type {}",
             identifier.cyan(),
             value.typeref.to_string().italic().yellow()
@@ -169,17 +176,23 @@ impl<'a> TypeEnv<'a> {
         expr: &ast::Expr,
         span: &Span,
     ) -> Result<ast::TypeRef, Vec<EgonErrorS>> {
+        verify_trace!(
+            type_env resolve_expr_type: "Resolving expression's type: {}",
+            expr.to_string().cyan()
+        );
+
         let resolved_type = match expr {
             ast::Expr::Identifier(ident_expr) => self.resolve_identifier_type(ident_expr, span),
             ast::Expr::List(list_expr) => self.resolve_list_type(list_expr),
             ast::Expr::Tuple(tuple_expr) => self.resolve_tuple_type(tuple_expr),
             ast::Expr::Block(block_expr) => {
-                let a = block_expr.return_expr.clone();
+                let block_expr_return_expr = block_expr.return_expr.clone();
 
-                if let Some((a, a_span)) = a {
-                    let result = self.resolve_expr_type(&a, &a_span);
-
-                    return result;
+                if let Some((block_expr_return_expr, block_expr_return_span)) =
+                    block_expr_return_expr
+                {
+                    return self
+                        .resolve_expr_type(&block_expr_return_expr, &block_expr_return_span);
                 } else {
                     return Ok(ast::TypeRef::unit());
                 }
@@ -215,8 +228,9 @@ impl<'a> TypeEnv<'a> {
         match &resolved_type {
             Ok(resolved_type) => {
                 let resolved_type_string = format!("{resolved_type}");
-                verify_trace!(resolve_type:
-                    "{} to the type {}",
+                verify_trace!(
+                    type_env resolve_expr_type:
+                    "Resolved expression {} to the type {}",
                     expr.to_string().cyan(),
                     resolved_type_string.italic().yellow()
                 );

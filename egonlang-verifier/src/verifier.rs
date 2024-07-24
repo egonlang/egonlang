@@ -111,13 +111,20 @@ impl<'a> Visitor<'a> for Verifier<'a> {
 
         let result = match stmt {
             ast::Stmt::Expr(stmt_expr) => {
-                verify_trace!(visit_stmt: "{} is an expression statement", stmt.to_string().cyan());
+                verify_trace!(visit_stmt expr: "{} is an expression statement", stmt.to_string().cyan());
 
                 let (expr, expr_span) = &stmt_expr.expr;
+
+                verify_trace!(visit_stmt expr: "Checking expression {} from stmt {}", expr.to_string().cyan(), stmt.to_string().cyan());
+
                 let expr_errs = self
                     .visit_expr(expr, expr_span, types)
                     .err()
                     .unwrap_or_default();
+
+                if !expr_errs.is_empty() {
+                    verify_trace!(visit_stmt expr error: "Value expression {} had {} errors", &expr.to_string().cyan(), expr_errs.len());
+                }
 
                 errs.extend(expr_errs);
 
@@ -128,22 +135,19 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 Ok(())
             }
             ast::Stmt::Assign(stmt_assign) => {
-                verify_trace!(visit_stmt: "{} is an assignment statement", stmt.to_string().cyan());
-
-                if let Some((type_expr, type_expr_span)) = &stmt_assign.type_expr {
-                    let type_expr_errs = self
-                        .visit_expr(type_expr, type_expr_span, types)
-                        .err()
-                        .unwrap_or_default();
-
-                    errs.extend(type_expr_errs);
-                }
+                verify_trace!(visit_stmt assign: "{} is an assignment statement", stmt.to_string().cyan());
 
                 if let Some((value_expr, value_expr_span)) = &stmt_assign.value {
+                    verify_trace!(visit_stmt assign: "Checking value expression {}", value_expr.to_string().cyan());
+
                     let value_expr_errs = self
                         .visit_expr(value_expr, value_expr_span, types)
                         .err()
                         .unwrap_or_default();
+
+                    if !value_expr_errs.is_empty() {
+                        verify_trace!(visit_stmt assign error: "Value expression {} had {} errors", &value_expr.to_string().cyan(), value_expr_errs.len());
+                    }
 
                     errs.extend(value_expr_errs);
                 }
@@ -155,6 +159,8 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 match (&stmt_assign.type_expr, &stmt_assign.value) {
                     (None, None) => {}
                     (None, Some((value_expr, value_span))) => {
+                        verify_trace!(visit_stmt assign: "Resolving value expression {}", value_expr.to_string().cyan());
+
                         let value_typeref = types.resolve_expr_type(value_expr, value_span)?;
                         types.set(
                             &stmt_assign.identifier.name,
@@ -165,6 +171,8 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                         );
                     }
                     (Some((type_expr, type_span)), None) => {
+                        verify_trace!(visit_stmt assign: "Resolving type expression {}", type_expr.to_string().cyan());
+
                         let type_typeref = types.resolve_expr_type(type_expr, type_span)?;
 
                         types.set(
@@ -176,6 +184,8 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                         );
                     }
                     (Some((type_expr, type_span)), Some((_value_expr, _value_span))) => {
+                        verify_trace!(visit_stmt assign: "Resolving type expression {}", type_expr.to_string().cyan());
+
                         let type_typeref = types.resolve_expr_type(type_expr, type_span)?;
 
                         types.set(
@@ -191,14 +201,20 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 Ok(())
             }
             ast::Stmt::Fn(stmt_fn) => {
-                verify_trace!(visit_stmt: "{} is an function statement", stmt.to_string().cyan());
+                verify_trace!(visit_stmt function: "{} is an function statement", stmt.to_string().cyan());
 
                 let (fn_expr, fn_expr_span) = &stmt_fn.fn_expr;
+
+                verify_trace!(visit_stmt function: "Checking function statement's function expression {}", fn_expr.to_string().cyan());
 
                 let fn_expr_errs = self
                     .visit_expr(fn_expr, fn_expr_span, types)
                     .err()
                     .unwrap_or_default();
+
+                if !fn_expr_errs.is_empty() {
+                    verify_trace!(visit_stmt function error: "Function expression {} had {} errors", &fn_expr.to_string().cyan(), fn_expr_errs.len());
+                }
 
                 errs.extend(fn_expr_errs);
 
@@ -210,7 +226,7 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 Ok(())
             }
             ast::Stmt::Error => {
-                verify_trace!(visit_stmt: "{} is an error statement", stmt.to_string().cyan());
+                verify_trace!(visit_stmt error_stmt: "{} is an error statement", stmt.to_string().cyan());
                 Ok(())
             }
         };
@@ -226,7 +242,7 @@ impl<'a> Visitor<'a> for Verifier<'a> {
         verify_trace!(visit_stmt: "There were a total of {} rule errors with statement {}", errs.len(), stmt.to_string().cyan());
 
         verify_trace!(
-            exit_stmt:
+            visit_stmt exit_stmt:
             "{}",
             stmt.to_string().cyan()
         );
@@ -250,7 +266,7 @@ impl<'a> Visitor<'a> for Verifier<'a> {
 
         match expr {
             ast::Expr::Block(block_expr) => {
-                verify_trace!(visit_expr: "{} is a block expression", expr.to_string().cyan());
+                verify_trace!(visit_expr block: "{} is a block expression", expr.to_string().cyan());
 
                 let mut block_types = types.extend();
 
@@ -283,7 +299,7 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 }
             }
             ast::Expr::Assign(assign_expr) => {
-                verify_trace!(visit_expr: "{} is an assign expression", expr.to_string().cyan());
+                verify_trace!(visit_expr assign: "{} is an assign expression", expr.to_string().cyan());
 
                 let (value_expr, value_span) = &assign_expr.value;
 
@@ -301,7 +317,7 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 }
             }
             ast::Expr::Infix(infix_expr) => {
-                verify_trace!(visit_expr: "{} is an infix expression", expr.to_string().cyan());
+                verify_trace!(visit_expr infix: "{} is an infix expression", expr.to_string().cyan());
 
                 let (lt_expr, lt_span) = &infix_expr.lt;
 
@@ -328,7 +344,7 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 }
             }
             ast::Expr::Fn(fn_expr) => {
-                verify_trace!(visit_expr: "{} is a function expression", expr.to_string().cyan());
+                verify_trace!(visit_expr function: "{} is a function expression", expr.to_string().cyan());
 
                 let mut fn_types = types.extend();
 
@@ -363,7 +379,7 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 }
             }
             ast::Expr::If(if_expr) => {
-                verify_trace!(visit_expr: "{} is an if expression", expr.to_string().cyan());
+                verify_trace!(visit_expr if_expr: "{} is an if expression", expr.to_string().cyan());
 
                 let (cond_expr, cond_span) = &if_expr.cond;
                 let cond_errs = self
@@ -394,7 +410,7 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 }
             }
             _ => {
-                verify_trace!(visit_expr: "{} is a another type of expression", expr.to_string().cyan());
+                verify_trace!(visit_expr other: "{} is a another type of expression", expr.to_string().cyan());
 
                 for rule in &self.rules {
                     let rule_errs = rule.visit_expr(expr, span, types).err().unwrap_or_default();

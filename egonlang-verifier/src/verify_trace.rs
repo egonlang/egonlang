@@ -28,7 +28,7 @@ macro_rules! verify_trace {
         }
     };
 
-    ($label:ident: $message:expr) => {
+    ($($label:ident) +: $message:expr) => {
         if cfg!(feature = "verify-trace") {
             use colored::Colorize;
 
@@ -38,11 +38,11 @@ macro_rules! verify_trace {
             let col = column!();
             let ident = format!("at {file}:{line}:{col}");
 
-            eprintln!("{} [{}] {message}\n{}\n", "VERIFY:".bold(), stringify!($label).underline().bold(), ident.dimmed());
+            eprintln!("{} [{}] {message}\n{}\n", "VERIFY:".bold(), stringify!($($label):+).bold(), ident.dimmed());
         }
     };
 
-    ($label:ident: $message:expr, $($y:expr), *) => {
+    ($($label:ident) +: $message:expr, $($y:expr), *) => {
         if cfg!(feature = "verify-trace") {
             use colored::Colorize;
 
@@ -52,7 +52,7 @@ macro_rules! verify_trace {
             let col = column!();
             let ident = format!("at {file}:{line}:{col}");
 
-            eprintln!("{} [{}] {message}\n{}\n", "VERIFY:".bold(), stringify!($label).underline().bold(), ident.dimmed());
+            eprintln!("{} [{}] {message}\n{}\n", "VERIFY:".bold(), stringify!($($label):+).bold(), ident.dimmed());
         }
     };
 }
