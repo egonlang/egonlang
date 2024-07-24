@@ -421,7 +421,7 @@ impl<'a> Visitor<'a> for Verifier<'a> {
         };
 
         verify_trace!(
-            exit_expr: "{}",
+            visit_expr exit_expr: "{}",
             expr.to_string().cyan()
         );
 

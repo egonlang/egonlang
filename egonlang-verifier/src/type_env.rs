@@ -31,20 +31,30 @@ impl<'a> TypeEnv<'a> {
         Default::default()
     }
 
+    pub fn level(&self) -> usize {
+        match self.root {
+            Some(root_type_env) => root_type_env.level() + 1,
+            None => 0,
+        }
+    }
+
     /// Create a new type environment by extending the current one
     pub fn extend(&self) -> Box<TypeEnv> {
-        verify_trace!(type_env extend: "Extending type env...");
-
-        Box::from(TypeEnv {
+        let extended_type_env = TypeEnv {
             root: Some(self),
             values: HashMap::new(),
-        })
+        };
+
+        verify_trace!(type_env extend: "(level: {}) Extending type env... New level: {}", self.level(), extended_type_env.level());
+
+        Box::from(extended_type_env)
     }
 
     /// Attempt to resolve an identifier's type
     pub fn get(&self, identifier: &str) -> Option<TypeEnvValue> {
         verify_trace!(
-            type_env get: "Looking up identifier {}",
+            type_env get: "(level:{}) Looking up identifier {}",
+            self.level(),
             identifier.cyan()
         );
 
@@ -53,7 +63,8 @@ impl<'a> TypeEnv<'a> {
             None => match &self.root {
                 Some(root) => {
                     verify_trace!(
-                        type_env get error: "Not finding {}, looking in higher type env",
+                        type_env get error: "(level:{}) Not finding {}, looking in higher type env",
+                        self.level(),
                         identifier.cyan()
                     );
                     root.get(identifier)
@@ -67,7 +78,8 @@ impl<'a> TypeEnv<'a> {
 
             if result.typeref.0 == *"type" {
                 verify_trace!(
-                    "Got type alias {} for {}",
+                    "(level:{}) Got type alias {} for {}",
+                    self.level(),
                     result.typeref.to_string().italic().yellow(),
                     identifier.cyan()
                 );
@@ -79,7 +91,8 @@ impl<'a> TypeEnv<'a> {
         match &result {
             Some(result) => {
                 verify_trace!(
-                    type_env get: "Got type {} for {}",
+                    type_env get: "(level:{}) Got type {} for {}",
+                    self.level(),
                     result.typeref.to_string().italic().yellow(),
                     identifier.cyan()
                 );
@@ -87,7 +100,8 @@ impl<'a> TypeEnv<'a> {
             None => {
                 verify_trace!(
                     type_env get error:
-                    "Unable to find type for {} in type env",
+                    "(level:{}) Unable to find type for {} in type env",
+                    self.level(),
                     identifier.cyan()
                 );
             }
@@ -117,7 +131,9 @@ impl<'a> TypeEnv<'a> {
             return match self.get(&new_typeref.to_string()) {
                 Some(aliased_type) => {
                     verify_trace!(
-                        "Setting {} to type alias {}",
+                        type_env set:
+                        "(level:{}) Setting {} to type alias {}",
+                        self.level(),
                         identifier.cyan(),
                         aliased_type.typeref.to_string().italic().yellow()
                     );
@@ -133,7 +149,9 @@ impl<'a> TypeEnv<'a> {
                 }
                 None => {
                     verify_trace!(
-                        "Setting {} to the type alias {}",
+                        type_env set:
+                        "(level: {}) Setting {} to the type alias {}",
+                        self.level(),
                         identifier.cyan(),
                         new_typeref.to_string().italic().yellow()
                     );
@@ -151,7 +169,8 @@ impl<'a> TypeEnv<'a> {
 
         verify_trace!(
             type_env set:
-            "Setting {} to the type {}",
+            "(level: {}) Setting {} to the type {}",
+            self.level(),
             identifier.cyan(),
             value.typeref.to_string().italic().yellow()
         );
@@ -177,7 +196,8 @@ impl<'a> TypeEnv<'a> {
         span: &Span,
     ) -> Result<ast::TypeRef, Vec<EgonErrorS>> {
         verify_trace!(
-            type_env resolve_expr_type: "Resolving expression's type: {}",
+            type_env resolve_expr_type: "(level: {}) Resolving expression's type: {}",
+            self.level(),
             expr.to_string().cyan()
         );
 
@@ -230,7 +250,8 @@ impl<'a> TypeEnv<'a> {
                 let resolved_type_string = format!("{resolved_type}");
                 verify_trace!(
                     type_env resolve_expr_type:
-                    "Resolved expression {} to the type {}",
+                    "(level: {}) Resolved expression {} to the type {}",
+                    self.level(),
                     expr.to_string().cyan(),
                     resolved_type_string.italic().yellow()
                 );
@@ -243,7 +264,8 @@ impl<'a> TypeEnv<'a> {
                     .join("; ");
 
                 verify_trace!(
-                    error: "Unable to resolve {} to a type: {}",
+                    type_env resolve_expr_type error: "(level: {}) Unable to resolve {} to a type: {}",
+                    self.level(),
                     expr.to_string().cyan(),
                     err_string.italic().red()
                 );
@@ -260,12 +282,34 @@ impl<'a> TypeEnv<'a> {
     ) -> Result<ast::TypeRef, Vec<EgonErrorS>> {
         let name = &ident_expr.identifier.name;
 
+        verify_trace!(
+            type_env resolve_identifier_type: "(level: {}) Resolve type for identifier {}",
+            self.level(),
+            ident_expr.to_string().cyan()
+        );
+
         match self.get(name) {
-            Some(env_var) => Ok(env_var.typeref),
-            None => Err(vec![(
-                EgonTypeError::Undefined(name.to_string()).into(),
-                span.clone(),
-            )]),
+            Some(env_var) => {
+                verify_trace!(
+                    type_env resolve_identifier_type: "(level: {}) Resolve type for identifier {}",
+                    self.level(),
+                    ident_expr.to_string().cyan()
+                );
+
+                Ok(env_var.typeref)
+            }
+            None => {
+                verify_trace!(
+                    type_env resolve_identifier_type error: "(level: {}) Unable to resolve type for identifier {}",
+                    self.level(),
+                    ident_expr.to_string().cyan()
+                );
+
+                Err(vec![(
+                    EgonTypeError::Undefined(name.to_string()).into(),
+                    span.clone(),
+                )])
+            }
         }
     }
 
