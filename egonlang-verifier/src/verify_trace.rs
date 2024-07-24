@@ -1,17 +1,7 @@
 #[macro_export]
 macro_rules! verify_trace {
     ($message:expr) => {
-        if cfg!(feature = "verify-trace") {
-            use colored::Colorize;
-
-            let message = format!($message);
-            let file = file!();
-            let line = line!();
-            let col = column!();
-            let ident = format!("at {file}:{line}:{col}");
-
-            eprintln!("{} {message}\n{}\n", "VERIFY:".bold(), ident.dimmed());
-        }
+        verify_trace!($message,);
     };
 
     ($message:expr, $($y:expr), *) => {
@@ -22,9 +12,13 @@ macro_rules! verify_trace {
             let file = file!();
             let line = line!();
             let col = column!();
-            let ident = format!("at {file}:{line}:{col}");
+            let file_line_col = format!("at {file}:{line}:{col}");
 
-            eprintln!("{} {message}\n{}\n", "VERIFY:".bold(), ident.dimmed());
+            eprintln!(
+                "{} {message}\n{}\n",
+                "VERIFY:".bold(),
+                file_line_col.dimmed()
+            );
         }
     };
 
@@ -36,9 +30,14 @@ macro_rules! verify_trace {
             let file = file!();
             let line = line!();
             let col = column!();
-            let ident = format!("at {file}:{line}:{col}");
+            let file_line_col = format!("at {file}:{line}:{col}");
 
-            eprintln!("{} [{}] {message}\n{}\n", "VERIFY:".bold(), stringify!($($label):+).bold(), ident.dimmed());
+            eprintln!(
+                "{} [{}] {message}\n{}\n",
+                "VERIFY:".bold(),
+                stringify!($($label):+).bold(),
+                file_line_col.dimmed()
+            );
         }
     };
 
@@ -50,9 +49,14 @@ macro_rules! verify_trace {
             let file = file!();
             let line = line!();
             let col = column!();
-            let ident = format!("at {file}:{line}:{col}");
+            let file_line_col = format!("at {file}:{line}:{col}");
 
-            eprintln!("{} [{}] {message}\n{}\n", "VERIFY:".bold(), stringify!($($label):+).bold(), ident.dimmed());
+            eprintln!(
+                "{} [{}] {message}\n{}\n",
+                "VERIFY:".bold(),
+                stringify!($($label):+).bold(),
+                file_line_col.dimmed()
+            );
         }
     };
 }
