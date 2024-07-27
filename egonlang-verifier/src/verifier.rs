@@ -138,7 +138,12 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 verify_trace!(visit_stmt assign: "{} is an assignment statement", stmt.to_string().cyan());
 
                 if let Some((value_expr, value_expr_span)) = &stmt_assign.value {
-                    verify_trace!(visit_stmt assign: "Checking value expression {}", value_expr.to_string().cyan());
+                    verify_trace!(
+                        visit_stmt assign:
+                        "Checking value expression {} from assign statement {}",
+                        value_expr.to_string().cyan(),
+                        stmt.to_string().cyan()
+                    );
 
                     let value_expr_errs = self
                         .visit_expr(value_expr, value_expr_span, types)
@@ -159,7 +164,12 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 match (&stmt_assign.type_expr, &stmt_assign.value) {
                     (None, None) => {}
                     (None, Some((value_expr, value_span))) => {
-                        verify_trace!(visit_stmt assign: "Resolving value expression {}", value_expr.to_string().cyan());
+                        verify_trace!(
+                            visit_stmt assign:
+                            "Resolving value expression {} from assign statement {}",
+                            value_expr.to_string().cyan(),
+                            stmt.to_string().cyan()
+                        );
 
                         let value_typeref = types.resolve_expr_type(value_expr, value_span)?;
                         types.set(
@@ -171,7 +181,12 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                         );
                     }
                     (Some((type_expr, type_span)), None) => {
-                        verify_trace!(visit_stmt assign: "Resolving type expression {}", type_expr.to_string().cyan());
+                        verify_trace!(
+                            visit_stmt assign:
+                            "Resolving type expression {} from assign statement {}",
+                            type_expr.to_string().cyan(),
+                            stmt.to_string().cyan()
+                        );
 
                         let type_typeref = types.resolve_expr_type(type_expr, type_span)?;
 
@@ -184,7 +199,12 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                         );
                     }
                     (Some((type_expr, type_span)), Some((_value_expr, _value_span))) => {
-                        verify_trace!(visit_stmt assign: "Resolving type expression {}", type_expr.to_string().cyan());
+                        verify_trace!(
+                            visit_stmt assign:
+                            "Resolving type expression {} from assign statement {}",
+                            type_expr.to_string().cyan(),
+                            stmt.to_string().cyan()
+                        );
 
                         let type_typeref = types.resolve_expr_type(type_expr, type_span)?;
 

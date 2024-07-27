@@ -19,3 +19,5 @@ target/
 out
 
 *temp*.*
+
+.DS_Store

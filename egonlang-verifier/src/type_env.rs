@@ -206,24 +206,63 @@ impl<'a> TypeEnv<'a> {
             ast::Expr::List(list_expr) => self.resolve_list_type(list_expr),
             ast::Expr::Tuple(tuple_expr) => self.resolve_tuple_type(tuple_expr),
             ast::Expr::Block(block_expr) => {
+                verify_trace!(
+                    type_env resolve_expr_type: "(level: {}) Resolving type for block {}",
+                    self.level(),
+                    block_expr.to_string().cyan()
+                );
+
                 let block_expr_return_expr = block_expr.return_expr.clone();
 
                 if let Some((block_expr_return_expr, block_expr_return_span)) =
                     block_expr_return_expr
                 {
-                    return self
-                        .resolve_expr_type(&block_expr_return_expr, &block_expr_return_span);
+                    let resolved_type =
+                        self.resolve_expr_type(&block_expr_return_expr, &block_expr_return_span);
+
+                    verify_trace!(
+                        type_env resolve_expr_type block: "(level: {}) Resolved block expression {} to type",
+                        self.level(),
+                        block_expr.to_string().cyan()
+                    );
+
+                    resolved_type
                 } else {
+                    verify_trace!(
+                        type_env resolve_expr_type block: "(level: {}) Resolved block expression {} to type {}",
+                        self.level(),
+                        block_expr.to_string().cyan(),
+                        ast::TypeRef::unit().to_string().italic().yellow()
+                    );
+
                     return Ok(ast::TypeRef::unit());
                 }
             }
             ast::Expr::Type(type_expr) => {
-                let type_string = type_expr.0.to_string();
-                let a = self.get(type_string.as_str());
+                verify_trace!(
+                    type_env resolve_expr_type: "(level: {}) Resolving type expression {}",
+                    self.level(),
+                    type_expr.to_string().cyan()
+                );
 
-                if let Some(a) = &a {
-                    return Ok(a.typeref.clone());
+                let type_string = type_expr.0.to_string();
+                if let Some(type_env_value) = &self.get(type_string.as_str()) {
+                    verify_trace!(
+                        type_env resolve_expr_type: "(level: {}) Resolved type expression {} to type {}",
+                        self.level(),
+                        type_expr.to_string().cyan(),
+                        type_env_value.typeref.to_string().italic().yellow()
+                    );
+
+                    return Ok(type_env_value.typeref.clone());
                 }
+
+                verify_trace!(
+                    type_env resolve_expr_type: "(level: {}) Resolved type expression {} to type {}",
+                    self.level(),
+                    type_expr.to_string().cyan(),
+                    type_expr.0.to_string().italic().yellow()
+                );
 
                 Ok(type_expr.0.clone())
             }
@@ -283,7 +322,7 @@ impl<'a> TypeEnv<'a> {
         let name = &ident_expr.identifier.name;
 
         verify_trace!(
-            type_env resolve_identifier_type: "(level: {}) Resolve type for identifier {}",
+            type_env resolve_identifier_type: "(level: {}) Resolving type for identifier {}",
             self.level(),
             ident_expr.to_string().cyan()
         );
@@ -291,9 +330,10 @@ impl<'a> TypeEnv<'a> {
         match self.get(name) {
             Some(env_var) => {
                 verify_trace!(
-                    type_env resolve_identifier_type: "(level: {}) Resolve type for identifier {}",
+                    type_env resolve_identifier_type: "(level: {}) Resolved type for identifier {} to type {}",
                     self.level(),
-                    ident_expr.to_string().cyan()
+                    ident_expr.to_string().cyan(),
+                    env_var.typeref.to_string().italic().yellow()
                 );
 
                 Ok(env_var.typeref)
@@ -317,12 +357,32 @@ impl<'a> TypeEnv<'a> {
         &self,
         list_expr: &ast::ExprList,
     ) -> Result<ast::TypeRef, Vec<EgonErrorS>> {
+        verify_trace!(
+            type_env resolve_list_type: "(level: {}) Resolve type for list {}",
+            self.level(),
+            list_expr.to_string().cyan()
+        );
+
         if list_expr.items.is_empty() {
+            verify_trace!(
+                type_env resolve_list_type: "(level: {}) Resolved type for list {} to type {}",
+                self.level(),
+                list_expr.to_string().cyan(),
+                ast::TypeRef::list(ast::TypeRef::unknown()).to_string().italic().yellow()
+            );
+
             return Ok(ast::TypeRef::list(ast::TypeRef::unknown()));
         }
 
         let (first_item_expr, first_item_span) = list_expr.items.first().unwrap().clone();
         let first_item_type = self.resolve_expr_type(&first_item_expr, &first_item_span)?;
+
+        verify_trace!(
+            type_env resolve_list_type: "(level: {}) Resolved type for identifier {} to type {}",
+            self.level(),
+            list_expr.to_string().cyan(),
+            first_item_type.to_string().italic().yellow()
+        );
 
         Ok(ast::TypeRef::list(first_item_type))
     }
@@ -331,16 +391,36 @@ impl<'a> TypeEnv<'a> {
         &self,
         tuple_expr: &ast::ExprTuple,
     ) -> Result<ast::TypeRef, Vec<EgonErrorS>> {
+        verify_trace!(
+            type_env resolve_tuple_type: "(level: {}) Resolve type for tuple {}",
+            self.level(),
+            tuple_expr.to_string().cyan()
+        );
+
         if tuple_expr.items.is_empty() {
-            return Ok(ast::TypeRef::list(ast::TypeRef::unknown()));
+            verify_trace!(
+                type_env resolve_tuple_type: "(level: {}) Resolved type for tuple {} to type {}",
+                self.level(),
+                tuple_expr.to_string().cyan(),
+                ast::TypeRef::tuple(vec![]).to_string().italic().yellow()
+            );
+
+            return Ok(ast::TypeRef::tuple(vec![]));
         }
 
-        let item_types = tuple_expr
+        let item_types: Vec<ast::TypeRef> = tuple_expr
             .items
             .clone()
             .into_iter()
             .map(|(x_expr, x_span)| self.resolve_expr_type(&x_expr, &x_span).unwrap())
             .collect();
+
+        verify_trace!(
+            type_env resolve_tuple_type: "(level: {}) Resolved type for tuple {} to type {}",
+            self.level(),
+            tuple_expr.to_string().cyan(),
+            ast::TypeRef::tuple(item_types.clone()).to_string().italic().yellow()
+        );
 
         Ok(ast::TypeRef::tuple(item_types))
     }
