@@ -9,7 +9,7 @@ expr_rule!(
     /// if ("example") {} else {}; // TypeError
     /// ```
     TypeMismatchIfCondExpr,
-    fn (expr: &ast::Expr, _span: &Span, types: &mut TypeEnv) {
+    |expr, _span, _resolve_ident, resolve_expr| {
         let mut errs = vec![];
 
         if let ast::Expr::If(if_expr) = expr {
@@ -19,7 +19,7 @@ expr_rule!(
             );
 
             let (cond_expr, cond_span) = &if_expr.cond;
-            let cond_typeref = types.resolve_expr_type(cond_expr, cond_span).unwrap();
+            let cond_typeref = resolve_expr(cond_expr, cond_span).unwrap().typeref;
 
             if cond_typeref != ast::TypeRef::bool() {
                 verify_trace!(error:

@@ -1,4 +1,3 @@
 (a: string): number => { b };
 
 // out: TypeError: `b` is not defined
-// out: TypeError: `b` is not defined

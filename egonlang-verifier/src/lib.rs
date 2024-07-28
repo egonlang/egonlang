@@ -2,7 +2,6 @@ pub mod rules;
 mod type_env;
 mod verifier;
 mod verify_trace;
-mod visitor;
 
 pub use type_env::{TypeEnv, TypeEnvValue};
 pub use verifier::{VerificationResult, Verifier};

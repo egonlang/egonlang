@@ -1,0 +1,7 @@
+type IntA = number;
+
+{
+    type IntB = IntA;
+
+    const b: IntB = 10; // The source of the issued
+};

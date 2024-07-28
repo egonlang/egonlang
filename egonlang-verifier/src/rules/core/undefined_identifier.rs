@@ -10,7 +10,7 @@ expr_rule!(
     /// a;
     /// ```
     ReferencingUndefinedIdentifier,
-    fn (expr: &ast::Expr, span: &Span, types: &mut TypeEnv) {
+    |expr, span, resolve_ident, _resolve_expr| {
         let mut errs = vec![];
 
         if let ast::Expr::Identifier(ast::ExprIdentifier { identifier }) = expr {
@@ -21,7 +21,7 @@ expr_rule!(
 
             let name = &identifier.name;
 
-            if types.get(name).is_none() {
+            if resolve_ident(name).is_none() {
                 verify_trace!(error: "identifier not defined: {expr}");
 
                 errs.push((EgonTypeError::Undefined(name.to_string()).into(), span.clone()));

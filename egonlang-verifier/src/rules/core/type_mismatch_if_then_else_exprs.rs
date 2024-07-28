@@ -10,17 +10,17 @@ expr_rule!(
     /// if (true) { 123 } else { 456 };
     /// ```
     TypeMismatchIfthenElseExpr,
-    fn (expr: &ast::Expr, _span: &Span, types: &mut TypeEnv) {
+    |expr, _span, _resolve_ident, resolve_expr| {
         let mut errs = vec![];
 
         if let ast::Expr::If(if_expr) = expr {
             verify_trace!("Verifying if expression then/else types: {expr}");
 
             let (then_expr, then_span) = &if_expr.then;
-            let then_typeref = types.resolve_expr_type(then_expr, then_span).unwrap();
+            let then_typeref = resolve_expr(then_expr, then_span).unwrap().typeref;
 
             if let Some((else_expr, else_span)) = &if_expr.else_ {
-                let else_typeref = types.resolve_expr_type(else_expr, else_span).unwrap();
+                let else_typeref = resolve_expr(else_expr, else_span).unwrap().typeref;
 
                 if then_typeref != else_typeref {
                     if then_typeref.is_list() && else_typeref.is_list() {
@@ -144,19 +144,19 @@ mod tests {
         Err(vec![
             (
                 EgonTypeError::MismatchType {
-                    expected: "number".to_string(),
-                    actual: "string".to_string()
-                }
-                .into(),
-                52..61
-            ),
-            (
-                EgonTypeError::MismatchType {
                     expected: "list<number>".to_string(),
                     actual: "number".to_string()
                 }
                 .into(),
                 29..61
+            ),
+            (
+                EgonTypeError::MismatchType {
+                    expected: "number".to_string(),
+                    actual: "string".to_string()
+                }
+                .into(),
+                52..61
             )
         ])
     }

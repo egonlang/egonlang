@@ -5,7 +5,7 @@ use crate::span::Spanned;
 
 pub type EgonErrorS = Spanned<EgonError>;
 
-#[derive(Debug, Error, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Error, PartialEq, Serialize, Deserialize)]
 pub enum EgonError {
     #[error("SyntaxError: {0}")]
     SyntaxError(EgonSyntaxError),
@@ -13,7 +13,7 @@ pub enum EgonError {
     TypeError(EgonTypeError),
 }
 
-#[derive(Debug, Error, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Error, Eq, PartialEq, Serialize, Deserialize)]
 pub enum EgonSyntaxError {
     #[error("extraneous input: {token:?}")]
     ExtraToken { token: String },
@@ -44,7 +44,7 @@ pub enum EgonSyntaxError {
     DivideByZero,
 }
 
-#[derive(Debug, Error, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Error, Eq, PartialEq, Serialize, Deserialize)]
 pub enum EgonTypeError {
     #[error("mismatched types: expected type `{expected}` but received `{actual}`")]
     MismatchType { expected: String, actual: String },

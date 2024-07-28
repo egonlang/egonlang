@@ -18,32 +18,32 @@ expr_rule!(
     /// c = true;
     /// ```
     TypeMismatchReassigningLetValues,
-    fn (expr: &ast::Expr, _span: &Span, types: &mut TypeEnv) {
+    |expr, _span, resolve_ident, resolve_expr| {
         let mut errs = vec![];
 
         if let ast::Expr::Assign(expr_assign) = expr {
             let identifier = &expr_assign.identifier.name;
 
-            if let Some(type_env_value) = types.get(identifier) {
+            if let Some(type_env_value) = resolve_ident(identifier) {
                 verify_trace!(
                     "Verifying assign expression types: {}",
                     expr.to_string().cyan()
                 );
 
-                let type_env_typeref = type_env_value.typeref;
+                let type_env_typeref = &type_env_value.typeref;
                 let is_const = &type_env_value.is_const;
 
                 let (value_expr, value_span) = &expr_assign.value;
-                let value_typeref = types.resolve_expr_type(value_expr, value_span).unwrap();
+                let value_typeref = resolve_expr(value_expr, value_span).unwrap();
 
-                if !is_const && type_env_typeref != value_typeref {
+                if !is_const && type_env_typeref != &value_typeref.typeref {
                     verify_trace!(error:
                         "Type mismatching reassigning value ({type_env_typeref:?} vs {value_typeref:?}): {expr}");
 
                     errs.push((
                         EgonTypeError::MismatchType {
                             expected: type_env_typeref.to_string(),
-                            actual: value_typeref.to_string(),
+                            actual: value_typeref.typeref.to_string(),
                         }
                         .into(),
                         value_span.clone(),

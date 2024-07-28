@@ -46,7 +46,7 @@ fn main() {
 
                 let module = match parse(&content, 0) {
                     Ok(module) => {
-                        let verifier = Verifier::default();
+                        let mut verifier = Verifier::default();
                         verifier.verify(&module)
                     }
                     Err(errs) => Err(errs),

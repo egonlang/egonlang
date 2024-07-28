@@ -10,7 +10,7 @@ expr_rule!(
     /// ["a", "b", "c"];
     /// ```
     TypeMisMatchListItems,
-    fn (expr: &ast::Expr, _span: &Span, types: &mut TypeEnv) {
+    |expr, _span, _resolve_ident, resolve_expr| {
         let mut errs = vec![];
 
         if let ast::Expr::List(expr_list) = expr {
@@ -23,33 +23,32 @@ expr_rule!(
 
             if !items.is_empty() {
                 let (first_item_expr, first_item_span) = items.first().unwrap();
-                let first_item_typeref = types
-                    .resolve_expr_type(first_item_expr, first_item_span)
+                let first_item_typeref = resolve_expr(first_item_expr, first_item_span)
                     .unwrap();
 
                 let remaining_items: Vec<Spanned<ast::Expr>> = items.clone().into_iter().skip(1).collect();
 
                 for (item, item_span) in &remaining_items {
-                    match types.resolve_expr_type(item, item_span) {
-                        Ok(item_typeref) => {
-                            if item_typeref != first_item_typeref {
+                    match resolve_expr(item, item_span) {
+                        Some(item_typeref) => {
+                            if item_typeref.typeref != first_item_typeref.typeref {
                                 verify_trace!(error:
                                     "Found {} in a list of {}",
-                                    item_typeref.to_string().yellow(),
-                                    first_item_typeref.to_string().yellow()
+                                    item_typeref.typeref.to_string().yellow(),
+                                    first_item_typeref.typeref.to_string().yellow()
                                 );
 
                                 errs.push((
                                     EgonTypeError::MismatchType {
-                                        expected: first_item_typeref.to_string(),
-                                        actual: item_typeref.to_string(),
+                                        expected: first_item_typeref.typeref.to_string(),
+                                        actual: item_typeref.typeref.to_string(),
                                     }
                                     .into(),
                                     item_span.clone(),
                                 ));
                             }
                         }
-                        Err(e) => errs.extend(e),
+                        None => {}
                     }
                 }
             }

@@ -10,38 +10,22 @@ stmt_rule!(
     /// let c: bool = true;
     /// ```
     TypeMismatchOnDeclarations,
-    fn (stmt: &ast::Stmt, span: &Span, types: &mut TypeEnv) {
+    | stmt, span, resolve_ident, resolve_expr | {
         let mut errs = vec![];
 
         if let ast::Stmt::Assign(stmt_assign) = stmt {
-            verify_trace!(
-                verifier rule:
-                "Verifying assignment statement: {}",
-                stmt.to_string().cyan()
-            );
-
             match (&stmt_assign.type_expr, &stmt_assign.value) {
                 // let a;
                 (None, None) => {
-                    verify_trace!(
-                        verifier rule error:
-                        "Declaration of unknown type and no initial value: {}",
-                        stmt.to_string().cyan()
-                    );
                     errs.push((EgonTypeError::UnknownType.into(), span.clone()));
                 }
                 // let a = 123;
                 (None, Some((value_expr, value_span))) => {
-                    if let Ok(value_typeref) = types.resolve_expr_type(value_expr, value_span) {
+                    if let Some(value_typeref) = resolve_expr(value_expr, value_span) {
                         // Check for empty list assignment
                         // Example:
                         // let a = [];
-                        if value_typeref == ast::TypeRef::list(ast::TypeRef::unknown()) {
-                            verify_trace!(
-                                verifier rule error:
-                                "Unknown list type in declaration: {}",
-                                stmt.to_string().cyan()
-                            );
+                        if value_typeref.typeref == ast::TypeRef::list(ast::TypeRef::unknown()) {
                             errs.push((EgonTypeError::UknownListType.into(), value_span.clone()));
                         }
                     }
@@ -49,53 +33,47 @@ stmt_rule!(
                 }
                 // let a: number;
                 (Some((assign_type_expr, assign_type_span)), None) => {
-                    let assign_typeref = types
-                        .resolve_expr_type(assign_type_expr, assign_type_span)
+                    let assign_typeref = resolve_expr(assign_type_expr, assign_type_span)
                         .unwrap();
 
                     // Check for empty list assignment
                     // Example:
                     // let a: unknown;
-                    if assign_typeref == ast::TypeRef::unknown() {
-                        verify_trace!(
-                            verifier rule error: "Unknown type in declaration: {stmt}");
+                    if assign_typeref.typeref == ast::TypeRef::unknown() {
                         errs.push((EgonTypeError::UnknownType.into(), assign_type_span.clone()));
                     }
                 }
                 // let a: number = 123;
                 (Some((assign_type_expr, assign_type_span)), Some((value_expr, value_span))) => {
-                    let assign_typeref = types
-                        .resolve_expr_type(assign_type_expr, assign_type_span)
+                    let assign_typeref = resolve_expr(assign_type_expr, assign_type_span)
                         .unwrap();
 
-                    if let Ok(value_typeref) = types.resolve_expr_type(value_expr, value_span) {
+                    if let Some(value_typeref) = resolve_expr(value_expr, value_span) {
                         // Types mismatched
-                        if assign_typeref != value_typeref {
+                        if assign_typeref.typeref != value_typeref.typeref {
                             // Check for empty list assignment
                             // Example:
                             // let a: list<number> = [];
-                            if value_typeref == ast::TypeRef::list(ast::TypeRef::unknown())
-                                && assign_typeref.is_known_list()
+                            if value_typeref.typeref == ast::TypeRef::list(ast::TypeRef::unknown())
+                                && assign_typeref.typeref.is_known_list()
                             {
                                 return vec![];
                             }
 
-                            if value_typeref.0 == *"identifier" {
+                            if value_typeref.typeref.0 == *"identifier" {
                                 let identifier = &stmt_assign.identifier.name;
 
-                                if let Some(identifier_type) = types.get(identifier) {
-                                    if assign_typeref == identifier_type.typeref {
+                                if let Some(identifier_type) = resolve_ident(identifier) {
+                                    if assign_typeref.typeref == identifier_type.typeref {
                                         return vec![];
                                     }
                                 }
                             }
 
-                            verify_trace!(verifier rule error: "Type mismatch in declaration: {stmt}");
-
                             errs.push((
                                 EgonTypeError::MismatchType {
-                                    expected: assign_typeref.to_string(),
-                                    actual: value_typeref.to_string(),
+                                    expected: assign_typeref.typeref.to_string(),
+                                    actual: value_typeref.typeref.to_string(),
                                 }
                                 .into(),
                                 value_span.clone(),
@@ -104,14 +82,9 @@ stmt_rule!(
                             // Check for empty list assignment
                             // Example:
                             // let a: list<unknown> = [];
-                            if value_typeref == ast::TypeRef::list(ast::TypeRef::unknown())
-                                && assign_typeref.is_unknown_list()
+                            if value_typeref.typeref == ast::TypeRef::list(ast::TypeRef::unknown())
+                                && assign_typeref.typeref.is_unknown_list()
                             {
-                                verify_trace!(
-                                    verifier rule error:
-                                    "Unknown list type in declaration: {}",
-                                    stmt.to_string().cyan()
-                                );
                                 errs.push((EgonTypeError::UknownListType.into(), span.clone()));
                             }
                         }

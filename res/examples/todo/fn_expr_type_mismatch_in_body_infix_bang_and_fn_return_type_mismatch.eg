@@ -1,4 +1,7 @@
 (a: string): number => { !a };
 
+// This occurs because `a` is a string but bang prefix requires `bool` type
 // out: TypeError: mismatched types: expected type `bool` but received `string`
+
+// This occurs because the bang prefix produces the `bool` type
 // out: TypeError: mismatched types: expected type `number` but received `bool`

@@ -87,14 +87,6 @@ impl Debug for Stmt {
     }
 }
 
-/// Statement that creates a type alias
-/// e.g. type NumberList = number<list>;
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct StmtType {
-    pub identifier: Identifier,
-    pub type_expr: Option<ExprS>,
-}
-
 /// An expression statement evaluates an expression and discards the result.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct StmtExpr {
@@ -152,6 +144,22 @@ impl Display for StmtAssign {
 
             f.write_fmt(format_args!("{} {}{}{};", decl, name, typing, value))
         }
+    }
+}
+
+/// Statement that declares a type alias
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct StmtTypeAlias {
+    pub identifier: Identifier,
+    pub value: Identifier,
+}
+
+impl Display for StmtTypeAlias {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        let alias = &self.identifier.name;
+        let value = &self.value.name;
+
+        f.write_fmt(format_args!("type {} = {};", alias, value))
     }
 }
 
@@ -283,72 +291,6 @@ impl Display for Expr {
     }
 }
 
-impl Expr {
-    pub fn get_type_expr(self) -> TypeRef {
-        match self {
-            Expr::Unit => TypeRef::unit(),
-            Expr::Literal(literal) => match literal {
-                ExprLiteral::Bool(_) => TypeRef::bool(),
-                ExprLiteral::Number(_) => TypeRef::number(),
-                ExprLiteral::String(_) => TypeRef::string(),
-            },
-            Expr::Identifier(_) => TypeRef::identifier(),
-            Expr::Block(block) => block
-                .return_expr
-                .map_or(TypeRef::unit(), |(expr, _)| expr.get_type_expr()),
-            Expr::List(list) => {
-                if list.items.is_empty() {
-                    return TypeRef::list(TypeRef::unknown());
-                }
-
-                let (first_item, _) = list.items.first().unwrap().clone();
-
-                let first_item_type_ident = first_item.get_type_expr();
-
-                TypeRef::list(first_item_type_ident)
-            }
-            Expr::Tuple(tuple) => TypeRef::tuple(
-                tuple
-                    .items
-                    .into_iter()
-                    .map(|(expr, _)| expr.get_type_expr())
-                    .collect(),
-            ),
-            Expr::Infix(infix) => match infix.op {
-                OpInfix::Add => TypeRef::number(),
-                OpInfix::Subtract => TypeRef::number(),
-                OpInfix::Multiply => TypeRef::number(),
-                OpInfix::Divide => TypeRef::number(),
-                OpInfix::Modulus => TypeRef::number(),
-                OpInfix::Less => TypeRef::bool(),
-                OpInfix::LessEqual => TypeRef::bool(),
-                OpInfix::Greater => TypeRef::bool(),
-                OpInfix::GreaterEqual => TypeRef::bool(),
-                OpInfix::Equal => TypeRef::bool(),
-                OpInfix::NotEqual => TypeRef::bool(),
-                OpInfix::LogicAnd => TypeRef::bool(),
-                OpInfix::LogicOr => TypeRef::bool(),
-            },
-            Expr::Prefix(prefix) => match prefix.op {
-                OpPrefix::Negate => TypeRef::number(),
-                OpPrefix::Not => TypeRef::bool(),
-            },
-            Expr::Assign(assign) => {
-                let (expr, _) = assign.value;
-
-                expr.get_type_expr()
-            }
-            Expr::If(if_) => if_.then.0.get_type_expr(),
-            Expr::Fn(fn_) => TypeRef::function(
-                fn_.params.into_iter().map(|param| param.0 .1).collect(),
-                fn_.return_type.0,
-            ),
-            Expr::Range(_) => TypeRef::range(),
-            Expr::Type(ty) => ty.0,
-        }
-    }
-}
-
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum ExprLiteral {
     Bool(bool),
@@ -384,7 +326,7 @@ impl TryFrom<Expr> for f64 {
             },
             _ => Err(vec![errors::EgonTypeError::MismatchType {
                 expected: TypeRef::number().to_string(),
-                actual: value.get_type_expr().to_string(),
+                actual: value.to_string(),
             }
             .into()]),
         }
@@ -411,7 +353,7 @@ impl TryFrom<Expr> for String {
             },
             _ => Err(vec![errors::EgonTypeError::MismatchType {
                 expected: TypeRef::string().to_string(),
-                actual: value.get_type_expr().to_string(),
+                actual: value.to_string(),
             }
             .into()]),
         }
@@ -440,7 +382,7 @@ impl TryFrom<Expr> for bool {
             },
             _ => Err(vec![EgonError::TypeError(EgonTypeError::MismatchType {
                 expected: TypeRef::bool().to_string(),
-                actual: value.get_type_expr().to_string(),
+                actual: value.to_string(),
             })]),
         }
     }
@@ -775,6 +717,10 @@ impl TypeRef {
 
     pub fn list(item_type: TypeRef) -> TypeRef {
         TypeRef("list".to_string(), vec![item_type])
+    }
+
+    pub fn unknown_list() -> TypeRef {
+        TypeRef::list(TypeRef::unknown())
     }
 
     pub fn tuple(item_types: Vec<TypeRef>) -> TypeRef {
