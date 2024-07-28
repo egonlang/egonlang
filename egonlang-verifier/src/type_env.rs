@@ -281,7 +281,40 @@ impl<'a> TypeEnv<'a> {
 
                 Ok(then_typeref)
             }
-            _ => Ok(expr.clone().get_type_expr()),
+            ast::Expr::Unit => Ok(ast::TypeRef::unit()),
+            ast::Expr::Literal(literal) => Ok(match literal {
+                ast::ExprLiteral::Bool(_) => ast::TypeRef::bool(),
+                ast::ExprLiteral::Number(_) => ast::TypeRef::number(),
+                ast::ExprLiteral::String(_) => ast::TypeRef::string(),
+            }),
+            ast::Expr::Infix(infix) => Ok(match infix.op {
+                ast::OpInfix::Add => ast::TypeRef::number(),
+                ast::OpInfix::Subtract => ast::TypeRef::number(),
+                ast::OpInfix::Multiply => ast::TypeRef::number(),
+                ast::OpInfix::Divide => ast::TypeRef::number(),
+                ast::OpInfix::Modulus => ast::TypeRef::number(),
+                ast::OpInfix::Less => ast::TypeRef::bool(),
+                ast::OpInfix::LessEqual => ast::TypeRef::bool(),
+                ast::OpInfix::Greater => ast::TypeRef::bool(),
+                ast::OpInfix::GreaterEqual => ast::TypeRef::bool(),
+                ast::OpInfix::Equal => ast::TypeRef::bool(),
+                ast::OpInfix::NotEqual => ast::TypeRef::bool(),
+                ast::OpInfix::LogicAnd => ast::TypeRef::bool(),
+                ast::OpInfix::LogicOr => ast::TypeRef::bool(),
+            }),
+            ast::Expr::Prefix(prefix) => Ok(match prefix.op {
+                ast::OpPrefix::Negate => ast::TypeRef::number(),
+                ast::OpPrefix::Not => ast::TypeRef::bool(),
+            }),
+            ast::Expr::Fn(fn_) => Ok(ast::TypeRef::function(
+                fn_.params
+                    .clone()
+                    .into_iter()
+                    .map(|((_, typeref), _)| typeref)
+                    .collect(),
+                fn_.return_type.clone().0,
+            )),
+            ast::Expr::Range(_) => Ok(ast::TypeRef::range()),
         };
 
         match &resolved_type {
