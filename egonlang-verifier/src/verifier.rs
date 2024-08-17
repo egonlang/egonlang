@@ -186,7 +186,7 @@ impl<'a> Verifier<'a> {
                 );
 
                 if let Some((block_expr_return_expr, _)) = &block_expr.return_expr {
-                    self.resolve_expr_type(&block_expr_return_expr)
+                    self.resolve_expr_type(block_expr_return_expr)
                 } else {
                     verify_trace!(
                         verifier resolve_expr_type block: "(level: {}) Resolved block expression {} to type {}",

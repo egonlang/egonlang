@@ -29,26 +29,23 @@ expr_rule!(
                 let remaining_items: Vec<Spanned<ast::Expr>> = items.clone().into_iter().skip(1).collect();
 
                 for (item, item_span) in &remaining_items {
-                    match resolve_expr(item, item_span) {
-                        Some(item_typeref) => {
-                            if item_typeref.typeref != first_item_typeref.typeref {
-                                verify_trace!(error:
-                                    "Found {} in a list of {}",
-                                    item_typeref.typeref.to_string().yellow(),
-                                    first_item_typeref.typeref.to_string().yellow()
-                                );
+                    if let Some(item_typeref) = resolve_expr(item, item_span) {
+                        if item_typeref.typeref != first_item_typeref.typeref {
+                            verify_trace!(error:
+                                "Found {} in a list of {}",
+                                item_typeref.typeref.to_string().yellow(),
+                                first_item_typeref.typeref.to_string().yellow()
+                            );
 
-                                errs.push((
-                                    EgonTypeError::MismatchType {
-                                        expected: first_item_typeref.typeref.to_string(),
-                                        actual: item_typeref.typeref.to_string(),
-                                    }
-                                    .into(),
-                                    item_span.clone(),
-                                ));
-                            }
+                            errs.push((
+                                EgonTypeError::MismatchType {
+                                    expected: first_item_typeref.typeref.to_string(),
+                                    actual: item_typeref.typeref.to_string(),
+                                }
+                                .into(),
+                                item_span.clone(),
+                            ));
                         }
-                        None => {}
                     }
                 }
             }
