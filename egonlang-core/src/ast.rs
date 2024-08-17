@@ -87,14 +87,6 @@ impl Debug for Stmt {
     }
 }
 
-/// Statement that creates a type alias
-/// e.g. type NumberList = number<list>;
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct StmtType {
-    pub identifier: Identifier,
-    pub type_expr: Option<ExprS>,
-}
-
 /// An expression statement evaluates an expression and discards the result.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct StmtExpr {
@@ -152,6 +144,22 @@ impl Display for StmtAssign {
 
             f.write_fmt(format_args!("{} {}{}{};", decl, name, typing, value))
         }
+    }
+}
+
+/// Statement that declares a type alias
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct StmtTypeAlias {
+    pub identifier: Identifier,
+    pub value: Identifier,
+}
+
+impl Display for StmtTypeAlias {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        let alias = &self.identifier.name;
+        let value = &self.value.name;
+
+        f.write_fmt(format_args!("type {} = {};", alias, value))
     }
 }
 
@@ -709,6 +717,10 @@ impl TypeRef {
 
     pub fn list(item_type: TypeRef) -> TypeRef {
         TypeRef("list".to_string(), vec![item_type])
+    }
+
+    pub fn unknown_list() -> TypeRef {
+        TypeRef::list(TypeRef::unknown())
     }
 
     pub fn tuple(item_types: Vec<TypeRef>) -> TypeRef {

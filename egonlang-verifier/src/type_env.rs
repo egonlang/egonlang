@@ -12,6 +12,20 @@ pub struct TypeEnvValue {
 }
 
 impl TypeEnvValue {
+    pub fn new(typeref: ast::TypeRef) -> Self {
+        Self {
+            typeref,
+            is_const: false,
+        }
+    }
+
+    pub fn new_const(typeref: ast::TypeRef) -> Self {
+        Self {
+            typeref,
+            is_const: true,
+        }
+    }
+
     fn map_typeref(&self, typeref: ast::TypeRef) -> TypeEnvValue {
         let mut env_var = self.clone();
         env_var.typeref = typeref;
@@ -21,60 +35,35 @@ impl TypeEnvValue {
 }
 
 #[derive(Default)]
-pub struct TypeEnv<'a> {
-    root: Option<&'a TypeEnv<'a>>,
+pub struct TypeEnv {
+    level: usize,
     values: HashMap<String, TypeEnvValue>,
 }
 
-impl<'a> TypeEnv<'a> {
-    pub fn new() -> Self {
-        Default::default()
-    }
-
-    pub fn level(&self) -> usize {
-        match self.root {
-            Some(root_type_env) => root_type_env.level() + 1,
-            None => 0,
+impl TypeEnv {
+    pub fn new(level: usize) -> Self {
+        TypeEnv {
+            level,
+            ..Default::default()
         }
     }
 
-    /// Create a new type environment by extending the current one
-    pub fn extend(&self) -> Box<TypeEnv> {
-        let extended_type_env = TypeEnv {
-            root: Some(self),
-            values: HashMap::new(),
-        };
-
-        verify_trace!(type_env extend: "(level: {}) Extending type env... New level: {}", self.level(), extended_type_env.level());
-
-        Box::from(extended_type_env)
+    pub fn level(&self) -> usize {
+        self.level
     }
 
     /// Attempt to resolve an identifier's type
     pub fn get(&self, identifier: &str) -> Option<TypeEnvValue> {
         verify_trace!(
-            type_env get: "(level:{}) Looking up identifier {}",
+            type_env get: "(level: {}) Looking up identifier {}",
             self.level(),
             identifier.cyan()
         );
 
-        let result = match self.values.get(identifier) {
-            Some(result) => Some(result.clone()),
-            None => match &self.root {
-                Some(root) => {
-                    verify_trace!(
-                        type_env get error: "(level:{}) Not finding {}, looking in higher type env",
-                        self.level(),
-                        identifier.cyan()
-                    );
-                    root.get(identifier)
-                }
-                _ => None,
-            },
-        };
+        let result = self.values.get(identifier);
 
         if result.is_some() {
-            let result = result.clone().unwrap();
+            let result = result.unwrap();
 
             if result.typeref.0 == *"type" {
                 verify_trace!(
@@ -88,7 +77,7 @@ impl<'a> TypeEnv<'a> {
             }
         }
 
-        match &result {
+        match result {
             Some(result) => {
                 verify_trace!(
                     type_env get: "(level:{}) Got type {} for {}",
@@ -100,14 +89,14 @@ impl<'a> TypeEnv<'a> {
             None => {
                 verify_trace!(
                     type_env get error:
-                    "(level:{}) Unable to find type for {} in type env",
+                    "(level: {}) Unable to find type for {} in type env",
                     self.level(),
                     identifier.cyan()
                 );
             }
         }
 
-        result
+        result.cloned()
     }
 
     pub fn set(&mut self, identifier: &str, value: TypeEnvValue) -> Option<TypeEnvValue> {
@@ -131,7 +120,7 @@ impl<'a> TypeEnv<'a> {
             return match self.get(&new_typeref.to_string()) {
                 Some(aliased_type) => {
                     verify_trace!(
-                        type_env set:
+                        type_env set type_alias:
                         "(level:{}) Setting {} to type alias {}",
                         self.level(),
                         identifier.cyan(),
@@ -468,7 +457,7 @@ mod type_env_tests {
 
     #[test]
     fn get_returns_some_type_env_value_if_exists() {
-        let mut env = TypeEnv::new();
+        let mut env = TypeEnv::new(0);
 
         env.set(
             "a",
@@ -489,68 +478,14 @@ mod type_env_tests {
 
     #[test]
     fn get_returns_none_if_not_exists() {
-        let env = TypeEnv::new();
+        let env = TypeEnv::new(0);
 
         assert_eq!(None, env.get("a"));
     }
 
     #[test]
-    fn extended_env_returns_some_type_value_if_exists() {
-        let mut env = TypeEnv::new();
-
-        env.set(
-            "a",
-            TypeEnvValue {
-                typeref: TypeRef::number(),
-                is_const: false,
-            },
-        );
-
-        let env2 = env.extend();
-
-        assert_eq!(
-            Some(TypeEnvValue {
-                typeref: TypeRef::number(),
-                is_const: false,
-            }),
-            env2.get("a")
-        );
-    }
-
-    #[test]
-    fn extended_env_returns_some_type_value_if_new_value_exists() {
-        let mut env = TypeEnv::new();
-
-        env.set(
-            "a",
-            TypeEnvValue {
-                typeref: TypeRef::number(),
-                is_const: false,
-            },
-        );
-
-        let mut env2 = env.extend();
-
-        env2.set(
-            "a",
-            TypeEnvValue {
-                typeref: TypeRef::bool(),
-                is_const: false,
-            },
-        );
-
-        assert_eq!(
-            Some(TypeEnvValue {
-                typeref: TypeRef::bool(),
-                is_const: false,
-            }),
-            env2.get("a")
-        );
-    }
-
-    #[test]
     fn type_alias_returns_aliased_type() {
-        let mut env = TypeEnv::new();
+        let mut env = TypeEnv::new(0);
 
         // Alias type `Int` to type `number`
         env.set(
@@ -572,7 +507,7 @@ mod type_env_tests {
 
     #[test]
     fn type_alias_returns_aliased_type_2() {
-        let mut env = TypeEnv::new();
+        let mut env = TypeEnv::new(0);
 
         // Alias type `Int` to type `number`
         env.set(

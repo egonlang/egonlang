@@ -1,37 +1,93 @@
+pub trait ResolveIdent: Fn(&str) -> Option<crate::TypeEnvValue> {}
+pub trait ResolveExpr:
+    Fn(&::egonlang_core::ast::Expr, &::egonlang_core::span::Span) -> Option<crate::TypeEnvValue>
+{
+}
+
+impl<F> ResolveIdent for F where F: Fn(&str) -> Option<crate::TypeEnvValue> {}
+impl<F> ResolveExpr for F where
+    F: Fn(&::egonlang_core::ast::Expr, &::egonlang_core::span::Span) -> Option<crate::TypeEnvValue>
+{
+}
+
 /// Rule for verifying statements and expressions
 pub trait Rule<'a> {
     fn visit_stmt(
         &self,
         stmt: &::egonlang_core::ast::Stmt,
         span: &::egonlang_core::span::Span,
-        types: &mut crate::type_env::TypeEnv,
+        resolve_ident: &dyn ResolveIdent,
+        resolve_expr: &dyn ResolveExpr,
     ) -> crate::VerificationResult;
 
     fn visit_expr(
         &self,
         expr: &::egonlang_core::ast::Expr,
         span: &::egonlang_core::span::Span,
-        types: &mut crate::type_env::TypeEnv,
+        resolve_ident: &dyn ResolveIdent,
+        resolve_expr: &dyn ResolveExpr,
     ) -> crate::VerificationResult;
 }
 
 /// Create a verifier [`Rule`] for an expression
 #[macro_export]
 macro_rules! expr_rule {
-    ($(#[$attributes:meta])* $name:ident, fn $params:tt $body:expr) => {
+    ($(#[$attributes:meta])* $name:ident, |$expr:ident| $body:expr) => {
         ::paste::paste! {
             /// Egon Verifier Expression Rule
             ///
             $(#[$attributes])*
             pub struct [<$name Rule>];
 
+            impl<'a> $crate::rules::rule::Rule<'a> for [<$name Rule>] {
+                fn visit_stmt(
+                    &self,
+                    _stmt: &::egonlang_core::ast::Stmt,
+                    _span: &::egonlang_core::span::Span,
+                    _resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
+                    _resolve_expr: &dyn $crate::rules::rule::ResolveExpr,
+                ) -> VerificationResult {
+                    Ok(())
+                }
+
+                fn visit_expr(
+                    &self,
+                    expr: &::egonlang_core::ast::Expr,
+                    _span: &::egonlang_core::span::Span,
+                    _resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
+                    _resolve_expr: &dyn $crate::rules::rule::ResolveExpr,
+                ) -> VerificationResult {
+                    let internal = |$expr: &::egonlang_core::ast::Expr| ->
+                        Vec<::egonlang_core::errors::EgonErrorS> {
+                            $body
+                        };
+
+                    let errs = internal(expr);
+
+                    if !errs.is_empty() {
+                        return Err(errs);
+                    }
+
+                    Ok(())
+                }
+            }
+        }
+    };
+
+    ($(#[$attributes:meta])* $name:ident, |$expr:ident, $span:ident| $body:expr) => {
+        ::paste::paste! {
+            /// Egon Verifier Expression Rule
+            ///
+            $(#[$attributes])*
+            pub struct [<$name Rule>];
 
             impl<'a> $crate::rules::rule::Rule<'a> for [<$name Rule>] {
                 fn visit_stmt(
                     &self,
                     _stmt: &::egonlang_core::ast::Stmt,
                     _span: &::egonlang_core::span::Span,
-                    _types: &mut $crate::TypeEnv,
+                    _resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
+                    _resolve_expr: &dyn $crate::rules::rule::ResolveExpr,
                 ) -> VerificationResult {
                     Ok(())
                 }
@@ -40,13 +96,57 @@ macro_rules! expr_rule {
                     &self,
                     expr: &::egonlang_core::ast::Expr,
                     span: &::egonlang_core::span::Span,
-                    types: &mut $crate::TypeEnv,
+                    _resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
+                    _resolve_expr: &dyn $crate::rules::rule::ResolveExpr,
                 ) -> VerificationResult {
-                    fn internal $params -> Vec<::egonlang_core::errors::EgonErrorS> {
-                        $body
+                    let internal = | $expr: &::egonlang_core::ast::Expr,
+                                     $span: &::egonlang_core::span::Span |
+                        { $body };
+
+                    let errs = internal((expr, span));
+
+                    if !errs.is_empty() {
+                        return Err(errs);
                     }
 
-                    let errs = internal(expr, span, types);
+                    Ok(())
+                }
+            }
+        }
+    };
+
+    ($(#[$attributes:meta])* $name:ident, |$expr:ident, $span:ident, $resolve_ident:ident, $resolve_expr:ident| $body:expr) => {
+        ::paste::paste! {
+            /// Egon Verifier Expression Rule
+            ///
+            $(#[$attributes])*
+            pub struct [<$name Rule>];
+
+            impl<'a> $crate::rules::rule::Rule<'a> for [<$name Rule>] {
+                fn visit_stmt(
+                    &self,
+                    _stmt: &::egonlang_core::ast::Stmt,
+                    _span: &::egonlang_core::span::Span,
+                    _resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
+                    _resolve_expr: &dyn $crate::rules::rule::ResolveExpr,
+                ) -> VerificationResult {
+                    Ok(())
+                }
+
+                fn visit_expr(
+                    &self,
+                    expr: &::egonlang_core::ast::Expr,
+                    span: &::egonlang_core::span::Span,
+                    resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
+                    resolve_expr: &dyn $crate::rules::rule::ResolveExpr,
+                ) -> VerificationResult {
+                    let internal = | $expr: &::egonlang_core::ast::Expr,
+                                     $span: &::egonlang_core::span::Span,
+                                     $resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
+                                     $resolve_expr: &dyn $crate::rules::rule::ResolveExpr |
+                        { $body };
+
+                    let errs = internal(expr, span, resolve_ident, resolve_expr);
 
                     if !errs.is_empty() {
                         return Err(errs);
@@ -62,7 +162,7 @@ macro_rules! expr_rule {
 /// Create a verifier [`Rule`] for a statement
 #[macro_export]
 macro_rules! stmt_rule {
-    ($(#[$attributes:meta])* $name:ident, fn $params:tt $body:expr) => {
+    ($(#[$attributes:meta])* $name:ident, |$stmt:ident, $span:ident, $resolve_ident:ident, $resolve_expr:ident| $body:expr) => {
         paste::paste! {
             /// Egon Verifier Statement Rule
             ///
@@ -74,13 +174,16 @@ macro_rules! stmt_rule {
                     &self,
                     stmt: &::egonlang_core::ast::Stmt,
                     span: &::egonlang_core::span::Span,
-                    types: &mut $crate::TypeEnv,
+                    resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
+                    resolve_expr: &dyn $crate::rules::rule::ResolveExpr,
                 ) -> $crate::VerificationResult {
-                    fn internal $params -> Vec<::egonlang_core::errors::EgonErrorS> {
-                        $body
-                    }
+                    let internal = | $stmt: &::egonlang_core::ast::Stmt,
+                                     $span: &::egonlang_core::span::Span,
+                                     $resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
+                                     $resolve_expr: &dyn $crate::rules::rule::ResolveExpr |
+                        { $body };
 
-                    let errs = internal(stmt, span, types);
+                    let errs = internal(stmt, span, resolve_ident, resolve_expr);
 
                     if !errs.is_empty() {
                         return Err(errs);
@@ -93,7 +196,8 @@ macro_rules! stmt_rule {
                     &self,
                     _expr: &::egonlang_core::ast::Expr,
                     _span: &::egonlang_core::span::Span,
-                    _types: &mut $crate::TypeEnv,
+                    _resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
+                    _resolve_expr: &dyn $crate::rules::rule::ResolveExpr,
                 ) -> $crate::VerificationResult {
                     Ok(())
                 }

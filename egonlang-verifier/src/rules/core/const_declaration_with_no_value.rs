@@ -4,21 +4,11 @@ use egonlang_core::prelude::*;
 stmt_rule!(
     /// Checks assignment statements initialize consts with a value
     DeclareConstWithoutValue,
-    fn (stmt: &ast::Stmt, span: &Span, _types: &mut TypeEnv) {
+    | stmt, span, _resolve_ident, _resolve_expr | {
         let mut errs = vec![];
 
         if let ast::Stmt::Assign(stmt_assign) = stmt {
-            verify_trace!(
-                "Verifying const declaration has value: {}",
-                stmt.to_string().cyan()
-            );
-
             if stmt_assign.is_const && stmt_assign.value.is_none() {
-                verify_trace!(
-                    error: "const declaration has no value: {}",
-                    stmt.to_string().cyan()
-                );
-
                 errs.push((
                     EgonSyntaxError::UninitializedConst {
                         name: stmt_assign.identifier.name.clone(),

@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
+use rules::rule::ResolveExpr;
 
 expr_rule!(
     /// Checks value types for all infix operation expressions
@@ -10,85 +11,86 @@ expr_rule!(
     /// 1 + 2;
     /// ```
     TypeMismatchInfix,
-    fn (expr: &ast::Expr, _span: &Span, types: &mut TypeEnv) {
+    |expr, _span, _resolve_ident, resolve_expr| {
         let mut errs: Vec<EgonErrorS> = vec![];
+
 
         if let ast::Expr::Infix(infix) = expr {
             verify_trace!("Verifying infix expression: {}", expr.to_string().cyan());
 
             match infix.op {
                 ast::OpInfix::Greater => {
-                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), types)
+                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::GreaterEqual => {
-                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), types)
+                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::Less => {
-                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), types)
+                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::LessEqual => {
-                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), types)
+                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::Add => {
-                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), types)
+                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::Subtract => {
-                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), types)
+                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::Multiply => {
-                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), types)
+                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::Divide => {
-                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), types)
+                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::LogicAnd => {
-                    let infix_errs = validate_infix_types(infix, ast::TypeRef::bool(), types)
+                    let infix_errs = validate_infix_types(infix, ast::TypeRef::bool(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::LogicOr => {
-                    let infix_errs = validate_infix_types(infix, ast::TypeRef::bool(), types)
+                    let infix_errs = validate_infix_types(infix, ast::TypeRef::bool(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::Modulus => {
-                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), types)
+                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
@@ -105,15 +107,15 @@ expr_rule!(
 fn validate_infix_types(
     infix: &ast::ExprInfix,
     expected_type: ast::TypeRef,
-    types: &mut TypeEnv,
+    resolve_expr: &dyn ResolveExpr,
 ) -> Result<(), Vec<EgonErrorS>> {
     let mut errs = vec![];
 
     let (lt_expr, lt_span) = &infix.lt;
-    let lt_type = types.resolve_expr_type(lt_expr, lt_span)?;
+    let lt_type = resolve_expr(lt_expr, lt_span).unwrap().typeref;
 
     let (rt_expr, rt_span) = &infix.rt;
-    let rt_type = types.resolve_expr_type(rt_expr, rt_span)?;
+    let rt_type = resolve_expr(rt_expr, rt_span).unwrap().typeref;
 
     if lt_type != expected_type {
         verify_trace!(error: "infix operation received non number: {lt_expr}");

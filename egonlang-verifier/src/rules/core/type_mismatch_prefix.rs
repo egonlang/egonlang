@@ -12,23 +12,23 @@ expr_rule!(
     /// !true
     /// ```
     TypeMismatchPrefix,
-    fn (expr: &ast::Expr, _span: &Span, types: &mut TypeEnv) {
+    |expr, _span, _resolve_ident, resolve_expr| {
         let mut errs = vec![];
 
         if let ast::Expr::Prefix(prefix_expr) = expr {
-            verify_trace!("Verifying prefix expression: {expr}");
+            verify_trace!("Verifying prefix expression: {}", expr.to_string().cyan());
 
             match prefix_expr.op {
                 ast::OpPrefix::Negate => {
                     let (value_expr, value_span) = &prefix_expr.rt;
-                    let value_typeref = types.resolve_expr_type(value_expr, value_span).unwrap();
+                    let value_typeref = resolve_expr(value_expr, value_span).unwrap();
 
-                    if value_typeref != ast::TypeRef::number() {
+                    if value_typeref.typeref != ast::TypeRef::number() {
                         verify_trace!(error: "negate prefix on a none number value: {expr}");
                         errs.push((
                             EgonTypeError::MismatchType {
                                 expected: ast::TypeRef::number().to_string(),
-                                actual: value_typeref.to_string(),
+                                actual: value_typeref.typeref.to_string(),
                             }
                             .into(),
                             value_span.clone(),
@@ -37,14 +37,14 @@ expr_rule!(
                 }
                 ast::OpPrefix::Not => {
                     let (value_expr, value_span) = &prefix_expr.rt;
-                    let value_typeref = types.resolve_expr_type(value_expr, value_span).unwrap();
+                    let value_typeref = resolve_expr(value_expr, value_span).unwrap();
 
-                    if value_typeref != ast::TypeRef::bool() {
+                    if value_typeref.typeref != ast::TypeRef::bool() {
                         verify_trace!(error: "not prefix on a none bool value: {expr}");
                         errs.push((
                             EgonTypeError::MismatchType {
                                 expected: ast::TypeRef::bool().to_string(),
-                                actual: value_typeref.to_string(),
+                                actual: value_typeref.typeref.to_string(),
                             }
                             .into(),
                             value_span.clone(),

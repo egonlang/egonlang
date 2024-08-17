@@ -1,6 +1,10 @@
+use ast::TypeRef;
 use egonlang_core::prelude::*;
 
-use crate::{rules, verify_trace, visitor::Visitor, TypeEnv, TypeEnvValue};
+use crate::{
+    rules::{self, ResolveExpr, ResolveIdent},
+    verify_trace, TypeEnv, TypeEnvValue,
+};
 
 pub type VerificationResult = Result<(), Vec<EgonErrorS>>;
 
@@ -21,6 +25,8 @@ pub type VerificationResult = Result<(), Vec<EgonErrorS>>;
 /// ```
 pub struct Verifier<'a> {
     rules: Vec<Box<dyn rules::Rule<'a>>>,
+    /// Type environments in a stack to support scopes
+    type_envs: Vec<TypeEnv>,
 }
 
 impl Default for Verifier<'_> {
@@ -35,7 +41,20 @@ impl<'a> Verifier<'a> {
     pub fn new() -> Self {
         Verifier {
             rules: Default::default(),
+            type_envs: vec![TypeEnv::new(0)],
         }
+    }
+
+    pub fn current_type_env(&self) -> &TypeEnv {
+        self.type_envs
+            .last()
+            .expect("Verifier setup without a type environment")
+    }
+
+    pub fn current_type_env_mut(&mut self) -> &mut TypeEnv {
+        self.type_envs
+            .last_mut()
+            .expect("Verifier setup without a type environment")
     }
 
     /// Register a [`Rule`]
@@ -77,15 +96,13 @@ impl<'a> Verifier<'a> {
     }
 
     /// Verify an AST [`Module`] using the registered [`Rule`] set
-    pub fn verify(&self, module: &ast::Module) -> VerificationResult {
+    pub fn verify(&mut self, module: &ast::Module) -> VerificationResult {
         let mut all_errs: Vec<EgonErrorS> = vec![];
 
-        let mut types = TypeEnv::new();
-
-        verify_trace!(verifier_verify: "Verifying module...");
+        verify_trace!(verifier verify: "Verifying module...");
 
         for (stmt, stmt_span) in &module.stmts {
-            if let Err(stmt_errs) = self.visit_stmt(stmt, stmt_span, &mut types) {
+            if let Err(stmt_errs) = self.visit_stmt(stmt, stmt_span) {
                 all_errs.extend(stmt_errs);
             }
         }
@@ -98,33 +115,199 @@ impl<'a> Verifier<'a> {
     }
 }
 
-impl<'a> Visitor<'a> for Verifier<'a> {
-    fn visit_stmt(
-        &self,
-        stmt: &ast::Stmt,
-        span: &Span,
-        types: &mut TypeEnv,
-    ) -> Result<(), Vec<EgonErrorS>> {
+impl<'a> Verifier<'a> {
+    /// Resolves an identifier through all type environment scopes
+    fn resolve_identifier(&self, identifier: &str) -> Option<TypeEnvValue> {
+        verify_trace!(
+            verifier resolve_expr_type: "(level: {}) Resolving identifier type: {}",
+            self.current_type_env_level(),
+            identifier.to_string().cyan()
+        );
+
+        for type_env in self.type_envs.iter().rev() {
+            if let Some(value) = type_env.get(identifier) {
+                return Some(value);
+            }
+        }
+
+        None
+    }
+
+    /// Resolve an expression's type recursively.
+    /// This will resolve value identifiers types as well.
+    ///
+    /// Example
+    ///
+    /// let a = 123;
+    ///
+    /// let b = false;
+    ///
+    /// (a, b,); // This expression's type resolves to (number, bool,)
+    pub fn resolve_expr_type(&self, expr: &ast::Expr) -> Option<TypeEnvValue> {
+        verify_trace!(
+            verifier resolve_expr_type: "(level: {}) Resolving type for expression {}",
+            self.current_type_env_level(),
+            expr.to_string().cyan()
+        );
+
+        let resolved_type = match expr {
+            ast::Expr::Identifier(ident_expr) => {
+                self.resolve_identifier(&ident_expr.identifier.name)
+            }
+            ast::Expr::List(list_expr) => {
+                if list_expr.items.is_empty() {
+                    return Some(TypeEnvValue::new(ast::TypeRef::unknown_list()));
+                }
+
+                let (first_item_expr, _) = list_expr.items.first().unwrap().clone();
+                let first_item_type = self.resolve_expr_type(&first_item_expr)?.typeref;
+
+                Some(TypeEnvValue::new(ast::TypeRef::list(first_item_type)))
+            }
+            ast::Expr::Tuple(tuple_expr) => {
+                if tuple_expr.items.is_empty() {
+                    return Some(TypeEnvValue::new(ast::TypeRef::tuple(vec![])));
+                }
+
+                let item_types: Vec<ast::TypeRef> = tuple_expr
+                    .items
+                    .clone()
+                    .into_iter()
+                    .map(|(x_expr, _)| self.resolve_expr_type(&x_expr).unwrap().typeref)
+                    .collect();
+
+                Some(TypeEnvValue::new(ast::TypeRef::tuple(item_types)))
+            }
+            ast::Expr::Block(block_expr) => {
+                verify_trace!(
+                    verifier resolve_expr_type: "(level: {}) Resolving type for block {}",
+                    self.current_type_env_level(),
+                    block_expr.to_string().cyan()
+                );
+
+                if let Some((block_expr_return_expr, _)) = &block_expr.return_expr {
+                    self.resolve_expr_type(&block_expr_return_expr)
+                } else {
+                    verify_trace!(
+                        verifier resolve_expr_type block: "(level: {}) Resolved block expression {} to type {}",
+                        self.current_type_env_level(),
+                        block_expr.to_string().cyan(),
+                        ast::TypeRef::unit().to_string().italic().yellow()
+                    );
+
+                    return Some(TypeEnvValue::new(ast::TypeRef::unit()));
+                }
+            }
+            ast::Expr::Type(type_expr) => {
+                verify_trace!(
+                    verifier resolve_expr_type type_expr: "(level: {}) Resolving type for type expression {}",
+                    self.current_type_env_level(),
+                    type_expr.to_string().cyan()
+                );
+
+                let type_string = type_expr.0.to_string();
+                if let Some(type_env_value) = &self.resolve_identifier(type_string.as_str()) {
+                    verify_trace!(
+                        verifier resolve_expr_type type_expr: "(level: {}) Resolved type expression {} to type {}",
+                        self.current_type_env_level(),
+                        type_expr.to_string().cyan(),
+                        type_env_value.typeref.to_string().italic().yellow()
+                    );
+
+                    return Some(type_env_value.clone());
+                }
+
+                verify_trace!(
+                    verifier resolve_expr_type type_expr: "(level: {}) Resolved type expression {} to type {}",
+                    self.current_type_env_level(),
+                    type_expr.to_string().cyan(),
+                    type_expr.0.to_string().italic().yellow()
+                );
+
+                Some(TypeEnvValue::new(type_expr.0.clone()))
+            }
+            ast::Expr::Assign(assign_expr) => {
+                let name = &assign_expr.identifier.name;
+
+                Some(self.resolve_identifier(name).unwrap_or_else(|| {
+                    let (value_expr, _) = &assign_expr.value;
+
+                    self.resolve_expr_type(value_expr).unwrap()
+                }))
+            }
+            ast::Expr::If(if_expr) => {
+                let (then_expr, _) = &if_expr.then;
+                let then_typeref = self.resolve_expr_type(then_expr)?;
+
+                Some(then_typeref)
+            }
+            ast::Expr::Unit => Some(TypeEnvValue::new(ast::TypeRef::unit())),
+            ast::Expr::Literal(literal) => Some(TypeEnvValue::new(match literal {
+                ast::ExprLiteral::Bool(_) => ast::TypeRef::bool(),
+                ast::ExprLiteral::Number(_) => ast::TypeRef::number(),
+                ast::ExprLiteral::String(_) => ast::TypeRef::string(),
+            })),
+            ast::Expr::Infix(infix) => Some(TypeEnvValue::new(match infix.op {
+                ast::OpInfix::Add => ast::TypeRef::number(),
+                ast::OpInfix::Subtract => ast::TypeRef::number(),
+                ast::OpInfix::Multiply => ast::TypeRef::number(),
+                ast::OpInfix::Divide => ast::TypeRef::number(),
+                ast::OpInfix::Modulus => ast::TypeRef::number(),
+                ast::OpInfix::Less => ast::TypeRef::bool(),
+                ast::OpInfix::LessEqual => ast::TypeRef::bool(),
+                ast::OpInfix::Greater => ast::TypeRef::bool(),
+                ast::OpInfix::GreaterEqual => ast::TypeRef::bool(),
+                ast::OpInfix::Equal => ast::TypeRef::bool(),
+                ast::OpInfix::NotEqual => ast::TypeRef::bool(),
+                ast::OpInfix::LogicAnd => ast::TypeRef::bool(),
+                ast::OpInfix::LogicOr => ast::TypeRef::bool(),
+            })),
+            ast::Expr::Prefix(prefix) => Some(TypeEnvValue::new(match prefix.op {
+                ast::OpPrefix::Negate => ast::TypeRef::number(),
+                ast::OpPrefix::Not => ast::TypeRef::bool(),
+            })),
+            ast::Expr::Fn(fn_) => Some(TypeEnvValue::new(ast::TypeRef::function(
+                fn_.params
+                    .clone()
+                    .into_iter()
+                    .map(|((_, typeref), _)| typeref)
+                    .collect(),
+                fn_.return_type.clone().0,
+            ))),
+            ast::Expr::Range(_) => Some(TypeEnvValue::new(ast::TypeRef::range())),
+        };
+
+        if let Some(resolved_type) = &resolved_type {
+            let resolved_type_string = format!("{}", resolved_type.typeref);
+
+            verify_trace!(
+                verifier resolve_expr_type:
+                "(level: {}) Resolved expression {} to the type {}",
+                self.current_type_env_level(),
+                expr.to_string().cyan(),
+                resolved_type_string.italic().yellow()
+            );
+        };
+
+        resolved_type
+    }
+
+    fn visit_stmt(&mut self, stmt: &ast::Stmt, span: &Span) -> Result<(), Vec<EgonErrorS>> {
         let mut errs: Vec<EgonErrorS> = vec![];
 
-        verify_trace!(visit_stmt: "{}", stmt.to_string().cyan());
+        verify_trace!(verifier visit_stmt: "{}", stmt.to_string().cyan());
 
         let result = match stmt {
             ast::Stmt::Expr(stmt_expr) => {
-                verify_trace!(visit_stmt expr: "{} is an expression statement", stmt.to_string().cyan());
+                verify_trace!(verifier visit_stmt expr: "{} is an expression statement", stmt.to_string().cyan());
 
                 let (expr, expr_span) = &stmt_expr.expr;
 
-                verify_trace!(visit_stmt expr: "Checking expression {} from stmt {}", expr.to_string().cyan(), stmt.to_string().cyan());
+                verify_trace!(verifier visit_stmt expr: "Checking expression {} from stmt {}", expr.to_string().cyan(), stmt.to_string().cyan());
 
-                let expr_errs = self
-                    .visit_expr(expr, expr_span, types)
-                    .err()
-                    .unwrap_or_default();
+                let expr_errs = self.visit_expr(expr, expr_span).err().unwrap_or_default();
 
-                if !expr_errs.is_empty() {
-                    verify_trace!(visit_stmt expr error: "Value expression {} had {} errors", &expr.to_string().cyan(), expr_errs.len());
-                }
+                verify_trace!(verifier visit_stmt expr error: "Value expression {} had {} errors", &expr.to_string().cyan(), expr_errs.len());
 
                 errs.extend(expr_errs);
 
@@ -135,83 +318,61 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 Ok(())
             }
             ast::Stmt::Assign(stmt_assign) => {
-                verify_trace!(visit_stmt assign: "{} is an assignment statement", stmt.to_string().cyan());
-
-                if let Some((value_expr, value_expr_span)) = &stmt_assign.value {
-                    verify_trace!(
-                        visit_stmt assign:
-                        "Checking value expression {} from assign statement {}",
-                        value_expr.to_string().cyan(),
-                        stmt.to_string().cyan()
-                    );
-
-                    let value_expr_errs = self
-                        .visit_expr(value_expr, value_expr_span, types)
-                        .err()
-                        .unwrap_or_default();
-
-                    if !value_expr_errs.is_empty() {
-                        verify_trace!(visit_stmt assign error: "Value expression {} had {} errors", &value_expr.to_string().cyan(), value_expr_errs.len());
-                    }
-
-                    errs.extend(value_expr_errs);
-                }
-
-                if !errs.is_empty() {
-                    return Err(errs);
-                }
+                verify_trace!(verifier visit_stmt assign: "{} is an assignment statement", stmt.to_string().cyan());
 
                 match (&stmt_assign.type_expr, &stmt_assign.value) {
                     (None, None) => {}
                     (None, Some((value_expr, value_span))) => {
                         verify_trace!(
-                            visit_stmt assign:
+                            verifier visit_stmt assign:
                             "Resolving value expression {} from assign statement {}",
                             value_expr.to_string().cyan(),
                             stmt.to_string().cyan()
                         );
 
-                        let value_typeref = types.resolve_expr_type(value_expr, value_span)?;
-                        types.set(
+                        let value_typeref = self.visit_expr(value_expr, value_span)?;
+
+                        self.current_type_env_mut().set(
                             &stmt_assign.identifier.name,
                             TypeEnvValue {
-                                typeref: value_typeref,
+                                typeref: value_typeref.typeref,
                                 is_const: stmt_assign.is_const,
                             },
                         );
                     }
-                    (Some((type_expr, type_span)), None) => {
+                    (Some((type_expr, _type_span)), None) => {
                         verify_trace!(
-                            visit_stmt assign:
+                            verifier visit_stmt assign:
                             "Resolving type expression {} from assign statement {}",
                             type_expr.to_string().cyan(),
                             stmt.to_string().cyan()
                         );
 
-                        let type_typeref = types.resolve_expr_type(type_expr, type_span)?;
+                        let type_typeref = self.resolve_expr_type(type_expr).unwrap();
 
-                        types.set(
+                        self.current_type_env_mut().set(
                             &stmt_assign.identifier.name,
                             TypeEnvValue {
-                                typeref: type_typeref,
+                                typeref: type_typeref.typeref,
                                 is_const: stmt_assign.is_const,
                             },
                         );
                     }
-                    (Some((type_expr, type_span)), Some((_value_expr, _value_span))) => {
+                    (Some((type_expr, _type_span)), Some((value_expr, value_span))) => {
                         verify_trace!(
-                            visit_stmt assign:
-                            "Resolving type expression {} from assign statement {}",
+                            verifier visit_stmt assign:
+                            "Resolving the type expression {} from the assignment statement {}",
                             type_expr.to_string().cyan(),
                             stmt.to_string().cyan()
                         );
 
-                        let type_typeref = types.resolve_expr_type(type_expr, type_span)?;
+                        let type_typeref = self.resolve_expr_type(type_expr).unwrap();
+                        self.visit_expr(value_expr, value_span)?;
 
-                        types.set(
+                        self.current_type_env_mut().set(
                             &stmt_assign.identifier.name,
                             TypeEnvValue {
-                                typeref: type_typeref,
+                                typeref: type_typeref.typeref,
                                 is_const: stmt_assign.is_const,
                             },
                         );
@@ -221,19 +382,19 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 Ok(())
             }
             ast::Stmt::Fn(stmt_fn) => {
-                verify_trace!(visit_stmt function: "{} is an function statement", stmt.to_string().cyan());
+                verify_trace!(verifier visit_stmt function: "{} is an function statement", stmt.to_string().cyan());
 
                 let (fn_expr, fn_expr_span) = &stmt_fn.fn_expr;
 
-                verify_trace!(visit_stmt function: "Checking function statement's function expression {}", fn_expr.to_string().cyan());
+                verify_trace!(verifier visit_stmt function: "Checking function statement's function expression {}", fn_expr.to_string().cyan());
 
                 let fn_expr_errs = self
-                    .visit_expr(fn_expr, fn_expr_span, types)
+                    .visit_expr(fn_expr, fn_expr_span)
                     .err()
                     .unwrap_or_default();
 
                 if !fn_expr_errs.is_empty() {
-                    verify_trace!(visit_stmt function error: "Function expression {} had {} errors", &fn_expr.to_string().cyan(), fn_expr_errs.len());
+                    verify_trace!(verifier visit_stmt function error: "Function expression {} had {} errors", &fn_expr.to_string().cyan(), fn_expr_errs.len());
                 }
 
                 errs.extend(fn_expr_errs);
@@ -246,23 +407,35 @@ impl<'a> Visitor<'a> for Verifier<'a> {
                 Ok(())
             }
             ast::Stmt::Error => {
-                verify_trace!(visit_stmt error_stmt: "{} is an error statement", stmt.to_string().cyan());
+                verify_trace!(verifier visit_stmt error_stmt: "{} is an error statement", stmt.to_string().cyan());
                 Ok(())
             }
         };
 
-        verify_trace!(visit_stmt: "Running rules for statement {}", stmt.to_string().cyan());
+        verify_trace!(verifier visit_stmt: "Running rules for statement {}", stmt.to_string().cyan());
 
         for rule in &self.rules {
-            let rule_errs = rule.visit_stmt(stmt, span, types).err().unwrap_or_default();
+            let resolve_ident: Box<dyn ResolveIdent> =
+                Box::new(|id: &str| self.resolve_identifier(id));
+
+            let resolve_expr: Box<dyn ResolveExpr> = Box::new(
+                |expr: &::egonlang_core::ast::Expr, _span: &::egonlang_core::span::Span| {
+                    self.resolve_expr_type(expr)
+                },
+            );
+
+            let rule_errs = rule
+                .visit_stmt(stmt, span, resolve_ident.as_ref(), resolve_expr.as_ref())
+                .err()
+                .unwrap_or_default();
 
             errs.extend(rule_errs);
         }
 
-        verify_trace!(visit_stmt: "There were a total of {} rule errors with statement {}", errs.len(), stmt.to_string().cyan());
+        verify_trace!(verifier visit_stmt: "There were a total of {} rule errors with statement {}", errs.len(), stmt.to_string().cyan());
 
         verify_trace!(
-            visit_stmt exit_stmt:
+            verifier visit_stmt exit_stmt:
             "{}",
             stmt.to_string().cyan()
         );
@@ -275,103 +448,256 @@ impl<'a> Visitor<'a> for Verifier<'a> {
     }
 
     fn visit_expr(
-        &self,
+        &mut self,
         expr: &ast::Expr,
         span: &Span,
-        types: &mut TypeEnv,
-    ) -> Result<(), Vec<EgonErrorS>> {
-        let mut errs: Vec<EgonErrorS> = vec![];
-
-        verify_trace!(visit_expr: "{}", expr.to_string().cyan());
+    ) -> Result<TypeEnvValue, Vec<EgonErrorS>> {
+        verify_trace!(verifier visit_expr: "{}", expr.to_string().cyan());
 
         match expr {
             ast::Expr::Block(block_expr) => {
-                verify_trace!(visit_expr block: "{} is a block expression", expr.to_string().cyan());
+                verify_trace!(verifier visit_expr block: "{} is a block expression", expr.to_string().cyan());
 
-                let mut block_types = types.extend();
+                let mut errs: Vec<EgonErrorS> = vec![];
+
+                self.start_new_type_env();
 
                 for (stmt, stmt_span) in &block_expr.stmts {
-                    let stmt_errs = self
-                        .visit_stmt(stmt, stmt_span, &mut block_types)
-                        .err()
-                        .unwrap_or_default();
+                    let stmt_errs = self.visit_stmt(stmt, stmt_span).err().unwrap_or_default();
 
                     errs.extend(stmt_errs);
                 }
 
-                if block_expr.return_expr.is_some() {
-                    let (return_expr, return_span) = block_expr.return_expr.as_ref().unwrap();
-                    let expr_errs = self
-                        .visit_expr(return_expr, return_span, &mut block_types)
-                        .err()
-                        .unwrap_or_default();
+                match &block_expr.return_expr {
+                    Some((return_expr, return_span)) => {
+                        verify_trace!(
+                            verifier visit_expr block: "{} has a return expression {}",
+                            expr.to_string().cyan(),
+                            return_expr.to_string().cyan()
+                        );
 
-                    errs.extend(expr_errs);
-                }
+                        match self.visit_expr(return_expr, return_span) {
+                            Ok(return_type) => {
+                                for rule in &self.rules {
+                                    let resolve_ident: Box<dyn ResolveIdent> =
+                                        Box::new(|id: &str| self.resolve_identifier(id));
 
-                for rule in &self.rules {
-                    let rule_errs = rule
-                        .visit_expr(expr, span, &mut block_types)
-                        .err()
-                        .unwrap_or_default();
+                                    let resolve_expr: Box<dyn ResolveExpr> = Box::new(
+                                        |expr: &::egonlang_core::ast::Expr,
+                                        _span: &::egonlang_core::span::Span| {
+                                            self.resolve_expr_type(expr)
+                                        },
+                                    );
 
-                    errs.extend(rule_errs);
+                                    let rule_errs = rule
+                                        .visit_expr(
+                                            expr,
+                                            span,
+                                            resolve_ident.as_ref(),
+                                            resolve_expr.as_ref(),
+                                        )
+                                        .err()
+                                        .unwrap_or_default();
+
+                                    errs.extend(rule_errs);
+                                }
+
+                                self.end_current_type_env();
+
+                                if !errs.is_empty() {
+                                    return Err(errs);
+                                }
+
+                                verify_trace!(
+                                    verifier visit_expr block: "{} resolved to type of {}",
+                                    expr.to_string().cyan(),
+                                    return_type.typeref.to_string().yellow().italic()
+                                );
+
+                                Ok(return_type)
+                            }
+                            Err(return_errs) => {
+                                errs.extend(return_errs);
+
+                                Err(errs)
+                            }
+                        }
+                    }
+                    None => {
+                        if !errs.is_empty() {
+                            return Err(errs);
+                        }
+
+                        Ok(TypeEnvValue {
+                            typeref: ast::TypeRef::unit(),
+                            is_const: true,
+                        })
+                    }
                 }
             }
             ast::Expr::Assign(assign_expr) => {
                 verify_trace!(visit_expr assign: "{} is an assign expression", expr.to_string().cyan());
 
+                let mut errs: Vec<EgonErrorS> = vec![];
+
                 let (value_expr, value_span) = &assign_expr.value;
 
-                let value_errs = self
-                    .visit_expr(value_expr, value_span, types)
-                    .err()
-                    .unwrap_or_default();
+                match self.visit_expr(value_expr, value_span) {
+                    Ok(value_type) => {
+                        for rule in &self.rules {
+                            let rule_errs = rule
+                                .visit_expr(
+                                    expr,
+                                    span,
+                                    &|id: &str| self.resolve_identifier(id),
+                                    &|expr: &ast::Expr, _span: &Span| self.resolve_expr_type(expr),
+                                )
+                                .err()
+                                .unwrap_or_default();
 
-                errs.extend(value_errs);
+                            errs.extend(rule_errs);
+                        }
 
-                for rule in &self.rules {
-                    let rule_errs = rule.visit_expr(expr, span, types).err().unwrap_or_default();
+                        if !errs.is_empty() {
+                            return Err(errs);
+                        }
 
-                    errs.extend(rule_errs);
+                        Ok(value_type)
+                    }
+                    Err(value_errs) => Err(value_errs),
                 }
             }
             ast::Expr::Infix(infix_expr) => {
                 verify_trace!(visit_expr infix: "{} is an infix expression", expr.to_string().cyan());
 
+                let mut errs: Vec<EgonErrorS> = vec![];
+
                 let (lt_expr, lt_span) = &infix_expr.lt;
 
-                let lt_errs = self
-                    .visit_expr(lt_expr, lt_span, types)
-                    .err()
-                    .unwrap_or_default();
+                let lt_errs = self.visit_expr(lt_expr, lt_span).err().unwrap_or_default();
 
                 errs.extend(lt_errs);
 
                 let (rt_expr, rt_span) = &infix_expr.rt;
 
-                let rt_errs = self
-                    .visit_expr(rt_expr, rt_span, types)
-                    .err()
-                    .unwrap_or_default();
+                let rt_errs = self.visit_expr(rt_expr, rt_span).err().unwrap_or_default();
 
                 errs.extend(rt_errs);
 
                 for rule in &self.rules {
-                    let rule_errs = rule.visit_expr(expr, span, types).err().unwrap_or_default();
+                    let rule_errs = rule
+                        .visit_expr(
+                            expr,
+                            span,
+                            &|id: &str| self.resolve_identifier(id),
+                            &|expr: &ast::Expr, _span: &Span| self.resolve_expr_type(expr),
+                        )
+                        .err()
+                        .unwrap_or_default();
 
                     errs.extend(rule_errs);
+                }
+
+                if !errs.is_empty() {
+                    return Err(errs);
+                }
+
+                Ok(match infix_expr.op {
+                    ast::OpInfix::Add => TypeEnvValue {
+                        typeref: TypeRef::number(),
+                        is_const: true,
+                    },
+                    ast::OpInfix::Subtract => TypeEnvValue {
+                        typeref: TypeRef::number(),
+                        is_const: true,
+                    },
+                    ast::OpInfix::Multiply => TypeEnvValue {
+                        typeref: TypeRef::number(),
+                        is_const: true,
+                    },
+                    ast::OpInfix::Divide => TypeEnvValue {
+                        typeref: TypeRef::number(),
+                        is_const: true,
+                    },
+                    ast::OpInfix::Modulus => TypeEnvValue {
+                        typeref: TypeRef::number(),
+                        is_const: true,
+                    },
+                    ast::OpInfix::Less => TypeEnvValue {
+                        typeref: TypeRef::bool(),
+                        is_const: true,
+                    },
+                    ast::OpInfix::LessEqual => TypeEnvValue {
+                        typeref: TypeRef::bool(),
+                        is_const: true,
+                    },
+                    ast::OpInfix::Greater => TypeEnvValue {
+                        typeref: TypeRef::bool(),
+                        is_const: true,
+                    },
+                    ast::OpInfix::GreaterEqual => TypeEnvValue {
+                        typeref: TypeRef::bool(),
+                        is_const: true,
+                    },
+                    ast::OpInfix::Equal => TypeEnvValue {
+                        typeref: TypeRef::bool(),
+                        is_const: true,
+                    },
+                    ast::OpInfix::NotEqual => TypeEnvValue {
+                        typeref: TypeRef::bool(),
+                        is_const: true,
+                    },
+                    ast::OpInfix::LogicAnd => TypeEnvValue {
+                        typeref: TypeRef::bool(),
+                        is_const: true,
+                    },
+                    ast::OpInfix::LogicOr => TypeEnvValue {
+                        typeref: TypeRef::bool(),
+                        is_const: true,
+                    },
+                })
+            }
+            ast::Expr::Prefix(prefix_expr) => {
+                verify_trace!(visit_expr infix: "{} is an prefix expression", expr.to_string().cyan());
+
+                let (rt_expr, rt_span) = &prefix_expr.rt;
+
+                match self.visit_expr(rt_expr, rt_span) {
+                    Ok(_) => {
+                        let mut errs: Vec<EgonErrorS> = vec![];
+
+                        for rule in &self.rules {
+                            let rule_errs = rule
+                                .visit_expr(
+                                    expr,
+                                    span,
+                                    &|id: &str| self.resolve_identifier(id),
+                                    &|expr: &ast::Expr, _span: &Span| self.resolve_expr_type(expr),
+                                )
+                                .err()
+                                .unwrap_or_default();
+
+                            errs.extend(rule_errs);
+                        }
+
+                        if !errs.is_empty() {
+                            return Err(errs);
+                        }
+
+                        Ok(self.resolve_expr_type(expr).unwrap())
+                    }
+                    Err(rt_errs) => Err(rt_errs),
                 }
             }
             ast::Expr::Fn(fn_expr) => {
                 verify_trace!(visit_expr function: "{} is a function expression", expr.to_string().cyan());
 
-                let mut fn_types = types.extend();
+                self.start_new_type_env();
 
                 for ((ident, type_ref), _) in &fn_expr.params {
                     let name = &ident.name;
 
-                    fn_types.set(
+                    self.current_type_env_mut().set(
                         name,
                         TypeEnvValue {
                             typeref: type_ref.clone(),
@@ -382,74 +708,297 @@ impl<'a> Visitor<'a> for Verifier<'a> {
 
                 let (body_expr, body_span) = &fn_expr.body;
 
-                let body_errs = self
-                    .visit_expr(body_expr, body_span, &mut fn_types)
-                    .err()
-                    .unwrap_or_default();
+                match self.visit_expr(body_expr, body_span) {
+                    Ok(body_type) => {
+                        let mut errs: Vec<EgonErrorS> = vec![];
 
-                errs.extend(body_errs);
+                        for rule in &self.rules {
+                            let rule_errs = rule
+                                .visit_expr(
+                                    expr,
+                                    span,
+                                    &|id: &str| self.resolve_identifier(id),
+                                    &|expr: &ast::Expr, _span: &Span| self.resolve_expr_type(expr),
+                                )
+                                .err()
+                                .unwrap_or_default();
 
-                for rule in &self.rules {
-                    let rule_errs = rule
-                        .visit_expr(expr, span, &mut fn_types)
-                        .err()
-                        .unwrap_or_default();
+                            errs.extend(rule_errs);
+                        }
 
-                    errs.extend(rule_errs);
+                        self.end_current_type_env();
+
+                        if !errs.is_empty() {
+                            return Err(errs);
+                        }
+
+                        Ok(body_type.clone())
+                    }
+                    Err(body_errs) => Err(body_errs),
                 }
             }
             ast::Expr::If(if_expr) => {
                 verify_trace!(visit_expr if_expr: "{} is an if expression", expr.to_string().cyan());
 
                 let (cond_expr, cond_span) = &if_expr.cond;
-                let cond_errs = self
-                    .visit_expr(cond_expr, cond_span, types)
-                    .err()
-                    .unwrap_or_default();
-                errs.extend(cond_errs);
 
-                let (then_expr, then_cond) = &if_expr.then;
-                let then_errs = self
-                    .visit_expr(then_expr, then_cond, types)
-                    .err()
-                    .unwrap_or_default();
-                errs.extend(then_errs);
+                match self.visit_expr(cond_expr, cond_span) {
+                    Ok(_) => {
+                        let (then_expr, then_span) = &if_expr.then;
 
-                if let Some((else_expr, else_span)) = &if_expr.else_ {
-                    let else_errs = self
-                        .visit_expr(else_expr, else_span, types)
+                        match self.visit_expr(then_expr, then_span) {
+                            Ok(then_type) => {
+                                let mut errs: Vec<EgonErrorS> = vec![];
+
+                                for rule in &self.rules {
+                                    let rule_errs = rule
+                                        .visit_expr(
+                                            expr,
+                                            span,
+                                            &|id: &str| self.resolve_identifier(id),
+                                            &|expr: &ast::Expr, _span: &Span| {
+                                                self.resolve_expr_type(expr)
+                                            },
+                                        )
+                                        .err()
+                                        .unwrap_or_default();
+
+                                    errs.extend(rule_errs);
+                                }
+
+                                match &if_expr.else_ {
+                                    Some((else_expr, else_span)) => {
+                                        match self.visit_expr(else_expr, else_span) {
+                                            Ok(_) => {
+                                                if !errs.is_empty() {
+                                                    return Err(errs);
+                                                }
+
+                                                Ok(then_type.clone())
+                                            }
+                                            Err(else_errs) => {
+                                                errs.extend(else_errs);
+
+                                                Err(errs)
+                                            }
+                                        }
+                                    }
+                                    None => {
+                                        if !errs.is_empty() {
+                                            return Err(errs);
+                                        }
+
+                                        Ok(then_type.clone())
+                                    }
+                                }
+                            }
+                            Err(then_errs) => Err(then_errs),
+                        }
+                    }
+                    Err(cond_errs) => Err(cond_errs),
+                }
+            }
+            ast::Expr::Unit => Ok(TypeEnvValue {
+                typeref: TypeRef::unit(),
+                is_const: true,
+            }),
+            ast::Expr::Literal(literal_expr) => Ok(match literal_expr {
+                ast::ExprLiteral::Bool(_) => TypeEnvValue {
+                    typeref: TypeRef::bool(),
+                    is_const: true,
+                },
+                ast::ExprLiteral::Number(_) => TypeEnvValue {
+                    typeref: TypeRef::number(),
+                    is_const: true,
+                },
+                ast::ExprLiteral::String(_) => TypeEnvValue {
+                    typeref: TypeRef::string(),
+                    is_const: true,
+                },
+            }),
+            ast::Expr::Identifier(ident_expr) => match self.resolve_expr_type(expr) {
+                Some(t) => Ok(t),
+                None => Err(vec![(
+                    EgonTypeError::Undefined(ident_expr.identifier.name.clone()).into(),
+                    span.clone(),
+                )]),
+            },
+            ast::Expr::List(list_expr) => {
+                verify_trace!(visit_expr infix: "{} is an list expression", expr.to_string().cyan());
+
+                if list_expr.items.is_empty() {
+                    return Ok(TypeEnvValue {
+                        typeref: TypeRef::list(TypeRef::unknown()),
+                        is_const: true,
+                    });
+                }
+
+                let mut errs: Vec<EgonErrorS> = vec![];
+                let mut first_item_type = TypeEnvValue {
+                    typeref: TypeRef::unknown(),
+                    is_const: true,
+                };
+
+                for (i, (item_expr, item_span)) in list_expr.items.iter().enumerate() {
+                    match self.visit_expr(item_expr, item_span) {
+                        Err(item_errs) => {
+                            errs.extend(item_errs);
+                        }
+                        Ok(item_type) => {
+                            if i == 0 {
+                                first_item_type = item_type;
+                            }
+                        }
+                    }
+                }
+
+                for rule in &self.rules {
+                    let rule_errs = rule
+                        .visit_expr(
+                            expr,
+                            span,
+                            &|id: &str| self.resolve_identifier(id),
+                            &|expr: &ast::Expr, _span: &Span| self.resolve_expr_type(expr),
+                        )
                         .err()
                         .unwrap_or_default();
-                    errs.extend(else_errs);
-                }
-
-                for rule in &self.rules {
-                    let rule_errs = rule.visit_expr(expr, span, types).err().unwrap_or_default();
 
                     errs.extend(rule_errs);
                 }
+
+                // errs.dedup();
+
+                if !errs.is_empty() {
+                    return Err(errs);
+                }
+
+                let t = TypeEnvValue {
+                    typeref: TypeRef::list(first_item_type.typeref),
+                    is_const: false,
+                };
+
+                Ok(t)
             }
-            _ => {
-                verify_trace!(visit_expr other: "{} is a another type of expression", expr.to_string().cyan());
+            ast::Expr::Tuple(tuple_expr) => {
+                let mut item_types: Vec<TypeRef> = vec![];
+                let mut errs: Vec<EgonErrorS> = vec![];
+
+                for (item_expr, item_span) in &tuple_expr.items {
+                    match self.visit_expr(item_expr, item_span) {
+                        Ok(item_type) => {
+                            item_types.push(item_type.typeref.clone());
+                        }
+                        Err(item_errs) => {
+                            item_types.push(TypeRef::unknown());
+                            errs.extend(item_errs);
+                        }
+                    };
+                }
 
                 for rule in &self.rules {
-                    let rule_errs = rule.visit_expr(expr, span, types).err().unwrap_or_default();
+                    let rule_errs = rule
+                        .visit_expr(
+                            expr,
+                            span,
+                            &|id: &str| self.resolve_identifier(id),
+                            &|expr: &ast::Expr, _span: &Span| self.resolve_expr_type(expr),
+                        )
+                        .err()
+                        .unwrap_or_default();
 
                     errs.extend(rule_errs);
                 }
+
+                if !errs.is_empty() {
+                    return Err(errs);
+                }
+
+                Ok(TypeEnvValue {
+                    typeref: TypeRef::tuple(item_types.clone()),
+                    is_const: false,
+                })
             }
-        };
+            ast::Expr::Range(_) => {
+                let mut errs: Vec<EgonErrorS> = vec![];
+
+                for rule in &self.rules {
+                    let rule_errs = rule
+                        .visit_expr(
+                            expr,
+                            span,
+                            &|id: &str| self.resolve_identifier(id),
+                            &|expr: &ast::Expr, _span: &Span| self.resolve_expr_type(expr),
+                        )
+                        .err()
+                        .unwrap_or_default();
+
+                    errs.extend(rule_errs);
+                }
+
+                if !errs.is_empty() {
+                    return Err(errs);
+                }
+
+                Ok(TypeEnvValue {
+                    typeref: TypeRef::range(),
+                    is_const: false,
+                })
+            }
+            ast::Expr::Type(type_expr) => {
+                let mut errs: Vec<EgonErrorS> = vec![];
+
+                for rule in &self.rules {
+                    let rule_errs = rule
+                        .visit_expr(
+                            expr,
+                            span,
+                            &|id: &str| self.resolve_identifier(id),
+                            &|expr: &ast::Expr, _span: &Span| self.resolve_expr_type(expr),
+                        )
+                        .err()
+                        .unwrap_or_default();
+
+                    errs.extend(rule_errs);
+                }
+
+                if !errs.is_empty() {
+                    return Err(errs);
+                }
+
+                Ok(TypeEnvValue {
+                    typeref: type_expr.0.clone(),
+                    is_const: false,
+                })
+            }
+        }
+    }
+
+    /// Start new type environment scope
+    fn start_new_type_env(&mut self) {
+        self.type_envs.push(TypeEnv::new(self.type_envs.len()));
+
+        let level = self.current_type_env_level();
 
         verify_trace!(
-            visit_expr exit_expr: "{}",
-            expr.to_string().cyan()
+            verifier start_new_type_env:
+            "Starting new type environment (new level: {level})"
         );
+    }
 
-        if !errs.is_empty() {
-            return Err(errs);
-        }
+    /// End tne current type environment scope
+    fn end_current_type_env(&mut self) {
+        self.type_envs.pop();
 
-        Ok(())
+        let level = self.current_type_env_level();
+
+        verify_trace!(
+            verifier start_new_type_env:
+            "Ending new type environment (new level: {level})"
+        );
+    }
+
+    fn current_type_env_level(&self) -> usize {
+        self.type_envs.len() - 1
     }
 }
 
@@ -1188,9 +1737,27 @@ mod verifier_tests {
     //     )])
     // );
 
+    verifier_test!(
+        validate_reassign_const_value_3,
+        r#"
+        const a: number = 123;
+
+        {
+            a = 456;
+        };
+        "#,
+        Err(vec![(
+            EgonSyntaxError::ReassigningConst {
+                name: "a".to_string()
+            }
+            .into(),
+            55..62
+        )])
+    );
+
     #[test]
     fn errors_when_referencing_undefined_identifier() {
-        let verifier = Verifier::default();
+        let mut verifier = Verifier::default();
 
         let module = ast::Module::from(vec![(
             ast::StmtExpr {
@@ -1219,7 +1786,7 @@ mod verifier_tests {
 
     #[test]
     fn errors_when_referencing_multiple_undefined_identifiers() {
-        let verifier = Verifier::default();
+        let mut verifier = Verifier::default();
 
         let module = ast::Module::from(vec![
             (
@@ -1263,7 +1830,7 @@ mod verifier_tests {
 
     #[test]
     fn errors_when_assigning_list_with_type_mismatched_items() {
-        let verifier = Verifier::default();
+        let mut verifier = Verifier::default();
 
         let module = ast::Module::from(vec![(
             ast::StmtExpr {

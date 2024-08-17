@@ -10,13 +10,13 @@ stmt_rule!(
     /// type invalidTypeAlias = string; // SyntaxError∂
     /// ```
     InvalidTypeAliasName,
-    fn (stmt: &ast::Stmt, span: &Span, types: &mut TypeEnv) {
+    | stmt, span, _resolve_ident, resolve_expr | {
         let mut errs = vec![];
 
         if let ast::Stmt::Assign(assign_stmt) = &stmt {
             if let Some((value_expr, value_span)) = &assign_stmt.value {
-                if let Ok(value_typeref) = types.resolve_expr_type(value_expr, value_span) {
-                    if value_typeref.is_type() {
+                if let Some(value_typeref) = resolve_expr(value_expr, value_span) {
+                    if value_typeref.typeref.is_type() {
                         let name = &assign_stmt.identifier.name;
                         let pattern = Regex::new("^[A-Z][A-Za-z0-9]*$").unwrap();
 

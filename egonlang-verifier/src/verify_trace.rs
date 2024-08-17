@@ -15,8 +15,7 @@ macro_rules! verify_trace {
             let file_line_col = format!("at {file}:{line}:{col}");
 
             eprintln!(
-                "{} {message}\n{}\n",
-                "VERIFY:".bold(),
+                "{message}\n{}\n",
                 file_line_col.dimmed()
             );
         }
@@ -33,8 +32,7 @@ macro_rules! verify_trace {
             let file_line_col = format!("at {file}:{line}:{col}");
 
             eprintln!(
-                "{} [{}] {message}\n{}\n",
-                "VERIFY:".bold(),
+                "[{}] {message}\n{}\n",
                 stringify!($($label):+).bold(),
                 file_line_col.dimmed()
             );
@@ -52,8 +50,7 @@ macro_rules! verify_trace {
             let file_line_col = format!("at {file}:{line}:{col}");
 
             eprintln!(
-                "{} [{}] {message}\n{}\n",
-                "VERIFY:".bold(),
+                "[{}] {message}\n{}\n",
                 stringify!($($label):+).bold(),
                 file_line_col.dimmed()
             );
