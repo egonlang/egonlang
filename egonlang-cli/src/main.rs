@@ -118,7 +118,7 @@ mod tests {
         let mut cmd = Command::cargo_bin("egon")?;
 
         cmd.arg("verify")
-            .arg("../res/examples/valid/assign.eg")
+            .arg("../res/examples/valid/expr_assign_chain.eg")
             .assert()
             .success()
             .stdout(predicate::eq(b"Passed!\n" as &[u8]));

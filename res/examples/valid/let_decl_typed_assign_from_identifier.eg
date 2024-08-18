@@ -1,3 +1,0 @@
-let a: number = 123;
-let b = a;
-let c: number = a + b;

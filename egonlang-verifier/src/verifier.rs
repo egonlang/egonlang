@@ -465,6 +465,26 @@ impl<'a> Verifier<'a> {
         result
     }
 
+    fn run_expr_rules(&self, expr: &ast::Expr, span: &Span) -> Vec<EgonErrorS> {
+        let mut errs: Vec<EgonErrorS> = vec![];
+
+        for rule in &self.rules {
+            let rule_errs = rule
+                .visit_expr(
+                    expr,
+                    span,
+                    &|id: &str| self.resolve_identifier(id),
+                    &|expr: &ast::Expr, _span: &Span| self.resolve_expr_type(expr),
+                )
+                .err()
+                .unwrap_or_default();
+
+            errs.extend(rule_errs);
+        }
+
+        errs
+    }
+
     fn visit_expr(
         &mut self,
         expr: &mut ast::Expr,
@@ -499,29 +519,8 @@ impl<'a> Verifier<'a> {
 
                         match self.visit_expr(return_expr, return_span) {
                             Ok(return_type) => {
-                                for rule in &self.rules {
-                                    let resolve_ident: Box<dyn ResolveIdent> =
-                                        Box::new(|id: &str| self.resolve_identifier(id));
-
-                                    let resolve_expr: Box<dyn ResolveExpr> = Box::new(
-                                        |expr: &::egonlang_core::ast::Expr,
-                                        _span: &::egonlang_core::span::Span| {
-                                            self.resolve_expr_type(expr)
-                                        },
-                                    );
-
-                                    let rule_errs = rule
-                                        .visit_expr(
-                                            &expr_clone,
-                                            span,
-                                            resolve_ident.as_ref(),
-                                            resolve_expr.as_ref(),
-                                        )
-                                        .err()
-                                        .unwrap_or_default();
-
-                                    errs.extend(rule_errs);
-                                }
+                                let rule_errs = self.run_expr_rules(&expr_clone, span);
+                                errs.extend(rule_errs);
 
                                 self.end_current_type_env();
 
@@ -567,23 +566,29 @@ impl<'a> Verifier<'a> {
 
                 let mut errs: Vec<EgonErrorS> = vec![];
 
+                let ident_type = self.resolve_identifier(&assign_expr.identifier.name);
+
+                match ident_type {
+                    Some(_) => {}
+                    None => {
+                        errs.push((
+                            EgonTypeError::Undefined(assign_expr.identifier.name.to_string())
+                                .into(),
+                            span.clone(),
+                        ));
+                    }
+                };
+
                 let (value_expr, value_span) = &mut assign_expr.value;
+                let value_type = self.visit_expr(value_expr, value_span);
 
-                match self.visit_expr(value_expr, value_span) {
+                match value_type {
                     Ok(value_type) => {
-                        for rule in &self.rules {
-                            let rule_errs = rule
-                                .visit_expr(
-                                    expr,
-                                    span,
-                                    &|id: &str| self.resolve_identifier(id),
-                                    &|expr: &ast::Expr, _span: &Span| self.resolve_expr_type(expr),
-                                )
-                                .err()
-                                .unwrap_or_default();
+                        let rule_errs = self.run_expr_rules(value_expr, value_span);
+                        errs.extend(rule_errs);
 
-                            errs.extend(rule_errs);
-                        }
+                        let rule_errs = self.run_expr_rules(expr, span);
+                        errs.extend(rule_errs);
 
                         if !errs.is_empty() {
                             return Err(errs);
@@ -591,7 +596,14 @@ impl<'a> Verifier<'a> {
 
                         Ok(value_type)
                     }
-                    Err(value_errs) => Err(value_errs),
+                    Err(value_errs) => {
+                        errs.extend(value_errs);
+
+                        let rule_errs = self.run_expr_rules(expr, span);
+                        errs.extend(rule_errs);
+
+                        Err(errs)
+                    }
                 }
             }
             ast::Expr::Infix(infix_expr) => {
@@ -611,19 +623,8 @@ impl<'a> Verifier<'a> {
 
                 errs.extend(rt_errs);
 
-                for rule in &self.rules {
-                    let rule_errs = rule
-                        .visit_expr(
-                            &expr_clone,
-                            span,
-                            &|id: &str| self.resolve_identifier(id),
-                            &|expr: &ast::Expr, _span: &Span| self.resolve_expr_type(expr),
-                        )
-                        .err()
-                        .unwrap_or_default();
-
-                    errs.extend(rule_errs);
-                }
+                let rule_errs = self.run_expr_rules(&expr_clone, span);
+                errs.extend(rule_errs);
 
                 if !errs.is_empty() {
                     return Err(errs);
@@ -693,19 +694,8 @@ impl<'a> Verifier<'a> {
                     Ok(_) => {
                         let mut errs: Vec<EgonErrorS> = vec![];
 
-                        for rule in &self.rules {
-                            let rule_errs = rule
-                                .visit_expr(
-                                    expr,
-                                    span,
-                                    &|id: &str| self.resolve_identifier(id),
-                                    &|expr: &ast::Expr, _span: &Span| self.resolve_expr_type(expr),
-                                )
-                                .err()
-                                .unwrap_or_default();
-
-                            errs.extend(rule_errs);
-                        }
+                        let rule_errs = self.run_expr_rules(&expr_clone, span);
+                        errs.extend(rule_errs);
 
                         if !errs.is_empty() {
                             return Err(errs);
@@ -739,19 +729,8 @@ impl<'a> Verifier<'a> {
                     Ok(body_type) => {
                         let mut errs: Vec<EgonErrorS> = vec![];
 
-                        for rule in &self.rules {
-                            let rule_errs = rule
-                                .visit_expr(
-                                    expr,
-                                    span,
-                                    &|id: &str| self.resolve_identifier(id),
-                                    &|expr: &ast::Expr, _span: &Span| self.resolve_expr_type(expr),
-                                )
-                                .err()
-                                .unwrap_or_default();
-
-                            errs.extend(rule_errs);
-                        }
+                        let rule_errs = self.run_expr_rules(expr, span);
+                        errs.extend(rule_errs);
 
                         self.end_current_type_env();
 
@@ -766,19 +745,8 @@ impl<'a> Verifier<'a> {
 
                         errs.extend(body_errs);
 
-                        for rule in &self.rules {
-                            let rule_errs = rule
-                                .visit_expr(
-                                    expr,
-                                    span,
-                                    &|id: &str| self.resolve_identifier(id),
-                                    &|expr: &ast::Expr, _span: &Span| self.resolve_expr_type(expr),
-                                )
-                                .err()
-                                .unwrap_or_default();
-
-                            errs.extend(rule_errs);
-                        }
+                        let rule_errs = self.run_expr_rules(expr, span);
+                        errs.extend(rule_errs);
 
                         self.end_current_type_env();
 
@@ -799,21 +767,8 @@ impl<'a> Verifier<'a> {
                             Ok(then_type) => {
                                 let mut errs: Vec<EgonErrorS> = vec![];
 
-                                for rule in &self.rules {
-                                    let rule_errs = rule
-                                        .visit_expr(
-                                            &expr_clone,
-                                            span,
-                                            &|id: &str| self.resolve_identifier(id),
-                                            &|expr: &ast::Expr, _span: &Span| {
-                                                self.resolve_expr_type(expr)
-                                            },
-                                        )
-                                        .err()
-                                        .unwrap_or_default();
-
-                                    errs.extend(rule_errs);
-                                }
+                                let rule_errs = self.run_expr_rules(&expr_clone, span);
+                                errs.extend(rule_errs);
 
                                 match &mut if_expr.else_ {
                                     Some((else_expr, else_span)) => {
@@ -904,19 +859,8 @@ impl<'a> Verifier<'a> {
                     }
                 }
 
-                for rule in &self.rules {
-                    let rule_errs = rule
-                        .visit_expr(
-                            expr,
-                            span,
-                            &|id: &str| self.resolve_identifier(id),
-                            &|expr: &ast::Expr, _span: &Span| self.resolve_expr_type(expr),
-                        )
-                        .err()
-                        .unwrap_or_default();
-
-                    errs.extend(rule_errs);
-                }
+                let rule_errs = self.run_expr_rules(&expr_clone, span);
+                errs.extend(rule_errs);
 
                 // errs.dedup();
 
@@ -947,19 +891,8 @@ impl<'a> Verifier<'a> {
                     };
                 }
 
-                for rule in &self.rules {
-                    let rule_errs = rule
-                        .visit_expr(
-                            expr,
-                            span,
-                            &|id: &str| self.resolve_identifier(id),
-                            &|expr: &ast::Expr, _span: &Span| self.resolve_expr_type(expr),
-                        )
-                        .err()
-                        .unwrap_or_default();
-
-                    errs.extend(rule_errs);
-                }
+                let rule_errs = self.run_expr_rules(&expr_clone, span);
+                errs.extend(rule_errs);
 
                 if !errs.is_empty() {
                     return Err(errs);
@@ -973,19 +906,8 @@ impl<'a> Verifier<'a> {
             ast::Expr::Range(_) => {
                 let mut errs: Vec<EgonErrorS> = vec![];
 
-                for rule in &self.rules {
-                    let rule_errs = rule
-                        .visit_expr(
-                            expr,
-                            span,
-                            &|id: &str| self.resolve_identifier(id),
-                            &|expr: &ast::Expr, _span: &Span| self.resolve_expr_type(expr),
-                        )
-                        .err()
-                        .unwrap_or_default();
-
-                    errs.extend(rule_errs);
-                }
+                let rule_errs = self.run_expr_rules(&expr_clone, span);
+                errs.extend(rule_errs);
 
                 if !errs.is_empty() {
                     return Err(errs);
@@ -1008,19 +930,8 @@ impl<'a> Verifier<'a> {
 
                 match type_type {
                     Some(t) => {
-                        for rule in &self.rules {
-                            let rule_errs = rule
-                                .visit_expr(
-                                    expr,
-                                    span,
-                                    &|id: &str| self.resolve_identifier(id),
-                                    &|expr: &ast::Expr, _span: &Span| self.resolve_expr_type(expr),
-                                )
-                                .err()
-                                .unwrap_or_default();
-
-                            errs.extend(rule_errs);
-                        }
+                        let rule_errs = self.run_expr_rules(&expr_clone, span);
+                        errs.extend(rule_errs);
 
                         if !errs.is_empty() {
                             return Err(errs);
@@ -1368,11 +1279,7 @@ mod verifier_tests {
         validate_assign_chain_mismatched_types,
         "let a: () = b = 123;",
         Err(vec![(
-            EgonTypeError::MismatchType {
-                expected: "()".to_string(),
-                actual: "number".to_string()
-            }
-            .into(),
+            EgonTypeError::Undefined("b".to_string()).into(),
             12..19
         )])
     );
@@ -1380,7 +1287,10 @@ mod verifier_tests {
     verifier_test!(
         validate_assign_chain_matching_types,
         "let a: number = b = 123;",
-        Ok(())
+        Err(vec![(
+            EgonTypeError::Undefined("b".to_string()).into(),
+            16..23
+        )])
     );
 
     verifier_test!(
@@ -1526,14 +1436,17 @@ mod verifier_tests {
     verifier_test!(
         validate_assign_mixed_type_list,
         "a = [1, \"a\"];",
-        Err(vec![(
-            EgonTypeError::MismatchType {
-                expected: "number".to_string(),
-                actual: "string".to_string()
-            }
-            .into(),
-            8..11
-        )])
+        Err(vec![
+            (EgonTypeError::Undefined("a".to_string()).into(), 0..12),
+            (
+                EgonTypeError::MismatchType {
+                    expected: "number".to_string(),
+                    actual: "string".to_string()
+                }
+                .into(),
+                8..11
+            )
+        ])
     );
 
     verifier_test!(
@@ -1978,36 +1891,9 @@ mod verifier_tests {
     }
 
     #[test]
-    fn errors_when_assigning_list_with_type_mismatched_items() {
-        let mut verifier = Verifier::default();
-
-        let mut module = ast::Module::from(vec![(
-            ast::StmtExpr {
-                expr: (
-                    ast::ExprAssign {
-                        identifier: ast::Identifier {
-                            name: "a".to_string(),
-                        },
-                        value: (
-                            ast::ExprList {
-                                items: vec![
-                                    (ast::ExprLiteral::Number(10f64).into(), 0..1),
-                                    (ast::ExprLiteral::Bool(false).into(), 2..3),
-                                ],
-                            }
-                            .into(),
-                            0..0,
-                        ),
-                    }
-                    .into(),
-                    1..2,
-                ),
-            }
-            .into(),
-            0..0,
-        )]);
-
-        let results = verifier.verify(&mut module);
+    fn errors_when_declaring_let_using_list_with_type_mismatched_items() {
+        let results =
+            parse("let a = [10, false];", 0).and_then(|mut module| verify_module(&mut module));
 
         assert_eq!(
             Err(vec![(
@@ -2016,8 +1902,47 @@ mod verifier_tests {
                     actual: ast::TypeRef::bool().to_string()
                 }
                 .into(),
-                2..3
+                13..18
             )]),
+            results
+        );
+    }
+
+    #[test]
+    fn errors_when_assigning_using_list_with_type_mismatched_items() {
+        let results = parse("let a: list<number>; a = [10, false];", 0)
+            .and_then(|mut module| verify_module(&mut module));
+
+        assert_eq!(
+            Err(vec![(
+                EgonTypeError::MismatchType {
+                    expected: ast::TypeRef::number().to_string(),
+                    actual: ast::TypeRef::bool().to_string()
+                }
+                .into(),
+                30..35
+            )]),
+            results
+        );
+    }
+
+    #[test]
+    fn errors_when_reassigning_to_undefined_ident_using_list_with_type_mismatched_items() {
+        let results =
+            parse("a = [10, false];", 0).and_then(|mut module| verify_module(&mut module));
+
+        assert_eq!(
+            Err(vec![
+                (EgonTypeError::Undefined("a".to_string()).into(), 0..15),
+                (
+                    EgonTypeError::MismatchType {
+                        expected: ast::TypeRef::number().to_string(),
+                        actual: ast::TypeRef::bool().to_string()
+                    }
+                    .into(),
+                    9..14
+                ),
+            ]),
             results
         );
     }

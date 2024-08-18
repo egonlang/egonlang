@@ -1,3 +1,4 @@
 a = [1, "a"];
 
+// out: TypeError: `a` is not defined
 // out: TypeError: mismatched types: expected type `number` but received `string`

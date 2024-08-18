@@ -1,0 +1,5 @@
+let b: number = 123;
+
+a = b;
+
+// out: TypeError: `a` is not defined

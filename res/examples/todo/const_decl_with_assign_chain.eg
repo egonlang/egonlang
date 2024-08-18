@@ -1,0 +1,3 @@
+const a = b = 123;
+
+// This is currently not supported but will be
