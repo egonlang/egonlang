@@ -31,6 +31,7 @@ pub type ExprS = Spanned<Expr>;
 pub enum Stmt {
     Expr(StmtExpr),
     Assign(StmtAssign),
+    TypeAlias(StmtTypeAlias),
     Fn(Box<StmtFn>),
     Error,
 }
@@ -70,6 +71,7 @@ impl Display for Stmt {
         match self {
             Stmt::Expr(stmt) => f.write_fmt(format_args!("{}", stmt)),
             Stmt::Assign(stmt) => f.write_fmt(format_args!("{}", stmt)),
+            Stmt::TypeAlias(stmt) => f.write_fmt(format_args!("{}", stmt)),
             Stmt::Fn(stmt) => f.write_fmt(format_args!("{}", stmt)),
             Stmt::Error => todo!(),
         }
@@ -81,6 +83,7 @@ impl Debug for Stmt {
         match self {
             Self::Expr(arg0) => f.write_fmt(format_args!("{:#?}", arg0)),
             Self::Assign(arg0) => f.write_fmt(format_args!("{:#?}", arg0)),
+            Self::TypeAlias(arg0) => f.write_fmt(format_args!("{:#?}", arg0)),
             Self::Fn(arg0) => f.write_fmt(format_args!("{:#?}", arg0)),
             Self::Error => write!(f, "Error"),
         }
@@ -150,14 +153,14 @@ impl Display for StmtAssign {
 /// Statement that declares a type alias
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct StmtTypeAlias {
-    pub identifier: Identifier,
-    pub value: Identifier,
+    pub alias: Identifier,
+    pub value: Spanned<TypeRef>,
 }
 
 impl Display for StmtTypeAlias {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let alias = &self.identifier.name;
-        let value = &self.value.name;
+        let alias = &self.alias.name;
+        let value = &self.value.0.to_string();
 
         f.write_fmt(format_args!("type {} = {};", alias, value))
     }
@@ -691,8 +694,63 @@ impl TypeRef {
         }
     }
 
+    pub fn is_unknown(&self) -> bool {
+        self.0 == *"unknown"
+    }
+
     pub fn is_unknown_list(&self) -> bool {
         !self.is_known_list()
+    }
+
+    /// Is this a builtin type?
+    ///
+    /// - `bool`
+    /// - `number`
+    /// - `string`
+    /// - `list<T>`
+    /// - `range`
+    /// - `()`
+    /// - `tuple<T, ...>`
+    /// - `unknown`
+    /// - `function<T>`
+    pub fn is_builtin(&self) -> bool {
+        self.is_bool()
+            || self.is_number()
+            || self.is_string()
+            || self.is_list()
+            || self.is_range()
+            || self.is_unit()
+            || self.is_tuple()
+            || self.is_unknown()
+            || self.is_function()
+    }
+
+    pub fn is_bool(&self) -> bool {
+        "bool" == self.0
+    }
+
+    pub fn is_number(&self) -> bool {
+        "number" == self.0
+    }
+
+    pub fn is_string(&self) -> bool {
+        "string" == self.0
+    }
+
+    pub fn is_tuple(&self) -> bool {
+        "tuple" == self.0
+    }
+
+    pub fn is_range(&self) -> bool {
+        "range" == self.0
+    }
+
+    pub fn is_function(&self) -> bool {
+        "function" == self.0
+    }
+
+    pub fn is_unit(&self) -> bool {
+        "()" == self.0
     }
 
     pub fn string() -> TypeRef {

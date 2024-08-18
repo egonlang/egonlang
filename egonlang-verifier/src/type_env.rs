@@ -65,7 +65,7 @@ impl TypeEnv {
         if result.is_some() {
             let result = result.unwrap();
 
-            if result.typeref.0 == *"type" {
+            if result.typeref.is_type() {
                 verify_trace!(
                     "(level:{}) Got type alias {} for {}",
                     self.level(),

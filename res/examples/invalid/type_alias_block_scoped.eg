@@ -9,4 +9,4 @@ let a: Int = 5;
 let b: number = 20;
 let c: Integer = a + b;
 
-// out: TypeError: mismatched types: expected type `Integer` but received `number`
+// out: TypeError: `Integer` is not defined

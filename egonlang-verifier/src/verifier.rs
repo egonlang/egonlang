@@ -205,26 +205,29 @@ impl<'a> Verifier<'a> {
                     type_expr.to_string().cyan()
                 );
 
-                let type_string = type_expr.0.to_string();
-                if let Some(type_env_value) = &self.resolve_identifier(type_string.as_str()) {
+                if type_expr.0.is_builtin() {
+                    Some(TypeEnvValue::new(type_expr.0.clone()))
+                } else {
+                    let type_string = type_expr.0.to_string();
+                    if let Some(type_env_value) = &self.resolve_identifier(type_string.as_str()) {
+                        verify_trace!(
+                            verifier resolve_expr_type type_expr: "(level: {}) Resolved type expression {} to type {}",
+                            self.current_type_env_level(),
+                            type_expr.to_string().cyan(),
+                            type_env_value.typeref.to_string().italic().yellow()
+                        );
+
+                        return Some(type_env_value.clone());
+                    }
+
                     verify_trace!(
-                        verifier resolve_expr_type type_expr: "(level: {}) Resolved type expression {} to type {}",
+                        verifier resolve_expr_type type_expr: "(level: {}) Resolved type expression {} to type NONE",
                         self.current_type_env_level(),
-                        type_expr.to_string().cyan(),
-                        type_env_value.typeref.to_string().italic().yellow()
+                        type_expr.to_string().cyan()
                     );
 
-                    return Some(type_env_value.clone());
+                    None
                 }
-
-                verify_trace!(
-                    verifier resolve_expr_type type_expr: "(level: {}) Resolved type expression {} to type {}",
-                    self.current_type_env_level(),
-                    type_expr.to_string().cyan(),
-                    type_expr.0.to_string().italic().yellow()
-                );
-
-                Some(TypeEnvValue::new(type_expr.0.clone()))
             }
             ast::Expr::Assign(assign_expr) => {
                 let name = &assign_expr.identifier.name;
@@ -323,13 +326,6 @@ impl<'a> Verifier<'a> {
                 match (&stmt_assign.type_expr, &stmt_assign.value) {
                     (None, None) => {}
                     (None, Some((value_expr, value_span))) => {
-                        verify_trace!(
-                            verifier visit_stmt assign:
-                            "Resolving value expression {} from assign statement {}",
-                            value_expr.to_string().cyan(),
-                            stmt.to_string().cyan()
-                        );
-
                         let value_typeref = self.visit_expr(value_expr, value_span)?;
 
                         self.current_type_env_mut().set(
@@ -340,44 +336,56 @@ impl<'a> Verifier<'a> {
                             },
                         );
                     }
-                    (Some((type_expr, _type_span)), None) => {
-                        verify_trace!(
-                            verifier visit_stmt assign:
-                            "Resolving type expression {} from assign statement {}",
-                            type_expr.to_string().cyan(),
-                            stmt.to_string().cyan()
-                        );
-
-                        let type_typeref = self.resolve_expr_type(type_expr).unwrap();
-
-                        self.current_type_env_mut().set(
-                            &stmt_assign.identifier.name,
-                            TypeEnvValue {
-                                typeref: type_typeref.typeref,
-                                is_const: stmt_assign.is_const,
-                            },
-                        );
+                    (Some((type_expr, type_span)), None) => {
+                        match self.visit_expr(type_expr, type_span) {
+                            Ok(type_typeref) => {
+                                self.current_type_env_mut().set(
+                                    &stmt_assign.identifier.name,
+                                    TypeEnvValue {
+                                        typeref: type_typeref.typeref,
+                                        is_const: stmt_assign.is_const,
+                                    },
+                                );
+                            }
+                            Err(type_errs) => {
+                                errs.extend(type_errs);
+                            }
+                        }
                     }
-                    (Some((type_expr, _type_span)), Some((value_expr, value_span))) => {
-                        verify_trace!(
-                            verifier visit_stmt assign:
-                            "Resolving the type expression {} from the assignment statement {}",
-                            type_expr.to_string().cyan(),
-                            stmt.to_string().cyan()
-                        );
+                    (Some((type_expr, type_span)), Some((value_expr, value_span))) => {
+                        match self.visit_expr(type_expr, type_span) {
+                            Ok(type_typeref) => {
+                                self.visit_expr(value_expr, value_span)?;
 
-                        let type_typeref = self.resolve_expr_type(type_expr).unwrap();
-                        self.visit_expr(value_expr, value_span)?;
-
-                        self.current_type_env_mut().set(
-                            &stmt_assign.identifier.name,
-                            TypeEnvValue {
-                                typeref: type_typeref.typeref,
-                                is_const: stmt_assign.is_const,
-                            },
-                        );
+                                self.current_type_env_mut().set(
+                                    &stmt_assign.identifier.name,
+                                    TypeEnvValue {
+                                        typeref: type_typeref.typeref,
+                                        is_const: stmt_assign.is_const,
+                                    },
+                                );
+                            }
+                            Err(type_errs) => {
+                                errs.extend(type_errs);
+                            }
+                        }
                     }
                 };
+
+                Ok(())
+            }
+            ast::Stmt::TypeAlias(stmt_type_alias) => {
+                verify_trace!(verifier visit_stmt type_alias: "{} is a type alias statement", stmt.to_string().cyan());
+
+                let alias = &stmt_type_alias.alias;
+                let value = self
+                    .resolve_identifier(&stmt_type_alias.value.0.to_string())
+                    .unwrap_or(TypeEnvValue {
+                        typeref: stmt_type_alias.value.0.clone(),
+                        is_const: true,
+                    });
+
+                self.current_type_env_mut().set(&alias.name, value);
 
                 Ok(())
             }
@@ -519,11 +527,15 @@ impl<'a> Verifier<'a> {
                             Err(return_errs) => {
                                 errs.extend(return_errs);
 
+                                self.end_current_type_env();
+
                                 Err(errs)
                             }
                         }
                     }
                     None => {
+                        self.end_current_type_env();
+
                         if !errs.is_empty() {
                             return Err(errs);
                         }
@@ -816,13 +828,16 @@ impl<'a> Verifier<'a> {
                     is_const: true,
                 },
             }),
-            ast::Expr::Identifier(ident_expr) => match self.resolve_expr_type(expr) {
-                Some(t) => Ok(t),
-                None => Err(vec![(
-                    EgonTypeError::Undefined(ident_expr.identifier.name.clone()).into(),
-                    span.clone(),
-                )]),
-            },
+            ast::Expr::Identifier(ident_expr) => {
+                //
+                match self.resolve_expr_type(expr) {
+                    Some(t) => Ok(t),
+                    None => Err(vec![(
+                        EgonTypeError::Undefined(ident_expr.identifier.name.clone()).into(),
+                        span.clone(),
+                    )]),
+                }
+            }
             ast::Expr::List(list_expr) => {
                 verify_trace!(visit_expr infix: "{} is an list expression", expr.to_string().cyan());
 
@@ -945,30 +960,51 @@ impl<'a> Verifier<'a> {
                 })
             }
             ast::Expr::Type(type_expr) => {
+                verify_trace!(verifier visit_expr type_expr: "{} is an type expression", expr.to_string().cyan());
+
                 let mut errs: Vec<EgonErrorS> = vec![];
 
-                for rule in &self.rules {
-                    let rule_errs = rule
-                        .visit_expr(
-                            expr,
-                            span,
-                            &|id: &str| self.resolve_identifier(id),
-                            &|expr: &ast::Expr, _span: &Span| self.resolve_expr_type(expr),
-                        )
-                        .err()
-                        .unwrap_or_default();
+                let typeref = &type_expr.0;
+                let typeref_ident = &typeref.to_string();
 
-                    errs.extend(rule_errs);
+                let type_type = self.resolve_identifier(typeref_ident);
+
+                match type_type {
+                    Some(t) => {
+                        for rule in &self.rules {
+                            let rule_errs = rule
+                                .visit_expr(
+                                    expr,
+                                    span,
+                                    &|id: &str| self.resolve_identifier(id),
+                                    &|expr: &ast::Expr, _span: &Span| self.resolve_expr_type(expr),
+                                )
+                                .err()
+                                .unwrap_or_default();
+
+                            errs.extend(rule_errs);
+                        }
+
+                        if !errs.is_empty() {
+                            return Err(errs);
+                        }
+
+                        Ok(t)
+                    }
+                    None => {
+                        if typeref.is_builtin() {
+                            Ok(TypeEnvValue {
+                                typeref: typeref.clone(),
+                                is_const: true,
+                            })
+                        } else {
+                            Err(vec![(
+                                EgonTypeError::Undefined(typeref_ident.to_string()).into(),
+                                span.clone(),
+                            )])
+                        }
+                    }
                 }
-
-                if !errs.is_empty() {
-                    return Err(errs);
-                }
-
-                Ok(TypeEnvValue {
-                    typeref: type_expr.0.clone(),
-                    is_const: false,
-                })
             }
         }
     }
@@ -987,14 +1023,14 @@ impl<'a> Verifier<'a> {
 
     /// End tne current type environment scope
     fn end_current_type_env(&mut self) {
-        self.type_envs.pop();
-
         let level = self.current_type_env_level();
 
         verify_trace!(
-            verifier start_new_type_env:
-            "Ending new type environment (new level: {level})"
+            verifier end_new_type_env:
+            "Ending type environment (new level: {level})"
         );
+
+        self.type_envs.pop();
     }
 
     fn current_type_env_level(&self) -> usize {
@@ -1752,6 +1788,59 @@ mod verifier_tests {
             }
             .into(),
             55..62
+        )])
+    );
+
+    verifier_test!(
+        validate_type_alias_block_scoped,
+        r#"
+        type Int = number;
+
+        let a: Int = 5;
+
+        {
+            type Integer = Int;
+        };
+        
+        let c: Integer = a + 20;
+        "#,
+        Err(vec![(
+            EgonTypeError::Undefined("Integer".to_string()).into(),
+            131..138
+        )])
+    );
+
+    verifier_test!(
+        validate_type_alias_block_scoped_b,
+        r#"
+        type Int = number;
+
+        {
+            type Integer = Int;
+        };
+        
+        let c: Integer = 5 + 20;
+        "#,
+        Err(vec![(
+            EgonTypeError::Undefined("Integer".to_string()).into(),
+            106..113
+        )])
+    );
+
+    verifier_test!(
+        validate_type_alias_block_scoped_c,
+        r#"
+        type Int = number;
+
+        {
+            type Integer = Int;
+        };
+        
+        let c: Integer = 5 + 20;
+        "#,
+        Err(vec![(
+            EgonTypeError::Undefined("Integer".to_string()).into(),
+            106..113
         )])
     );
 

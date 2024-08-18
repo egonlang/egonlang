@@ -93,7 +93,7 @@ mod parser_tests {
     use crate::ast::{
         self, Expr, ExprAssign, ExprBlock, ExprFn, ExprIdentifier, ExprIf, ExprInfix, ExprList,
         ExprLiteral, ExprRange, ExprTuple, ExprType, Identifier, Module, OpInfix, Stmt, StmtAssign,
-        StmtExpr, TypeRef,
+        StmtExpr, StmtTypeAlias, TypeRef,
     };
 
     use crate::errors::{EgonError, EgonSyntaxError};
@@ -1800,19 +1800,11 @@ mod parser_tests {
         "type NumberList = list<number>;",
         Ok(Module {
             stmts: vec![(
-                Stmt::Assign(StmtAssign {
-                    identifier: Identifier {
+                Stmt::TypeAlias(StmtTypeAlias {
+                    alias: Identifier {
                         name: "NumberList".to_string()
                     },
-                    type_expr: Some((
-                        Expr::Type(ExprType(TypeRef::typed(TypeRef::list(TypeRef::number())))),
-                        18..30
-                    )),
-                    is_const: true,
-                    value: Some((
-                        Expr::Type(ExprType(TypeRef::typed(TypeRef::list(TypeRef::number())))),
-                        18..30
-                    ))
+                    value: (TypeRef::list(TypeRef::number()), 18..30)
                 }),
                 0..31
             )]
@@ -1828,19 +1820,11 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![
                 (
-                    Stmt::Assign(StmtAssign {
-                        identifier: Identifier {
+                    Stmt::TypeAlias(StmtTypeAlias {
+                        alias: Identifier {
                             name: "NumberList".to_string()
                         },
-                        type_expr: Some((
-                            Expr::Type(ExprType(TypeRef::typed(TypeRef::list(TypeRef::number())))),
-                            27..39
-                        )),
-                        is_const: true,
-                        value: Some((
-                            Expr::Type(ExprType(TypeRef::typed(TypeRef::list(TypeRef::number())))),
-                            27..39
-                        ))
+                        value: (TypeRef::list(TypeRef::number()), 27..39)
                     }),
                     9..40
                 ),
@@ -1892,23 +1876,11 @@ mod parser_tests {
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: vec![
                                         (
-                                            Stmt::Assign(StmtAssign {
-                                                identifier: Identifier {
+                                            Stmt::TypeAlias(StmtTypeAlias {
+                                                alias: Identifier {
                                                     name: "Int".to_string()
                                                 },
-                                                type_expr: Some((
-                                                    Expr::Type(ExprType(TypeRef::typed(
-                                                        TypeRef::number()
-                                                    ))),
-                                                    44..50
-                                                )),
-                                                is_const: true,
-                                                value: Some((
-                                                    Expr::Type(ExprType(TypeRef::typed(
-                                                        TypeRef::number()
-                                                    ))),
-                                                    44..50
-                                                ))
+                                                value: (TypeRef::number(), 44..50)
                                             }),
                                             33..51
                                         ),
