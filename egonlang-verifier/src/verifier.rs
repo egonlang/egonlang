@@ -761,7 +761,29 @@ impl<'a> Verifier<'a> {
 
                         Ok(body_type.clone())
                     }
-                    Err(body_errs) => Err(body_errs),
+                    Err(body_errs) => {
+                        let mut errs: Vec<EgonErrorS> = vec![];
+
+                        errs.extend(body_errs);
+
+                        for rule in &self.rules {
+                            let rule_errs = rule
+                                .visit_expr(
+                                    expr,
+                                    span,
+                                    &|id: &str| self.resolve_identifier(id),
+                                    &|expr: &ast::Expr, _span: &Span| self.resolve_expr_type(expr),
+                                )
+                                .err()
+                                .unwrap_or_default();
+
+                            errs.extend(rule_errs);
+                        }
+
+                        self.end_current_type_env();
+
+                        Err(errs)
+                    }
                 }
             }
             ast::Expr::If(if_expr) => {
@@ -1642,6 +1664,29 @@ mod verifier_tests {
             .into(),
             21..27
         )])
+    );
+
+    verifier_test!(
+        validate_fn_expr_type_mismatch_in_body_infix_bang_and_fn_return_type_mismatch_b,
+        "(a: string): number => { !a };",
+        Err(vec![
+            (
+                EgonTypeError::MismatchType {
+                    expected: "bool".to_string(),
+                    actual: "string".to_string()
+                }
+                .into(),
+                26..27
+            ),
+            (
+                EgonTypeError::MismatchType {
+                    expected: "number".to_string(),
+                    actual: "bool".to_string()
+                }
+                .into(),
+                23..29
+            )
+        ])
     );
 
     verifier_test!(
