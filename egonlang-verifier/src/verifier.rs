@@ -1,4 +1,5 @@
 use ast::TypeRef;
+use colored::Colorize;
 use egonlang_core::prelude::*;
 
 use crate::{
@@ -17,9 +18,9 @@ pub type VerificationResult = Result<(), Vec<EgonErrorS>>;
 /// /// Verifier with the default [`Rule`] set
 /// let verifier = Verifier::default();
 ///
-/// let module = parse("let a = 123;", 0).expect("Unable to parse");
+/// let mut module = parse("let a = 123;", 0).expect("Unable to parse");
 ///
-/// let result = verify_module(&module);
+/// let result = verify_module(&mut module);
 ///
 /// matches!(result, Ok(()));
 /// ```
@@ -96,12 +97,12 @@ impl<'a> Verifier<'a> {
     }
 
     /// Verify an AST [`Module`] using the registered [`Rule`] set
-    pub fn verify(&mut self, module: &ast::Module) -> VerificationResult {
+    pub fn verify(&mut self, module: &mut ast::Module) -> VerificationResult {
         let mut all_errs: Vec<EgonErrorS> = vec![];
 
         verify_trace!(verifier verify: "Verifying module...");
 
-        for (stmt, stmt_span) in &module.stmts {
+        for (stmt, stmt_span) in &mut module.stmts {
             if let Err(stmt_errs) = self.visit_stmt(stmt, stmt_span) {
                 all_errs.extend(stmt_errs);
             }
@@ -184,6 +185,13 @@ impl<'a> Verifier<'a> {
                     self.current_type_env_level(),
                     block_expr.to_string().cyan()
                 );
+
+                if let Some(block_typeref) = &block_expr.typeref {
+                    return Some(TypeEnvValue {
+                        typeref: block_typeref.clone(),
+                        is_const: true,
+                    });
+                }
 
                 if let Some((block_expr_return_expr, _)) = &block_expr.return_expr {
                     self.resolve_expr_type(block_expr_return_expr)
@@ -295,18 +303,20 @@ impl<'a> Verifier<'a> {
         resolved_type
     }
 
-    fn visit_stmt(&mut self, stmt: &ast::Stmt, span: &Span) -> Result<(), Vec<EgonErrorS>> {
+    fn visit_stmt(&mut self, stmt: &mut ast::Stmt, span: &Span) -> Result<(), Vec<EgonErrorS>> {
         let mut errs: Vec<EgonErrorS> = vec![];
 
-        verify_trace!(verifier visit_stmt: "{}", stmt.to_string().cyan());
+        let stmt_string = stmt.clone().to_string().cyan();
+
+        verify_trace!(verifier visit_stmt: "{}", stmt_string);
 
         let result = match stmt {
             ast::Stmt::Expr(stmt_expr) => {
-                verify_trace!(verifier visit_stmt expr: "{} is an expression statement", stmt.to_string().cyan());
+                verify_trace!(verifier visit_stmt expr: "{} is an expression statement", stmt_string);
 
-                let (expr, expr_span) = &stmt_expr.expr;
+                let (expr, expr_span) = &mut stmt_expr.expr;
 
-                verify_trace!(verifier visit_stmt expr: "Checking expression {} from stmt {}", expr.to_string().cyan(), stmt.to_string().cyan());
+                verify_trace!(verifier visit_stmt expr: "Checking expression {} from stmt {}", expr.to_string().cyan(), stmt_string);
 
                 let expr_errs = self.visit_expr(expr, expr_span).err().unwrap_or_default();
 
@@ -321,9 +331,9 @@ impl<'a> Verifier<'a> {
                 Ok(())
             }
             ast::Stmt::Assign(stmt_assign) => {
-                verify_trace!(verifier visit_stmt assign: "{} is an assignment statement", stmt.to_string().cyan());
+                verify_trace!(verifier visit_stmt assign: "{} is an assignment statement", stmt_string);
 
-                match (&stmt_assign.type_expr, &stmt_assign.value) {
+                match (&mut stmt_assign.type_expr, &mut stmt_assign.value) {
                     (None, None) => {}
                     (None, Some((value_expr, value_span))) => {
                         let value_typeref = self.visit_expr(value_expr, value_span)?;
@@ -375,7 +385,7 @@ impl<'a> Verifier<'a> {
                 Ok(())
             }
             ast::Stmt::TypeAlias(stmt_type_alias) => {
-                verify_trace!(verifier visit_stmt type_alias: "{} is a type alias statement", stmt.to_string().cyan());
+                verify_trace!(verifier visit_stmt type_alias: "{} is a type alias statement", stmt_string);
 
                 let alias = &stmt_type_alias.alias;
                 let value = self
@@ -390,9 +400,9 @@ impl<'a> Verifier<'a> {
                 Ok(())
             }
             ast::Stmt::Fn(stmt_fn) => {
-                verify_trace!(verifier visit_stmt function: "{} is an function statement", stmt.to_string().cyan());
+                verify_trace!(verifier visit_stmt function: "{} is an function statement", stmt_string);
 
-                let (fn_expr, fn_expr_span) = &stmt_fn.fn_expr;
+                let (fn_expr, fn_expr_span) = &mut stmt_fn.fn_expr;
 
                 verify_trace!(verifier visit_stmt function: "Checking function statement's function expression {}", fn_expr.to_string().cyan());
 
@@ -415,12 +425,12 @@ impl<'a> Verifier<'a> {
                 Ok(())
             }
             ast::Stmt::Error => {
-                verify_trace!(verifier visit_stmt error_stmt: "{} is an error statement", stmt.to_string().cyan());
+                verify_trace!(verifier visit_stmt error_stmt: "{} is an error statement", stmt_string);
                 Ok(())
             }
         };
 
-        verify_trace!(verifier visit_stmt: "Running rules for statement {}", stmt.to_string().cyan());
+        verify_trace!(verifier visit_stmt: "Running rules for statement {}", stmt_string);
 
         for rule in &self.rules {
             let resolve_ident: Box<dyn ResolveIdent> =
@@ -440,12 +450,12 @@ impl<'a> Verifier<'a> {
             errs.extend(rule_errs);
         }
 
-        verify_trace!(verifier visit_stmt: "There were a total of {} rule errors with statement {}", errs.len(), stmt.to_string().cyan());
+        verify_trace!(verifier visit_stmt: "There were a total of {} rule errors with statement {}", errs.len(), stmt_string);
 
         verify_trace!(
             verifier visit_stmt exit_stmt:
             "{}",
-            stmt.to_string().cyan()
+            stmt_string
         );
 
         if !errs.is_empty() {
@@ -457,30 +467,33 @@ impl<'a> Verifier<'a> {
 
     fn visit_expr(
         &mut self,
-        expr: &ast::Expr,
+        expr: &mut ast::Expr,
         span: &Span,
     ) -> Result<TypeEnvValue, Vec<EgonErrorS>> {
-        verify_trace!(verifier visit_expr: "{}", expr.to_string().cyan());
+        let expr_string = expr.to_string().cyan();
+        let expr_clone = expr.clone();
+
+        verify_trace!(verifier visit_expr: "{}", expr_string);
 
         match expr {
             ast::Expr::Block(block_expr) => {
-                verify_trace!(verifier visit_expr block: "{} is a block expression", expr.to_string().cyan());
+                verify_trace!(verifier visit_expr block: "{} is a block expression", expr_string);
 
                 let mut errs: Vec<EgonErrorS> = vec![];
 
                 self.start_new_type_env();
 
-                for (stmt, stmt_span) in &block_expr.stmts {
+                for (stmt, stmt_span) in &mut block_expr.stmts {
                     let stmt_errs = self.visit_stmt(stmt, stmt_span).err().unwrap_or_default();
 
                     errs.extend(stmt_errs);
                 }
 
-                match &block_expr.return_expr {
+                match &mut block_expr.return_expr {
                     Some((return_expr, return_span)) => {
                         verify_trace!(
                             verifier visit_expr block: "{} has a return expression {}",
-                            expr.to_string().cyan(),
+                            expr_string,
                             return_expr.to_string().cyan()
                         );
 
@@ -499,7 +512,7 @@ impl<'a> Verifier<'a> {
 
                                     let rule_errs = rule
                                         .visit_expr(
-                                            expr,
+                                            &expr_clone,
                                             span,
                                             resolve_ident.as_ref(),
                                             resolve_expr.as_ref(),
@@ -518,9 +531,11 @@ impl<'a> Verifier<'a> {
 
                                 verify_trace!(
                                     verifier visit_expr block: "{} resolved to type of {}",
-                                    expr.to_string().cyan(),
+                                    expr_string,
                                     return_type.typeref.to_string().yellow().italic()
                                 );
+
+                                block_expr.typeref = Some(return_type.typeref.clone());
 
                                 Ok(return_type)
                             }
@@ -548,11 +563,11 @@ impl<'a> Verifier<'a> {
                 }
             }
             ast::Expr::Assign(assign_expr) => {
-                verify_trace!(visit_expr assign: "{} is an assign expression", expr.to_string().cyan());
+                verify_trace!(visit_expr assign: "{} is an assign expression", expr_string);
 
                 let mut errs: Vec<EgonErrorS> = vec![];
 
-                let (value_expr, value_span) = &assign_expr.value;
+                let (value_expr, value_span) = &mut assign_expr.value;
 
                 match self.visit_expr(value_expr, value_span) {
                     Ok(value_type) => {
@@ -580,17 +595,17 @@ impl<'a> Verifier<'a> {
                 }
             }
             ast::Expr::Infix(infix_expr) => {
-                verify_trace!(visit_expr infix: "{} is an infix expression", expr.to_string().cyan());
+                verify_trace!(visit_expr infix: "{} is an infix expression", expr_string);
 
                 let mut errs: Vec<EgonErrorS> = vec![];
 
-                let (lt_expr, lt_span) = &infix_expr.lt;
+                let (lt_expr, lt_span) = &mut infix_expr.lt;
 
                 let lt_errs = self.visit_expr(lt_expr, lt_span).err().unwrap_or_default();
 
                 errs.extend(lt_errs);
 
-                let (rt_expr, rt_span) = &infix_expr.rt;
+                let (rt_expr, rt_span) = &mut infix_expr.rt;
 
                 let rt_errs = self.visit_expr(rt_expr, rt_span).err().unwrap_or_default();
 
@@ -599,7 +614,7 @@ impl<'a> Verifier<'a> {
                 for rule in &self.rules {
                     let rule_errs = rule
                         .visit_expr(
-                            expr,
+                            &expr_clone,
                             span,
                             &|id: &str| self.resolve_identifier(id),
                             &|expr: &ast::Expr, _span: &Span| self.resolve_expr_type(expr),
@@ -670,9 +685,9 @@ impl<'a> Verifier<'a> {
                 })
             }
             ast::Expr::Prefix(prefix_expr) => {
-                verify_trace!(visit_expr infix: "{} is an prefix expression", expr.to_string().cyan());
+                verify_trace!(visit_expr infix: "{} is an prefix expression", expr_string);
 
-                let (rt_expr, rt_span) = &prefix_expr.rt;
+                let (rt_expr, rt_span) = &mut prefix_expr.rt;
 
                 match self.visit_expr(rt_expr, rt_span) {
                     Ok(_) => {
@@ -702,7 +717,7 @@ impl<'a> Verifier<'a> {
                 }
             }
             ast::Expr::Fn(fn_expr) => {
-                verify_trace!(visit_expr function: "{} is a function expression", expr.to_string().cyan());
+                verify_trace!(visit_expr function: "{} is a function expression", expr_string);
 
                 self.start_new_type_env();
 
@@ -718,7 +733,7 @@ impl<'a> Verifier<'a> {
                     );
                 }
 
-                let (body_expr, body_span) = &fn_expr.body;
+                let (body_expr, body_span) = &mut fn_expr.body;
 
                 match self.visit_expr(body_expr, body_span) {
                     Ok(body_type) => {
@@ -750,13 +765,13 @@ impl<'a> Verifier<'a> {
                 }
             }
             ast::Expr::If(if_expr) => {
-                verify_trace!(visit_expr if_expr: "{} is an if expression", expr.to_string().cyan());
+                verify_trace!(visit_expr if_expr: "{} is an if expression", expr_string);
 
-                let (cond_expr, cond_span) = &if_expr.cond;
+                let (cond_expr, cond_span) = &mut if_expr.cond;
 
                 match self.visit_expr(cond_expr, cond_span) {
                     Ok(_) => {
-                        let (then_expr, then_span) = &if_expr.then;
+                        let (then_expr, then_span) = &mut if_expr.then;
 
                         match self.visit_expr(then_expr, then_span) {
                             Ok(then_type) => {
@@ -765,7 +780,7 @@ impl<'a> Verifier<'a> {
                                 for rule in &self.rules {
                                     let rule_errs = rule
                                         .visit_expr(
-                                            expr,
+                                            &expr_clone,
                                             span,
                                             &|id: &str| self.resolve_identifier(id),
                                             &|expr: &ast::Expr, _span: &Span| {
@@ -778,7 +793,7 @@ impl<'a> Verifier<'a> {
                                     errs.extend(rule_errs);
                                 }
 
-                                match &if_expr.else_ {
+                                match &mut if_expr.else_ {
                                     Some((else_expr, else_span)) => {
                                         match self.visit_expr(else_expr, else_span) {
                                             Ok(_) => {
@@ -830,7 +845,7 @@ impl<'a> Verifier<'a> {
             }),
             ast::Expr::Identifier(ident_expr) => {
                 //
-                match self.resolve_expr_type(expr) {
+                match self.resolve_expr_type(&expr_clone) {
                     Some(t) => Ok(t),
                     None => Err(vec![(
                         EgonTypeError::Undefined(ident_expr.identifier.name.clone()).into(),
@@ -839,7 +854,7 @@ impl<'a> Verifier<'a> {
                 }
             }
             ast::Expr::List(list_expr) => {
-                verify_trace!(visit_expr infix: "{} is an list expression", expr.to_string().cyan());
+                verify_trace!(visit_expr infix: "{} is an list expression", expr_string);
 
                 if list_expr.items.is_empty() {
                     return Ok(TypeEnvValue {
@@ -854,7 +869,7 @@ impl<'a> Verifier<'a> {
                     is_const: true,
                 };
 
-                for (i, (item_expr, item_span)) in list_expr.items.iter().enumerate() {
+                for (i, (item_expr, item_span)) in list_expr.items.iter_mut().enumerate() {
                     match self.visit_expr(item_expr, item_span) {
                         Err(item_errs) => {
                             errs.extend(item_errs);
@@ -898,7 +913,7 @@ impl<'a> Verifier<'a> {
                 let mut item_types: Vec<TypeRef> = vec![];
                 let mut errs: Vec<EgonErrorS> = vec![];
 
-                for (item_expr, item_span) in &tuple_expr.items {
+                for (item_expr, item_span) in &mut tuple_expr.items {
                     match self.visit_expr(item_expr, item_span) {
                         Ok(item_type) => {
                             item_types.push(item_type.typeref.clone());
@@ -960,7 +975,7 @@ impl<'a> Verifier<'a> {
                 })
             }
             ast::Expr::Type(type_expr) => {
-                verify_trace!(verifier visit_expr type_expr: "{} is an type expression", expr.to_string().cyan());
+                verify_trace!(verifier visit_expr type_expr: "{} is an type expression", expr_string);
 
                 let mut errs: Vec<EgonErrorS> = vec![];
 
@@ -1050,7 +1065,7 @@ mod verifier_tests {
         ($test_name:ident, $input:expr, $expected:expr) => {
             #[test]
             fn $test_name() {
-                let result = parse($input, 0).and_then(|module| verify_module(&module));
+                let result = parse($input, 0).and_then(|mut module| verify_module(&mut module));
 
                 assert_eq!($expected, result);
             }
@@ -1848,7 +1863,7 @@ mod verifier_tests {
     fn errors_when_referencing_undefined_identifier() {
         let mut verifier = Verifier::default();
 
-        let module = ast::Module::from(vec![(
+        let mut module = ast::Module::from(vec![(
             ast::StmtExpr {
                 expr: (
                     ast::Identifier {
@@ -1862,7 +1877,7 @@ mod verifier_tests {
             0..3,
         )]);
 
-        let results = verifier.verify(&module);
+        let results = verifier.verify(&mut module);
 
         assert_eq!(
             Err(vec![(
@@ -1877,7 +1892,7 @@ mod verifier_tests {
     fn errors_when_referencing_multiple_undefined_identifiers() {
         let mut verifier = Verifier::default();
 
-        let module = ast::Module::from(vec![
+        let mut module = ast::Module::from(vec![
             (
                 ast::StmtExpr {
                     expr: (
@@ -1906,7 +1921,7 @@ mod verifier_tests {
             ),
         ]);
 
-        let results = verifier.verify(&module);
+        let results = verifier.verify(&mut module);
 
         assert_eq!(
             Err(vec![
@@ -1921,7 +1936,7 @@ mod verifier_tests {
     fn errors_when_assigning_list_with_type_mismatched_items() {
         let mut verifier = Verifier::default();
 
-        let module = ast::Module::from(vec![(
+        let mut module = ast::Module::from(vec![(
             ast::StmtExpr {
                 expr: (
                     ast::ExprAssign {
@@ -1947,7 +1962,7 @@ mod verifier_tests {
             0..0,
         )]);
 
-        let results = verifier.verify(&module);
+        let results = verifier.verify(&mut module);
 
         assert_eq!(
             Err(vec![(

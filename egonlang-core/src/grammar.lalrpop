@@ -231,7 +231,8 @@ ExprBlock: ast::Expr = {
     ast::Expr::Block(Box::new(
         ast::ExprBlock {
             stmts,
-            return_expr
+            return_expr,
+            typeref: None
         }
     )),
 }

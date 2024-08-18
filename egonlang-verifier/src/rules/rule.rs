@@ -251,14 +251,14 @@ macro_rules! verifier_rule_test {
         #[test]
         $(#[$attributes])*
         fn $name() {
-            let module = ::egonlang_core::parser::parse($input, 0)
+            let mut module = ::egonlang_core::parser::parse($input, 0)
                 .expect("Unable to parse source to module");
 
             let mut verifier = $crate::verifier::Verifier::new();
 
             verifier.add_rule($rule);
 
-            let result = verifier.verify(&module);
+            let result = verifier.verify(&mut module);
 
             ::pretty_assertions::assert_eq!($expected, result);
         }

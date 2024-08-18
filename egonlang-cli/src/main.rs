@@ -45,9 +45,9 @@ fn main() {
                 let content = std::fs::read_to_string(full_path).expect("Unable to read file");
 
                 let module = match parse(&content, 0) {
-                    Ok(module) => {
+                    Ok(mut module) => {
                         let mut verifier = Verifier::default();
-                        verifier.verify(&module)
+                        verifier.verify(&mut module)
                     }
                     Err(errs) => Err(errs),
                 };

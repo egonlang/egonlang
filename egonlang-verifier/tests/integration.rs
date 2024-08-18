@@ -31,7 +31,7 @@ fn integration_implemented(path: PathBuf) {
 
     let mut got_output = Vec::new();
 
-    if let Err(e) = parse(&source, 0).and_then(|module| verify_module(&module)) {
+    if let Err(e) = parse(&source, 0).and_then(|mut module| verify_module(&mut module)) {
         let m = e
             .into_iter()
             .map(|(e, _)| e.to_string())
@@ -61,7 +61,7 @@ fn integration_todo(#[files("../res/examples/todo/**/*.eg")] path: PathBuf) {
 
     let mut got_output = Vec::new();
 
-    if let Err(e) = parse(&source, 0).and_then(|module| verify_module(&module)) {
+    if let Err(e) = parse(&source, 0).and_then(|mut module| verify_module(&mut module)) {
         let m = e
             .into_iter()
             .map(|(e, _)| e.to_string())

@@ -435,7 +435,8 @@ mod parser_tests {
                     expr: (
                         Expr::Block(Box::from(ExprBlock {
                             stmts: vec![],
-                            return_expr: None
+                            return_expr: None,
+                            typeref: None
                         })),
                         0..2
                     )
@@ -454,7 +455,8 @@ mod parser_tests {
                     expr: (
                         Expr::Block(Box::new(ExprBlock {
                             stmts: vec![],
-                            return_expr: Some((Expr::Literal(ExprLiteral::Number(123f64)), 1..4))
+                            return_expr: Some((Expr::Literal(ExprLiteral::Number(123f64)), 1..4)),
+                            typeref: None
                         })),
                         0..5
                     )
@@ -476,7 +478,8 @@ mod parser_tests {
                             return_expr: Some((
                                 Expr::Literal(ExprLiteral::String("foo".to_string())),
                                 1..6
-                            ))
+                            )),
+                            typeref: None
                         })),
                         0..7
                     )
@@ -502,7 +505,8 @@ mod parser_tests {
                                     }
                                 }),
                                 1..4
-                            ))
+                            )),
+                            typeref: None
                         })),
                         0..5
                     )
@@ -533,7 +537,8 @@ mod parser_tests {
                                 }),
                                 1..5
                             )],
-                            return_expr: None
+                            return_expr: None,
+                            typeref: None
                         })),
                         0..6
                     )
@@ -556,14 +561,16 @@ mod parser_tests {
                                     expr: (
                                         Expr::Block(Box::new(ExprBlock {
                                             stmts: vec![],
-                                            return_expr: None
+                                            return_expr: None,
+                                            typeref: None
                                         })),
                                         1..3
                                     )
                                 }),
                                 1..4
                             )],
-                            return_expr: None
+                            return_expr: None,
+                            typeref: None
                         })),
                         0..5
                     )
@@ -585,10 +592,12 @@ mod parser_tests {
                             return_expr: Some((
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: vec![],
-                                    return_expr: None
+                                    return_expr: None,
+                                    typeref: None
                                 })),
                                 1..3
-                            ))
+                            )),
+                            typeref: None
                         })),
                         0..4
                     )
@@ -611,7 +620,8 @@ mod parser_tests {
                                     expr: (
                                         Expr::Block(Box::new(ExprBlock {
                                             stmts: vec![],
-                                            return_expr: None
+                                            return_expr: None,
+                                            typeref: None
                                         })),
                                         1..3
                                     )
@@ -621,10 +631,12 @@ mod parser_tests {
                             return_expr: Some((
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: vec![],
-                                    return_expr: None
+                                    return_expr: None,
+                                    typeref: None
                                 })),
                                 4..6
-                            ))
+                            )),
+                            typeref: None
                         })),
                         0..7
                     )
@@ -672,7 +684,8 @@ mod parser_tests {
                             return_expr: Some((
                                 Expr::Literal(ExprLiteral::String("bar".to_string())),
                                 12..17
-                            ))
+                            )),
+                            typeref: None
                         })),
                         0..18
                     )
@@ -1264,7 +1277,8 @@ mod parser_tests {
                             then: (
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: vec![],
-                                    return_expr: None
+                                    return_expr: None,
+                                    typeref: None
                                 })),
                                 10..12
                             ),
@@ -1290,14 +1304,16 @@ mod parser_tests {
                             then: (
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: vec![],
-                                    return_expr: None
+                                    return_expr: None,
+                                    typeref: None
                                 })),
                                 10..12
                             ),
                             else_: Some((
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: vec![],
-                                    return_expr: None
+                                    return_expr: None,
+                                    typeref: None
                                 })),
                                 18..20
                             ))
@@ -1322,7 +1338,8 @@ mod parser_tests {
                             then: (
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: vec![],
-                                    return_expr: None
+                                    return_expr: None,
+                                    typeref: None
                                 })),
                                 10..12
                             ),
@@ -1332,7 +1349,8 @@ mod parser_tests {
                                     then: (
                                         Expr::Block(Box::new(ExprBlock {
                                             stmts: vec![],
-                                            return_expr: None
+                                            return_expr: None,
+                                            typeref: None
                                         })),
                                         28..30
                                     ),
@@ -1361,7 +1379,8 @@ mod parser_tests {
                             then: (
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: vec![],
-                                    return_expr: None
+                                    return_expr: None,
+                                    typeref: None
                                 })),
                                 10..12
                             ),
@@ -1371,14 +1390,16 @@ mod parser_tests {
                                     then: (
                                         Expr::Block(Box::new(ExprBlock {
                                             stmts: vec![],
-                                            return_expr: None
+                                            return_expr: None,
+                                            typeref: None
                                         })),
                                         28..30
                                     ),
                                     else_: Some((
                                         Expr::Block(Box::new(ExprBlock {
                                             stmts: vec![],
-                                            return_expr: None
+                                            return_expr: None,
+                                            typeref: None
                                         })),
                                         36..38
                                     ))
@@ -1406,7 +1427,8 @@ mod parser_tests {
                             then: (
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: vec![],
-                                    return_expr: None
+                                    return_expr: None,
+                                    typeref: None
                                 })),
                                 10..12
                             ),
@@ -1416,7 +1438,8 @@ mod parser_tests {
                                     then: (
                                         Expr::Block(Box::new(ExprBlock {
                                             stmts: vec![],
-                                            return_expr: None
+                                            return_expr: None,
+                                            typeref: None
                                         })),
                                         28..30
                                     ),
@@ -1426,14 +1449,16 @@ mod parser_tests {
                                             then: (
                                                 Expr::Block(Box::new(ExprBlock {
                                                     stmts: vec![],
-                                                    return_expr: None
+                                                    return_expr: None,
+                                                    typeref: None
                                                 })),
                                                 46..48
                                             ),
                                             else_: Some((
                                                 Expr::Block(Box::new(ExprBlock {
                                                     stmts: vec![],
-                                                    return_expr: None
+                                                    return_expr: None,
+                                                    typeref: None
                                                 })),
                                                 54..56
                                             ))
@@ -1945,7 +1970,8 @@ mod parser_tests {
                                             }
                                         }),
                                         128..129
-                                    ))
+                                    )),
+                                    typeref: None
                                 })),
                                 19..139
                             )
@@ -1996,7 +2022,8 @@ mod parser_tests {
                                     return_expr: Some((
                                         Expr::Literal(ExprLiteral::Number(123f64)),
                                         20..23
-                                    ))
+                                    )),
+                                    typeref: None
                                 })),
                                 18..25
                             ),
@@ -2006,7 +2033,8 @@ mod parser_tests {
                                     return_expr: Some((
                                         Expr::Literal(ExprLiteral::Number(456f64)),
                                         33..36
-                                    ))
+                                    )),
+                                    typeref: None
                                 })),
                                 31..38
                             ))

@@ -433,6 +433,7 @@ impl From<Identifier> for Expr {
 pub struct ExprBlock {
     pub stmts: Vec<StmtS>,
     pub return_expr: Option<ExprS>,
+    pub typeref: Option<TypeRef>,
 }
 
 impl Display for ExprBlock {
@@ -1121,7 +1122,8 @@ mod ast_tests {
             then: (
                 ExprBlock {
                     stmts: vec![],
-                    return_expr: Some((ExprLiteral::Number(123f64).into(), 0..0))
+                    return_expr: Some((ExprLiteral::Number(123f64).into(), 0..0)),
+                    typeref: None
                 }
                 .into(),
                 0..0
@@ -1144,7 +1146,8 @@ mod ast_tests {
                         .into(),
                         0..0
                     )],
-                    return_expr: Some((ExprLiteral::Number(456f64).into(), 0..0))
+                    return_expr: Some((ExprLiteral::Number(456f64).into(), 0..0)),
+                    typeref: None
                 }
                 .into(),
                 0..0
@@ -1161,7 +1164,8 @@ mod ast_tests {
             then: (
                 ExprBlock {
                     stmts: vec![],
-                    return_expr: Some((ExprLiteral::Number(123f64).into(), 0..0))
+                    return_expr: Some((ExprLiteral::Number(123f64).into(), 0..0)),
+                    typeref: None
                 }
                 .into(),
                 0..0
@@ -1169,7 +1173,8 @@ mod ast_tests {
             else_: Some((
                 ExprBlock {
                     stmts: vec![],
-                    return_expr: Some((ExprLiteral::Number(456f64).into(), 0..0))
+                    return_expr: Some((ExprLiteral::Number(456f64).into(), 0..0)),
+                    typeref: None
                 }
                 .into(),
                 0..0
@@ -1191,7 +1196,8 @@ mod ast_tests {
                         .into(),
                         0..0
                     )],
-                    return_expr: Some((ExprLiteral::Number(456f64).into(), 0..0))
+                    return_expr: Some((ExprLiteral::Number(456f64).into(), 0..0)),
+                    typeref: None
                 }
                 .into(),
                 0..0
@@ -1205,7 +1211,8 @@ mod ast_tests {
                         .into(),
                         0..0
                     )],
-                    return_expr: Some((ExprLiteral::Number(0f64).into(), 0..0))
+                    return_expr: Some((ExprLiteral::Number(0f64).into(), 0..0)),
+                    typeref: None
                 }
                 .into(),
                 0..0
@@ -1253,7 +1260,8 @@ mod ast_tests {
             body: (
                 ExprBlock {
                     stmts: vec![],
-                    return_expr: None
+                    return_expr: None,
+                    typeref: None
                 }
                 .into(),
                 0..0
@@ -1279,7 +1287,8 @@ mod ast_tests {
             body: (
                 ExprBlock {
                     stmts: vec![],
-                    return_expr: None
+                    return_expr: None,
+                    typeref: None
                 }
                 .into(),
                 0..0
@@ -1316,7 +1325,8 @@ mod ast_tests {
             body: (
                 ExprBlock {
                     stmts: vec![],
-                    return_expr: None
+                    return_expr: None,
+                    typeref: None
                 }
                 .into(),
                 0..0
@@ -1353,7 +1363,8 @@ mod ast_tests {
             body: (
                 ExprBlock {
                     stmts: vec![],
-                    return_expr: None
+                    return_expr: None,
+                    typeref: None
                 }
                 .into(),
                 0..0
@@ -1409,7 +1420,8 @@ mod ast_tests {
                             )
                         })),
                         0..0
-                    ))
+                    )),
+                    typeref: None
                 }
                 .into(),
                 0..0

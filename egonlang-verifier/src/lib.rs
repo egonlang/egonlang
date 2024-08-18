@@ -9,7 +9,7 @@ pub use verifier::{VerificationResult, Verifier};
 /// Verify a [`egonlang_core::ast::Module`] using the core [`rules::Rule`] set
 ///
 /// See: [`rules::core`]
-pub fn verify_module(module: &egonlang_core::ast::Module) -> VerificationResult {
+pub fn verify_module(module: &mut egonlang_core::ast::Module) -> VerificationResult {
     Verifier::default().verify(module)
 }
 
