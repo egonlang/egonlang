@@ -7,7 +7,7 @@ use crate::{
 };
 use std::fmt::{self, Debug, Display, Formatter};
 
-/// Modules are units of code (e.g. variables, functions)
+/// A collection of [`Stmt`] representing an Egon code file.
 #[derive(Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct Module {
     pub stmts: Vec<StmtS>,
@@ -23,15 +23,40 @@ impl Module {
     }
 }
 
+/// A tuple containing a statement and it's span e.g. (stmt, span)
 pub type StmtS = Spanned<Stmt>;
+
+/// A tuple containing an expression and it's span e.g. (expr, span)
 pub type ExprS = Spanned<Expr>;
 
-/// Statements
+/// A statement (e.g. that does not produce a value)
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub enum Stmt {
+    /// A statement that evaluates an expression then consumes the value.
+    ///
+    /// ```egon
+    /// [1, 2, 3];
+    /// ```
     Expr(StmtExpr),
+    /// A statement that declares and/or initalizes a variable or constant
+    ///
+    /// ```egon
+    /// let a: number = 123;
+    /// const b = 456;
+    /// ```
     Assign(StmtAssign),
+    /// A statement that declares a type alias
+    ///
+    /// ```egon
+    /// type Int = number;
+    /// let a: Int = 123;
+    /// ```
     TypeAlias(StmtTypeAlias),
+    /// A statement declaring a function
+    ///
+    /// ```egon
+    /// fn sum (a: number, b: number): number => { a + b }
+    /// ```
     Fn(Box<StmtFn>),
     Error,
 }
@@ -90,7 +115,11 @@ impl Debug for Stmt {
     }
 }
 
-/// An expression statement evaluates an expression and discards the result.
+/// A statement that evaluates an expression then consumes the value.
+///
+/// ```egon
+/// [1, 2, 3];
+/// ```
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct StmtExpr {
     pub expr: ExprS,
@@ -102,7 +131,12 @@ impl Display for StmtExpr {
     }
 }
 
-/// Statement that sets `var.name` to `value`
+/// A statement that declares and/or initalizes a variable or constant
+///
+/// ```egon
+/// let a: number = 123;
+/// const b = 456;
+/// ```
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct StmtAssign {
     pub identifier: Identifier,
@@ -150,7 +184,12 @@ impl Display for StmtAssign {
     }
 }
 
-/// Statement that declares a type alias
+/// A statement that declares a type alias
+///
+/// ```egon
+/// type Int = number;
+/// let a: Int = 123;
+/// ```
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct StmtTypeAlias {
     pub alias: Identifier,
@@ -166,6 +205,11 @@ impl Display for StmtTypeAlias {
     }
 }
 
+/// A statement declaring a function
+///
+/// ```egon
+/// fn sum (a: number, b: number): number => { a + b }
+/// ```
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct StmtFn {
     pub name: Identifier,
@@ -181,18 +225,103 @@ impl Display for StmtFn {
 /// Expressions
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Expr {
+    /// Expression returning no value
+    ///
+    /// e.g. `void`, `()` in other languages
+    ///
+    /// ```egon
+    /// ();
+    /// ```
     Unit,
+    /// Expression representing literal values e.g. `string`, `number`, `bool`
+    ///
+    /// ```egon
+    /// 123;
+    /// "example";
+    /// false;
+    /// ```
     Literal(ExprLiteral),
+    /// Expression representing an identifier
+    ///
+    /// ```egon
+    /// let a: number = 123; // `a` & `number` are identifier expressions
+    /// a + 5; // `a` is an identifier expression
+    /// ```
     Identifier(ExprIdentifier),
+    /// Expression creating a lexical scope that optionally returns a value
+    ///
+    /// ```egon
+    /// let a: () = { 123; };
+    /// let b: number = { 456 };
+    /// ```
     Block(Box<ExprBlock>),
+    /// Expression creating a list of same typed values
+    ///
+    /// ```egon
+    /// [];
+    /// [1, 2, 3];
+    /// ```
     List(ExprList),
+    /// Expression creating a fixed sized collection of mixed typed values
+    ///
+    /// ```egon
+    /// (1,);
+    /// (1, 2, 3,);
+    /// ```
     Tuple(ExprTuple),
+    /// Expression preforming an infix operation
+    ///
+    /// ```egon
+    /// 1 + 2;
+    /// true != false;
+    /// ```
     Infix(Box<ExprInfix>),
+    /// Expression preforming a prefix operation
+    ///
+    /// ```egon
+    /// -10;
+    /// !false;
+    /// ```
     Prefix(Box<ExprPrefix>),
+    /// Expression for assigning a value expression to an identifier
+    ///
+    /// ```egon
+    /// let a: number;
+    /// a = 123;
+    /// ```
+    ///
+    /// This is not allowed for constants
+    ///
+    /// ```egon
+    /// const a: number = 123;
+    /// a = 1; // This will generate an error
+    /// ```
     Assign(Box<ExprAssign>),
+    /// Expression returning a value based on a condition
+    ///
+    /// ```egon
+    /// let a: number = if (true) { 123 } else { 456 };
+    /// ```
     If(Box<ExprIf>),
+    /// Expression creating an anonymous function
+    ///
+    /// ```egon
+    /// (a: number): number => { a + 10 };
+    /// ```
     Fn(Box<ExprFn>),
+    /// Expression creating a range of values
+    ///
+    /// ```egon
+    /// 0..10;
+    /// 10..200;
+    /// 100..0;
+    /// ```
     Range(ExprRange),
+    /// Expression representing a type
+    ///
+    /// ```egon
+    /// type Int = number; // `number` is a type expression
+    /// ```
     Type(ExprType),
 }
 
@@ -294,6 +423,13 @@ impl Display for Expr {
     }
 }
 
+/// Expression representing literal values e.g. `string`, `number`, `bool`
+///
+/// ```egon
+/// 123;
+/// "example";
+/// false;
+/// ```
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum ExprLiteral {
     Bool(bool),
@@ -401,6 +537,13 @@ impl Display for ExprLiteral {
     }
 }
 
+/// Expression representing literal values e.g. `string`, `number`, `bool`
+///
+/// ```egon
+/// 123;
+/// "example";
+/// false;
+/// ```
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ExprIdentifier {
     pub identifier: Identifier,
@@ -429,10 +572,25 @@ impl From<Identifier> for Expr {
     }
 }
 
+/// Expression creating a lexical scope that optionally returns a value
+///
+/// ```egon
+/// let a: () = { 123; };
+/// let b: number = { 456 };
+/// ```
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ExprBlock {
     pub stmts: Vec<StmtS>,
     pub return_expr: Option<ExprS>,
+    /// The block's resolved type
+    ///
+    /// ```egon
+    /// let a: number = {
+    ///   let b = 123;
+    ///
+    ///   b // The block's resolved type is `number`
+    /// };
+    /// ```
     pub typeref: Option<TypeRef>,
 }
 
@@ -468,6 +626,12 @@ impl Display for ExprBlock {
     }
 }
 
+/// Expression creating a list of same typed values
+///
+/// ```egon
+/// [];
+/// [1, 2, 3];
+/// ```
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ExprList {
     pub items: Vec<ExprS>,
@@ -487,6 +651,12 @@ impl Display for ExprList {
     }
 }
 
+/// Expression creating a fixed sized collection of mixed typed values
+///
+/// ```egon
+/// (1,);
+/// (1, 2, 3,);
+/// ```
 #[derive(Clone, Debug, PartialEq, Default, Serialize, Deserialize)]
 pub struct ExprTuple {
     pub items: Vec<ExprS>,
@@ -506,6 +676,12 @@ impl Display for ExprTuple {
     }
 }
 
+/// Expression preforming an infix operation
+///
+/// ```egon
+/// 1 + 2;
+/// true != false;
+/// ```
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ExprInfix {
     pub lt: ExprS,
@@ -559,6 +735,12 @@ impl Display for OpInfix {
     }
 }
 
+/// Expression preforming a prefix operation
+///
+/// ```egon
+/// -10;
+/// !false;
+/// ```
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ExprPrefix {
     pub op: OpPrefix,
@@ -588,6 +770,19 @@ impl Display for OpPrefix {
     }
 }
 
+/// Expression for assigning a value expression to an identifier
+///
+/// ```egon
+/// let a: number;
+/// a = 123;
+/// ```
+///
+/// This is not allowed for constants
+///
+/// ```egon
+/// const a: number = 123;
+/// a = 1; // This will generate an error
+/// ```
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ExprAssign {
     pub identifier: Identifier,
@@ -600,6 +795,11 @@ impl Display for ExprAssign {
     }
 }
 
+/// Expression returning a value based on a condition
+///
+/// ```egon
+/// let a: number = if (true) { 123 } else { 456 };
+/// ```
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ExprIf {
     pub cond: ExprS,
@@ -622,6 +822,11 @@ impl Display for ExprIf {
     }
 }
 
+/// Expression creating an anonymous function
+///
+/// ```egon
+/// (a: number): number => { a + 10 };
+/// ```
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ExprFn {
     pub name: Option<Identifier>,
@@ -647,6 +852,13 @@ impl Display for ExprFn {
     }
 }
 
+/// Expression creating a range of values
+///
+/// ```egon
+/// 0..10;
+/// 10..200;
+/// 100..0;
+/// ```
 #[derive(Clone, Debug, PartialEq, Default, Serialize, Deserialize)]
 pub struct ExprRange {
     pub start: Option<Spanned<ExprLiteral>>,
@@ -664,6 +876,12 @@ impl Display for ExprRange {
     }
 }
 
+/// Expression representing a type
+///
+/// ```egon
+/// let a: string = "example"; // `string` is a type expression
+/// type Int = number; // `number` is a type expression
+/// ```
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ExprType(pub TypeRef);
 
@@ -673,6 +891,7 @@ impl Display for ExprType {
     }
 }
 
+/// Value representing a type
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TypeRef(pub String, pub Vec<TypeRef>);
 
@@ -695,10 +914,12 @@ impl TypeRef {
         }
     }
 
+    /// Is this an unknown type?
     pub fn is_unknown(&self) -> bool {
         self.0 == *"unknown"
     }
 
+    /// Is this an unknown list type?
     pub fn is_unknown_list(&self) -> bool {
         !self.is_known_list()
     }
@@ -726,74 +947,92 @@ impl TypeRef {
             || self.is_function()
     }
 
+    /// Is this a bool type?
     pub fn is_bool(&self) -> bool {
         "bool" == self.0
     }
 
+    /// Is this a number type?
     pub fn is_number(&self) -> bool {
         "number" == self.0
     }
 
+    /// Is this a string type?
     pub fn is_string(&self) -> bool {
         "string" == self.0
     }
 
+    /// Is this a tuple type?
     pub fn is_tuple(&self) -> bool {
         "tuple" == self.0
     }
 
+    /// Is this a range type?
     pub fn is_range(&self) -> bool {
         "range" == self.0
     }
 
+    /// Is this a function type?
     pub fn is_function(&self) -> bool {
         "function" == self.0
     }
 
+    /// Is this a unit type?
     pub fn is_unit(&self) -> bool {
         "()" == self.0
     }
 
+    /// Create a `string` type instance
     pub fn string() -> TypeRef {
         TypeRef("string".to_string(), vec![])
     }
 
+    /// Create a `number` type instance
     pub fn number() -> TypeRef {
         TypeRef("number".to_string(), vec![])
     }
 
+    /// Create a `bool` type instance
     pub fn bool() -> TypeRef {
         TypeRef("bool".to_string(), vec![])
     }
 
+    /// Create a `()` type instance
     pub fn unit() -> TypeRef {
         TypeRef("()".to_string(), vec![])
     }
 
+    /// Create a `range` type instance
     pub fn range() -> TypeRef {
         TypeRef("range".to_string(), vec![])
     }
 
+    /// Create a `list<T>` type instance
     pub fn list(item_type: TypeRef) -> TypeRef {
         TypeRef("list".to_string(), vec![item_type])
     }
 
+    /// Create a `list<unknown>` type instance
     pub fn unknown_list() -> TypeRef {
         TypeRef::list(TypeRef::unknown())
     }
 
+    /// Create a `tuple<T, U...>` type instance
     pub fn tuple(item_types: Vec<TypeRef>) -> TypeRef {
         TypeRef("tuple".to_string(), item_types)
     }
 
+    /// Create an `identifier` type instance
     pub fn identifier() -> TypeRef {
         TypeRef("identifier".to_string(), vec![])
     }
 
+    /// Create an `unknown` type instance
     pub fn unknown() -> TypeRef {
         TypeRef("unknown".to_string(), vec![])
     }
 
+    /// Create a `function` type instance
     pub fn function(params_types: Vec<TypeRef>, return_type: TypeRef) -> TypeRef {
         TypeRef(
             "function".to_string(),
@@ -801,6 +1040,7 @@ impl TypeRef {
         )
     }
 
+    /// Create a `type` type instance
     pub fn typed(value: TypeRef) -> TypeRef {
         TypeRef("type".to_string(), vec![value])
     }
@@ -877,7 +1117,7 @@ mod ast_tests {
 
     typeref_display_test!(
         test_typeref_display_unknown_list,
-        TypeRef::list(TypeRef::unknown()),
+        TypeRef::unknown_list(),
         "list<unknown>"
     );
 
@@ -895,7 +1135,7 @@ mod ast_tests {
 
     typeref_display_test!(
         test_typeref_display_nested_unknown_list,
-        TypeRef::list(TypeRef::list(TypeRef::unknown())),
+        TypeRef::list(TypeRef::unknown_list()),
         "list<list<unknown>>"
     );
 

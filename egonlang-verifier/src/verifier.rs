@@ -534,6 +534,16 @@ impl<'a> Verifier<'a> {
                                     return_type.typeref.to_string().yellow().italic()
                                 );
 
+                                // Record the block's returning expression
+                                // This is important for identifier expressions
+                                //
+                                // ```egon
+                                // let a = {
+                                //   let b = 123;
+                                //
+                                //   b
+                                // };
+                                // ```
                                 block_expr.typeref = Some(return_type.typeref.clone());
 
                                 Ok(return_type)
