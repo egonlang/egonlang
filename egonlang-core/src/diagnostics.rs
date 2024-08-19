@@ -197,7 +197,7 @@ mod tests {
                 },
             },
             severity: Some(DiagnosisSeverity::ERROR),
-            message: String::from("SyntaxError: unexpected input")
+            message: String::from("SyntaxError: unexpected input: \"@foo\"")
         }]
     );
 
@@ -216,7 +216,7 @@ mod tests {
                 },
             },
             severity: Some(DiagnosisSeverity::ERROR),
-            message: String::from("SyntaxError: unexpected input")
+            message: String::from("SyntaxError: unexpected input: \"@foo\"")
         }]
     );
 }

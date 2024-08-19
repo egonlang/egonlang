@@ -19,7 +19,7 @@ pub enum EgonSyntaxError {
     ExtraToken { token: String },
     #[error("invalid input")]
     InvalidToken,
-    #[error("unexpected input")]
+    #[error("unexpected input: {token:?}")]
     UnexpectedInput { token: String },
     #[error("unexpected end of file; expected: {expected:?}")]
     UnrecognizedEOF { expected: Vec<String> },
