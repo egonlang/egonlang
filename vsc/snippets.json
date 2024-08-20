@@ -90,5 +90,14 @@
       "($1, $2, $3, $4,)$0"
     ],
     "description": "Create a tuple (T, U, V, W,)"
+  },
+  "assert_type": {
+    "prefix": [
+      "assert_type"
+    ],
+    "body": [
+      "assert_type $1, $2;$0"
+    ],
+    "description": "Create an assert type statement"
   }
 }
