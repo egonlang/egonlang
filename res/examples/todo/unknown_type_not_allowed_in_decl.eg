@@ -1,0 +1,3 @@
+let b: unknown = 123;
+
+// out: TypeError: unknown type e.g. let a: unknown; or let a;
