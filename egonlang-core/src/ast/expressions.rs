@@ -1,226 +1,17 @@
+use std::fmt::{self, Display, Formatter};
+
 use serde::{Deserialize, Serialize};
 
 use crate::{
     errors::{self, EgonError, EgonSyntaxError, EgonTypeError},
-    prelude::parse,
+    parser::parse,
     span::Spanned,
 };
-use std::fmt::{self, Debug, Display, Formatter};
 
-/// A collection of [`Stmt`] representing an Egon code file.
-#[derive(Debug, Default, PartialEq, Serialize, Deserialize)]
-pub struct Module {
-    pub stmts: Vec<StmtS>,
-}
-
-impl Module {
-    pub fn new() -> Self {
-        Module::default()
-    }
-
-    pub fn from(stmts: Vec<StmtS>) -> Self {
-        Module { stmts }
-    }
-}
-
-/// A tuple containing a statement and it's span e.g. (stmt, span)
-pub type StmtS = Spanned<Stmt>;
+use super::{Stmt, StmtS, TypeRef};
 
 /// A tuple containing an expression and it's span e.g. (expr, span)
 pub type ExprS = Spanned<Expr>;
-
-/// A statement (e.g. that does not produce a value)
-#[derive(Clone, PartialEq, Serialize, Deserialize)]
-pub enum Stmt {
-    /// A statement that evaluates an expression then consumes the value.
-    ///
-    /// ```egon
-    /// [1, 2, 3];
-    /// ```
-    Expr(StmtExpr),
-    /// A statement that declares and/or initalizes a variable or constant
-    ///
-    /// ```egon
-    /// let a: number = 123;
-    /// const b = 456;
-    /// ```
-    Assign(StmtAssign),
-    /// A statement that declares a type alias
-    ///
-    /// ```egon
-    /// type Int = number;
-    /// let a: Int = 123;
-    /// ```
-    TypeAlias(StmtTypeAlias),
-    /// A statement declaring a function
-    ///
-    /// ```egon
-    /// fn sum (a: number, b: number): number => { a + b }
-    /// ```
-    Fn(Box<StmtFn>),
-    Error,
-}
-
-impl From<StmtExpr> for Stmt {
-    fn from(value: StmtExpr) -> Self {
-        Stmt::Expr(value)
-    }
-}
-
-impl From<StmtAssign> for Stmt {
-    fn from(value: StmtAssign) -> Self {
-        Stmt::Assign(value)
-    }
-}
-
-impl From<StmtFn> for Stmt {
-    fn from(value: StmtFn) -> Self {
-        Stmt::Fn(Box::from(value))
-    }
-}
-
-impl TryFrom<&str> for Stmt {
-    type Error = errors::EgonError;
-
-    fn try_from(value: &str) -> Result<Stmt, errors::EgonError> {
-        let module = parse(value, 0).unwrap();
-
-        let stmt_spanned = module.stmts.first().unwrap();
-
-        Ok(stmt_spanned.0.clone())
-    }
-}
-
-impl Display for Stmt {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        match self {
-            Stmt::Expr(stmt) => f.write_fmt(format_args!("{}", stmt)),
-            Stmt::Assign(stmt) => f.write_fmt(format_args!("{}", stmt)),
-            Stmt::TypeAlias(stmt) => f.write_fmt(format_args!("{}", stmt)),
-            Stmt::Fn(stmt) => f.write_fmt(format_args!("{}", stmt)),
-            Stmt::Error => todo!(),
-        }
-    }
-}
-
-impl Debug for Stmt {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Expr(arg0) => f.write_fmt(format_args!("{:#?}", arg0)),
-            Self::Assign(arg0) => f.write_fmt(format_args!("{:#?}", arg0)),
-            Self::TypeAlias(arg0) => f.write_fmt(format_args!("{:#?}", arg0)),
-            Self::Fn(arg0) => f.write_fmt(format_args!("{:#?}", arg0)),
-            Self::Error => write!(f, "Error"),
-        }
-    }
-}
-
-/// A statement that evaluates an expression then consumes the value.
-///
-/// ```egon
-/// [1, 2, 3];
-/// ```
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct StmtExpr {
-    pub expr: ExprS,
-}
-
-impl Display for StmtExpr {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        f.write_fmt(format_args!("{};", self.expr.0))
-    }
-}
-
-/// A statement that declares and/or initalizes a variable or constant
-///
-/// ```egon
-/// let a: number = 123;
-/// const b = 456;
-/// ```
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct StmtAssign {
-    pub identifier: Identifier,
-    pub type_expr: Option<ExprS>,
-    pub is_const: bool,
-    pub value: Option<ExprS>,
-}
-
-impl Display for StmtAssign {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let decl = if self.is_const { "const" } else { "let" };
-        let name = &self.identifier.name;
-
-        let is_type_alias = self
-            .value
-            .as_ref()
-            .map(|(type_expr, _)| matches!(type_expr, Expr::Type(_)))
-            .unwrap_or(false);
-
-        if is_type_alias {
-            let typing = self
-                .type_expr
-                .clone()
-                .map(|f| f.0)
-                .map(|f| format!("{f}"))
-                .unwrap_or_default();
-
-            f.write_fmt(format_args!("type {} = {};", name, typing))
-        } else {
-            let typing = self
-                .type_expr
-                .clone()
-                .map(|f| f.0)
-                .map(|f| format!(": {f}"))
-                .unwrap_or_default();
-            let value = self
-                .value
-                .clone()
-                .map(|f| f.0)
-                .map(|v| format!(" = {v}"))
-                .unwrap_or_default();
-
-            f.write_fmt(format_args!("{} {}{}{};", decl, name, typing, value))
-        }
-    }
-}
-
-/// A statement that declares a type alias
-///
-/// ```egon
-/// type Int = number;
-/// let a: Int = 123;
-/// ```
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct StmtTypeAlias {
-    pub alias: Identifier,
-    pub value: Spanned<TypeRef>,
-}
-
-impl Display for StmtTypeAlias {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let alias = &self.alias.name;
-        let value = &self.value.0.to_string();
-
-        f.write_fmt(format_args!("type {} = {};", alias, value))
-    }
-}
-
-/// A statement declaring a function
-///
-/// ```egon
-/// fn sum (a: number, b: number): number => { a + b }
-/// ```
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct StmtFn {
-    pub name: Identifier,
-    pub fn_expr: ExprS,
-}
-
-impl Display for StmtFn {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        f.write_fmt(format_args!("fn {} {}", self.name.name, self.fn_expr.0))
-    }
-}
 
 /// Expressions
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -349,6 +140,24 @@ impl From<ExprLiteral> for Expr {
     }
 }
 
+impl From<bool> for Expr {
+    fn from(value: bool) -> Self {
+        Expr::Literal(value.into())
+    }
+}
+
+impl From<String> for Expr {
+    fn from(value: String) -> Self {
+        Expr::Literal(value.into())
+    }
+}
+
+impl From<f64> for Expr {
+    fn from(value: f64) -> Self {
+        Expr::Literal(value.into())
+    }
+}
+
 impl From<ExprIdentifier> for Expr {
     fn from(value: ExprIdentifier) -> Self {
         Expr::Identifier(value)
@@ -435,6 +244,24 @@ pub enum ExprLiteral {
     Bool(bool),
     Number(f64),
     String(String),
+}
+
+impl From<bool> for ExprLiteral {
+    fn from(value: bool) -> Self {
+        ExprLiteral::Bool(value)
+    }
+}
+
+impl From<String> for ExprLiteral {
+    fn from(value: String) -> Self {
+        ExprLiteral::String(value)
+    }
+}
+
+impl From<f64> for ExprLiteral {
+    fn from(value: f64) -> Self {
+        ExprLiteral::Number(value)
+    }
 }
 
 impl TryFrom<Expr> for f64 {
@@ -891,253 +718,74 @@ impl Display for ExprType {
     }
 }
 
-/// Value representing a type
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct TypeRef(pub String, pub Vec<TypeRef>);
+#[cfg(test)]
+mod into_tests {
+    macro_rules! expr_from_test {
+        ($test_name:ident, $expr:expr, $expected:expr) => {
+            #[test]
+            fn $test_name() {
+                let expr: $crate::ast::Expr = $expr.into();
+                let expected: $crate::ast::Expr = $expected;
 
-impl TypeRef {
-    pub fn is_type(&self) -> bool {
-        self.0 == *"type"
-    }
-
-    pub fn is_list(&self) -> bool {
-        self.0 == *"list"
-    }
-
-    pub fn is_known_list(&self) -> bool {
-        if self.is_list() {
-            let f = self.1.first().unwrap();
-
-            TypeRef::unknown() != *f
-        } else {
-            false
-        }
-    }
-
-    /// Is this an unknown type?
-    pub fn is_unknown(&self) -> bool {
-        self.0 == *"unknown"
-    }
-
-    /// Is this an unknown list type?
-    pub fn is_unknown_list(&self) -> bool {
-        !self.is_known_list()
-    }
-
-    /// Is this a builtin type?
-    ///
-    /// - `bool`
-    /// - `number`
-    /// - `string`
-    /// - `list<T>`
-    /// - `range`
-    /// - `()`
-    /// - `tuple<T, ...>`
-    /// - `unknown`
-    /// - `function<T>`
-    pub fn is_builtin(&self) -> bool {
-        self.is_bool()
-            || self.is_number()
-            || self.is_string()
-            || self.is_list()
-            || self.is_range()
-            || self.is_unit()
-            || self.is_tuple()
-            || self.is_unknown()
-            || self.is_function()
-    }
-
-    /// Is this a bool type?
-    pub fn is_bool(&self) -> bool {
-        "bool" == self.0
-    }
-
-    /// Is this a number type?
-    pub fn is_number(&self) -> bool {
-        "number" == self.0
-    }
-
-    /// Is this a string type?
-    pub fn is_string(&self) -> bool {
-        "string" == self.0
-    }
-
-    /// Is this a tuple type?
-    pub fn is_tuple(&self) -> bool {
-        "tuple" == self.0
-    }
-
-    /// Is this a range type?
-    pub fn is_range(&self) -> bool {
-        "range" == self.0
-    }
-
-    /// Is this a function type?
-    pub fn is_function(&self) -> bool {
-        "function" == self.0
-    }
-
-    /// Is this a unit type?
-    pub fn is_unit(&self) -> bool {
-        "()" == self.0
-    }
-
-    /// Create a `string` type instance
-    pub fn string() -> TypeRef {
-        TypeRef("string".to_string(), vec![])
-    }
-
-    /// Create a `number` type instance
-    pub fn number() -> TypeRef {
-        TypeRef("number".to_string(), vec![])
-    }
-
-    /// Create a `bool` type instance
-    pub fn bool() -> TypeRef {
-        TypeRef("bool".to_string(), vec![])
-    }
-
-    /// Create a `()` type instance
-    pub fn unit() -> TypeRef {
-        TypeRef("()".to_string(), vec![])
-    }
-
-    /// Create a `range` type instance
-    pub fn range() -> TypeRef {
-        TypeRef("range".to_string(), vec![])
-    }
-
-    /// Create a `list<T>` type instance
-    pub fn list(item_type: TypeRef) -> TypeRef {
-        TypeRef("list".to_string(), vec![item_type])
-    }
-
-    /// Create a `list<unknown>` type instance
-    pub fn unknown_list() -> TypeRef {
-        TypeRef::list(TypeRef::unknown())
-    }
-
-    /// Create a `tuple<T, U...>` type instance
-    pub fn tuple(item_types: Vec<TypeRef>) -> TypeRef {
-        TypeRef("tuple".to_string(), item_types)
-    }
-
-    /// Create an `identifier` type instance
-    pub fn identifier() -> TypeRef {
-        TypeRef("identifier".to_string(), vec![])
-    }
-
-    /// Create an `unknown` type instance
-    pub fn unknown() -> TypeRef {
-        TypeRef("unknown".to_string(), vec![])
-    }
-
-    /// Create a `function` type instance
-    pub fn function(params_types: Vec<TypeRef>, return_type: TypeRef) -> TypeRef {
-        TypeRef(
-            "function".to_string(),
-            vec![TypeRef::tuple(params_types), return_type],
-        )
-    }
-
-    /// Create a `type` type instance
-    pub fn typed(value: TypeRef) -> TypeRef {
-        TypeRef("type".to_string(), vec![value])
-    }
-}
-
-impl Display for TypeRef {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let base = if self.1.is_empty() {
-            self.0.clone()
-        } else if self.is_type() {
-            self.1.first().unwrap().to_string()
-        } else {
-            let m = format!(
-                "{}<{}>",
-                self.0,
-                self.1
-                    .clone()
-                    .into_iter()
-                    .map(|typeref| typeref.to_string())
-                    .collect::<Vec<String>>()
-                    .join(", ")
-            );
-            m
+                ::pretty_assertions::assert_eq!(expected, expr);
+            }
         };
-        f.write_fmt(format_args!("{}", base))
     }
+
+    expr_from_test!(
+        expr_from_bool_true,
+        true,
+        crate::ast::ExprLiteral::Bool(true).into()
+    );
+
+    expr_from_test!(
+        expr_from_bool_false,
+        false,
+        crate::ast::ExprLiteral::Bool(false).into()
+    );
+
+    expr_from_test!(
+        expr_from_empty_string,
+        "".to_string(),
+        crate::ast::ExprLiteral::String("".to_string()).into()
+    );
+
+    expr_from_test!(
+        expr_from_string,
+        "example".to_string(),
+        crate::ast::ExprLiteral::String("example".to_string()).into()
+    );
+
+    expr_from_test!(
+        expr_number_literal_from_zero,
+        0f64,
+        crate::ast::ExprLiteral::Number(0f64).into()
+    );
+
+    expr_from_test!(
+        expr_number_literal_from_number,
+        123f64,
+        crate::ast::ExprLiteral::Number(123f64).into()
+    );
 }
 
 #[cfg(test)]
-mod ast_tests {
+mod display_tests {
     use std::vec;
 
     use pretty_assertions::assert_eq;
 
-    use super::*;
-
-    macro_rules! stmt_display_test {
-        ($test_name:ident, $stmt:expr, $expected:expr) => {
-            #[test]
-            fn $test_name() {
-                let stmt: Stmt = $stmt;
-                assert_eq!($expected, stmt.to_string());
-            }
-        };
-    }
+    use crate::ast::*;
 
     macro_rules! expr_display_test {
         ($test_name:ident, $expr:expr, $expected:expr) => {
             #[test]
             fn $test_name() {
-                let expr: Expr = $expr;
+                let expr: $crate::ast::Expr = $expr;
                 assert_eq!($expected, expr.to_string());
             }
         };
     }
-
-    macro_rules! typeref_display_test {
-        ($test_name:ident, $typeref:expr, $expected:expr) => {
-            #[test]
-            fn $test_name() {
-                let typeref: TypeRef = $typeref;
-                assert_eq!($expected, typeref.to_string());
-            }
-        };
-    }
-
-    typeref_display_test!(test_typeref_display_unit, TypeRef::unit(), "()");
-
-    typeref_display_test!(
-        test_typeref_display_type_of_number,
-        TypeRef::typed(TypeRef::number()),
-        "number"
-    );
-
-    typeref_display_test!(
-        test_typeref_display_unknown_list,
-        TypeRef::unknown_list(),
-        "list<unknown>"
-    );
-
-    typeref_display_test!(
-        test_typeref_display_number_list,
-        TypeRef::list(TypeRef::number()),
-        "list<number>"
-    );
-
-    typeref_display_test!(
-        test_typeref_display_nested_number_list,
-        TypeRef::list(TypeRef::list(TypeRef::number())),
-        "list<list<number>>"
-    );
-
-    typeref_display_test!(
-        test_typeref_display_nested_unknown_list,
-        TypeRef::list(TypeRef::unknown_list()),
-        "list<list<unknown>>"
-    );
 
     expr_display_test!(test_expr_display_unit, Expr::Unit, "()");
 
@@ -1669,22 +1317,4 @@ mod ast_tests {
         })),
         "(a: number, b: number): number => { a + b }"
     );
-
-    stmt_display_test! {
-        test_stmt_assign_with_non_type_value,
-        "let a: number = 123;".try_into().unwrap(),
-        "let a: number = 123;"
-    }
-
-    stmt_display_test! {
-        test_stmt_assign_with_no_value,
-        "let a: number;".try_into().unwrap(),
-        "let a: number;"
-    }
-
-    stmt_display_test! {
-        test_stmt_assign_with_type_value,
-        "type Number = number;".try_into().unwrap(),
-        "type Number = number;"
-    }
 }
