@@ -147,7 +147,7 @@ If/Else can be written as expressions it's then/else blocks are block expression
 ```
 const is = true;
 
-const value = if (is) { 123 } else { 456 };
+const value = if is { 123 } else { 456 };
 ```
 
 #### Function Expressions
@@ -215,7 +215,7 @@ If/Else can be written as expression statements.
 const is = true;
 let value: number;
 
-if (is) {
+if is {
     value = 123;
 } else {
     value = 456;

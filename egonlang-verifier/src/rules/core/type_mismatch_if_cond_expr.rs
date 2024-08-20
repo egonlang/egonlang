@@ -59,7 +59,7 @@ mod tests {
                 actual: "number".to_string()
             }
             .into(),
-            22..25
+            21..26
         )])
     }
 
@@ -73,7 +73,7 @@ mod tests {
                 actual: "string".to_string()
             }
             .into(),
-            4..6
+            3..7
         )])
     }
 
@@ -87,7 +87,7 @@ mod tests {
                 actual: "string".to_string()
             }
             .into(),
-            4..6
+            3..7
         )])
     }
 
@@ -101,7 +101,7 @@ mod tests {
                 actual: "string".to_string()
             }
             .into(),
-            4..9
+            3..10
         )])
     }
 
@@ -115,7 +115,7 @@ mod tests {
                 actual: "string".to_string()
             }
             .into(),
-            4..9
+            3..10
         )])
     }
 
@@ -129,7 +129,7 @@ mod tests {
                 actual: "string".to_string()
             }
             .into(),
-            4..11
+            3..12
         )])
     }
 
@@ -143,7 +143,7 @@ mod tests {
                 actual: "string".to_string()
             }
             .into(),
-            4..11
+            3..12
         )])
     }
 
@@ -157,7 +157,7 @@ mod tests {
                 actual: "()".to_string()
             }
             .into(),
-            4..6
+            3..7
         )])
     }
 
@@ -171,7 +171,7 @@ mod tests {
                 actual: "()".to_string()
             }
             .into(),
-            4..6
+            3..7
         )])
     }
 
@@ -185,7 +185,7 @@ mod tests {
                 actual: "list<unknown>".to_string()
             }
             .into(),
-            4..6
+            3..7
         )])
     }
 
@@ -199,7 +199,7 @@ mod tests {
                 actual: "list<unknown>".to_string()
             }
             .into(),
-            4..6
+            3..7
         )])
     }
 
@@ -213,7 +213,7 @@ mod tests {
                 actual: "list<bool>".to_string()
             }
             .into(),
-            4..17
+            3..18
         )])
     }
 
@@ -227,7 +227,7 @@ mod tests {
                 actual: "list<bool>".to_string()
             }
             .into(),
-            4..17
+            3..18
         )])
     }
 }

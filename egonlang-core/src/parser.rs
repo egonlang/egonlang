@@ -133,6 +133,7 @@ mod parser_tests {
                     "\"]\"".to_string(),
                     "\"and\"".to_string(),
                     "\"or\"".to_string(),
+                    "\"{\"".to_string(),
                     "\"}\"".to_string(),
                 ]
             }),
@@ -163,6 +164,7 @@ mod parser_tests {
                     "\"]\"".to_string(),
                     "\"and\"".to_string(),
                     "\"or\"".to_string(),
+                    "\"{\"".to_string(),
                     "\"}\"".to_string(),
                 ]
             }),
@@ -224,6 +226,7 @@ mod parser_tests {
                     "\"]\"".to_string(),
                     "\"and\"".to_string(),
                     "\"or\"".to_string(),
+                    "\"{\"".to_string(),
                     "\"}\"".to_string(),
                 ]
             }),
@@ -254,6 +257,7 @@ mod parser_tests {
                     "\"]\"".to_string(),
                     "\"and\"".to_string(),
                     "\"or\"".to_string(),
+                    "\"{\"".to_string(),
                     "\"}\"".to_string(),
                 ]
             }),
@@ -301,6 +305,7 @@ mod parser_tests {
                     "\"]\"".to_string(),
                     "\"and\"".to_string(),
                     "\"or\"".to_string(),
+                    "\"{\"".to_string(),
                     "\"}\"".to_string(),
                 ]
             }),
@@ -1228,41 +1233,28 @@ mod parser_tests {
     parser_test!(
         parse_if_cond_no_params,
         "if true {};",
-        Err(vec![
-            (
-                EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
-                    token: "true".to_string(),
-                    expected: vec!["\"(\"".to_string()]
+        Ok(Module {
+            stmts: vec![(
+                Stmt::Expr(StmtExpr {
+                    expr: (
+                        Expr::If(Box::new(ExprIf {
+                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 3..7),
+                            then: (
+                                Expr::Block(Box::new(ExprBlock {
+                                    stmts: vec![],
+                                    return_expr: None,
+                                    typeref: None
+                                })),
+                                8..10
+                            ),
+                            else_: None
+                        })),
+                        0..10
+                    )
                 }),
-                3..7
-            ),
-            (
-                EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
-                    token: "{".to_string(),
-                    expected: vec![
-                        "\"!=\"".to_string(),
-                        "\"%\"".to_string(),
-                        "\")\"".to_string(),
-                        "\"*\"".to_string(),
-                        "\"+\"".to_string(),
-                        "\",\"".to_string(),
-                        "\"-\"".to_string(),
-                        "\"/\"".to_string(),
-                        "\";\"".to_string(),
-                        "\"<\"".to_string(),
-                        "\"<=\"".to_string(),
-                        "\"==\"".to_string(),
-                        "\">\"".to_string(),
-                        "\">=\"".to_string(),
-                        "\"]\"".to_string(),
-                        "\"and\"".to_string(),
-                        "\"or\"".to_string(),
-                        "\"}\"".to_string(),
-                    ]
-                }),
-                8..9
-            )
-        ])
+                0..11
+            )]
+        })
     );
 
     parser_test!(
@@ -1273,7 +1265,7 @@ mod parser_tests {
                 Stmt::Expr(StmtExpr {
                     expr: (
                         Expr::If(Box::new(ExprIf {
-                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 4..8),
+                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 3..9),
                             then: (
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: vec![],
@@ -1300,7 +1292,7 @@ mod parser_tests {
                 Stmt::Expr(StmtExpr {
                     expr: (
                         Expr::If(Box::new(ExprIf {
-                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 4..8),
+                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 3..9),
                             then: (
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: vec![],
@@ -1334,7 +1326,7 @@ mod parser_tests {
                 Stmt::Expr(StmtExpr {
                     expr: (
                         Expr::If(Box::new(ExprIf {
-                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 4..8),
+                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 3..9),
                             then: (
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: vec![],
@@ -1345,7 +1337,7 @@ mod parser_tests {
                             ),
                             else_: Some((
                                 Expr::If(Box::new(ExprIf {
-                                    cond: (Expr::Literal(ExprLiteral::Bool(true)), 22..26),
+                                    cond: (Expr::Literal(ExprLiteral::Bool(true)), 21..27),
                                     then: (
                                         Expr::Block(Box::new(ExprBlock {
                                             stmts: vec![],
@@ -1375,7 +1367,7 @@ mod parser_tests {
                 Stmt::Expr(StmtExpr {
                     expr: (
                         Expr::If(Box::new(ExprIf {
-                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 4..8),
+                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 3..9),
                             then: (
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: vec![],
@@ -1386,7 +1378,7 @@ mod parser_tests {
                             ),
                             else_: Some((
                                 Expr::If(Box::new(ExprIf {
-                                    cond: (Expr::Literal(ExprLiteral::Bool(true)), 22..26),
+                                    cond: (Expr::Literal(ExprLiteral::Bool(true)), 21..27),
                                     then: (
                                         Expr::Block(Box::new(ExprBlock {
                                             stmts: vec![],
@@ -1423,7 +1415,7 @@ mod parser_tests {
                 Stmt::Expr(StmtExpr {
                     expr: (
                         Expr::If(Box::new(ExprIf {
-                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 4..8),
+                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 3..9),
                             then: (
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: vec![],
@@ -1434,7 +1426,7 @@ mod parser_tests {
                             ),
                             else_: Some((
                                 Expr::If(Box::new(ExprIf {
-                                    cond: (Expr::Literal(ExprLiteral::Bool(true)), 22..26),
+                                    cond: (Expr::Literal(ExprLiteral::Bool(true)), 21..27),
                                     then: (
                                         Expr::Block(Box::new(ExprBlock {
                                             stmts: vec![],
@@ -1445,7 +1437,7 @@ mod parser_tests {
                                     ),
                                     else_: Some((
                                         Expr::If(Box::new(ExprIf {
-                                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 40..44),
+                                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 39..45),
                                             then: (
                                                 Expr::Block(Box::new(ExprBlock {
                                                     stmts: vec![],
@@ -1484,7 +1476,27 @@ mod parser_tests {
             (
                 EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
                     token: "123".to_string(),
-                    expected: vec!["\"{\"".to_string()]
+                    expected: vec![
+                        "\"!=\"".to_string(),
+                        "\"%\"".to_string(),
+                        "\")\"".to_string(),
+                        "\"*\"".to_string(),
+                        "\"+\"".to_string(),
+                        "\",\"".to_string(),
+                        "\"-\"".to_string(),
+                        "\"/\"".to_string(),
+                        "\";\"".to_string(),
+                        "\"<\"".to_string(),
+                        "\"<=\"".to_string(),
+                        "\"==\"".to_string(),
+                        "\">\"".to_string(),
+                        "\">=\"".to_string(),
+                        "\"]\"".to_string(),
+                        "\"and\"".to_string(),
+                        "\"or\"".to_string(),
+                        "\"{\"".to_string(),
+                        "\"}\"".to_string(),
+                    ]
                 }),
                 10..13
             ),
@@ -1510,6 +1522,7 @@ mod parser_tests {
                         "\"]\"".to_string(),
                         "\"and\"".to_string(),
                         "\"or\"".to_string(),
+                        "\"{\"".to_string(),
                         "\"}\"".to_string(),
                     ]
                 }),
@@ -1518,7 +1531,27 @@ mod parser_tests {
             (
                 EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
                     token: "456".to_string(),
-                    expected: vec!["\"{\"".to_string()]
+                    expected: vec![
+                        "\"!=\"".to_string(),
+                        "\"%\"".to_string(),
+                        "\")\"".to_string(),
+                        "\"*\"".to_string(),
+                        "\"+\"".to_string(),
+                        "\",\"".to_string(),
+                        "\"-\"".to_string(),
+                        "\"/\"".to_string(),
+                        "\";\"".to_string(),
+                        "\"<\"".to_string(),
+                        "\"<=\"".to_string(),
+                        "\"==\"".to_string(),
+                        "\">\"".to_string(),
+                        "\">=\"".to_string(),
+                        "\"]\"".to_string(),
+                        "\"and\"".to_string(),
+                        "\"or\"".to_string(),
+                        "\"{\"".to_string(),
+                        "\"}\"".to_string(),
+                    ]
                 }),
                 29..32
             ),
@@ -1544,6 +1577,7 @@ mod parser_tests {
                         "\"]\"".to_string(),
                         "\"and\"".to_string(),
                         "\"or\"".to_string(),
+                        "\"{\"".to_string(),
                         "\"}\"".to_string(),
                     ]
                 }),
@@ -1570,6 +1604,7 @@ mod parser_tests {
                         "\"]\"".to_string(),
                         "\"and\"".to_string(),
                         "\"or\"".to_string(),
+                        "\"{\"".to_string(),
                         "\"}\"".to_string(),
                     ]
                 }),
@@ -2015,7 +2050,7 @@ mod parser_tests {
                     is_const: false,
                     value: Some((
                         Expr::If(Box::new(ExprIf {
-                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 12..16),
+                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 11..17),
                             then: (
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: vec![],

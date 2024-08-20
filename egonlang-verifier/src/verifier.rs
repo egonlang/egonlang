@@ -1325,7 +1325,7 @@ mod verifier_tests {
                 actual: "number".to_string()
             }
             .into(),
-            4..7
+            3..8
         )])
     );
 
@@ -1338,7 +1338,7 @@ mod verifier_tests {
                 actual: "number".to_string()
             }
             .into(),
-            4..13
+            3..14
         )])
     );
 

@@ -92,14 +92,14 @@ ExprAssign: ast::Expr = {
 
 ExprIf: ast::Expr = {
     // if .. else ..
-    "if" "(" <cond:Spanned<ExprLogicOr>> ")" <then:Spanned<ExprBlock>> 
+    "if" <cond:Spanned<ExprLogicOr>> <then:Spanned<ExprBlock>> 
     <else_:("else" <Spanned<ExprBlock>>)?>
     => {
         ast::Expr::If(Box::new(ast::ExprIf { <> }))
     },
 
     // if .. else if ..
-    "if" "(" <cond:Spanned<ExprLogicOr>> ")" <then:Spanned<ExprBlock>> 
+    "if" <cond:Spanned<ExprLogicOr>> <then:Spanned<ExprBlock>> 
     <else_:("else" <Spanned<ExprIf>>)>
     => {
         ast::Expr::If(Box::new(ast::ExprIf { 
