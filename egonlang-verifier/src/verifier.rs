@@ -764,8 +764,12 @@ impl<'a> Verifier<'a> {
 
                 self.start_new_type_env();
 
+                let mut param_types: Vec<TypeRef> = vec![];
+
                 for ((ident, type_ref), _) in &fn_expr.params {
                     let name = &ident.name;
+
+                    param_types.push(type_ref.clone());
 
                     self.current_type_env_mut().set(
                         name,
@@ -791,7 +795,10 @@ impl<'a> Verifier<'a> {
                             return Err(errs);
                         }
 
-                        Ok(body_type.clone())
+                        Ok(TypeEnvValue {
+                            typeref: TypeRef::function(param_types, body_type.typeref),
+                            is_const: true,
+                        })
                     }
                     Err(body_errs) => {
                         let mut errs: Vec<EgonErrorS> = vec![];

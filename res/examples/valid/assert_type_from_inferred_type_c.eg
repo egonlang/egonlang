@@ -1,0 +1,4 @@
+let a: number = 100;
+
+let foo = (): number => { a };
+let bar: function<tuple, number> = foo;
