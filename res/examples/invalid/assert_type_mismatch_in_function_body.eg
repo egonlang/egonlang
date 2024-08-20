@@ -1,0 +1,5 @@
+(): () => {
+    assert_type 123, string;
+};
+
+// out: TypeError: mismatched types: expected type `string` but received `number`

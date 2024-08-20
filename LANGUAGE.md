@@ -256,3 +256,24 @@ let numbers: ListOfNumbers = ["foo"];
 
 // out: TypeError: mismatched types: expected type `list<number>` but received `list<string>`
 ```
+
+#### Type Assertion Statements
+
+Assert a values type. This is useful for testing during language development.
+
+```egon
+assert_type 123, number;
+assert_type false, bool;
+assert_type { "testing" }, string;
+
+let a = 123;
+assert_type a, number;
+
+fn sum(a: number, b: number): number => {
+    let result = a + b;
+
+    assert_type a, number;
+
+    result
+}
+```

@@ -1,0 +1,4 @@
+let a = false;
+assert_type a, number;
+
+// out: TypeError: mismatched types: expected type `number` but received `bool`

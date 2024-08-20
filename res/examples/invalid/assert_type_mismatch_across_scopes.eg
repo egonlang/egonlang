@@ -1,0 +1,14 @@
+let a = 123;
+
+{
+    let a = false;
+
+    assert_type a, number;
+    assert_type a, bool;
+};
+
+assert_type a, bool;
+assert_type a, number;
+
+// out: TypeError: mismatched types: expected type `number` but received `bool`
+// out: TypeError: mismatched types: expected type `bool` but received `number`

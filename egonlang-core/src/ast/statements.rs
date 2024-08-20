@@ -37,6 +37,12 @@ pub enum Stmt {
     /// fn sum (a: number, b: number): number => { a + b }
     /// ```
     Fn(Box<StmtFn>),
+    /// A statement to assert an expression's type
+    ///
+    /// ```egon
+    /// assert_type 123 number;
+    /// ```
+    AssertType(StmtAssertType),
     Error,
 }
 
@@ -55,6 +61,12 @@ impl From<StmtAssign> for Stmt {
 impl From<StmtFn> for Stmt {
     fn from(value: StmtFn) -> Self {
         Stmt::Fn(Box::from(value))
+    }
+}
+
+impl From<StmtAssertType> for Stmt {
+    fn from(value: StmtAssertType) -> Self {
+        Stmt::AssertType(value)
     }
 }
 
@@ -77,6 +89,7 @@ impl Display for Stmt {
             Stmt::Assign(stmt) => f.write_fmt(format_args!("{}", stmt)),
             Stmt::TypeAlias(stmt) => f.write_fmt(format_args!("{}", stmt)),
             Stmt::Fn(stmt) => f.write_fmt(format_args!("{}", stmt)),
+            Stmt::AssertType(stmt) => f.write_fmt(format_args!("{}", stmt)),
             Stmt::Error => todo!(),
         }
     }
@@ -89,6 +102,7 @@ impl Debug for Stmt {
             Self::Assign(arg0) => f.write_fmt(format_args!("{:#?}", arg0)),
             Self::TypeAlias(arg0) => f.write_fmt(format_args!("{:#?}", arg0)),
             Self::Fn(arg0) => f.write_fmt(format_args!("{:#?}", arg0)),
+            Self::AssertType(arg0) => f.write_fmt(format_args!("{:#?}", arg0)),
             Self::Error => write!(f, "Error"),
         }
     }
@@ -198,6 +212,26 @@ pub struct StmtFn {
 impl Display for StmtFn {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.write_fmt(format_args!("fn {} {}", self.name.name, self.fn_expr.0))
+    }
+}
+
+/// A statement to assert an expression's type
+///
+/// ```egon
+/// assert_type 123 number;
+/// ```
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct StmtAssertType {
+    pub value: ExprS,
+    pub expected_type: ExprS,
+}
+
+impl Display for StmtAssertType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.write_fmt(format_args!(
+            "assert_type {} {}",
+            self.value.0, self.expected_type.0
+        ))
     }
 }
 

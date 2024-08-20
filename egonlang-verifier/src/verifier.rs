@@ -92,6 +92,7 @@ impl<'a> Verifier<'a> {
         self.add_rule(rules::core::TypeMismatchReassigningLetValuesRule);
         self.add_rule(rules::core::TypeMismatchIfthenElseExprRule);
         self.add_rule(rules::core::InvalidTypeAliasNameRule);
+        self.add_rule(rules::core::AssertTypeRule);
 
         self
     }
@@ -424,6 +425,28 @@ impl<'a> Verifier<'a> {
                 //
                 Ok(())
             }
+            ast::Stmt::AssertType(stmt_assert_type) => {
+                let mut errs: Vec<EgonErrorS> = vec![];
+
+                let (value_expr, value_span) = &mut stmt_assert_type.value;
+                if let Err(x) = self.visit_expr(value_expr, value_span) {
+                    errs.extend(x);
+                }
+
+                let (expected_type_expr, expected_type_span) = &mut stmt_assert_type.expected_type;
+                if let Err(x) = self.visit_expr(expected_type_expr, expected_type_span) {
+                    errs.extend(x);
+                }
+
+                let rule_errs = self.run_stmt_rules(stmt, span);
+                errs.extend(rule_errs);
+
+                if !errs.is_empty() {
+                    return Err(errs);
+                }
+
+                Ok(())
+            }
             ast::Stmt::Error => {
                 verify_trace!(verifier visit_stmt error_stmt: "{} is an error statement", stmt_string);
                 Ok(())
@@ -463,6 +486,26 @@ impl<'a> Verifier<'a> {
         }
 
         result
+    }
+
+    fn run_stmt_rules(&self, stmt: &ast::Stmt, span: &Span) -> Vec<EgonErrorS> {
+        let mut errs: Vec<EgonErrorS> = vec![];
+
+        for rule in &self.rules {
+            let rule_errs = rule
+                .visit_stmt(
+                    stmt,
+                    span,
+                    &|id: &str| self.resolve_identifier(id),
+                    &|expr: &ast::Expr, _span: &Span| self.resolve_expr_type(expr),
+                )
+                .err()
+                .unwrap_or_default();
+
+            errs.extend(rule_errs);
+        }
+
+        errs
     }
 
     fn run_expr_rules(&self, expr: &ast::Expr, span: &Span) -> Vec<EgonErrorS> {
@@ -1825,6 +1868,45 @@ mod verifier_tests {
             EgonTypeError::Undefined("Integer".to_string()).into(),
             106..113
         )])
+    );
+
+    verifier_test!(
+        validate_assert_type,
+        r#"
+        assert_type 123, number;
+        assert_type -1, number;
+        assert_type true, bool;
+        assert_type false, bool;
+        assert_type true and false, bool;
+        assert_type true or false, bool;
+        assert_type !false, bool;
+        assert_type (), ();
+        assert_type "testing", string;
+        assert_type [1, 2, 3], list<number>;
+        assert_type [], list<unknown>;
+        assert_type (false, 100,), tuple<bool, number>;
+        assert_type (a: number, b: number): number => { a + b }, function<tuple<number, number>, number>;
+        assert_type 0..100, range;
+        assert_type 1 + 2, number;
+        assert_type 1 - 2, number;
+        assert_type 1 / 2, number;
+        assert_type 1 * 2, number;
+        assert_type 1 % 2, number;
+        assert_type 1 > 2, bool;
+        assert_type 1 >= 2, bool;
+        assert_type 1 < 2, bool;
+        assert_type 1 <= 2, bool;
+        assert_type 1 == 2, bool;
+        "#,
+        Ok(())
+    );
+
+    verifier_test!(
+        validate_assert_type_with_value_in_block,
+        r#"
+        assert_type { 123 }, number;
+        "#,
+        Ok(())
     );
 
     #[test]

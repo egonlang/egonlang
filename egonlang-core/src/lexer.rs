@@ -141,6 +141,8 @@ pub enum Token {
     Const,
     #[token("type")]
     Type,
+    #[token("assert_type")]
+    AssertType,
 
     // Literals.
     #[regex("[a-zA-Z_][a-zA-Z0-9_]*", lex_identifier)]
@@ -873,6 +875,18 @@ mod lexer_tests {
             Ok((23, Token::Identifier("number".to_string()), 29)),
             Ok((29, Token::Greater, 30)),
             Ok((30, Token::Semicolon, 31)),
+        ]
+    );
+
+    lexer_test!(
+        lex_assert_type,
+        "assert_type 123, number;",
+        vec![
+            Ok((0, Token::AssertType, 11)),
+            Ok((12, Token::Number(123f64), 15)),
+            Ok((15, Token::Comma, 16)),
+            Ok((17, Token::Identifier("number".to_string()), 23)),
+            Ok((23, Token::Semicolon, 24)),
         ]
     );
 }

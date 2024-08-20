@@ -1,0 +1,3 @@
+assert_type number, number;
+assert_type string, string;
+assert_type list<bool>, list<bool>;

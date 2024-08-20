@@ -66,6 +66,10 @@ StmtS = Spanned<Stmt>;
 Stmt: ast::Stmt = {
     <expr:ExprS> ";" =>
         ast::Stmt::Expr(ast::StmtExpr { <> }),
+    "assert_type" <value:ExprS> "," <expected_type:Spanned<TypeRef>> ";" => ast::Stmt::AssertType(ast::StmtAssertType { 
+        value,
+        expected_type: (ast::Expr::Type(ast::ExprType(expected_type.0)), expected_type.1)
+     }),
     <e:!> => {
         errors.push(e.error);
         ast::Stmt::Error
@@ -334,6 +338,7 @@ extern {
         "let" => lexer::Token::Let,
         "const" => lexer::Token::Const,
         "type" => lexer::Token::Type,
+        "assert_type" => lexer::Token::AssertType,
 
         // Literals.
         identifier => lexer::Token::Identifier(<String>),

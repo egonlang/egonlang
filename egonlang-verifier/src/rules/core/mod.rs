@@ -1,5 +1,6 @@
 //! Core syntax rules for the egon language
 
+mod assert_type;
 mod const_declaration_with_no_value;
 mod divide_by_zero;
 mod invalid_type_alias_name;
@@ -14,6 +15,7 @@ mod type_mismatch_prefix;
 mod type_mismatch_reassigning_let_values;
 mod undefined_identifier;
 
+pub use assert_type::AssertTypeRule;
 pub use const_declaration_with_no_value::DeclareConstWithoutValueRule;
 pub use divide_by_zero::DivideByZeroRule;
 pub use invalid_type_alias_name::InvalidTypeAliasNameRule;

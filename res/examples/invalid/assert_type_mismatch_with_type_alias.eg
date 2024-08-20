@@ -1,0 +1,5 @@
+type String = string;
+
+assert_type 123, String;
+
+// out: TypeError: mismatched types: expected type `string` but received `number`

@@ -1,0 +1,40 @@
+assert_type 123, number;
+assert_type -1, number;
+assert_type true, bool;
+assert_type false, bool;
+assert_type true and false, bool;
+assert_type true or false, bool;
+assert_type !false, bool;
+assert_type (), ();
+assert_type "testing", string;
+assert_type [1, 2, 3], list<number>;
+assert_type [], list<unknown>;
+assert_type (false, 100,), tuple<bool, number>;
+assert_type
+    (a: number, b: number): number => { a + b },
+    function<tuple<number, number>, number>;
+assert_type 0..100, range;
+assert_type 1 + 2, number;
+assert_type 1 - 2, number;
+assert_type 1 / 2, number;
+assert_type 1 * 2, number;
+assert_type 1 % 2, number;
+assert_type 1 > 2, bool;
+assert_type 1 >= 2, bool;
+assert_type 1 < 2, bool;
+assert_type 1 <= 2, bool;
+assert_type 1 == 2, bool;
+
+let foo = "bar";
+assert_type foo, string;
+
+assert_type {}, ();
+assert_type { 123 }, number;
+assert_type { 123; }, ();
+assert_type { { 123 } }, number;
+
+type Number = number;
+assert_type 123, Number;
+
+let a: Number = 456;
+assert_type a, number;

@@ -92,8 +92,8 @@ mod parser_tests {
 
     use crate::ast::{
         self, Expr, ExprAssign, ExprBlock, ExprFn, ExprIdentifier, ExprIf, ExprInfix, ExprList,
-        ExprLiteral, ExprRange, ExprTuple, ExprType, Identifier, Module, OpInfix, Stmt, StmtAssign,
-        StmtExpr, StmtTypeAlias, TypeRef,
+        ExprLiteral, ExprRange, ExprTuple, ExprType, Identifier, Module, OpInfix, Stmt,
+        StmtAssertType, StmtAssign, StmtExpr, StmtTypeAlias, TypeRef,
     };
 
     use crate::errors::{EgonError, EgonSyntaxError};
@@ -2078,6 +2078,21 @@ mod parser_tests {
                     ))
                 }),
                 0..39
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_assert_type,
+        "assert_type 123, number;",
+        Ok(Module {
+            stmts: vec![(
+                StmtAssertType {
+                    value: (123f64.into(), 12..15),
+                    expected_type: (ast::ExprType(TypeRef::number()).into(), 17..23)
+                }
+                .into(),
+                0..24
             )]
         })
     );
