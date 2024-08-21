@@ -17,6 +17,9 @@ cli *args:
 cli-trace *args:
     just cli --features='verify-trace' {{args}}
 
+lsp:
+    cargo run --bin egonlang-lsp
+
 format:
     cargo fmt --all
     cargo clippy --fix --all-targets --no-deps --workspace
