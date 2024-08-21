@@ -12,7 +12,7 @@ clean:
     cargo clean
 
 cli *args:
-    cargo run {{args}}
+    cargo run --bin egon {{args}}
 
 cli-trace *args:
     just cli --features='verify-trace' {{args}}

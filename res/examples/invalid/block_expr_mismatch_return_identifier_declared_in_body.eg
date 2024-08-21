@@ -5,4 +5,3 @@ let a: number = {
 };
 
 // out: TypeError: mismatched types: expected type `number` but received `string`
-// TODO: See: https://github.com/egonlang/egonlang/issues/19
