@@ -1,0 +1,5 @@
+assert_type b, number;
+assert_type 123, Number;
+
+// out: TypeError: `b` is not defined
+// out: TypeError: `Number` is not defined

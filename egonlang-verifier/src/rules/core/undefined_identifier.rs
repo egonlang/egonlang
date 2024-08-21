@@ -53,4 +53,14 @@ mod tests {
             0..1
         )])
     }
+
+    verifier_rule_test!(
+        ReferencingUndefinedIdentifierRule,
+        returns_error_if_assert_type_value_is_undefined_identifier,
+        "assert_type a, number;",
+        Err(vec![(
+            EgonTypeError::Undefined("a".to_string()).into(),
+            12..13
+        )])
+    );
 }

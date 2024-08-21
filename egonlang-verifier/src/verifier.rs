@@ -1916,6 +1916,17 @@ mod verifier_tests {
         Ok(())
     );
 
+    verifier_test!(
+        validate_assign_to_undefined_identifier,
+        r#"let b: number = 123;
+
+a = b;"#,
+        Err(vec![(
+            EgonTypeError::Undefined("a".to_string()).into(),
+            22..27
+        )])
+    );
+
     #[test]
     fn errors_when_referencing_undefined_identifier() {
         let mut verifier = Verifier::default();

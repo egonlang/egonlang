@@ -1,30 +1,22 @@
-use crate::errors::{EgonError, EgonSyntaxError, EgonTypeError};
-use crate::span::Span;
-use codespan_reporting::diagnostic::{Diagnostic, Label};
+use crate::prelude::*;
+use line_col::LineColLookup;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default)]
-pub struct Diagnoser {}
+pub struct Diagnoser;
 
 impl Diagnoser {
-    #[allow(dead_code)]
-    pub fn get_diagnostics(source: &str) -> Vec<Diagnosis> {
-        match crate::parser::parse(source, 0) {
-            Ok(_) => vec![],
-            Err(errs) => {
-                return errs
-                    .iter()
-                    .map(|(err, span)| Diagnosis {
-                        range: Diagnoser::get_range(source, span),
-                        severity: Some(DiagnosisSeverity::ERROR),
-                        message: err.to_string(),
-                    })
-                    .collect();
-            }
-        }
+    pub fn get_diagnostics(errs: &[(EgonError, Span)], source: &str) -> Vec<Diagnosis> {
+        return errs
+            .iter()
+            .map(|(err, span)| Diagnosis {
+                range: Diagnoser::get_range(source, span),
+                severity: Some(DiagnosisSeverity::ERROR),
+                message: err.to_string(),
+            })
+            .collect();
     }
 
-    #[allow(dead_code)]
     fn get_range(source: &str, span: &Span) -> DiagnosisRange {
         DiagnosisRange {
             start: Diagnoser::get_position(source, span.start),
@@ -32,15 +24,14 @@ impl Diagnoser {
         }
     }
 
-    #[allow(dead_code)]
     fn get_position(source: &str, idx: usize) -> DiagnosisPosition {
-        let before = &source[..idx];
-        let line = before.lines().count().checked_sub(1).unwrap_or_default();
-        let character = before.lines().last().unwrap_or_default().len();
-        DiagnosisPosition {
-            line: line as _,
-            character: character as _,
-        }
+        let lookup = LineColLookup::new(source);
+
+        let (line, character) = lookup.get(idx);
+        let line = (line - 1) as u32;
+        let character = (character - 1) as u32;
+
+        DiagnosisPosition { line, character }
     }
 }
 
@@ -60,11 +51,8 @@ pub struct Diagnosis {
 pub struct DiagnosisSeverity(i32);
 impl DiagnosisSeverity {
     pub const ERROR: DiagnosisSeverity = DiagnosisSeverity(1);
-    #[allow(dead_code)]
     pub const WARNING: DiagnosisSeverity = DiagnosisSeverity(2);
-    #[allow(dead_code)]
     pub const INFORMATION: DiagnosisSeverity = DiagnosisSeverity(3);
-    #[allow(dead_code)]
     pub const HINT: DiagnosisSeverity = DiagnosisSeverity(4);
 }
 
@@ -75,7 +63,6 @@ pub struct DiagnosisPosition {
 }
 
 impl DiagnosisPosition {
-    #[allow(dead_code)]
     pub fn new(line: u32, character: u32) -> DiagnosisPosition {
         DiagnosisPosition { line, character }
     }
@@ -90,135 +77,100 @@ pub struct DiagnosisRange {
 }
 
 impl DiagnosisRange {
-    #[allow(dead_code)]
     pub fn new(start: DiagnosisPosition, end: DiagnosisPosition) -> DiagnosisRange {
         DiagnosisRange { start, end }
     }
 }
 
-#[allow(dead_code)]
-trait AsDiagnostic {
-    fn as_diagnostic(&self, span: &Span) -> Diagnostic<()>;
-}
-
-macro_rules! impl_as_dianostic {
-    ($($error:tt),+) => {$(
-        impl AsDiagnostic for $error {
-            fn as_diagnostic(&self, span: &Span) -> Diagnostic<()> {
-                Diagnostic::error()
-                    .with_code(stringify!($error))
-                    .with_message(self.to_string())
-                    .with_labels(vec![Label::primary((), span.clone())])
-            }
-        }
-    )+};
-}
-
-impl_as_dianostic!(EgonSyntaxError, EgonTypeError);
-
-impl AsDiagnostic for EgonError {
-    fn as_diagnostic(&self, span: &Span) -> Diagnostic<()> {
-        match self {
-            EgonError::SyntaxError(e) => e.as_diagnostic(span),
-            EgonError::TypeError(e) => e.as_diagnostic(span),
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
+    use crate::diagnostics::{Diagnosis, DiagnosisPosition, DiagnosisRange, DiagnosisSeverity};
+
+    use super::{Diagnoser, EgonErrorS, EgonTypeError};
+
     use pretty_assertions::assert_eq;
 
-    use crate::diagnostics::{
-        Diagnoser, Diagnosis, DiagnosisPosition, DiagnosisRange, DiagnosisSeverity,
-    };
+    #[test]
+    fn it_maps_error_to_diagnosis_in_multiline_source() {
+        let source = r#"let b: number = 123;
 
-    macro_rules! diagnostics_test {
-        ($test_name:ident, $input:expr, $expected:expr) => {
-            #[test]
-            fn $test_name() {
-                let source = String::from($input);
+a = b;"#;
+        let err: EgonErrorS = (EgonTypeError::Undefined("a".to_string()).into(), 22..27);
 
-                assert_eq!($expected, Diagnoser::get_diagnostics(&source));
-            }
-        };
+        let diagnostics = Diagnoser::get_diagnostics(&[err], source);
+
+        assert_eq!(
+            vec![Diagnosis {
+                range: DiagnosisRange {
+                    start: DiagnosisPosition {
+                        line: 2,
+                        character: 0
+                    },
+                    end: DiagnosisPosition {
+                        line: 2,
+                        character: 5
+                    }
+                },
+                severity: Some(DiagnosisSeverity::ERROR),
+                message: "TypeError: `a` is not defined".to_string()
+            }],
+            diagnostics
+        );
     }
 
-    diagnostics_test!(
-        diagnosis_unexpected_eof,
-        "123",
-        vec![Diagnosis {
-            range: DiagnosisRange {
-                start: DiagnosisPosition {
-                    line: 0,
-                    character: 3,
-                },
-                end: DiagnosisPosition {
-                    line: 0,
-                    character: 3,
-                },
-            },
-            severity: Some(DiagnosisSeverity::ERROR),
-            message: String::from(
-                r#"SyntaxError: unexpected end of file; expected: ["\"!=\"", "\"%\"", "\")\"", "\"*\"", "\"+\"", "\",\"", "\"-\"", "\"..\"", "\"/\"", "\";\"", "\"<\"", "\"<=\"", "\"==\"", "\">\"", "\">=\"", "\"]\"", "\"and\"", "\"or\"", "\"{\"", "\"}\""]"#
-            )
-        }]
-    );
+    #[test]
+    fn it_maps_error_to_diagnosis_in_multiline_source_b() {
+        let source = r#"let b: number = 123;
 
-    diagnostics_test!(
-        diagnosis_unterminated_string,
-        r#""foo"#,
-        vec![Diagnosis {
-            range: DiagnosisRange {
-                start: DiagnosisPosition {
-                    line: 0,
-                    character: 0,
-                },
-                end: DiagnosisPosition {
-                    line: 0,
-                    character: 4,
-                },
-            },
-            severity: Some(DiagnosisSeverity::ERROR),
-            message: String::from("SyntaxError: unterminated string")
-        }]
-    );
+a = b;
 
-    diagnostics_test!(
-        diagnosis_unexpected_input,
-        r#"@foo"#,
-        vec![Diagnosis {
-            range: DiagnosisRange {
-                start: DiagnosisPosition {
-                    line: 0,
-                    character: 0,
-                },
-                end: DiagnosisPosition {
-                    line: 0,
-                    character: 4,
-                },
-            },
-            severity: Some(DiagnosisSeverity::ERROR),
-            message: String::from("SyntaxError: unexpected input: \"@foo\"")
-        }]
-    );
+// out: TypeError: `a` is not defined"#;
+        let err: EgonErrorS = (EgonTypeError::Undefined("a".to_string()).into(), 22..27);
 
-    diagnostics_test!(
-        diagnosis_error_on_newline,
-        "\n@foo",
-        vec![Diagnosis {
-            range: DiagnosisRange {
-                start: DiagnosisPosition {
-                    line: 0, // TODO: This should be 1?
-                    character: 0,
+        let diagnostics = Diagnoser::get_diagnostics(&[err], source);
+
+        assert_eq!(
+            vec![Diagnosis {
+                range: DiagnosisRange {
+                    start: DiagnosisPosition {
+                        line: 2,
+                        character: 0
+                    },
+                    end: DiagnosisPosition {
+                        line: 2,
+                        character: 5
+                    }
                 },
-                end: DiagnosisPosition {
-                    line: 1,
-                    character: 4,
+                severity: Some(DiagnosisSeverity::ERROR),
+                message: "TypeError: `a` is not defined".to_string()
+            }],
+            diagnostics
+        );
+    }
+
+    #[test]
+    fn it_maps_error_to_diagnosis_in_single_line_source() {
+        let source = r#"a = 123;"#;
+        let err: EgonErrorS = (EgonTypeError::Undefined("a".to_string()).into(), 0..7);
+
+        let diagnostics = Diagnoser::get_diagnostics(&[err], source);
+
+        assert_eq!(
+            vec![Diagnosis {
+                range: DiagnosisRange {
+                    start: DiagnosisPosition {
+                        line: 0,
+                        character: 0
+                    },
+                    end: DiagnosisPosition {
+                        line: 0,
+                        character: 7
+                    }
                 },
-            },
-            severity: Some(DiagnosisSeverity::ERROR),
-            message: String::from("SyntaxError: unexpected input: \"@foo\"")
-        }]
-    );
+                severity: Some(DiagnosisSeverity::ERROR),
+                message: "TypeError: `a` is not defined".to_string()
+            }],
+            diagnostics
+        );
+    }
 }

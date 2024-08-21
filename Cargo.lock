@@ -367,6 +367,7 @@ dependencies = [
  "codespan-reporting",
  "lalrpop",
  "lalrpop-util",
+ "line-col",
  "logos",
  "paste",
  "pretty_assertions",
@@ -701,6 +702,12 @@ dependencies = [
  "bitflags 2.6.0",
  "libc",
 ]
+
+[[package]]
+name = "line-col"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9e69cdf6b85b5c8dce514f694089a2cf8b1a702f6cd28607bcb3cf296c9778db"
 
 [[package]]
 name = "lock_api"

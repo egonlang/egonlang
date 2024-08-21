@@ -15,6 +15,7 @@
 
 - [core](./egonlang-core/): Library responsible for lexing, and parsing egon code
 - [verifier](./egonlang-verifier/): Library responsible verifying AST (e.g. syntax errors, type checking)
+- [lsp](./egonlang-lsp/) Language server
 - [cli](./egonlang-cli/): Command line tool to lex and parse egon code files 
 - [vsc](./vsc/): VS Code language extension
 
@@ -88,14 +89,16 @@ just test-trace path_056__UP_res_examples_invalid_infix_type_mismatch_string_eg
 
 ## VS Code Extension
 
-### Requirements
+The [VS Code extension](./vsc/) supports syntax highlighting, snippets, and integration with the [language server](./egonlang-lsp/).
 
-- [node](https://nodejs.org/) & [nvm](https://github.com/nvm-sh/nvm)
+### Usage
 
-### Building
+1. Uninstall any previous version of the extension
+2. Run `just clean build`
+3. Install the latest build `./vsc/out/egon-language-*.vsix`
+4. Open any egon file `*.eg`
 
-Builds the extension to `./vsc/out/egon-language-*.vsix`
+### Commands
 
-```shell 
-just build
-```
+- Start/stop/restart language server
+- Lex/parse/verify a file
