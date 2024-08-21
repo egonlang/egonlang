@@ -8,5 +8,6 @@
     "lldb.consoleMode": "commands",
     "lldb.launch.sourceLanguages": [
         "rust"
-    ]
+    ],
+    "egon.binPath": "./target/debug/egon"
 }

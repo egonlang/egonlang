@@ -61,7 +61,7 @@
     },
     "commands": [
       {
-        "command": "egon.LexCurrentFile",
+        "command": "egon.lexCurrentFile",
         "title": "Egon: Lex Current File"
       },
       {

@@ -37,7 +37,7 @@ export function activate(context: ExtensionContext) {
     commands.registerCommand("egon.lexCurrentFile", lexFileHandler),
     commands.registerCommand("egon.parseCurrentFile", parseFileHandler),
     commands.registerCommand("egon.openGithub", () => {
-      env.openExternal(Uri.parse("https://github.com/egonlang/egonlong"));
+      env.openExternal(Uri.parse("https://github.com/egonlang/egonlang"));
     }),
   );
 
