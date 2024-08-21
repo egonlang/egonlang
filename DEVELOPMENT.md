@@ -91,6 +91,8 @@ just test-trace path_056__UP_res_examples_invalid_infix_type_mismatch_string_eg
 
 The [VS Code extension](./vsc/) supports syntax highlighting, snippets, and integration with the [language server](./egonlang-lsp/).
 
+![Screenshot of vsc extension providing errors from language server](./vsc_typechecking_example.png)
+
 ### Usage
 
 1. Uninstall any previous version of the extension
