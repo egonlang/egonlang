@@ -9,11 +9,64 @@ import {
   env,
   Uri,
 } from "vscode";
+import {
+  LanguageClient,
+  LanguageClientOptions,
+  ServerOptions,
+} from "vscode-languageclient/node";
 import { EgonTaskProvider } from "./egonTaskProvider";
+
+let lc: LanguageClient;
 
 export function activate(context: ExtensionContext) {
   const binPath: string =
     workspace.getConfiguration("egon").get("binPath") ?? "egon";
+
+  const lspPath = `${binPath}lang-lsp`;
+  const serverOptions: ServerOptions = {
+    command: lspPath
+  };
+
+  const clientOptions: LanguageClientOptions = {
+    documentSelector: [
+      {
+        language: "egon",
+      },
+    ],
+    synchronize: {
+      fileEvents: workspace.createFileSystemWatcher("**/*.eg"),
+    },
+    outputChannelName: "egon",
+  };
+
+  lc = new LanguageClient(
+    "egon-language-server",
+    serverOptions,
+    clientOptions
+  );
+
+  const startLanguageServerHandler = () => {
+    console.log("Starting egon language server...");
+    return lc.start();
+  };
+
+  const stopLanguageServerHandler = () => {
+    console.log("Stopping egon language server...");
+
+    if (!lc) {
+      return undefined;
+    }
+
+    return lc.stop();
+  };
+
+  const restartLanguageServerHandler = async () => {
+    console.log("Restarting egon language server...");
+
+    await stopLanguageServerHandler();
+
+    await startLanguageServerHandler();
+  };
 
   const lexFileHandler = () => {
     const terminal = window.createTerminal(`egon lex`);
@@ -70,12 +123,26 @@ export function activate(context: ExtensionContext) {
     commands.registerCommand("egon.lexCurrentFileToFile", lexFileToFileHandler),
     commands.registerCommand("egon.parseCurrentFile", parseFileHandler),
     commands.registerCommand("egon.parseCurrentFileToFile", parseFileToFileHandler),
+    commands.registerCommand(
+      "egon.startLanguageServer",
+      startLanguageServerHandler
+    ),
+    commands.registerCommand(
+      "egon.stopLanguageServer",
+      stopLanguageServerHandler
+    ),
+    commands.registerCommand(
+      "egon.restartLanguageServer",
+      restartLanguageServerHandler
+    ),
     commands.registerCommand("egon.openGithub", () => {
       env.openExternal(Uri.parse("https://github.com/egonlang/egonlang"));
     }),
   );
 
   tasks.registerTaskProvider("egon", new EgonTaskProvider());
+
+  lc.start();
 }
 
 export function deactivate() { }

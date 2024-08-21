@@ -1,5 +1,5 @@
 [workspace]
 
-members = [ "egonlang-cli","egonlang-core", "egonlang-verifier"]
+members = ["egonlang-cli", "egonlang-core", "egonlang-lsp", "egonlang-verifier"]
 
 resolver = "2"

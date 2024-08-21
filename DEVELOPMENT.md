@@ -36,6 +36,7 @@
 | `just cli-trace COMMAND PATH`  | Run the egon command (logging with `verify-trace!` macro)                                          |
 | `just build-docker`            | Build the docker image for the egon language                                                       |
 | `just run-docker COMMAND PATH` | Run the egon command in docker e.g. `$ just run docker parse ./path/to/file.eg`                    |
+| `just lsp`                     | Start the egon language server                                                                     |
 
 ## CLI
 

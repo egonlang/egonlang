@@ -77,6 +77,18 @@
         "title": "Egon: Parse Current File To File"
       },
       {
+        "command": "egon.startLanguageServer",
+        "title": "Egon: Start language server"
+      },
+      {
+        "command": "egon.stopLanguageServer",
+        "title": "Egon: Stop language server"
+      },
+      {
+        "command": "egon.restartLanguageServer",
+        "title": "Egon: Restart language server"
+      },
+      {
         "command": "egon.openGithub",
         "title": "Egon: Open On Github"
       }
