@@ -24,6 +24,21 @@ export function activate(context: ExtensionContext) {
     terminal.show();
   };
 
+  const lexFileToFileHandler = async () => {
+    const filename = await window.showInputBox({
+      placeHolder: "File",
+      prompt: "Where to write the lex json to?",
+      value: "temp-lex.json"
+    });
+
+    const terminal = window.createTerminal(`egon lex ${filename}`);
+
+    terminal.sendText(
+      `${binPath} lex ${window.activeTextEditor.document.uri.path} > ${filename} && exit`
+    );
+    terminal.show(true);
+    terminal.hide();
+  };
 
   const parseFileHandler = () => {
     const terminal = window.createTerminal(`egon parse`);
@@ -33,9 +48,30 @@ export function activate(context: ExtensionContext) {
     terminal.show();
   };
 
+  const parseFileToFileHandler = async () => {
+    const filename = await window.showInputBox({
+      placeHolder: "File",
+      prompt: "Where to write the parse json to?",
+      value: "temp-parse.json"
+    });
+
+    if (!filename) {
+      return;
+    }
+
+    const terminal = window.createTerminal(`egon parse ${filename}`);
+
+    terminal.sendText(
+      `${binPath} parse ${window.activeTextEditor.document.uri.path} > ${filename} && exit`
+    );
+    terminal.show(true);
+  };
+
   context.subscriptions.push(
     commands.registerCommand("egon.lexCurrentFile", lexFileHandler),
+    commands.registerCommand("egon.lexCurrentFileToFile", lexFileToFileHandler),
     commands.registerCommand("egon.parseCurrentFile", parseFileHandler),
+    commands.registerCommand("egon.parseCurrentFileToFile", parseFileToFileHandler),
     commands.registerCommand("egon.openGithub", () => {
       env.openExternal(Uri.parse("https://github.com/egonlang/egonlang"));
     }),

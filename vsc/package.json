@@ -65,8 +65,16 @@
         "title": "Egon: Lex Current File"
       },
       {
+        "command": "egon.lexCurrentFileToFile",
+        "title": "Egon: Lex Current File To A File"
+      },
+      {
         "command": "egon.parseCurrentFile",
         "title": "Egon: Parse Current File"
+      },
+      {
+        "command": "egon.parseCurrentFileToFile",
+        "title": "Egon: Parse Current File To File"
       },
       {
         "command": "egon.openGithub",
