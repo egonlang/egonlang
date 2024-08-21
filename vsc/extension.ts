@@ -8,7 +8,6 @@ import {
   window,
   env,
   Uri,
-  languages
 } from "vscode";
 import { EgonTaskProvider } from "./egonTaskProvider";
 
@@ -37,7 +36,6 @@ export function activate(context: ExtensionContext) {
       `${binPath} lex ${window.activeTextEditor.document.uri.path} > ${filename} && exit`
     );
     terminal.show(true);
-    terminal.hide();
   };
 
   const parseFileHandler = () => {
