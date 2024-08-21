@@ -24,27 +24,6 @@ export function activate(context: ExtensionContext) {
     terminal.show();
   };
 
-  languages.registerHoverProvider('egon', {
-    provideHover(document, position, token) {
-      const word_range = document.getWordRangeAtPosition(position);
-      const word = document.getText(word_range);
-
-      switch (word) {
-        case "assert_type":
-          return {
-            contents: [
-              "Run compile time type assertions against expressions",
-              "",
-              "```egon\nassert_type 123, number;\n```"
-            ]
-          }
-        default:
-          return {
-            contents: []
-          }
-      }
-    }
-  });
 
   const parseFileHandler = () => {
     const terminal = window.createTerminal(`egon parse`);
