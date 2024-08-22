@@ -93,6 +93,7 @@ impl<'a> Verifier<'a> {
         self.add_rule(rules::core::TypeMismatchIfthenElseExprRule);
         self.add_rule(rules::core::InvalidTypeAliasNameRule);
         self.add_rule(rules::core::AssertTypeRule);
+        self.add_rule(rules::core::NoReturnOutsideBlockRule);
 
         self
     }
@@ -447,6 +448,22 @@ impl<'a> Verifier<'a> {
 
                 Ok(())
             }
+            ast::Stmt::Return(stmt_return) => {
+                let mut errs: Vec<EgonErrorS> = vec![];
+
+                let (value_expr, value_span) = &mut stmt_return.value;
+
+                if let Err(x) = self.visit_expr(value_expr, value_span) {
+                    errs.extend(x);
+                }
+
+                if !errs.is_empty() {
+                    return Err(errs);
+                }
+
+                //
+                Ok(())
+            }
             ast::Stmt::Error => {
                 verify_trace!(verifier visit_stmt error_stmt: "{} is an error statement", stmt_string);
                 Ok(())
@@ -546,7 +563,24 @@ impl<'a> Verifier<'a> {
 
                 self.start_new_type_env();
 
+                let mut return_stmt_type: Option<ast::TypeRef> = None;
+
                 for (stmt, stmt_span) in &mut block_expr.stmts {
+                    if let ast::Stmt::Return(stmt_return) = stmt {
+                        verify_trace!(verifier visit_expr block return_stmt: "{} has a return statement", expr_string);
+
+                        stmt_return.set_used_in_block();
+
+                        if let Some(v) = self.resolve_expr_type(&stmt_return.value.0) {
+                            verify_trace!(
+                                verifier visit_expr block return_stmt: "caching return value: {}",
+                                v.typeref.to_string().yellow().italic()
+                            );
+
+                            return_stmt_type = Some(v.typeref);
+                        }
+                    }
+
                     let stmt_errs = self.visit_stmt(stmt, stmt_span).err().unwrap_or_default();
 
                     errs.extend(stmt_errs);
@@ -603,8 +637,19 @@ impl<'a> Verifier<'a> {
                     None => {
                         self.end_current_type_env();
 
+                        if let Some(stmt_return_type) = return_stmt_type {
+                            block_expr.typeref = Some(stmt_return_type);
+                        }
+
                         if !errs.is_empty() {
                             return Err(errs);
+                        }
+
+                        if let Some(block_return_type) = &block_expr.typeref {
+                            return Ok(TypeEnvValue {
+                                typeref: block_return_type.clone(),
+                                is_const: true,
+                            });
                         }
 
                         Ok(TypeEnvValue {

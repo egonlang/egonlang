@@ -70,6 +70,7 @@ Stmt: ast::Stmt = {
         value,
         expected_type: (ast::Expr::Type(ast::ExprType(expected_type.0)), expected_type.1)
      }),
+     "return" <value:ExprS> ";" => ast::Stmt::Return(ast::StmtReturn::new(<>)),
     <e:!> => {
         errors.push(e.error);
         ast::Stmt::Error
@@ -339,6 +340,7 @@ extern {
         "const" => lexer::Token::Const,
         "type" => lexer::Token::Type,
         "assert_type" => lexer::Token::AssertType,
+        "return" => lexer::Token::Return,
 
         // Literals.
         identifier => lexer::Token::Identifier(<String>),

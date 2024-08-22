@@ -140,6 +140,18 @@ let result: number = {
  };
 ```
 
+##### Return Statement
+
+Block expressions can have an explicit `return` statement instead of the implicit return expression.
+
+```
+let result: number = { 
+    let n = 5;
+
+    return n * n;
+ };
+```
+
 #### If/Else Expressions
 
 If/Else can be written as expressions it's then/else blocks are block expressions.
@@ -165,6 +177,10 @@ Functions can be written as expressions. The function body is a block expression
 (a: number): function<tuple<number>, number> =>
         (b: number): number => { a + b };
 ```
+
+##### Return Statement
+
+See [block return statement](#return-statement)
 
 ### Statements
 

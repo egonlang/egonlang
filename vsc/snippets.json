@@ -99,5 +99,15 @@
       "assert_type $1, $2;$0"
     ],
     "description": "Create an assert type statement"
+  },
+  "return": {
+    "prefix": [
+      "ret",
+      "return"
+    ],
+    "body": [
+      "return $1;$0"
+    ],
+    "description": "Create a return statement"
   }
 }

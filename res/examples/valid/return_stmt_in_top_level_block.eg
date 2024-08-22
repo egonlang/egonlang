@@ -1,0 +1,5 @@
+let a: number = {
+    return 123;
+};
+
+assert_type a, number;

@@ -1,0 +1,3 @@
+return 123;
+
+// out: SyntaxError: can not return outside of a block

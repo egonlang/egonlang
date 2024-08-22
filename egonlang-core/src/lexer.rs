@@ -143,6 +143,8 @@ pub enum Token {
     Type,
     #[token("assert_type")]
     AssertType,
+    #[token("return")]
+    Return,
 
     // Literals.
     #[regex("[a-zA-Z_][a-zA-Z0-9_]*", lex_identifier)]

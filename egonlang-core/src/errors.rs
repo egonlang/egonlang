@@ -42,6 +42,8 @@ pub enum EgonSyntaxError {
     InvalidTypeAlias { name: String },
     #[error("can not divide by zero")]
     DivideByZero,
+    #[error("can not return outside of a block")]
+    ReturnedUsedOutsideBlock,
 }
 
 #[derive(Debug, Clone, Error, Eq, PartialEq, Serialize, Deserialize)]

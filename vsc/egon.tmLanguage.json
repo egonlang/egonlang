@@ -26,7 +26,7 @@
       "patterns": [
         {
           "name": "keyword.control.egon",
-          "match": "\\b(if|else|and|or|assert_type|type)\\b"
+          "match": "\\b(if|else|and|or|assert_type|type|return)\\b"
         },
         {
           "name": "constant.language.null.egon",

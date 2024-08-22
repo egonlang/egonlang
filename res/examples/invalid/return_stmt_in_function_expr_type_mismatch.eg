@@ -1,0 +1,5 @@
+(a: number, b: number): number => { 
+    return "";
+};
+
+// out: TypeError: mismatched types: expected type `number` but received `string`

@@ -43,6 +43,12 @@ pub enum Stmt {
     /// assert_type 123 number;
     /// ```
     AssertType(StmtAssertType),
+    /// A statement to return a value from a function
+    ///
+    /// ```egon
+    /// (): number => { return 123; }
+    /// ```
+    Return(StmtReturn),
     Error,
 }
 
@@ -90,6 +96,7 @@ impl Display for Stmt {
             Stmt::TypeAlias(stmt) => f.write_fmt(format_args!("{}", stmt)),
             Stmt::Fn(stmt) => f.write_fmt(format_args!("{}", stmt)),
             Stmt::AssertType(stmt) => f.write_fmt(format_args!("{}", stmt)),
+            Stmt::Return(stmt) => f.write_fmt(format_args!("{}", stmt)),
             Stmt::Error => todo!(),
         }
     }
@@ -103,6 +110,7 @@ impl Debug for Stmt {
             Self::TypeAlias(arg0) => f.write_fmt(format_args!("{:#?}", arg0)),
             Self::Fn(arg0) => f.write_fmt(format_args!("{:#?}", arg0)),
             Self::AssertType(arg0) => f.write_fmt(format_args!("{:#?}", arg0)),
+            Self::Return(arg0) => f.write_fmt(format_args!("{:#?}", arg0)),
             Self::Error => write!(f, "Error"),
         }
     }
@@ -229,9 +237,42 @@ pub struct StmtAssertType {
 impl Display for StmtAssertType {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.write_fmt(format_args!(
-            "assert_type {} {}",
+            "assert_type {}, {};",
             self.value.0, self.expected_type.0
         ))
+    }
+}
+
+/// A statement to return a value from a function
+///
+/// ```egon
+/// (): number => { return 123; }
+/// ```
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct StmtReturn {
+    pub value: ExprS,
+    used_in_block: bool,
+}
+
+impl StmtReturn {
+    pub fn new(value: ExprS) -> Self {
+        Self {
+            value,
+            used_in_block: false,
+        }
+    }
+    pub fn set_used_in_block(&mut self) {
+        self.used_in_block = true;
+    }
+
+    pub fn get_used_in_block(&self) -> bool {
+        self.used_in_block
+    }
+}
+
+impl Display for StmtReturn {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.write_fmt(format_args!("return {};", self.value.0))
     }
 }
 
@@ -265,5 +306,17 @@ mod tests {
         test_stmt_assign_with_type_value,
         "type Number = number;".try_into().unwrap(),
         "type Number = number;"
+    }
+
+    stmt_display_test! {
+        test_stmt_assert_type,
+        "assert_type 123, number;".try_into().unwrap(),
+        "assert_type 123, number;"
+    }
+
+    stmt_display_test! {
+        test_stmt_return,
+        "return 123;".try_into().unwrap(),
+        "return 123;"
     }
 }
