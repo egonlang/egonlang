@@ -17,6 +17,29 @@ impl Diagnoser {
             .collect();
     }
 
+    /// Map position index to (line, column)
+    ///
+    /// Line and column are zero based
+    pub fn index_to_position(source: &str, index: usize) -> (usize, usize) {
+        let lookup = LineColLookup::new(source);
+
+        let (line, char) = lookup.get(index);
+
+        (line - 1, char - 1)
+    }
+
+    /// Map position (line, column) to index
+    ///
+    /// Line and column are zero based
+    pub fn position_to_index(source: &str, position: (usize, usize)) -> usize {
+        let (line, character) = position;
+        let lines_before = source.split('\n').take(line);
+        let line_chars_before = lines_before.fold(0usize, |acc, e| acc + e.len());
+        let index = line_chars_before + character + 1;
+
+        index
+    }
+
     fn get_range(source: &str, span: &Span) -> DiagnosisRange {
         DiagnosisRange {
             start: Diagnoser::get_position(source, span.start),
@@ -25,13 +48,12 @@ impl Diagnoser {
     }
 
     fn get_position(source: &str, idx: usize) -> DiagnosisPosition {
-        let lookup = LineColLookup::new(source);
+        let (line, character) = Diagnoser::index_to_position(source, idx);
 
-        let (line, character) = lookup.get(idx);
-        let line = (line - 1) as u32;
-        let character = (character - 1) as u32;
-
-        DiagnosisPosition { line, character }
+        DiagnosisPosition {
+            line: line as _,
+            character: character as _,
+        }
     }
 }
 
@@ -172,5 +194,36 @@ a = b;
             }],
             diagnostics
         );
+    }
+
+    #[test]
+    fn it_should_convert_index_to_position() {
+        let source = "let a = 123;\nlet b = 456;";
+
+        let index = 17usize;
+        let expected_position = (1, 4);
+
+        let actual_position = Diagnoser::index_to_position(source, index);
+
+        assert_eq!(expected_position, actual_position);
+    }
+
+    #[test]
+    fn it_should_convert_position_to_index() {
+        let source = "let a = 123;\nlet b = 456;";
+        let position = (1, 4);
+        let expected_index = 17usize;
+        let actual_index = Diagnoser::position_to_index(source, position);
+
+        assert_eq!(expected_index, actual_index);
+    }
+
+    #[test]
+    fn it_should_convert_position_to_index_and_back() {
+        let source = "let a = 123;\nlet b = 456;";
+        let position = (1, 4);
+        let actual_index = Diagnoser::position_to_index(source, position);
+
+        assert_eq!(position, Diagnoser::index_to_position(source, actual_index));
     }
 }

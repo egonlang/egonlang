@@ -1,12 +1,18 @@
+use std::collections::HashMap;
+use std::sync::Arc;
+
 use diagnostics::{Diagnoser, Diagnosis, DiagnosisPosition, DiagnosisRange, DiagnosisSeverity};
 use egonlang_core::prelude::*;
 use egonlang_verifier::prelude::*;
+use tokio::sync::Mutex;
+use tower_lsp::jsonrpc::Result;
+use tower_lsp::lsp_types::{HoverProviderCapability, Url};
 use tower_lsp::{
     jsonrpc,
     lsp_types::{
         Diagnostic, DiagnosticSeverity, DidChangeTextDocumentParams, DidOpenTextDocumentParams,
-        InitializeParams, InitializeResult, Position, Range, ServerCapabilities, ServerInfo,
-        TextDocumentSyncKind,
+        Hover, HoverContents, HoverParams, InitializeParams, InitializeResult, MarkupContent,
+        Position, Range, ServerCapabilities, ServerInfo, TextDocumentSyncKind,
     },
     Client, LanguageServer,
 };
@@ -14,11 +20,15 @@ use tower_lsp::{
 #[derive(Debug)]
 pub struct EgonLanguageServerBackend {
     client: Client,
+    documents: Arc<Mutex<HashMap<Url, String>>>,
 }
 
 impl EgonLanguageServerBackend {
     pub fn new(client: Client) -> Self {
-        Self { client }
+        Self {
+            client,
+            documents: Arc::new(Mutex::new(HashMap::new())),
+        }
     }
 }
 
@@ -28,6 +38,7 @@ impl LanguageServer for EgonLanguageServerBackend {
         Ok(InitializeResult {
             capabilities: ServerCapabilities {
                 text_document_sync: Some(TextDocumentSyncKind::FULL.into()),
+                hover_provider: Some(HoverProviderCapability::Simple(true)),
                 ..Default::default()
             },
             server_info: Some(ServerInfo {
@@ -45,6 +56,10 @@ impl LanguageServer for EgonLanguageServerBackend {
     async fn did_open(&self, params: DidOpenTextDocumentParams) {
         let source = &params.text_document.text;
         let uri = params.text_document.uri;
+
+        let mut documents = self.documents.lock().await;
+        documents.insert(uri.clone(), source.to_string());
+
         let version = Some(params.text_document.version);
         let errs = parse(source, 0)
             .and_then(|mut module| verify_module(&mut module))
@@ -66,6 +81,10 @@ impl LanguageServer for EgonLanguageServerBackend {
     async fn did_change(&self, params: DidChangeTextDocumentParams) {
         let source = &params.content_changes.first().unwrap().text;
         let uri = params.text_document.uri;
+
+        let mut documents = self.documents.lock().await;
+        documents.insert(uri.clone(), source.to_string());
+
         let version = Some(params.text_document.version);
         let errs = parse(source, 0)
             .and_then(|mut module| verify_module(&mut module))
@@ -82,6 +101,35 @@ impl LanguageServer for EgonLanguageServerBackend {
                 version,
             )
             .await;
+    }
+
+    async fn hover(&self, params: HoverParams) -> Result<Option<Hover>> {
+        let source_uri = params.text_document_position_params.text_document.uri;
+        let position = params.text_document_position_params.position;
+
+        let docs = self.documents.lock().await;
+
+        let doc = docs.get(&source_uri).unwrap();
+        let index = Diagnoser::position_to_index(
+            doc,
+            (position.line as usize, position.character as usize),
+        );
+
+        if let Ok(module) = parse(doc, 0) {
+            let mut nodes = module.get_by_index(index);
+
+            nodes.reverse();
+
+            Ok(Some(Hover {
+                contents: HoverContents::Markup(MarkupContent {
+                    kind: tower_lsp::lsp_types::MarkupKind::PlainText,
+                    value: format!("{nodes:#?}"),
+                }),
+                range: None,
+            }))
+        } else {
+            Ok(None)
+        }
     }
 }
 
