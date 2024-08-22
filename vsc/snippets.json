@@ -1,17 +1,37 @@
 {
-  "(a: P0, ...): R => {}": {
+  "(a: P0, ...): R => { ... }": {
     "prefix": "fn",
     "body": [
       "(${1:a: P0}): ${2:R} => { $3 }$0"
     ],
     "description": "Create a function expression"
   },
-  "fn name (a: P0, ...): R => {}": {
+  "(a: P0, ...): R => { return ...; }": {
+    "prefix": [
+      "fn",
+      "fnr"
+    ],
+    "body": [
+      "(${1:a: P0}): ${2:R} => { return $3; }$0"
+    ],
+    "description": "Create a function expression with explicit return"
+  },
+  "fn name (a: P0, ...): R => { ... }": {
     "prefix": "fn",
     "body": [
       "fn ${1:name} (${2:a: P0}): ${3:R} => { $4 }$0"
     ],
     "description": "Declare a function"
+  },
+  "fn name (a: P0, ...): R => { return ...; }": {
+    "prefix": [
+      "fn",
+      "fnr"
+    ],
+    "body": [
+      "fn ${1:name} (${2:a: P0}): ${3:R} => { return $4; }$0"
+    ],
+    "description": "Declare a function with explicit return"
   },
   "let a: T;": {
     "prefix": "let",
