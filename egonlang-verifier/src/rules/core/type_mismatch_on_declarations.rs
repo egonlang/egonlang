@@ -57,47 +57,58 @@ stmt_rule!(
                 // let a: number = 123;
                 (Some((assign_type_expr, assign_type_span)), Some((value_expr, value_span))) => {
                     if let Some(assign_typeref) = resolve_expr(assign_type_expr, assign_type_span) {
-                        if let Some(value_typeref) = resolve_expr(value_expr, value_span) {
-                            // Types mismatched
-                            if assign_typeref.typeref != value_typeref.typeref {
-                                // Check for empty list assignment
-                                // Example:
-                                // let a: list<number> = [];
-                                if value_typeref.typeref == ast::TypeRef::list(ast::TypeRef::unknown())
-                                    && assign_typeref.typeref.is_known_list()
-                                {
-                                    return vec![];
-                                }
+                        // Check for empty list assignment
+                        // Example:
+                        // let a: unknown;
+                        if assign_typeref.typeref.is_unknown() {
+                            errs.push((
+                                EgonTypeError::UnknownType.into(),
+                                assign_type_span.clone()
+                            ));
+                        } else {
+                            if let Some(value_typeref) = resolve_expr(value_expr, value_span) {
+                                // Types mismatched
+                                if assign_typeref.typeref != value_typeref.typeref {
+                                    // Check for empty list assignment
+                                    // Example:
+                                    // let a: list<number> = [];
+                                    if value_typeref.typeref == ast::TypeRef::list(ast::TypeRef::unknown())
+                                        && assign_typeref.typeref.is_known_list()
+                                    {
+                                        return vec![];
+                                    }
 
-                                if value_typeref.typeref.0 == *"identifier" {
-                                    let identifier = &stmt_assign.identifier.name;
+                                    if value_typeref.typeref.0 == *"identifier" {
+                                        let identifier = &stmt_assign.identifier.name;
 
-                                    if let Some(identifier_type) = resolve_ident(identifier) {
-                                        if assign_typeref.typeref == identifier_type.typeref {
-                                            return vec![];
+                                        if let Some(identifier_type) = resolve_ident(identifier) {
+                                            if assign_typeref.typeref == identifier_type.typeref {
+                                                return vec![];
+                                            }
                                         }
                                     }
-                                }
 
-                                errs.push((
-                                    EgonTypeError::MismatchType {
-                                        expected: assign_typeref.typeref.to_string(),
-                                        actual: value_typeref.typeref.to_string(),
+                                    errs.push((
+                                        EgonTypeError::MismatchType {
+                                            expected: assign_typeref.typeref.to_string(),
+                                            actual: value_typeref.typeref.to_string(),
+                                        }
+                                        .into(),
+                                        value_span.clone(),
+                                    ));
+                                } else {
+                                    // Check for empty list assignment
+                                    // Example:
+                                    // let a: list<unknown> = [];
+                                    if value_typeref.typeref == ast::TypeRef::list(ast::TypeRef::unknown())
+                                        && assign_typeref.typeref.is_unknown_list()
+                                    {
+                                        errs.push((EgonTypeError::UknownListType.into(), span.clone()));
                                     }
-                                    .into(),
-                                    value_span.clone(),
-                                ));
-                            } else {
-                                // Check for empty list assignment
-                                // Example:
-                                // let a: list<unknown> = [];
-                                if value_typeref.typeref == ast::TypeRef::list(ast::TypeRef::unknown())
-                                    && assign_typeref.typeref.is_unknown_list()
-                                {
-                                    errs.push((EgonTypeError::UknownListType.into(), span.clone()));
                                 }
                             }
                         }
+
                     }
                 }
             }
