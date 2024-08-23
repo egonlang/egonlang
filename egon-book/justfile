@@ -1,0 +1,20 @@
+default:
+  @just --list
+
+build:
+    mdbook build
+
+clean:
+    mdbook clean
+
+serve:
+    mdbook serve
+
+watch:
+    mdbook watch
+
+fmt:
+    echo "No formatter in place"
+
+lint:
+    echo "No linter in place"
