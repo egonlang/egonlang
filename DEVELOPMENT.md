@@ -93,6 +93,8 @@ The [VS Code extension](./vsc/) supports syntax highlighting, snippets, and inte
 
 ![Screenshot of vsc extension providing errors from language server](./vsc_typechecking_example.png)
 
+![Screenshot of vsc extension providing hover info of AST nodes](./vsc_ast_hover_info.png)
+
 ### Usage
 
 1. Uninstall any previous version of the extension
