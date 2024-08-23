@@ -44,6 +44,19 @@ pub enum EgonSyntaxError {
     DivideByZero,
     #[error("can not return outside of a block")]
     ReturnedUsedOutsideBlock,
+    /// Indicates the reported code will never be executed.
+    ///
+    /// A common cause would be any code after a return statement.
+    ///
+    /// ```egon
+    /// {
+    ///   return true;
+    ///   123; // SyntaxError: unreachable code
+    ///   456  // SyntaxError: unreachable code
+    /// };
+    /// ```
+    #[error("unreachable code")]
+    UnreachableCode,
 }
 
 #[derive(Debug, Clone, Error, Eq, PartialEq, Serialize, Deserialize)]

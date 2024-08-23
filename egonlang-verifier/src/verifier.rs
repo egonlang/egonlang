@@ -94,6 +94,7 @@ impl<'a> Verifier<'a> {
         self.add_rule(rules::core::InvalidTypeAliasNameRule);
         self.add_rule(rules::core::AssertTypeRule);
         self.add_rule(rules::core::NoReturnOutsideBlockRule);
+        self.add_rule(rules::core::NoStmtsAfterReturnStmtRule);
 
         self
     }
@@ -565,6 +566,9 @@ impl<'a> Verifier<'a> {
 
                 let mut return_stmt_type: Option<ast::TypeRef> = None;
 
+                let rule_errs = self.run_expr_rules(&expr_clone, span);
+                errs.extend(rule_errs);
+
                 for (stmt, stmt_span) in &mut block_expr.stmts {
                     if let ast::Stmt::Return(stmt_return) = stmt {
                         verify_trace!(verifier visit_expr block return_stmt: "{} has a return statement", expr_string);
@@ -596,7 +600,7 @@ impl<'a> Verifier<'a> {
 
                         match self.visit_expr(return_expr, return_span) {
                             Ok(return_type) => {
-                                let rule_errs = self.run_expr_rules(&expr_clone, span);
+                                let rule_errs = self.run_expr_rules(return_expr, return_span);
                                 errs.extend(rule_errs);
 
                                 self.end_current_type_env();
@@ -2100,5 +2104,13 @@ a = b;"#,
             ]),
             results
         );
+    }
+
+    #[test]
+    fn no_errors() {
+        let results = parse("(a: number): number => { a };", 0)
+            .and_then(|mut module| verify_module(&mut module));
+
+        assert_eq!(Ok(()), results);
     }
 }

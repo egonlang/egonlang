@@ -1,0 +1,6 @@
+(): number => {
+    return 123;
+    1 + 5
+};
+
+// out: SyntaxError: unreachable code
