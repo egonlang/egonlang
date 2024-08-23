@@ -43,16 +43,17 @@ impl Module {
                 nodes.extend(expr_nodes);
             }
             Stmt::Assign(stmt_assign) => {
-                let mut is_hovered_over_identifier = false;
+                let mut is_hovered_over_identifier = true;
 
                 if let Some((_, type_span)) = &stmt_assign.type_expr {
                     if type_span.contains(&index) {
-                        is_hovered_over_identifier = true;
+                        is_hovered_over_identifier = false;
                     }
-                    if let Some((_, value_span)) = &stmt_assign.value {
-                        if value_span.contains(&index) {
-                            is_hovered_over_identifier = true;
-                        }
+                }
+
+                if let Some((_, value_span)) = &stmt_assign.value {
+                    if value_span.contains(&index) {
+                        is_hovered_over_identifier = false;
                     }
                 }
 
@@ -397,11 +398,11 @@ mod tests {
                     is_const: false,
                     value: Some((123f64.into(), 16..19))
                 })),
-                AstNode::Expr(&Expr::Type(ExprType(TypeRef::number()))),
-                AstNode::TypeRef(&TypeRef::number()),
                 AstNode::Identifier(&Identifier {
                     name: "a".to_string()
                 }),
+                AstNode::Expr(&Expr::Type(ExprType(TypeRef::number()))),
+                AstNode::TypeRef(&TypeRef::number()),
             ],
             nodes
         );
@@ -500,11 +501,11 @@ mod tests {
                     is_const: true,
                     value: Some((123f64.into(), 18..21))
                 })),
-                AstNode::Expr(&Expr::Type(ExprType(TypeRef::number()))),
-                AstNode::TypeRef(&TypeRef::number()),
                 AstNode::Identifier(&Identifier {
                     name: "a".to_string()
                 }),
+                AstNode::Expr(&Expr::Type(ExprType(TypeRef::number()))),
+                AstNode::TypeRef(&TypeRef::number()),
             ],
             nodes
         );
