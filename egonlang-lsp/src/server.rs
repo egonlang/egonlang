@@ -113,17 +113,33 @@ impl LanguageServer for EgonLanguageServerBackend {
         let index = Diagnoser::position_to_index(
             doc,
             (position.line as usize, position.character as usize),
-        );
+        ) - 1;
 
         if let Ok(module) = parse(doc, 0) {
             let mut nodes = module.get_by_index(index);
 
+            let first_node = nodes.pop().unwrap();
+
+            // Primary AST node
+            let first_node_type = first_node.node_type();
+            let first_node = format!("{:#?}", first_node);
+
+            // Surrounding/related AST nodes
+            // Reversing the nodes allows the more relevant nodes to appear first
             nodes.reverse();
+
+            let nodes: Vec<String> = nodes
+                .iter()
+                .map(|x| format!("---\n### {}\n```\n{x:#?}\n```", x.node_type()))
+                .collect();
+            let nodes = nodes.join("\n");
 
             Ok(Some(Hover {
                 contents: HoverContents::Markup(MarkupContent {
-                    kind: tower_lsp::lsp_types::MarkupKind::PlainText,
-                    value: format!("{nodes:#?}"),
+                    kind: tower_lsp::lsp_types::MarkupKind::Markdown,
+                    value: format!(
+                        "# AST\n## {first_node_type}\n```\n{first_node}\n```\n## See Also\n{nodes}"
+                    ),
                 }),
                 range: None,
             }))

@@ -35,9 +35,8 @@ impl Diagnoser {
         let (line, character) = position;
         let lines_before = source.split('\n').take(line);
         let line_chars_before = lines_before.fold(0usize, |acc, e| acc + e.len());
-        let index = line_chars_before + character + 1;
 
-        index
+        line_chars_before + character + 1
     }
 
     fn get_range(source: &str, span: &Span) -> DiagnosisRange {
