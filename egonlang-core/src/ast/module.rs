@@ -43,17 +43,44 @@ impl Module {
                 nodes.extend(expr_nodes);
             }
             Stmt::Assign(stmt_assign) => {
-                if let Some((type_expr, type_span)) = &stmt_assign.type_expr {
-                    let type_nodes = self.get_nodes_from_expr(type_expr, type_span, index);
-                    nodes.extend(type_nodes);
+                let mut is_hovered_over_identifier = false;
+
+                if let Some((_, type_span)) = &stmt_assign.type_expr {
+                    if type_span.contains(&index) {
+                        is_hovered_over_identifier = true;
+                    }
+                    if let Some((_, value_span)) = &stmt_assign.value {
+                        if value_span.contains(&index) {
+                            is_hovered_over_identifier = true;
+                        }
+                    }
                 }
 
-                if let Some((value_expr, value_span)) = &stmt_assign.value {
-                    let value_nodes = self.get_nodes_from_expr(value_expr, value_span, index);
-                    nodes.extend(value_nodes);
-                }
+                if is_hovered_over_identifier {
+                    if let Some((type_expr, type_span)) = &stmt_assign.type_expr {
+                        let type_nodes = self.get_nodes_from_expr(type_expr, type_span, index);
+                        nodes.extend(type_nodes);
+                    }
 
-                nodes.push(AstNode::Identifier(&stmt_assign.identifier));
+                    if let Some((value_expr, value_span)) = &stmt_assign.value {
+                        let value_nodes = self.get_nodes_from_expr(value_expr, value_span, index);
+                        nodes.extend(value_nodes);
+                    }
+
+                    nodes.push(AstNode::Identifier(&stmt_assign.identifier));
+                } else {
+                    nodes.push(AstNode::Identifier(&stmt_assign.identifier));
+
+                    if let Some((type_expr, type_span)) = &stmt_assign.type_expr {
+                        let type_nodes = self.get_nodes_from_expr(type_expr, type_span, index);
+                        nodes.extend(type_nodes);
+                    }
+
+                    if let Some((value_expr, value_span)) = &stmt_assign.value {
+                        let value_nodes = self.get_nodes_from_expr(value_expr, value_span, index);
+                        nodes.extend(value_nodes);
+                    }
+                }
             }
             Stmt::TypeAlias(stmt_type_alias) => {
                 let (value_typeref, value_span) = &stmt_type_alias.value;
@@ -319,7 +346,32 @@ mod tests {
                     is_const: false,
                     value: Some((123f64.into(), 8..11))
                 })),
+                AstNode::Identifier(&Identifier {
+                    name: "a".to_string()
+                }),
                 AstNode::Expr(&123f64.into()),
+            ],
+            nodes
+        );
+    }
+
+    #[test]
+    fn module_get_ast_nodes_by_index_let_decl_value_b() {
+        let source = "let a = 123;";
+        let module = parse(source, 0).unwrap();
+
+        let nodes = module.get_by_index(4);
+
+        assert_eq!(
+            vec![
+                AstNode::Stmt(&Stmt::Assign(StmtAssign {
+                    identifier: Identifier {
+                        name: "a".to_string()
+                    },
+                    type_expr: None,
+                    is_const: false,
+                    value: Some((123f64.into(), 8..11))
+                })),
                 AstNode::Identifier(&Identifier {
                     name: "a".to_string()
                 }),
@@ -422,10 +474,10 @@ mod tests {
                     is_const: true,
                     value: Some((123f64.into(), 10..13))
                 })),
-                AstNode::Expr(&123f64.into()),
                 AstNode::Identifier(&Identifier {
                     name: "a".to_string()
                 }),
+                AstNode::Expr(&123f64.into()),
             ],
             nodes
         );
@@ -723,6 +775,33 @@ mod tests {
                         name: "a".to_string()
                     }
                 })),
+            ],
+            nodes
+        );
+    }
+
+    #[test]
+    fn module_get_ast_nodes_by_index_assert_type() {
+        let source = "assert_type a, bool;";
+        let module = parse(source, 0).unwrap();
+
+        let nodes = module.get_by_index(16);
+
+        assert_eq!(
+            vec![
+                AstNode::Stmt(&Stmt::AssertType(StmtAssertType {
+                    value: (
+                        Expr::Identifier(ExprIdentifier {
+                            identifier: Identifier {
+                                name: "a".to_string()
+                            }
+                        }),
+                        12..13
+                    ),
+                    expected_type: (Expr::Type(ExprType(TypeRef::bool())), 15..19)
+                })),
+                AstNode::Expr(&Expr::Type(ExprType(TypeRef::bool()))),
+                AstNode::TypeRef(&TypeRef::bool()),
             ],
             nodes
         );

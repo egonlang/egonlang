@@ -6,7 +6,7 @@ use egonlang_core::prelude::*;
 use egonlang_verifier::prelude::*;
 use tokio::sync::Mutex;
 use tower_lsp::jsonrpc::Result;
-use tower_lsp::lsp_types::{HoverProviderCapability, Url};
+use tower_lsp::lsp_types::{HoverProviderCapability, MessageType, Url};
 use tower_lsp::{
     jsonrpc,
     lsp_types::{
@@ -113,7 +113,7 @@ impl LanguageServer for EgonLanguageServerBackend {
         let index = Diagnoser::position_to_index(
             doc,
             (position.line as usize, position.character as usize),
-        ) - 1;
+        );
 
         if let Ok(module) = parse(doc, 0) {
             let mut nodes = module.get_by_index(index);

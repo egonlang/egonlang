@@ -9,5 +9,6 @@
     "lldb.launch.sourceLanguages": [
         "rust"
     ],
-    "egon.binPath": "./target/debug/egon"
+    "egon.binPath": "./target/debug/egon",
+    "editor.renderWhitespace": "all"
 }
