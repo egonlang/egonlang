@@ -1,5 +1,13 @@
 # Egon Language Development Guide
 
+## Getting Started
+
+1. Clone/copy down https://github.com/egonlang/egonlang
+2. Install the [requirements](#requirements)
+3. Run `just clean build verify`
+4. Install the [VS Code extension](#vs-code-extension)
+5. Browser the code [examples](./res/examples/)
+
 ## Requirements
 
 - [rust](https://www.rust-lang.org/)
