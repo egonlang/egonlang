@@ -2,7 +2,9 @@ use std::fmt::{self, Debug, Display, Formatter};
 
 use serde::{Deserialize, Serialize};
 
-use crate::{errors, parser::parse, span::Spanned};
+use crate::parser::parse;
+
+use span::Spanned;
 
 use super::{Expr, ExprS, Identifier, TypeRef};
 
@@ -77,9 +79,9 @@ impl From<StmtAssertType> for Stmt {
 }
 
 impl TryFrom<&str> for Stmt {
-    type Error = errors::EgonError;
+    type Error = egonlang_errors::EgonError;
 
-    fn try_from(value: &str) -> Result<Stmt, errors::EgonError> {
+    fn try_from(value: &str) -> Result<Stmt, egonlang_errors::EgonError> {
         let module = parse(value, 0).unwrap();
 
         let stmt_spanned = module.stmts.first().unwrap();

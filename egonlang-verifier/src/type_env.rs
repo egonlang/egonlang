@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use egonlang_core::prelude::*;
+use egonlang_errors::{EgonErrorS, EgonTypeError};
 
 use crate::verify_trace;
 
@@ -182,7 +183,7 @@ impl TypeEnv {
     pub fn resolve_expr_type(
         &self,
         expr: &ast::Expr,
-        span: &Span,
+        span: &span::Span,
     ) -> Result<ast::TypeRef, Vec<EgonErrorS>> {
         verify_trace!(
             type_env resolve_expr_type: "(level: {}) Resolving expression's type: {}",
@@ -339,7 +340,7 @@ impl TypeEnv {
     fn resolve_identifier_type(
         &self,
         ident_expr: &ast::ExprIdentifier,
-        span: &Span,
+        span: &span::Span,
     ) -> Result<ast::TypeRef, Vec<EgonErrorS>> {
         let name = &ident_expr.identifier.name;
 

@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
+use egonlang_errors::EgonTypeError;
 
 expr_rule!(
     /// Check that let variables can't be assigned with a different type
@@ -61,6 +62,7 @@ mod tests {
     use super::TypeMismatchReassigningLetValuesRule;
     use crate::verifier_rule_test;
     use egonlang_core::prelude::*;
+    use egonlang_errors::EgonTypeError;
 
     verifier_rule_test! {
         TypeMismatchReassigningLetValuesRule,

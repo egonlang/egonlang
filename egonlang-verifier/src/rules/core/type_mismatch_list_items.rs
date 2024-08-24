@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
+use egonlang_errors::EgonTypeError;
 
 expr_rule!(
     /// Checks that all items of a list are of the same type
@@ -26,7 +27,7 @@ expr_rule!(
                 let first_item_typeref = resolve_expr(first_item_expr, first_item_span)
                     .unwrap();
 
-                let remaining_items: Vec<Spanned<ast::Expr>> = items.clone().into_iter().skip(1).collect();
+                let remaining_items: Vec<span::Spanned<ast::Expr>> = items.clone().into_iter().skip(1).collect();
 
                 for (item, item_span) in &remaining_items {
                     if let Some(item_typeref) = resolve_expr(item, item_span) {
@@ -60,6 +61,7 @@ mod tests {
     use super::TypeMisMatchListItemsRule;
     use crate::verifier_rule_test;
     use egonlang_core::prelude::*;
+    use egonlang_errors::EgonTypeError;
 
     verifier_rule_test!(
         TypeMisMatchListItemsRule,

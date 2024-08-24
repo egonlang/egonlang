@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
+use egonlang_errors::EgonSyntaxError;
 
 stmt_rule!(
     /// Checks assignment statements initialize consts with a value
@@ -25,9 +26,10 @@ stmt_rule!(
 
 #[cfg(test)]
 mod tests {
+    use egonlang_errors::EgonSyntaxError;
+
     use super::DeclareConstWithoutValueRule;
     use crate::verifier_rule_test;
-    use egonlang_core::prelude::*;
 
     verifier_rule_test!(
         DeclareConstWithoutValueRule,

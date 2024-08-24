@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::span::Spanned;
+use span::Spanned;
 
 pub type EgonErrorS = Spanned<EgonError>;
 

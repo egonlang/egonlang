@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
+use egonlang_errors::EgonSyntaxError;
 
 expr_rule!(
     /// Check that consts can not be reassigned
@@ -36,7 +37,7 @@ expr_rule!(
 mod tests {
     use super::ReassigningConstValueRule;
     use crate::verifier_rule_test;
-    use egonlang_core::prelude::*;
+    use egonlang_errors::EgonSyntaxError;
 
     verifier_rule_test!(
         ReassigningConstValueRule,

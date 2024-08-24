@@ -8,6 +8,8 @@ edition = "2021"
 [dependencies]
 regex = "1.10.4"
 egonlang-core = { path = "../egonlang-core" }
+egonlang-errors = { path = "../egonlang-errors" }
+span = { path = "../span" }
 colored = "2"
 paste = "1.0.15"
 

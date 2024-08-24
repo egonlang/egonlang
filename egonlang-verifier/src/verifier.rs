@@ -1,6 +1,8 @@
 use ast::TypeRef;
 use colored::Colorize;
 use egonlang_core::prelude::*;
+use egonlang_errors::{EgonErrorS, EgonTypeError};
+use span::Span;
 
 use crate::{
     rules::{self, ResolveExpr, ResolveIdent},
@@ -477,11 +479,10 @@ impl<'a> Verifier<'a> {
             let resolve_ident: Box<dyn ResolveIdent> =
                 Box::new(|id: &str| self.resolve_identifier(id));
 
-            let resolve_expr: Box<dyn ResolveExpr> = Box::new(
-                |expr: &::egonlang_core::ast::Expr, _span: &::egonlang_core::span::Span| {
+            let resolve_expr: Box<dyn ResolveExpr> =
+                Box::new(|expr: &::egonlang_core::ast::Expr, _span: &::span::Span| {
                     self.resolve_expr_type(expr)
-                },
-            );
+                });
 
             let rule_errs = rule
                 .visit_stmt(stmt, span, resolve_ident.as_ref(), resolve_expr.as_ref())
@@ -1099,6 +1100,7 @@ impl<'a> Verifier<'a> {
 mod verifier_tests {
     use crate::prelude::*;
     use egonlang_core::prelude::*;
+    use egonlang_errors::{EgonSyntaxError, EgonTypeError};
     use pretty_assertions::assert_eq;
 
     use super::Verifier;

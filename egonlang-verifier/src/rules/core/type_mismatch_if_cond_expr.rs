@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
+use egonlang_errors::EgonTypeError;
 
 expr_rule!(
     /// Checks the condition expression of a if statement is a boolean
@@ -45,9 +46,10 @@ expr_rule!(
 
 #[cfg(test)]
 mod tests {
+    use egonlang_errors::EgonTypeError;
+
     use super::TypeMismatchIfCondExprRule;
     use crate::verifier_rule_test;
-    use egonlang_core::prelude::*;
 
     verifier_rule_test! {
         TypeMismatchIfCondExprRule,

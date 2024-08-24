@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
+use egonlang_errors::{EgonErrorS, EgonTypeError};
 use rules::rule::ResolveExpr;
 
 expr_rule!(
@@ -153,6 +154,7 @@ mod type_mismatch_infix_tests {
     use super::TypeMismatchInfixRule;
     use crate::verifier_rule_test;
     use egonlang_core::prelude::*;
+    use egonlang_errors::EgonTypeError;
 
     verifier_rule_test!(
         TypeMismatchInfixRule,

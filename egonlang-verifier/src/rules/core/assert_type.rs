@@ -1,8 +1,6 @@
 use crate::prelude::*;
-use egonlang_core::{
-    ast::Stmt,
-    errors::{EgonErrorS, EgonTypeError},
-};
+use egonlang_core::ast::Stmt;
+use egonlang_errors::{EgonErrorS, EgonTypeError};
 
 stmt_rule!(AssertType, |stmt, span, _resolve_ident, resolve_expr| {
     let mut errs: Vec<EgonErrorS> = vec![];

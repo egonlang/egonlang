@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
+use egonlang_errors::EgonTypeError;
 
 stmt_rule!(
     /// Checks the value type of an assignment declaration matches the declaration type
@@ -121,6 +122,7 @@ mod tests {
     use super::TypeMismatchOnDeclarationsRule;
     use crate::verifier_rule_test;
     use egonlang_core::prelude::*;
+    use egonlang_errors::EgonTypeError;
 
     verifier_rule_test! {
         TypeMismatchOnDeclarationsRule,

@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
+use egonlang_errors::EgonSyntaxError;
 
 expr_rule!(
     NoStmtsAfterReturnStmt,
@@ -41,7 +42,7 @@ expr_rule!(
 
 #[cfg(test)]
 mod tests {
-    use egonlang_core::errors::EgonSyntaxError;
+    use egonlang_errors::EgonSyntaxError;
     use rules::core::NoStmtsAfterReturnStmtRule;
 
     use crate::{prelude::*, verifier_rule_test};

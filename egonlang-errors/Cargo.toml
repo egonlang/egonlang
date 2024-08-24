@@ -1,0 +1,10 @@
+[package]
+name = "egonlang-errors"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+thiserror = "1.0.56"
+serde = { version = "1.0.195", features = ["derive"] }
+span = { path = "../span" }
+paste = "1.0.15"

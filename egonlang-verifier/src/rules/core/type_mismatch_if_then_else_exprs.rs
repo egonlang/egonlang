@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
+use egonlang_errors::EgonTypeError;
 
 expr_rule!(
     /// Checks that both branches of an if/else expression/statement return the same type
@@ -61,7 +62,7 @@ expr_rule!(
 mod tests {
     use super::TypeMismatchIfthenElseExprRule;
     use crate::verifier_rule_test;
-    use egonlang_core::prelude::*;
+    use egonlang_errors::EgonTypeError;
 
     verifier_rule_test! {
         TypeMismatchIfthenElseExprRule,

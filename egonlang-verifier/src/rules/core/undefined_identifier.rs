@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
+use egonlang_errors::EgonTypeError;
 
 expr_rule!(
     /// Checks for references to undefined variables
@@ -34,9 +35,10 @@ expr_rule!(
 
 #[cfg(test)]
 mod tests {
+    use egonlang_errors::EgonTypeError;
+
     use super::ReferencingUndefinedIdentifierRule;
     use crate::verifier_rule_test;
-    use egonlang_core::prelude::*;
 
     verifier_rule_test! {
         ReferencingUndefinedIdentifierRule,

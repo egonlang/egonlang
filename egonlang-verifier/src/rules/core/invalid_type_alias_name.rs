@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
+use egonlang_errors::EgonSyntaxError;
 use regex::Regex;
 
 stmt_rule!(
@@ -36,7 +37,7 @@ stmt_rule!(
 mod tests {
     use super::InvalidTypeAliasNameRule;
     use crate::verifier_rule_test;
-    use egonlang_core::prelude::*;
+    use egonlang_errors::EgonSyntaxError;
 
     verifier_rule_test!(
         InvalidTypeAliasNameRule,

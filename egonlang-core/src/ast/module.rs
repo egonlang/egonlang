@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 use serde::{Deserialize, Serialize};
 
-use crate::span::{Span, Spanned};
+use span::{Span, Spanned};
 
 use super::{Expr, Stmt, StmtS};
 

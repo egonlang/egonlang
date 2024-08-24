@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
+use egonlang_errors::EgonTypeError;
 
 expr_rule!(
     /// Checks the return type of a function matches function body's
@@ -60,7 +61,7 @@ expr_rule!(
 mod tests {
     use super::TypeMismatchFnReturnExprRule;
     use crate::verifier_rule_test;
-    use egonlang_core::prelude::*;
+    use egonlang_errors::EgonTypeError;
 
     verifier_rule_test!(
         TypeMismatchFnReturnExprRule,

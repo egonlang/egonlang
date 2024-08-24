@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
+use egonlang_errors::EgonSyntaxError;
 
 stmt_rule!(
     NoReturnOutsideBlock,

@@ -1,12 +1,12 @@
 pub trait ResolveIdent: Fn(&str) -> Option<crate::TypeEnvValue> {}
 pub trait ResolveExpr:
-    Fn(&::egonlang_core::ast::Expr, &::egonlang_core::span::Span) -> Option<crate::TypeEnvValue>
+    Fn(&::egonlang_core::ast::Expr, &::span::Span) -> Option<crate::TypeEnvValue>
 {
 }
 
 impl<F> ResolveIdent for F where F: Fn(&str) -> Option<crate::TypeEnvValue> {}
 impl<F> ResolveExpr for F where
-    F: Fn(&::egonlang_core::ast::Expr, &::egonlang_core::span::Span) -> Option<crate::TypeEnvValue>
+    F: Fn(&::egonlang_core::ast::Expr, &::span::Span) -> Option<crate::TypeEnvValue>
 {
 }
 
@@ -15,7 +15,7 @@ pub trait Rule<'a> {
     fn visit_stmt(
         &self,
         stmt: &::egonlang_core::ast::Stmt,
-        span: &::egonlang_core::span::Span,
+        span: &::span::Span,
         resolve_ident: &dyn ResolveIdent,
         resolve_expr: &dyn ResolveExpr,
     ) -> crate::VerificationResult;
@@ -23,7 +23,7 @@ pub trait Rule<'a> {
     fn visit_expr(
         &self,
         expr: &::egonlang_core::ast::Expr,
-        span: &::egonlang_core::span::Span,
+        span: &::span::Span,
         resolve_ident: &dyn ResolveIdent,
         resolve_expr: &dyn ResolveExpr,
     ) -> crate::VerificationResult;
@@ -43,7 +43,7 @@ macro_rules! expr_rule {
                 fn visit_stmt(
                     &self,
                     _stmt: &::egonlang_core::ast::Stmt,
-                    _span: &::egonlang_core::span::Span,
+                    _span: &::span::Span,
                     _resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
                     _resolve_expr: &dyn $crate::rules::rule::ResolveExpr,
                 ) -> VerificationResult {
@@ -53,12 +53,12 @@ macro_rules! expr_rule {
                 fn visit_expr(
                     &self,
                     expr: &::egonlang_core::ast::Expr,
-                    _span: &::egonlang_core::span::Span,
+                    _span: &::span::Span,
                     _resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
                     _resolve_expr: &dyn $crate::rules::rule::ResolveExpr,
                 ) -> VerificationResult {
                     let internal = |$expr: &::egonlang_core::ast::Expr| ->
-                        Vec<::egonlang_core::errors::EgonErrorS> {
+                        Vec<::egonlang_errors::EgonErrorS> {
                             $body
                         };
 
@@ -126,7 +126,7 @@ macro_rules! expr_rule {
                 fn visit_stmt(
                     &self,
                     _stmt: &::egonlang_core::ast::Stmt,
-                    _span: &::egonlang_core::span::Span,
+                    _span: &::span::Span,
                     _resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
                     _resolve_expr: &dyn $crate::rules::rule::ResolveExpr,
                 ) -> VerificationResult {
@@ -136,12 +136,12 @@ macro_rules! expr_rule {
                 fn visit_expr(
                     &self,
                     expr: &::egonlang_core::ast::Expr,
-                    span: &::egonlang_core::span::Span,
+                    span: &::span::Span,
                     resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
                     resolve_expr: &dyn $crate::rules::rule::ResolveExpr,
                 ) -> VerificationResult {
                     let internal = | $expr: &::egonlang_core::ast::Expr,
-                                     $span: &::egonlang_core::span::Span,
+                                     $span: &::span::Span,
                                      $resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
                                      $resolve_expr: &dyn $crate::rules::rule::ResolveExpr |
                         { $body };
@@ -173,12 +173,12 @@ macro_rules! stmt_rule {
                 fn visit_stmt(
                     &self,
                     stmt: &::egonlang_core::ast::Stmt,
-                    span: &::egonlang_core::span::Span,
+                    span: &::span::Span,
                     resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
                     resolve_expr: &dyn $crate::rules::rule::ResolveExpr,
                 ) -> $crate::VerificationResult {
                     let internal = | $stmt: &::egonlang_core::ast::Stmt,
-                                     $span: &::egonlang_core::span::Span,
+                                     $span: &::span::Span,
                                      $resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
                                      $resolve_expr: &dyn $crate::rules::rule::ResolveExpr |
                         { $body };
@@ -195,7 +195,7 @@ macro_rules! stmt_rule {
                 fn visit_expr(
                     &self,
                     _expr: &::egonlang_core::ast::Expr,
-                    _span: &::egonlang_core::span::Span,
+                    _span: &::span::Span,
                     _resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
                     _resolve_expr: &dyn $crate::rules::rule::ResolveExpr,
                 ) -> $crate::VerificationResult {

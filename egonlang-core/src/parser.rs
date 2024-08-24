@@ -5,7 +5,7 @@ use crate::lexer::Lexer;
 use lalrpop_util::ParseError;
 
 use crate::ast::Module;
-use crate::errors::{EgonError, EgonErrorS, EgonSyntaxError};
+use egonlang_errors::{EgonError, EgonErrorS, EgonSyntaxError};
 
 lalrpop_mod!(
     #[allow(clippy::all)]
@@ -96,7 +96,7 @@ mod parser_tests {
         StmtAssertType, StmtAssign, StmtExpr, StmtTypeAlias, TypeRef,
     };
 
-    use crate::errors::{EgonError, EgonSyntaxError};
+    use egonlang_errors::{EgonError, EgonSyntaxError};
 
     macro_rules! parser_test {
         ($test_name:ident, $input:expr, $expected:expr) => {

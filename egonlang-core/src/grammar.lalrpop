@@ -1,7 +1,8 @@
 use lalrpop_util::ParseError;
-use crate::errors::EgonErrorS;
+use egonlang_errors::EgonErrorS;
 
-use crate::{ast, lexer, span};
+use crate::{ast, lexer};
+use span;
 
 grammar<'err>(
     errors: &'err mut Vec<ParseError<usize, lexer::Token, EgonErrorS>>

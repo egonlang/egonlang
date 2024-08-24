@@ -1,12 +1,11 @@
 use std::fmt::{self, Display, Formatter};
 
+use egonlang_errors::{EgonError, EgonTypeError};
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    errors::{self, EgonError, EgonSyntaxError, EgonTypeError},
-    parser::parse,
-    span::Spanned,
-};
+use crate::parser::parse;
+
+use span::Spanned;
 
 use super::{Stmt, StmtS, TypeRef};
 
@@ -117,9 +116,9 @@ pub enum Expr {
 }
 
 impl TryFrom<&str> for Expr {
-    type Error = errors::EgonError;
+    type Error = egonlang_errors::EgonError;
 
-    fn try_from(value: &str) -> Result<Expr, errors::EgonError> {
+    fn try_from(value: &str) -> Result<Expr, egonlang_errors::EgonError> {
         let module = parse(value, 0).unwrap();
 
         let (stmt, _) = module.stmts.first().unwrap();
@@ -130,7 +129,7 @@ impl TryFrom<&str> for Expr {
             return Ok(expr.0.clone());
         };
 
-        Err(EgonSyntaxError::InvalidToken.into())
+        Err(egonlang_errors::EgonSyntaxError::InvalidToken.into())
     }
 }
 
@@ -265,18 +264,18 @@ impl From<f64> for ExprLiteral {
 }
 
 impl TryFrom<Expr> for f64 {
-    type Error = Vec<EgonError>;
+    type Error = Vec<egonlang_errors::EgonError>;
 
     fn try_from(value: Expr) -> Result<Self, Self::Error> {
         match value {
             Expr::Literal(literal) => match literal {
                 ExprLiteral::Number(number) => Ok(number),
-                ExprLiteral::Bool(_) => Err(vec![errors::EgonTypeError::MismatchType {
+                ExprLiteral::Bool(_) => Err(vec![egonlang_errors::EgonTypeError::MismatchType {
                     expected: TypeRef::number().to_string(),
                     actual: TypeRef::bool().to_string(),
                 }
                 .into()]),
-                ExprLiteral::String(_) => Err(vec![errors::EgonTypeError::MismatchType {
+                ExprLiteral::String(_) => Err(vec![egonlang_errors::EgonTypeError::MismatchType {
                     expected: TypeRef::number().to_string(),
                     actual: TypeRef::string().to_string(),
                 }
@@ -284,13 +283,13 @@ impl TryFrom<Expr> for f64 {
             },
             Expr::Prefix(prefix) => match prefix.op {
                 OpPrefix::Negate => prefix.rt.0.try_into(),
-                OpPrefix::Not => Err(vec![errors::EgonTypeError::MismatchType {
+                OpPrefix::Not => Err(vec![egonlang_errors::EgonTypeError::MismatchType {
                     expected: TypeRef::number().to_string(),
                     actual: TypeRef::bool().to_string(),
                 }
                 .into()]),
             },
-            _ => Err(vec![errors::EgonTypeError::MismatchType {
+            _ => Err(vec![egonlang_errors::EgonTypeError::MismatchType {
                 expected: TypeRef::number().to_string(),
                 actual: value.to_string(),
             }
@@ -300,24 +299,24 @@ impl TryFrom<Expr> for f64 {
 }
 
 impl TryFrom<Expr> for String {
-    type Error = Vec<EgonError>;
+    type Error = Vec<egonlang_errors::EgonError>;
 
     fn try_from(value: Expr) -> Result<Self, Self::Error> {
         match value {
             Expr::Literal(literal) => match literal {
-                ExprLiteral::Number(_) => Err(vec![errors::EgonTypeError::MismatchType {
+                ExprLiteral::Number(_) => Err(vec![egonlang_errors::EgonTypeError::MismatchType {
                     expected: TypeRef::string().to_string(),
                     actual: TypeRef::number().to_string(),
                 }
                 .into()]),
-                ExprLiteral::Bool(_) => Err(vec![errors::EgonTypeError::MismatchType {
+                ExprLiteral::Bool(_) => Err(vec![egonlang_errors::EgonTypeError::MismatchType {
                     expected: TypeRef::string().to_string(),
                     actual: TypeRef::bool().to_string(),
                 }
                 .into()]),
                 ExprLiteral::String(string) => Ok(string),
             },
-            _ => Err(vec![errors::EgonTypeError::MismatchType {
+            _ => Err(vec![egonlang_errors::EgonTypeError::MismatchType {
                 expected: TypeRef::string().to_string(),
                 actual: value.to_string(),
             }
@@ -327,7 +326,7 @@ impl TryFrom<Expr> for String {
 }
 
 impl TryFrom<Expr> for bool {
-    type Error = Vec<EgonError>;
+    type Error = Vec<egonlang_errors::EgonError>;
 
     fn try_from(value: Expr) -> Result<Self, Self::Error> {
         match value {

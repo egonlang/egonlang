@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
+use egonlang_errors::EgonSyntaxError;
 
 expr_rule!(
     /// Checks infix expressions for dividing by zero
@@ -51,7 +52,7 @@ expr_rule!(
 mod tests {
     use super::DivideByZeroRule;
     use crate::verifier_rule_test;
-    use egonlang_core::prelude::*;
+    use egonlang_errors::EgonSyntaxError;
 
     verifier_rule_test!(
         DivideByZeroRule,

@@ -3,7 +3,7 @@ use std::num::ParseFloatError;
 use logos::Logos;
 use serde::{Deserialize, Serialize};
 
-use crate::errors::{EgonError, EgonErrorS, EgonSyntaxError};
+use egonlang_errors::{EgonError, EgonErrorS, EgonSyntaxError};
 
 /// Converts a [`String`] source in to a vector of [`Token`]
 #[derive(Debug)]

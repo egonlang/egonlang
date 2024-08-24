@@ -365,6 +365,7 @@ version = "0.1.0"
 dependencies = [
  "build-deps",
  "codespan-reporting",
+ "egonlang-errors",
  "lalrpop",
  "lalrpop-util",
  "logos",
@@ -372,7 +373,18 @@ dependencies = [
  "pretty_assertions",
  "regex",
  "serde",
+ "span",
  "str-idxpos",
+ "thiserror",
+]
+
+[[package]]
+name = "egonlang-errors"
+version = "0.1.0"
+dependencies = [
+ "paste",
+ "serde",
+ "span",
  "thiserror",
 ]
 
@@ -397,10 +409,12 @@ version = "0.1.0"
 dependencies = [
  "colored",
  "egonlang-core",
+ "egonlang-errors",
  "paste",
  "pretty_assertions",
  "regex",
  "rstest",
+ "span",
 ]
 
 [[package]]
@@ -1192,6 +1206,10 @@ dependencies = [
  "libc",
  "windows-sys 0.52.0",
 ]
+
+[[package]]
+name = "span"
+version = "0.1.0"
 
 [[package]]
 name = "str-idxpos"

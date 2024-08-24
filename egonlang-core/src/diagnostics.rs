@@ -1,5 +1,6 @@
-use crate::prelude::*;
+use egonlang_errors::EgonError;
 use serde::{Deserialize, Serialize};
+use span::Span;
 use str_idxpos::index_to_position;
 
 #[derive(Debug, Default)]
@@ -85,8 +86,9 @@ impl DiagnosisRange {
 mod tests {
     use crate::diagnostics::{Diagnosis, DiagnosisPosition, DiagnosisRange, DiagnosisSeverity};
 
-    use super::{Diagnoser, EgonErrorS, EgonTypeError};
+    use super::Diagnoser;
 
+    use egonlang_errors::{EgonErrorS, EgonTypeError};
     use pretty_assertions::assert_eq;
 
     #[test]

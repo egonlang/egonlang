@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
+use egonlang_errors::EgonTypeError;
 
 expr_rule!(
     /// Checks value types for all prefix operation expressions
@@ -63,6 +64,7 @@ mod tests {
     use super::TypeMismatchPrefixRule;
     use crate::verifier_rule_test;
     use egonlang_core::prelude::*;
+    use egonlang_errors::EgonTypeError;
 
     verifier_rule_test! {
         TypeMismatchPrefixRule,
