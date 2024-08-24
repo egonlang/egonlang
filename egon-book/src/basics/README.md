@@ -1,4 +1,5 @@
 # Basics
 
-**Note:** Please review the getting started section of the [developer's guide](https://github.com/egonlang/egonlang/blob/main/DEVELOPMENT.md#getting-started) to get things installed and working.
-
+<div class="warning">
+You might want to review the <a href="https://github.com/egonlang/egonlang/blob/main/DEVELOPMENT.md#getting-started">getting started</a> section of the <a href="https://github.com/egonlang/egonlang/blob/main/DEVELOPMENT.md">developer guide</a> to get things installed and working.
+</div>

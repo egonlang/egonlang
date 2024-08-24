@@ -17,3 +17,14 @@ let b: string = 123;
 a = "testing";
 // TypeError: mismatched types: expected type `string` but received `number`
 ```
+
+## Types
+
+- `number`
+- `string`
+- `bool`
+- `()`
+- `list<T>`
+- `tuple<T, U, ...>`
+- `function<tuple<Arg0, Arg1, ...>, R>`
+- `range`

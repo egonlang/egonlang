@@ -6,7 +6,7 @@ Variables store a piece of data. We can declare a variable using the `let` keywo
 let a = 123;
 ```
 
-You can also reassign the value later in the code.
+You can reassign the value later.
 
 ```egon
 a = 456;
