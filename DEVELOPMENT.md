@@ -23,11 +23,15 @@
 ## Project Structure
 
 - [core](./egonlang-core/): Library responsible for lexing, and parsing egon code
+- [errors](./egonlang-errors/): Shared errors used across egon crates
 - [verifier](./egonlang-verifier/): Library responsible verifying AST (e.g. syntax errors, type checking)
 - [lsp](./egonlang-lsp/) Language server
 - [cli](./egonlang-cli/): Command line tool to lex and parse egon code files 
 - [vsc](./vsc/): VS Code language extension
 - [book](./egon-book/) The egon book documenting the language
+
+### Support/Utils
+
 - [str-idxpos](./str-idxpos/) A library for mapping between 0-based string indexes and 0-based line/column positions
 
 ## Build, test, verify, etc...
