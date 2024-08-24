@@ -89,7 +89,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="basics/index.html"><strong aria-hidden="true">2.</strong> Basics</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="basics/variables.html"><strong aria-hidden="true">2.1.</strong> Variables</a></li><li class="chapter-item expanded "><a href="basics/constants.html"><strong aria-hidden="true">2.2.</strong> Constants</a></li><li class="chapter-item expanded "><a href="basics/types.html"><strong aria-hidden="true">2.3.</strong> Types</a></li><li class="chapter-item expanded "><a href="basics/stmts-vs-expr.html"><strong aria-hidden="true">2.4.</strong> Statements vs Expressions</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="basics/index.html"><strong aria-hidden="true">2.</strong> Basics</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="basics/variables.html"><strong aria-hidden="true">2.1.</strong> Variables</a></li><li class="chapter-item expanded "><a href="basics/constants.html"><strong aria-hidden="true">2.2.</strong> Constants</a></li><li class="chapter-item expanded "><a href="basics/types.html"><strong aria-hidden="true">2.3.</strong> Types</a></li><li class="chapter-item expanded "><a href="basics/stmts-vs-expr.html"><strong aria-hidden="true">2.4.</strong> Statements vs Expressions</a></li></ol></li><li class="chapter-item expanded "><a href="tooling/index.html"><strong aria-hidden="true">3.</strong> Tooling</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="tooling/cli.html"><strong aria-hidden="true">3.1.</strong> CLI</a></li><li class="chapter-item expanded "><a href="tooling/lsp.html"><strong aria-hidden="true">3.2.</strong> Language Server</a></li><li class="chapter-item expanded "><a href="tooling/vsc.html"><strong aria-hidden="true">3.3.</strong> VS Code Extension</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -443,6 +443,41 @@ let b = { true };
 assert_type b, string;
 // TypeError: mismatched types: expected type `string` but received `bool`
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="tooling"><a class="header" href="#tooling">Tooling</a></h1>
+<div class="warning">
+You might want to review the <a href="https://github.com/egonlang/egonlang/blob/main/DEVELOPMENT.md#getting-started">getting started</a> section of the <a href="https://github.com/egonlang/egonlang/blob/main/DEVELOPMENT.md">developer guide</a> to get things installed and working.
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="cli"><a class="header" href="#cli">CLI</a></h1>
+<p><a href="https://github.com/egonlang/egonlang/tree/main/egonlang-cli">Source</a></p>
+<h2 id="command"><a class="header" href="#command">Command</a></h2>
+<p>The <code>egon</code> command can lex, parse, and verify Egon code. If working from the repo then <code>just cli</code> can be used.</p>
+<h2 id="lexing"><a class="header" href="#lexing">Lexing</a></h2>
+<p>Returns a list of tokens from Egon code.</p>
+<pre><code class="language-shell">egon lex ./path/to/file.eg
+</code></pre>
+<h2 id="parsing"><a class="header" href="#parsing">Parsing</a></h2>
+<p>Returns an AST from Egon code.</p>
+<pre><code class="language-shell">egon parse ./path/to/file.eg
+</code></pre>
+<h2 id="verify"><a class="header" href="#verify">Verify</a></h2>
+<p>Analyze Egon code and return any errors.</p>
+<pre><code class="language-shell">egon verify ./path/to/file.eg
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="language-server"><a class="header" href="#language-server">Language Server</a></h1>
+<p><a href="https://github.com/egonlang/egonlang/tree/main/egonlang-lsp">Source</a></p>
+<h2 id="command-1"><a class="header" href="#command-1">Command</a></h2>
+<p>The <code>egon-lsp</code> starts the Egon language server. If working from the repo then <code>just lsp</code> can be used.</p>
+<pre><code class="language-shell">egon-lsp
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="vs-code-extension"><a class="header" href="#vs-code-extension">VS Code Extension</a></h1>
+<p><a href="https://github.com/egonlang/egonlang/tree/main/vsc">Source</a></p>
+<p>The extension supports syntax highlighting, snippets, and integration with the <a href="tooling/./egonlang-lsp/">language server</a>.</p>
+<h2 id="usage"><a class="header" href="#usage">Usage</a></h2>
+<ol>
+<li>Uninstall any previous version of the extension</li>
+<li>Run <code>just clean build</code></li>
+<li>Install the latest build <code>./vsc/out/egon-language-*.vsix</code></li>
+<li>Open any egon file <code>*.eg</code></li>
+</ol>
 
                     </main>
 

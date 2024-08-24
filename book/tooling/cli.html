@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Types - The Egon Programming Language</title>
+        <title>CLI - The Egon Programming Language</title>
 
 
         <!-- Custom HTML head -->
@@ -88,7 +88,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../basics/index.html"><strong aria-hidden="true">2.</strong> Basics</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../basics/variables.html"><strong aria-hidden="true">2.1.</strong> Variables</a></li><li class="chapter-item expanded "><a href="../basics/constants.html"><strong aria-hidden="true">2.2.</strong> Constants</a></li><li class="chapter-item expanded "><a href="../basics/types.html" class="active"><strong aria-hidden="true">2.3.</strong> Types</a></li><li class="chapter-item expanded "><a href="../basics/stmts-vs-expr.html"><strong aria-hidden="true">2.4.</strong> Statements vs Expressions</a></li></ol></li><li class="chapter-item expanded "><a href="../tooling/index.html"><strong aria-hidden="true">3.</strong> Tooling</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../tooling/cli.html"><strong aria-hidden="true">3.1.</strong> CLI</a></li><li class="chapter-item expanded "><a href="../tooling/lsp.html"><strong aria-hidden="true">3.2.</strong> Language Server</a></li><li class="chapter-item expanded "><a href="../tooling/vsc.html"><strong aria-hidden="true">3.3.</strong> VS Code Extension</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../basics/index.html"><strong aria-hidden="true">2.</strong> Basics</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../basics/variables.html"><strong aria-hidden="true">2.1.</strong> Variables</a></li><li class="chapter-item expanded "><a href="../basics/constants.html"><strong aria-hidden="true">2.2.</strong> Constants</a></li><li class="chapter-item expanded "><a href="../basics/types.html"><strong aria-hidden="true">2.3.</strong> Types</a></li><li class="chapter-item expanded "><a href="../basics/stmts-vs-expr.html"><strong aria-hidden="true">2.4.</strong> Statements vs Expressions</a></li></ol></li><li class="chapter-item expanded "><a href="../tooling/index.html"><strong aria-hidden="true">3.</strong> Tooling</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../tooling/cli.html" class="active"><strong aria-hidden="true">3.1.</strong> CLI</a></li><li class="chapter-item expanded "><a href="../tooling/lsp.html"><strong aria-hidden="true">3.2.</strong> Language Server</a></li><li class="chapter-item expanded "><a href="../tooling/vsc.html"><strong aria-hidden="true">3.3.</strong> VS Code Extension</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -173,40 +173,32 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="types"><a class="header" href="#types">Types</a></h1>
-<p>Egon is a statically typed language providing type errors at compile time.</p>
-<pre><code class="language-egon">let a = 123;
-
-a = "testing";
-// TypeError: mismatched types: expected type `number` but received `string`
+                        <h1 id="cli"><a class="header" href="#cli">CLI</a></h1>
+<p><a href="https://github.com/egonlang/egonlang/tree/main/egonlang-cli">Source</a></p>
+<h2 id="command"><a class="header" href="#command">Command</a></h2>
+<p>The <code>egon</code> command can lex, parse, and verify Egon code. If working from the repo then <code>just cli</code> can be used.</p>
+<h2 id="lexing"><a class="header" href="#lexing">Lexing</a></h2>
+<p>Returns a list of tokens from Egon code.</p>
+<pre><code class="language-shell">egon lex ./path/to/file.eg
 </code></pre>
-<p>The type was inferred when declaring <code>a</code> but an explicit type can be defined.</p>
-<pre><code class="language-egon">let b: string = 123;
-
-a = "testing";
-// TypeError: mismatched types: expected type `string` but received `number`
+<h2 id="parsing"><a class="header" href="#parsing">Parsing</a></h2>
+<p>Returns an AST from Egon code.</p>
+<pre><code class="language-shell">egon parse ./path/to/file.eg
 </code></pre>
-<h2 id="types-1"><a class="header" href="#types-1">Types</a></h2>
-<ul>
-<li><code>number</code></li>
-<li><code>string</code></li>
-<li><code>bool</code></li>
-<li><code>()</code></li>
-<li><code>list&lt;T&gt;</code></li>
-<li><code>tuple&lt;T, U, ...&gt;</code></li>
-<li><code>function&lt;tuple&lt;Arg0, Arg1, ...&gt;, R&gt;</code></li>
-<li><code>range</code></li>
-</ul>
+<h2 id="verify"><a class="header" href="#verify">Verify</a></h2>
+<p>Analyze Egon code and return any errors.</p>
+<pre><code class="language-shell">egon verify ./path/to/file.eg
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../basics/constants.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../tooling/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../basics/stmts-vs-expr.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../tooling/lsp.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -216,11 +208,11 @@ a = "testing";
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../basics/constants.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../tooling/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../basics/stmts-vs-expr.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../tooling/lsp.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
