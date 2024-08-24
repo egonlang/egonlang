@@ -367,12 +367,12 @@ dependencies = [
  "codespan-reporting",
  "lalrpop",
  "lalrpop-util",
- "line-col",
  "logos",
  "paste",
  "pretty_assertions",
  "regex",
  "serde",
+ "str-idxpos",
  "thiserror",
 ]
 
@@ -386,6 +386,7 @@ dependencies = [
  "egonlang-verifier",
  "serde",
  "serde_json",
+ "str-idxpos",
  "tokio",
  "tower-lsp",
 ]
@@ -1190,6 +1191,13 @@ checksum = "ce305eb0b4296696835b71df73eb912e0f1ffd2556a501fcede6e0c50349191c"
 dependencies = [
  "libc",
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "str-idxpos"
+version = "0.1.0"
+dependencies = [
+ "line-col",
 ]
 
 [[package]]

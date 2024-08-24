@@ -28,6 +28,7 @@
 - [cli](./egonlang-cli/): Command line tool to lex and parse egon code files 
 - [vsc](./vsc/): VS Code language extension
 - [book](./egon-book/) The egon book documenting the language
+- [str-idxpos](./str-idxpos/) A library for mapping between 0-based string indexes and 0-based line/column positions
 
 ## Build, test, verify, etc...
 

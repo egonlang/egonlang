@@ -4,6 +4,7 @@ use std::sync::Arc;
 use diagnostics::{Diagnoser, Diagnosis, DiagnosisPosition, DiagnosisRange, DiagnosisSeverity};
 use egonlang_core::prelude::*;
 use egonlang_verifier::prelude::*;
+use str_idxpos::position_to_index;
 use tokio::sync::Mutex;
 use tower_lsp::jsonrpc::Result;
 use tower_lsp::lsp_types::{HoverProviderCapability, Url};
@@ -110,10 +111,7 @@ impl LanguageServer for EgonLanguageServerBackend {
         let docs = self.documents.lock().await;
 
         let doc = docs.get(&source_uri).unwrap();
-        let index = Diagnoser::position_to_index(
-            doc,
-            (position.line as usize, position.character as usize),
-        );
+        let index = position_to_index(doc, (position.line as usize, position.character as usize));
 
         if let Ok(module) = parse(doc, 0) {
             let mut nodes = module.get_by_index(index);
