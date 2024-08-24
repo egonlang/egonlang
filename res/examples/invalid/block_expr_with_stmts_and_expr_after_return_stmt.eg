@@ -1,0 +1,10 @@
+{
+    return 123;
+    1 + 5;
+    false;
+    123
+};
+
+// out: SyntaxError: unreachable code
+// out: SyntaxError: unreachable code
+// out: SyntaxError: unreachable code
