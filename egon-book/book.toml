@@ -3,4 +3,4 @@ authors = ["Kylee Tilley"]
 language = "en"
 multilingual = false
 src = "src"
-title = "The Egon Book"
+title = "The Egon Programming Language"
