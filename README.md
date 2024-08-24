@@ -1,4 +1,4 @@
 # 👻 The Egon Language
 
-See the [language docs](./LANGUAGE.md) or [syntax examples](./res/examples/) for the syntax (a work in progress). Head over to the [development doc](./DEVELOPMENT.md) to get started!
+See the [the book](https://egonlang.github.io/egonlang/book/introduction.html), [syntax examples](./res/examples/) or over to the [development doc](./DEVELOPMENT.md) to get started!
 
