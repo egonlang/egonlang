@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 use serde::{Deserialize, Serialize};
 
-use crate::span::Span;
+use crate::span::{Span, Spanned};
 
 use super::{Expr, Stmt, StmtS};
 
@@ -26,14 +26,14 @@ impl Module {
         stmt: &'a Stmt,
         span: &'a Span,
         index: usize,
-    ) -> Vec<AstNode<'a>> {
+    ) -> Vec<AstNode> {
         let mut nodes = vec![];
 
         if !span.contains(&index) {
-            return nodes;
+            return vec![];
         }
 
-        nodes.push(AstNode::Stmt(stmt));
+        nodes.push(AstNode::Stmt((stmt.clone(), span.clone())));
 
         match &stmt {
             Stmt::Expr(stmt_expr) => {
@@ -55,18 +55,21 @@ impl Module {
 
                 let (ident, ident_span) = &stmt_assign.identifier;
                 if ident_span.contains(&index) {
-                    nodes.push(AstNode::Identifier(ident));
+                    nodes.push(AstNode::Identifier((ident.clone(), ident_span.clone())));
                 }
             }
             Stmt::TypeAlias(stmt_type_alias) => {
                 let (value_typeref, value_span) = &stmt_type_alias.value;
                 if value_span.contains(&index) {
-                    nodes.push(AstNode::TypeRef(value_typeref));
+                    nodes.push(AstNode::TypeRef((
+                        value_typeref.clone(),
+                        value_span.clone(),
+                    )));
                 }
 
                 let (ident, ident_span) = &stmt_type_alias.alias;
                 if ident_span.contains(&index) {
-                    nodes.push(AstNode::Identifier(ident));
+                    nodes.push(AstNode::Identifier((ident.clone(), ident_span.clone())));
                 }
             }
             Stmt::Fn(stmt_fn) => {
@@ -77,7 +80,7 @@ impl Module {
 
                 let (ident, ident_span) = &stmt_fn.name;
                 if ident_span.contains(&index) {
-                    nodes.push(AstNode::Identifier(ident));
+                    nodes.push(AstNode::Identifier((ident.clone(), ident_span.clone())));
                 }
             }
             Stmt::AssertType(stmt_assert_type) => {
@@ -106,14 +109,14 @@ impl Module {
         expr: &'a Expr,
         span: &'a Span,
         index: usize,
-    ) -> Vec<AstNode<'a>> {
+    ) -> Vec<AstNode> {
         let mut nodes = vec![];
 
         if !span.contains(&index) {
             return nodes;
         }
 
-        nodes.push(AstNode::Expr(expr));
+        nodes.push(AstNode::Expr((expr.clone(), span.clone())));
 
         match &expr {
             Expr::Unit => {}
@@ -162,7 +165,7 @@ impl Module {
                 let value_nodes = self.get_nodes_from_expr(value_expr, value_span, index);
                 nodes.extend(value_nodes);
 
-                nodes.push(AstNode::Identifier(&expr_assign.identifier.0));
+                nodes.push(AstNode::Identifier(expr_assign.identifier.clone()));
             }
             Expr::If(expr_if) => {
                 let (value_expr, value_span) = &expr_if.cond;
@@ -181,14 +184,20 @@ impl Module {
             Expr::Fn(expr_fn) => {
                 for ((param_identifier, param_type), param_span) in &expr_fn.params {
                     if param_span.contains(&index) {
-                        nodes.push(AstNode::TypeRef(param_type));
-                        nodes.push(AstNode::Identifier(param_identifier));
+                        nodes.push(AstNode::TypeRef((param_type.clone(), param_span.clone())));
+                        nodes.push(AstNode::Identifier((
+                            param_identifier.clone(),
+                            param_span.clone(),
+                        )));
                     }
                 }
 
                 let (return_type_type, return_type_span) = &expr_fn.return_type;
                 if return_type_span.contains(&index) {
-                    nodes.push(AstNode::TypeRef(return_type_type));
+                    nodes.push(AstNode::TypeRef((
+                        return_type_type.clone(),
+                        return_type_span.clone(),
+                    )));
                 }
 
                 let (body_expr, body_span) = &expr_fn.body;
@@ -196,12 +205,12 @@ impl Module {
                 nodes.extend(body_nodes);
 
                 if let Some(expr_fn_name) = &expr_fn.name {
-                    nodes.push(AstNode::Identifier(expr_fn_name));
+                    nodes.push(AstNode::Identifier((expr_fn_name.clone(), span.clone())));
                 }
             }
             Expr::Range(_) => {}
             Expr::Type(expr_type) => {
-                nodes.push(AstNode::TypeRef(&expr_type.0));
+                nodes.push(AstNode::TypeRef((expr_type.0.clone(), span.clone())));
             }
         };
 
@@ -223,14 +232,14 @@ impl Module {
 
 /// AST nodes contained in the [`Module`]
 #[derive(PartialEq)]
-pub enum AstNode<'a> {
-    Stmt(&'a super::Stmt),
-    Expr(&'a super::Expr),
-    Identifier(&'a super::Identifier),
-    TypeRef(&'a super::TypeRef),
+pub enum AstNode {
+    Stmt(super::StmtS),
+    Expr(super::ExprS),
+    Identifier(Spanned<super::Identifier>),
+    TypeRef(Spanned<super::TypeRef>),
 }
 
-impl<'a> AstNode<'a> {
+impl AstNode {
     pub fn node_type(&self) -> String {
         match self {
             AstNode::Stmt(_) => "Statement",
@@ -242,7 +251,7 @@ impl<'a> AstNode<'a> {
     }
 }
 
-impl<'a> Debug for AstNode<'a> {
+impl Debug for AstNode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Stmt(arg0) => f.write_fmt(format_args!("{:#?}", arg0)),
@@ -270,20 +279,26 @@ mod tests {
 
         assert_eq!(
             vec![
-                AstNode::Stmt(&Stmt::Assign(StmtAssign {
-                    identifier: (
-                        Identifier {
-                            name: "a".to_string()
-                        },
-                        4..5
-                    ),
-                    type_expr: None,
-                    is_const: false,
-                    value: None
-                })),
-                AstNode::Identifier(&Identifier {
-                    name: "a".to_string()
-                })
+                AstNode::Stmt((
+                    Stmt::Assign(StmtAssign {
+                        identifier: (
+                            Identifier {
+                                name: "a".to_string()
+                            },
+                            4..5
+                        ),
+                        type_expr: None,
+                        is_const: false,
+                        value: None
+                    },),
+                    0..6
+                )),
+                AstNode::Identifier((
+                    Identifier {
+                        name: "a".to_string()
+                    },
+                    4..5
+                ))
             ],
             nodes
         );
@@ -298,20 +313,26 @@ mod tests {
 
         assert_eq!(
             vec![
-                AstNode::Stmt(&Stmt::Assign(StmtAssign {
-                    identifier: (
-                        Identifier {
-                            name: "a".to_string()
-                        },
-                        4..5
-                    ),
-                    type_expr: None,
-                    is_const: false,
-                    value: Some((123f64.into(), 8..11))
-                })),
-                AstNode::Identifier(&Identifier {
-                    name: "a".to_string()
-                })
+                AstNode::Stmt((
+                    Stmt::Assign(StmtAssign {
+                        identifier: (
+                            Identifier {
+                                name: "a".to_string()
+                            },
+                            4..5
+                        ),
+                        type_expr: None,
+                        is_const: false,
+                        value: Some((123f64.into(), 8..11))
+                    }),
+                    0..12
+                )),
+                AstNode::Identifier((
+                    Identifier {
+                        name: "a".to_string()
+                    },
+                    4..5
+                ))
             ],
             nodes
         );
@@ -326,18 +347,21 @@ mod tests {
 
         assert_eq!(
             vec![
-                AstNode::Stmt(&Stmt::Assign(StmtAssign {
-                    identifier: (
-                        Identifier {
-                            name: "a".to_string()
-                        },
-                        4..5
-                    ),
-                    type_expr: None,
-                    is_const: false,
-                    value: Some((123f64.into(), 8..11))
-                })),
-                AstNode::Expr(&123f64.into()),
+                AstNode::Stmt((
+                    Stmt::Assign(StmtAssign {
+                        identifier: (
+                            Identifier {
+                                name: "a".to_string()
+                            },
+                            4..5
+                        ),
+                        type_expr: None,
+                        is_const: false,
+                        value: Some((123f64.into(), 8..11))
+                    }),
+                    0..12
+                )),
+                AstNode::Expr((123f64.into(), 8..11)),
             ],
             nodes
         );
@@ -352,20 +376,26 @@ mod tests {
 
         assert_eq!(
             vec![
-                AstNode::Stmt(&Stmt::Assign(StmtAssign {
-                    identifier: (
-                        Identifier {
-                            name: "a".to_string()
-                        },
-                        4..5
-                    ),
-                    type_expr: None,
-                    is_const: false,
-                    value: Some((123f64.into(), 8..11))
-                })),
-                AstNode::Identifier(&Identifier {
-                    name: "a".to_string()
-                }),
+                AstNode::Stmt((
+                    Stmt::Assign(StmtAssign {
+                        identifier: (
+                            Identifier {
+                                name: "a".to_string()
+                            },
+                            4..5
+                        ),
+                        type_expr: None,
+                        is_const: false,
+                        value: Some((123f64.into(), 8..11))
+                    }),
+                    0..12
+                )),
+                AstNode::Identifier((
+                    Identifier {
+                        name: "a".to_string()
+                    },
+                    4..5
+                )),
             ],
             nodes
         );
@@ -380,19 +410,22 @@ mod tests {
 
         assert_eq!(
             vec![
-                AstNode::Stmt(&Stmt::Assign(StmtAssign {
-                    identifier: (
-                        Identifier {
-                            name: "a".to_string()
-                        },
-                        4..5
-                    ),
-                    type_expr: Some((Expr::Type(ExprType(TypeRef::number())), 7..13)),
-                    is_const: false,
-                    value: Some((123f64.into(), 16..19))
-                })),
-                AstNode::Expr(&Expr::Type(ExprType(TypeRef::number()))),
-                AstNode::TypeRef(&TypeRef::number()),
+                AstNode::Stmt((
+                    Stmt::Assign(StmtAssign {
+                        identifier: (
+                            Identifier {
+                                name: "a".to_string()
+                            },
+                            4..5
+                        ),
+                        type_expr: Some((Expr::Type(ExprType(TypeRef::number())), 7..13)),
+                        is_const: false,
+                        value: Some((123f64.into(), 16..19))
+                    }),
+                    0..20
+                )),
+                AstNode::Expr((Expr::Type(ExprType(TypeRef::number())), 7..13)),
+                AstNode::TypeRef((TypeRef::number(), 7..13)),
             ],
             nodes
         );
@@ -407,20 +440,26 @@ mod tests {
 
         assert_eq!(
             vec![
-                AstNode::Stmt(&Stmt::Assign(StmtAssign {
-                    identifier: (
-                        Identifier {
-                            name: "a".to_string()
-                        },
-                        6..7
-                    ),
-                    type_expr: None,
-                    is_const: true,
-                    value: None
-                })),
-                AstNode::Identifier(&Identifier {
-                    name: "a".to_string()
-                })
+                AstNode::Stmt((
+                    Stmt::Assign(StmtAssign {
+                        identifier: (
+                            Identifier {
+                                name: "a".to_string()
+                            },
+                            6..7
+                        ),
+                        type_expr: None,
+                        is_const: true,
+                        value: None
+                    }),
+                    0..8
+                )),
+                AstNode::Identifier((
+                    Identifier {
+                        name: "a".to_string()
+                    },
+                    6..7
+                ))
             ],
             nodes
         );
@@ -435,20 +474,26 @@ mod tests {
 
         assert_eq!(
             vec![
-                AstNode::Stmt(&Stmt::Assign(StmtAssign {
-                    identifier: (
-                        Identifier {
-                            name: "a".to_string()
-                        },
-                        6..7
-                    ),
-                    type_expr: None,
-                    is_const: true,
-                    value: Some((123f64.into(), 10..13))
-                })),
-                AstNode::Identifier(&Identifier {
-                    name: "a".to_string()
-                })
+                AstNode::Stmt((
+                    Stmt::Assign(StmtAssign {
+                        identifier: (
+                            Identifier {
+                                name: "a".to_string()
+                            },
+                            6..7
+                        ),
+                        type_expr: None,
+                        is_const: true,
+                        value: Some((123f64.into(), 10..13))
+                    }),
+                    0..14
+                )),
+                AstNode::Identifier((
+                    Identifier {
+                        name: "a".to_string()
+                    },
+                    6..7
+                ))
             ],
             nodes
         );
@@ -463,18 +508,21 @@ mod tests {
 
         assert_eq!(
             vec![
-                AstNode::Stmt(&Stmt::Assign(StmtAssign {
-                    identifier: (
-                        Identifier {
-                            name: "a".to_string()
-                        },
-                        6..7
-                    ),
-                    type_expr: None,
-                    is_const: true,
-                    value: Some((123f64.into(), 10..13))
-                })),
-                AstNode::Expr(&123f64.into()),
+                AstNode::Stmt((
+                    Stmt::Assign(StmtAssign {
+                        identifier: (
+                            Identifier {
+                                name: "a".to_string()
+                            },
+                            6..7
+                        ),
+                        type_expr: None,
+                        is_const: true,
+                        value: Some((123f64.into(), 10..13))
+                    }),
+                    0..14
+                )),
+                AstNode::Expr((123f64.into(), 10..13)),
             ],
             nodes
         );
@@ -489,20 +537,26 @@ mod tests {
 
         assert_eq!(
             vec![
-                AstNode::Stmt(&Stmt::Assign(StmtAssign {
-                    identifier: (
-                        Identifier {
-                            name: "a".to_string()
-                        },
-                        6..7
-                    ),
-                    type_expr: None,
-                    is_const: true,
-                    value: Some((123f64.into(), 10..13))
-                })),
-                AstNode::Identifier(&Identifier {
-                    name: "a".to_string()
-                }),
+                AstNode::Stmt((
+                    Stmt::Assign(StmtAssign {
+                        identifier: (
+                            Identifier {
+                                name: "a".to_string()
+                            },
+                            6..7
+                        ),
+                        type_expr: None,
+                        is_const: true,
+                        value: Some((123f64.into(), 10..13))
+                    }),
+                    0..14
+                )),
+                AstNode::Identifier((
+                    Identifier {
+                        name: "a".to_string()
+                    },
+                    6..7
+                )),
             ],
             nodes
         );
@@ -517,19 +571,22 @@ mod tests {
 
         assert_eq!(
             vec![
-                AstNode::Stmt(&Stmt::Assign(StmtAssign {
-                    identifier: (
-                        Identifier {
-                            name: "a".to_string()
-                        },
-                        6..7
-                    ),
-                    type_expr: Some((Expr::Type(ExprType(TypeRef::number())), 9..15)),
-                    is_const: true,
-                    value: Some((123f64.into(), 18..21))
-                })),
-                AstNode::Expr(&Expr::Type(ExprType(TypeRef::number()))),
-                AstNode::TypeRef(&TypeRef::number()),
+                AstNode::Stmt((
+                    Stmt::Assign(StmtAssign {
+                        identifier: (
+                            Identifier {
+                                name: "a".to_string()
+                            },
+                            6..7
+                        ),
+                        type_expr: Some((Expr::Type(ExprType(TypeRef::number())), 9..15)),
+                        is_const: true,
+                        value: Some((123f64.into(), 18..21))
+                    }),
+                    0..22
+                )),
+                AstNode::Expr((Expr::Type(ExprType(TypeRef::number())), 9..15)),
+                AstNode::TypeRef((TypeRef::number(), 9..15)),
             ],
             nodes
         );
@@ -544,58 +601,70 @@ mod tests {
 
         assert_eq!(
             vec![
-                AstNode::Stmt(&Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::If(Box::new(ExprIf {
-                            cond: (
-                                Expr::Infix(Box::new(ExprInfix {
-                                    lt: (Expr::Literal(ExprLiteral::Number(10f64)), 3..5),
-                                    op: OpInfix::Less,
-                                    rt: (Expr::Literal(ExprLiteral::Number(0f64)), 8..9)
-                                })),
-                                3..9
-                            ),
-                            then: (
-                                Expr::Block(Box::new(ExprBlock {
-                                    stmts: vec![],
-                                    return_expr: Some((
-                                        Expr::Literal(ExprLiteral::Bool(false)),
-                                        12..17
-                                    )),
-                                    typeref: None
-                                })),
-                                10..19
-                            ),
-                            else_: None
-                        })),
-                        0..19
-                    )
-                })),
-                AstNode::Expr(&Expr::If(Box::new(ExprIf {
-                    cond: (
-                        Expr::Infix(Box::new(ExprInfix {
-                            lt: (Expr::Literal(ExprLiteral::Number(10f64)), 3..5),
-                            op: OpInfix::Less,
-                            rt: (Expr::Literal(ExprLiteral::Number(0f64)), 8..9)
-                        })),
-                        3..9
-                    ),
-                    then: (
-                        Expr::Block(Box::new(ExprBlock {
-                            stmts: vec![],
-                            return_expr: Some((Expr::Literal(ExprLiteral::Bool(false)), 12..17)),
-                            typeref: None
-                        })),
-                        10..19
-                    ),
-                    else_: None
-                }))),
-                AstNode::Expr(&Expr::Infix(Box::new(ExprInfix {
-                    lt: (Expr::Literal(ExprLiteral::Number(10f64)), 3..5),
-                    op: OpInfix::Less,
-                    rt: (Expr::Literal(ExprLiteral::Number(0f64)), 8..9)
-                }))),
-                AstNode::Expr(&Expr::Literal(ExprLiteral::Number(10f64))),
+                AstNode::Stmt((
+                    Stmt::Expr(StmtExpr {
+                        expr: (
+                            Expr::If(Box::new(ExprIf {
+                                cond: (
+                                    Expr::Infix(Box::new(ExprInfix {
+                                        lt: (Expr::Literal(ExprLiteral::Number(10f64)), 3..5),
+                                        op: OpInfix::Less,
+                                        rt: (Expr::Literal(ExprLiteral::Number(0f64)), 8..9)
+                                    })),
+                                    3..9
+                                ),
+                                then: (
+                                    Expr::Block(Box::new(ExprBlock {
+                                        stmts: vec![],
+                                        return_expr: Some((
+                                            Expr::Literal(ExprLiteral::Bool(false)),
+                                            12..17
+                                        )),
+                                        typeref: None
+                                    })),
+                                    10..19
+                                ),
+                                else_: None
+                            })),
+                            0..19
+                        )
+                    }),
+                    0..20
+                )),
+                AstNode::Expr((
+                    Expr::If(Box::new(ExprIf {
+                        cond: (
+                            Expr::Infix(Box::new(ExprInfix {
+                                lt: (Expr::Literal(ExprLiteral::Number(10f64)), 3..5),
+                                op: OpInfix::Less,
+                                rt: (Expr::Literal(ExprLiteral::Number(0f64)), 8..9)
+                            })),
+                            3..9
+                        ),
+                        then: (
+                            Expr::Block(Box::new(ExprBlock {
+                                stmts: vec![],
+                                return_expr: Some((
+                                    Expr::Literal(ExprLiteral::Bool(false)),
+                                    12..17
+                                )),
+                                typeref: None
+                            })),
+                            10..19
+                        ),
+                        else_: None
+                    })),
+                    0..19
+                )),
+                AstNode::Expr((
+                    Expr::Infix(Box::new(ExprInfix {
+                        lt: (Expr::Literal(ExprLiteral::Number(10f64)), 3..5),
+                        op: OpInfix::Less,
+                        rt: (Expr::Literal(ExprLiteral::Number(0f64)), 8..9)
+                    })),
+                    3..9
+                )),
+                AstNode::Expr((Expr::Literal(ExprLiteral::Number(10f64)), 3..5)),
             ],
             nodes
         );
@@ -610,75 +679,87 @@ mod tests {
 
         assert_eq!(
             vec![
-                AstNode::Stmt(&Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::If(Box::new(ExprIf {
-                            cond: (
-                                Expr::Infix(Box::new(ExprInfix {
-                                    lt: (Expr::Literal(ExprLiteral::Number(10f64)), 3..5),
-                                    op: OpInfix::NotEqual,
-                                    rt: (Expr::Literal(ExprLiteral::Number(0f64)), 9..10)
-                                })),
-                                3..10
-                            ),
-                            then: (
-                                Expr::Block(Box::new(ExprBlock {
-                                    stmts: vec![],
-                                    return_expr: Some((
-                                        Expr::Literal(ExprLiteral::Bool(false)),
-                                        13..18
-                                    )),
-                                    typeref: None
-                                })),
-                                11..20
-                            ),
-                            else_: Some((
-                                Expr::Block(Box::new(ExprBlock {
-                                    stmts: vec![],
-                                    return_expr: Some((
-                                        Expr::Literal(ExprLiteral::Bool(true)),
-                                        28..32
-                                    )),
-                                    typeref: None
-                                })),
-                                26..34
-                            ))
-                        })),
-                        0..34
-                    )
-                })),
-                AstNode::Expr(&Expr::If(Box::new(ExprIf {
-                    cond: (
-                        Expr::Infix(Box::new(ExprInfix {
-                            lt: (Expr::Literal(ExprLiteral::Number(10f64)), 3..5),
-                            op: OpInfix::NotEqual,
-                            rt: (Expr::Literal(ExprLiteral::Number(0f64)), 9..10)
-                        })),
-                        3..10
-                    ),
-                    then: (
-                        Expr::Block(Box::new(ExprBlock {
-                            stmts: vec![],
-                            return_expr: Some((Expr::Literal(ExprLiteral::Bool(false)), 13..18)),
-                            typeref: None
-                        })),
-                        11..20
-                    ),
-                    else_: Some((
-                        Expr::Block(Box::new(ExprBlock {
-                            stmts: vec![],
-                            return_expr: Some((Expr::Literal(ExprLiteral::Bool(true)), 28..32)),
-                            typeref: None
-                        })),
-                        26..34
-                    ))
-                }))),
-                AstNode::Expr(&Expr::Infix(Box::new(ExprInfix {
-                    lt: (Expr::Literal(ExprLiteral::Number(10f64)), 3..5),
-                    op: OpInfix::NotEqual,
-                    rt: (Expr::Literal(ExprLiteral::Number(0f64)), 9..10)
-                }))),
-                AstNode::Expr(&Expr::Literal(ExprLiteral::Number(0f64))),
+                AstNode::Stmt((
+                    Stmt::Expr(StmtExpr {
+                        expr: (
+                            Expr::If(Box::new(ExprIf {
+                                cond: (
+                                    Expr::Infix(Box::new(ExprInfix {
+                                        lt: (Expr::Literal(ExprLiteral::Number(10f64)), 3..5),
+                                        op: OpInfix::NotEqual,
+                                        rt: (Expr::Literal(ExprLiteral::Number(0f64)), 9..10)
+                                    })),
+                                    3..10
+                                ),
+                                then: (
+                                    Expr::Block(Box::new(ExprBlock {
+                                        stmts: vec![],
+                                        return_expr: Some((
+                                            Expr::Literal(ExprLiteral::Bool(false)),
+                                            13..18
+                                        )),
+                                        typeref: None
+                                    })),
+                                    11..20
+                                ),
+                                else_: Some((
+                                    Expr::Block(Box::new(ExprBlock {
+                                        stmts: vec![],
+                                        return_expr: Some((
+                                            Expr::Literal(ExprLiteral::Bool(true)),
+                                            28..32
+                                        )),
+                                        typeref: None
+                                    })),
+                                    26..34
+                                ))
+                            })),
+                            0..34
+                        )
+                    }),
+                    0..35
+                )),
+                AstNode::Expr((
+                    Expr::If(Box::new(ExprIf {
+                        cond: (
+                            Expr::Infix(Box::new(ExprInfix {
+                                lt: (Expr::Literal(ExprLiteral::Number(10f64)), 3..5),
+                                op: OpInfix::NotEqual,
+                                rt: (Expr::Literal(ExprLiteral::Number(0f64)), 9..10)
+                            })),
+                            3..10
+                        ),
+                        then: (
+                            Expr::Block(Box::new(ExprBlock {
+                                stmts: vec![],
+                                return_expr: Some((
+                                    Expr::Literal(ExprLiteral::Bool(false)),
+                                    13..18
+                                )),
+                                typeref: None
+                            })),
+                            11..20
+                        ),
+                        else_: Some((
+                            Expr::Block(Box::new(ExprBlock {
+                                stmts: vec![],
+                                return_expr: Some((Expr::Literal(ExprLiteral::Bool(true)), 28..32)),
+                                typeref: None
+                            })),
+                            26..34
+                        ))
+                    })),
+                    0..34
+                )),
+                AstNode::Expr((
+                    Expr::Infix(Box::new(ExprInfix {
+                        lt: (Expr::Literal(ExprLiteral::Number(10f64)), 3..5),
+                        op: OpInfix::NotEqual,
+                        rt: (Expr::Literal(ExprLiteral::Number(0f64)), 9..10)
+                    })),
+                    3..10
+                )),
+                AstNode::Expr((Expr::Literal(ExprLiteral::Number(0f64)), 9..10)),
             ],
             nodes
         );
@@ -693,113 +774,128 @@ mod tests {
 
         assert_eq!(
             vec![
-                AstNode::Stmt(&Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Fn(Box::new(ExprFn {
-                            name: None,
-                            params: vec![(
-                                (
-                                    Identifier {
-                                        name: "a".to_string()
-                                    },
-                                    TypeRef::string()
-                                ),
-                                1..10
-                            )],
-                            return_type: (TypeRef::bool(), 13..17),
-                            body: (
-                                Expr::Block(Box::new(ExprBlock {
-                                    stmts: vec![],
-                                    return_expr: Some((
-                                        Expr::Prefix(Box::new(ExprPrefix {
-                                            op: OpPrefix::Not,
-                                            rt: (
-                                                Expr::Identifier(ExprIdentifier {
-                                                    identifier: Identifier {
-                                                        name: "a".to_string()
-                                                    }
-                                                }),
-                                                24..25
-                                            )
-                                        })),
-                                        23..25
-                                    )),
-                                    typeref: None
-                                })),
-                                21..27
-                            )
-                        })),
-                        0..27
-                    )
-                })),
-                AstNode::Expr(&Expr::Fn(Box::new(ExprFn {
-                    name: None,
-                    params: vec![(
-                        (
-                            Identifier {
-                                name: "a".to_string()
-                            },
-                            TypeRef::string()
-                        ),
-                        1..10
-                    )],
-                    return_type: (TypeRef::bool(), 13..17),
-                    body: (
-                        Expr::Block(Box::new(ExprBlock {
-                            stmts: vec![],
-                            return_expr: Some((
-                                Expr::Prefix(Box::new(ExprPrefix {
-                                    op: OpPrefix::Not,
-                                    rt: (
-                                        Expr::Identifier(ExprIdentifier {
-                                            identifier: Identifier {
-                                                name: "a".to_string()
-                                            }
-                                        }),
-                                        24..25
-                                    )
-                                })),
-                                23..25
-                            )),
-                            typeref: None
-                        })),
-                        21..27
-                    )
-                }))),
-                AstNode::Expr(&Expr::Block(Box::new(ExprBlock {
-                    stmts: vec![],
-                    return_expr: Some((
-                        Expr::Prefix(Box::new(ExprPrefix {
-                            op: OpPrefix::Not,
-                            rt: (
-                                Expr::Identifier(ExprIdentifier {
-                                    identifier: Identifier {
-                                        name: "a".to_string()
-                                    }
-                                }),
-                                24..25
-                            )
-                        })),
-                        23..25
-                    )),
-                    typeref: None
-                }))),
-                AstNode::Expr(&Expr::Prefix(Box::new(ExprPrefix {
-                    op: OpPrefix::Not,
-                    rt: (
-                        Expr::Identifier(ExprIdentifier {
-                            identifier: Identifier {
-                                name: "a".to_string()
-                            }
-                        }),
-                        24..25
-                    )
-                }))),
-                AstNode::Expr(&Expr::Identifier(ExprIdentifier {
-                    identifier: Identifier {
-                        name: "a".to_string()
-                    }
-                })),
+                AstNode::Stmt((
+                    Stmt::Expr(StmtExpr {
+                        expr: (
+                            Expr::Fn(Box::new(ExprFn {
+                                name: None,
+                                params: vec![(
+                                    (
+                                        Identifier {
+                                            name: "a".to_string()
+                                        },
+                                        TypeRef::string()
+                                    ),
+                                    1..10
+                                )],
+                                return_type: (TypeRef::bool(), 13..17),
+                                body: (
+                                    Expr::Block(Box::new(ExprBlock {
+                                        stmts: vec![],
+                                        return_expr: Some((
+                                            Expr::Prefix(Box::new(ExprPrefix {
+                                                op: OpPrefix::Not,
+                                                rt: (
+                                                    Expr::Identifier(ExprIdentifier {
+                                                        identifier: Identifier {
+                                                            name: "a".to_string()
+                                                        }
+                                                    }),
+                                                    24..25
+                                                )
+                                            })),
+                                            23..25
+                                        )),
+                                        typeref: None
+                                    })),
+                                    21..27
+                                )
+                            })),
+                            0..27
+                        )
+                    }),
+                    0..28
+                )),
+                AstNode::Expr((
+                    Expr::Fn(Box::new(ExprFn {
+                        name: None,
+                        params: vec![(
+                            (
+                                Identifier {
+                                    name: "a".to_string()
+                                },
+                                TypeRef::string()
+                            ),
+                            1..10
+                        )],
+                        return_type: (TypeRef::bool(), 13..17),
+                        body: (
+                            Expr::Block(Box::new(ExprBlock {
+                                stmts: vec![],
+                                return_expr: Some((
+                                    Expr::Prefix(Box::new(ExprPrefix {
+                                        op: OpPrefix::Not,
+                                        rt: (
+                                            Expr::Identifier(ExprIdentifier {
+                                                identifier: Identifier {
+                                                    name: "a".to_string()
+                                                }
+                                            }),
+                                            24..25
+                                        )
+                                    })),
+                                    23..25
+                                )),
+                                typeref: None
+                            })),
+                            21..27
+                        )
+                    })),
+                    0..27
+                )),
+                AstNode::Expr((
+                    Expr::Block(Box::new(ExprBlock {
+                        stmts: vec![],
+                        return_expr: Some((
+                            Expr::Prefix(Box::new(ExprPrefix {
+                                op: OpPrefix::Not,
+                                rt: (
+                                    Expr::Identifier(ExprIdentifier {
+                                        identifier: Identifier {
+                                            name: "a".to_string()
+                                        }
+                                    }),
+                                    24..25
+                                )
+                            })),
+                            23..25
+                        )),
+                        typeref: None
+                    })),
+                    21..27
+                )),
+                AstNode::Expr((
+                    Expr::Prefix(Box::new(ExprPrefix {
+                        op: OpPrefix::Not,
+                        rt: (
+                            Expr::Identifier(ExprIdentifier {
+                                identifier: Identifier {
+                                    name: "a".to_string()
+                                }
+                            }),
+                            24..25
+                        )
+                    })),
+                    23..25
+                )),
+                AstNode::Expr((
+                    Expr::Identifier(ExprIdentifier {
+                        identifier: Identifier {
+                            name: "a".to_string()
+                        }
+                    }),
+                    24..25
+                )),
             ],
             nodes
         );
@@ -814,19 +910,22 @@ mod tests {
 
         assert_eq!(
             vec![
-                AstNode::Stmt(&Stmt::AssertType(StmtAssertType {
-                    value: (
-                        Expr::Identifier(ExprIdentifier {
-                            identifier: Identifier {
-                                name: "a".to_string()
-                            }
-                        }),
-                        12..13
-                    ),
-                    expected_type: (Expr::Type(ExprType(TypeRef::bool())), 15..19)
-                })),
-                AstNode::Expr(&Expr::Type(ExprType(TypeRef::bool()))),
-                AstNode::TypeRef(&TypeRef::bool()),
+                AstNode::Stmt((
+                    Stmt::AssertType(StmtAssertType {
+                        value: (
+                            Expr::Identifier(ExprIdentifier {
+                                identifier: Identifier {
+                                    name: "a".to_string()
+                                }
+                            }),
+                            12..13
+                        ),
+                        expected_type: (Expr::Type(ExprType(TypeRef::bool())), 15..19)
+                    }),
+                    0..20
+                )),
+                AstNode::Expr((Expr::Type(ExprType(TypeRef::bool())), 15..19)),
+                AstNode::TypeRef((TypeRef::bool(), 15..19)),
             ],
             nodes
         );
