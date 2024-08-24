@@ -21,3 +21,6 @@ out
 *temp*.*
 
 .DS_Store
+
+# LLVM coverage files
+*.profraw

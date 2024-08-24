@@ -13,6 +13,7 @@ build-release:
 
 clean:
     cargo clean
+    just clean-coverage
     cd vsc && just clean
     cd egon-book && just clean
 
@@ -47,6 +48,14 @@ verify-with-logs:
 test *args:
     cargo nextest run --workspace {{args}}
     cargo test --doc
+
+coverage *args:
+    CARGO_INCREMENTAL=0 RUSTFLAGS='-Cinstrument-coverage' LLVM_PROFILE_FILE='cargo-test-%p-%m.profraw' cargo nextest run --workspace {{args}}
+    grcov . --binary-path ./target/debug/deps/ -s . -t html --branch --ignore-not-existing --ignore '../*' --ignore "/*" -o target/coverage/html
+    just clean-coverage
+
+clean-coverage:
+    find ./ -name "*.profraw" | xargs rm -r
 
 test-trace *args:
     just test --features='verify-trace' --no-capture {{args}}

@@ -14,6 +14,7 @@
 - [nextest](https://nexte.st/)
 - [just](https://just.systems/)
 - [mdbook](https://rust-lang.github.io/mdBook/index.html)
+- [grcov](https://github.com/mozilla/grcov)
 
 ## Technologies
 
@@ -37,24 +38,26 @@
 
 ## Build, test, verify, etc...
 
-| Command                        | Description                                                                                        |
-| ------------------------------ | -------------------------------------------------------------------------------------------------- |
-| `just test`                    | Run all the tests                                                                                  |
-| `just test-trace`              | Run all the tests and log using `verify-trace!` macro                                              |
-| `just lint`                    | Run lint and any report errors                                                                     |
-| `just verify`                  | Runs tests and linting                                                                             |
-| `just verify-trace`            | Runs tests (logging with `verify-trace!` macro) and linting                                        |
-| `just verify-with-logs`        | Runs tests and linting but dumps stdout and stderr to `out.log` & `err.log` respectively           |
-| `just format`                  | Run formatting                                                                                     |
-| `just build`                   | Build the project (debug)                                                                          |
-| `just build-release`           | Build the project (release)                                                                        |
-| `just clean`                   | Clean build artifacts                                                                              |
-| `just cli COMMAND PATH`        | Run the egon command with the `COMMAND` (`lex`, `parse`, or `verify`) and the file `PATH` in `PWD` |
-| `just cli-trace COMMAND PATH`  | Run the egon command (logging with `verify-trace!` macro)                                          |
-| `just build-docker`            | Build the docker image for the egon language                                                       |
-| `just run-docker COMMAND PATH` | Run the egon command in docker e.g. `$ just run docker parse ./path/to/file.eg`                    |
-| `just lsp`                     | Start the egon language server                                                                     |
-| `just serve-book`              | Serve the [egon book](./egon-book/) at http://localhost:3000                                       |
+| Command                        | Description                                                                                             |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `just test`                    | Run all the tests                                                                                       |
+| `just test-trace`              | Run all the tests and log using `verify-trace!` macro                                                   |
+| `just coverage`                | Run all the tests with coverage enabled. Writes HTML report to `./target/coverage`                      |
+| `just clean-coverage`          | Clean up any `**/*.profraw` generated from running coverage. Handy if `just coverage` doesn't get them. |
+| `just lint`                    | Run lint and any report errors                                                                          |
+| `just verify`                  | Runs tests and linting                                                                                  |
+| `just verify-trace`            | Runs tests (logging with `verify-trace!` macro) and linting                                             |
+| `just verify-with-logs`        | Runs tests and linting but dumps stdout and stderr to `out.log` & `err.log` respectively                |
+| `just format`                  | Run formatting                                                                                          |
+| `just build`                   | Build the project (debug)                                                                               |
+| `just build-release`           | Build the project (release)                                                                             |
+| `just clean`                   | Clean build artifacts                                                                                   |
+| `just cli COMMAND PATH`        | Run the egon command with the `COMMAND` (`lex`, `parse`, or `verify`) and the file `PATH` in `PWD`      |
+| `just cli-trace COMMAND PATH`  | Run the egon command (logging with `verify-trace!` macro)                                               |
+| `just build-docker`            | Build the docker image for the egon language                                                            |
+| `just run-docker COMMAND PATH` | Run the egon command in docker e.g. `$ just run docker parse ./path/to/file.eg`                         |
+| `just lsp`                     | Start the egon language server                                                                          |
+| `just serve-book`              | Serve the [egon book](./egon-book/) at http://localhost:3000                                            |
 
 ## CLI
 
