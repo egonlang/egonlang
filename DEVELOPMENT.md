@@ -32,6 +32,7 @@
 
 ### Support/Utils
 
+- [span](./span/) A library providing the `Span` and `Spanned<T>` types
 - [str-idxpos](./str-idxpos/) A library for mapping between 0-based string indexes and 0-based line/column positions
 
 ## Build, test, verify, etc...
