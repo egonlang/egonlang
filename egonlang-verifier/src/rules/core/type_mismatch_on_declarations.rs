@@ -78,7 +78,7 @@ stmt_rule!(
                                 }
 
                                 if value_typeref.typeref.0 == *"identifier" {
-                                    let identifier = &stmt_assign.identifier.name;
+                                    let identifier = &stmt_assign.identifier.0.name;
 
                                     if let Some(identifier_type) = resolve_ident(identifier) {
                                         if assign_typeref.typeref == identifier_type.typeref {

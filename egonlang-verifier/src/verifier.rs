@@ -241,7 +241,7 @@ impl<'a> Verifier<'a> {
                 }
             }
             ast::Expr::Assign(assign_expr) => {
-                let name = &assign_expr.identifier.name;
+                let name = &assign_expr.identifier.0.name;
 
                 Some(self.resolve_identifier(name).unwrap_or_else(|| {
                     let (value_expr, _) = &assign_expr.value;
@@ -342,7 +342,7 @@ impl<'a> Verifier<'a> {
                         let value_typeref = self.visit_expr(value_expr, value_span)?;
 
                         self.current_type_env_mut().set(
-                            &stmt_assign.identifier.name,
+                            &stmt_assign.identifier.0.name,
                             TypeEnvValue {
                                 typeref: value_typeref.typeref,
                                 is_const: stmt_assign.is_const,
@@ -353,7 +353,7 @@ impl<'a> Verifier<'a> {
                         match self.visit_expr(type_expr, type_span) {
                             Ok(type_typeref) => {
                                 self.current_type_env_mut().set(
-                                    &stmt_assign.identifier.name,
+                                    &stmt_assign.identifier.0.name,
                                     TypeEnvValue {
                                         typeref: type_typeref.typeref,
                                         is_const: stmt_assign.is_const,
@@ -371,7 +371,7 @@ impl<'a> Verifier<'a> {
                                 self.visit_expr(value_expr, value_span)?;
 
                                 self.current_type_env_mut().set(
-                                    &stmt_assign.identifier.name,
+                                    &stmt_assign.identifier.0.name,
                                     TypeEnvValue {
                                         typeref: type_typeref.typeref,
                                         is_const: stmt_assign.is_const,
@@ -398,7 +398,7 @@ impl<'a> Verifier<'a> {
                         is_const: true,
                     });
 
-                self.current_type_env_mut().set(&alias.name, value);
+                self.current_type_env_mut().set(&alias.0.name, value);
 
                 Ok(())
             }
@@ -668,13 +668,13 @@ impl<'a> Verifier<'a> {
 
                 let mut errs: Vec<EgonErrorS> = vec![];
 
-                let ident_type = self.resolve_identifier(&assign_expr.identifier.name);
+                let ident_type = self.resolve_identifier(&assign_expr.identifier.0.name);
 
                 match ident_type {
                     Some(_) => {}
                     None => {
                         errs.push((
-                            EgonTypeError::Undefined(assign_expr.identifier.name.to_string())
+                            EgonTypeError::Undefined(assign_expr.identifier.0.name.to_string())
                                 .into(),
                             span.clone(),
                         ));

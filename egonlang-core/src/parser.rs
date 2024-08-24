@@ -1006,9 +1006,12 @@ mod parser_tests {
                 Stmt::Expr(StmtExpr {
                     expr: (
                         Expr::Assign(Box::new(ExprAssign {
-                            identifier: Identifier {
-                                name: "a".to_string()
-                            },
+                            identifier: (
+                                Identifier {
+                                    name: "a".to_string()
+                                },
+                                0..1
+                            ),
                             value: (
                                 Expr::Identifier(ExprIdentifier {
                                     identifier: Identifier {
@@ -1755,9 +1758,12 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Assign(StmtAssign {
-                    identifier: Identifier {
-                        name: "a".to_string()
-                    },
+                    identifier: (
+                        Identifier {
+                            name: "a".to_string()
+                        },
+                        4..5
+                    ),
                     type_expr: None,
                     is_const: false,
                     value: Some((ast::Expr::Literal(ExprLiteral::Number(123f64)), 8..11))
@@ -1773,16 +1779,22 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Assign(StmtAssign {
-                    identifier: Identifier {
-                        name: "a".to_string()
-                    },
+                    identifier: (
+                        Identifier {
+                            name: "a".to_string()
+                        },
+                        4..5
+                    ),
                     type_expr: None,
                     is_const: false,
                     value: Some((
                         ast::Expr::Assign(Box::new(ExprAssign {
-                            identifier: Identifier {
-                                name: "b".to_string()
-                            },
+                            identifier: (
+                                Identifier {
+                                    name: "b".to_string()
+                                },
+                                8..9
+                            ),
                             value: (Expr::Literal(ExprLiteral::Number(123f64)), 12..15)
                         })),
                         8..15
@@ -1799,16 +1811,22 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Assign(StmtAssign {
-                    identifier: Identifier {
-                        name: "a".to_string()
-                    },
+                    identifier: (
+                        Identifier {
+                            name: "a".to_string()
+                        },
+                        4..5
+                    ),
                     type_expr: Some((Expr::Type(ExprType(TypeRef::number())), 7..13)),
                     is_const: false,
                     value: Some((
                         ast::Expr::Assign(Box::new(ExprAssign {
-                            identifier: Identifier {
-                                name: "b".to_string()
-                            },
+                            identifier: (
+                                Identifier {
+                                    name: "b".to_string()
+                                },
+                                16..17
+                            ),
                             value: (Expr::Literal(ExprLiteral::Number(123f64)), 20..23)
                         })),
                         16..23
@@ -1825,9 +1843,12 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Assign(StmtAssign {
-                    identifier: Identifier {
-                        name: "a".to_string()
-                    },
+                    identifier: (
+                        Identifier {
+                            name: "a".to_string()
+                        },
+                        4..5
+                    ),
                     type_expr: Some((Expr::Type(ExprType(TypeRef::number())), 7..13)),
                     is_const: false,
                     value: Some((ast::Expr::Literal(ExprLiteral::Number(123f64)), 16..19))
@@ -1843,9 +1864,12 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Assign(StmtAssign {
-                    identifier: Identifier {
-                        name: "a".to_string()
-                    },
+                    identifier: (
+                        Identifier {
+                            name: "a".to_string()
+                        },
+                        4..5
+                    ),
                     type_expr: None,
                     is_const: false,
                     value: None
@@ -1861,9 +1885,12 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::TypeAlias(StmtTypeAlias {
-                    alias: Identifier {
-                        name: "NumberList".to_string()
-                    },
+                    alias: (
+                        Identifier {
+                            name: "NumberList".to_string()
+                        },
+                        5..15
+                    ),
                     value: (TypeRef::list(TypeRef::number()), 18..30)
                 }),
                 0..31
@@ -1881,18 +1908,24 @@ mod parser_tests {
             stmts: vec![
                 (
                     Stmt::TypeAlias(StmtTypeAlias {
-                        alias: Identifier {
-                            name: "NumberList".to_string()
-                        },
+                        alias: (
+                            Identifier {
+                                name: "NumberList".to_string()
+                            },
+                            14..24
+                        ),
                         value: (TypeRef::list(TypeRef::number()), 27..39)
                     }),
                     9..40
                 ),
                 (
                     Stmt::Assign(StmtAssign {
-                        identifier: Identifier {
-                            name: "a".to_string()
-                        },
+                        identifier: (
+                            Identifier {
+                                name: "a".to_string()
+                            },
+                            53..54
+                        ),
                         type_expr: Some((
                             Expr::Type(ExprType(TypeRef("NumberList".to_string(), vec![]))),
                             56..66
@@ -1937,18 +1970,24 @@ mod parser_tests {
                                     stmts: vec![
                                         (
                                             Stmt::TypeAlias(StmtTypeAlias {
-                                                alias: Identifier {
-                                                    name: "Int".to_string()
-                                                },
+                                                alias: (
+                                                    Identifier {
+                                                        name: "Int".to_string()
+                                                    },
+                                                    38..41
+                                                ),
                                                 value: (TypeRef::number(), 44..50)
                                             }),
                                             33..51
                                         ),
                                         (
                                             Stmt::Assign(StmtAssign {
-                                                identifier: Identifier {
-                                                    name: "a".to_string()
-                                                },
+                                                identifier: (
+                                                    Identifier {
+                                                        name: "a".to_string()
+                                                    },
+                                                    68..69
+                                                ),
                                                 type_expr: Some((
                                                     Expr::Type(ExprType(TypeRef::number())),
                                                     71..77
@@ -1963,9 +2002,12 @@ mod parser_tests {
                                         ),
                                         (
                                             Stmt::Assign(StmtAssign {
-                                                identifier: Identifier {
-                                                    name: "b".to_string()
-                                                },
+                                                identifier: (
+                                                    Identifier {
+                                                        name: "b".to_string()
+                                                    },
+                                                    99..100
+                                                ),
                                                 type_expr: Some((
                                                     Expr::Type(ExprType(TypeRef(
                                                         "Int".to_string(),
@@ -2025,9 +2067,12 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Assign(StmtAssign {
-                    identifier: Identifier {
-                        name: "a".to_string()
-                    },
+                    identifier: (
+                        Identifier {
+                            name: "a".to_string()
+                        },
+                        4..5
+                    ),
                     type_expr: Some((Expr::Type(ExprType(TypeRef::number())), 7..13)),
                     is_const: false,
                     value: None
@@ -2043,9 +2088,12 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Assign(StmtAssign {
-                    identifier: Identifier {
-                        name: "a".to_string()
-                    },
+                    identifier: (
+                        Identifier {
+                            name: "a".to_string()
+                        },
+                        4..5
+                    ),
                     type_expr: None,
                     is_const: false,
                     value: Some((

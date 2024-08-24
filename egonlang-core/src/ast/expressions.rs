@@ -612,13 +612,16 @@ impl Display for OpPrefix {
 /// ```
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ExprAssign {
-    pub identifier: Identifier,
+    pub identifier: Spanned<Identifier>,
     pub value: ExprS,
 }
 
 impl Display for ExprAssign {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        f.write_fmt(format_args!("{} = {}", self.identifier.name, self.value.0))
+        f.write_fmt(format_args!(
+            "{} = {}",
+            self.identifier.0.name, self.value.0
+        ))
     }
 }
 
@@ -847,9 +850,12 @@ mod display_tests {
     expr_display_test!(
         test_expr_assign,
         Expr::Assign(Box::new(ExprAssign {
-            identifier: Identifier {
-                name: "foo".to_string()
-            },
+            identifier: (
+                Identifier {
+                    name: "foo".to_string()
+                },
+                0..0
+            ),
             value: (ExprLiteral::Number(123f64).into(), 0..0)
         })),
         "foo = 123"

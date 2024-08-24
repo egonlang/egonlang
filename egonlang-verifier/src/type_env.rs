@@ -256,7 +256,7 @@ impl TypeEnv {
                 Ok(type_expr.0.clone())
             }
             ast::Expr::Assign(assign_expr) => {
-                let name = &assign_expr.identifier.name;
+                let name = &assign_expr.identifier.0.name;
 
                 Ok(self.get(name).map(|x| x.typeref).unwrap_or_else(|| {
                     let (value_expr, value_span) = &assign_expr.value;

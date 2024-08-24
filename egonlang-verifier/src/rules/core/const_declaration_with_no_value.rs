@@ -11,7 +11,7 @@ stmt_rule!(
             if stmt_assign.is_const && stmt_assign.value.is_none() {
                 errs.push((
                     EgonSyntaxError::UninitializedConst {
-                        name: stmt_assign.identifier.name.clone(),
+                        name: stmt_assign.identifier.0.name.clone(),
                     }
                     .into(),
                     span.clone(),

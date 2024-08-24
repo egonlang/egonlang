@@ -13,7 +13,7 @@ expr_rule!(
         let mut errs = vec![];
 
         if let ast::Expr::Assign(expr_assign) = expr {
-            let identifier = &expr_assign.identifier.name;
+            let identifier = &expr_assign.identifier.0.name;
             let type_env_value = resolve_ident(identifier);
             let is_const = type_env_value.map(|x| x.is_const).unwrap_or(false);
 

@@ -140,7 +140,7 @@ impl Display for StmtExpr {
 /// ```
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct StmtAssign {
-    pub identifier: Identifier,
+    pub identifier: Spanned<Identifier>,
     pub type_expr: Option<ExprS>,
     pub is_const: bool,
     pub value: Option<ExprS>,
@@ -149,7 +149,7 @@ pub struct StmtAssign {
 impl Display for StmtAssign {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let decl = if self.is_const { "const" } else { "let" };
-        let name = &self.identifier.name;
+        let name = &self.identifier.0.name;
 
         let is_type_alias = self
             .value
@@ -193,13 +193,13 @@ impl Display for StmtAssign {
 /// ```
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct StmtTypeAlias {
-    pub alias: Identifier,
+    pub alias: Spanned<Identifier>,
     pub value: Spanned<TypeRef>,
 }
 
 impl Display for StmtTypeAlias {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let alias = &self.alias.name;
+        let alias = &self.alias.0.name;
         let value = &self.value.0.to_string();
 
         f.write_fmt(format_args!("type {} = {};", alias, value))
@@ -213,13 +213,13 @@ impl Display for StmtTypeAlias {
 /// ```
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct StmtFn {
-    pub name: Identifier,
+    pub name: Spanned<Identifier>,
     pub fn_expr: ExprS,
 }
 
 impl Display for StmtFn {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        f.write_fmt(format_args!("fn {} {}", self.name.name, self.fn_expr.0))
+        f.write_fmt(format_args!("fn {} {}", self.name.0.name, self.fn_expr.0))
     }
 }
 

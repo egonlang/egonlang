@@ -43,44 +43,19 @@ impl Module {
                 nodes.extend(expr_nodes);
             }
             Stmt::Assign(stmt_assign) => {
-                let mut is_hovered_over_identifier = true;
-
-                if let Some((_, type_span)) = &stmt_assign.type_expr {
-                    if type_span.contains(&index) {
-                        is_hovered_over_identifier = false;
-                    }
+                if let Some((type_expr, type_span)) = &stmt_assign.type_expr {
+                    let type_nodes = self.get_nodes_from_expr(type_expr, type_span, index);
+                    nodes.extend(type_nodes);
                 }
 
-                if let Some((_, value_span)) = &stmt_assign.value {
-                    if value_span.contains(&index) {
-                        is_hovered_over_identifier = false;
-                    }
+                if let Some((value_expr, value_span)) = &stmt_assign.value {
+                    let value_nodes = self.get_nodes_from_expr(value_expr, value_span, index);
+                    nodes.extend(value_nodes);
                 }
 
-                if is_hovered_over_identifier {
-                    if let Some((type_expr, type_span)) = &stmt_assign.type_expr {
-                        let type_nodes = self.get_nodes_from_expr(type_expr, type_span, index);
-                        nodes.extend(type_nodes);
-                    }
-
-                    if let Some((value_expr, value_span)) = &stmt_assign.value {
-                        let value_nodes = self.get_nodes_from_expr(value_expr, value_span, index);
-                        nodes.extend(value_nodes);
-                    }
-
-                    nodes.push(AstNode::Identifier(&stmt_assign.identifier));
-                } else {
-                    nodes.push(AstNode::Identifier(&stmt_assign.identifier));
-
-                    if let Some((type_expr, type_span)) = &stmt_assign.type_expr {
-                        let type_nodes = self.get_nodes_from_expr(type_expr, type_span, index);
-                        nodes.extend(type_nodes);
-                    }
-
-                    if let Some((value_expr, value_span)) = &stmt_assign.value {
-                        let value_nodes = self.get_nodes_from_expr(value_expr, value_span, index);
-                        nodes.extend(value_nodes);
-                    }
+                let (ident, ident_span) = &stmt_assign.identifier;
+                if ident_span.contains(&index) {
+                    nodes.push(AstNode::Identifier(ident));
                 }
             }
             Stmt::TypeAlias(stmt_type_alias) => {
@@ -89,15 +64,21 @@ impl Module {
                     nodes.push(AstNode::TypeRef(value_typeref));
                 }
 
-                nodes.push(AstNode::Identifier(&stmt_type_alias.alias));
+                let (ident, ident_span) = &stmt_type_alias.alias;
+                if ident_span.contains(&index) {
+                    nodes.push(AstNode::Identifier(ident));
+                }
             }
             Stmt::Fn(stmt_fn) => {
-                let fn_expr_nodes =
-                    self.get_nodes_from_expr(&stmt_fn.fn_expr.0, &stmt_fn.fn_expr.1, index);
+                let (fn_expr_expr, fn_expr_span) = &stmt_fn.fn_expr;
+                let fn_expr_nodes = self.get_nodes_from_expr(fn_expr_expr, fn_expr_span, index);
 
                 nodes.extend(fn_expr_nodes);
 
-                nodes.push(AstNode::Identifier(&stmt_fn.name));
+                let (ident, ident_span) = &stmt_fn.name;
+                if ident_span.contains(&index) {
+                    nodes.push(AstNode::Identifier(ident));
+                }
             }
             Stmt::AssertType(stmt_assert_type) => {
                 let (value_expr, value_span) = &stmt_assert_type.value;
@@ -181,7 +162,7 @@ impl Module {
                 let value_nodes = self.get_nodes_from_expr(value_expr, value_span, index);
                 nodes.extend(value_nodes);
 
-                nodes.push(AstNode::Identifier(&expr_assign.identifier));
+                nodes.push(AstNode::Identifier(&expr_assign.identifier.0));
             }
             Expr::If(expr_if) => {
                 let (value_expr, value_span) = &expr_if.cond;
@@ -290,9 +271,12 @@ mod tests {
         assert_eq!(
             vec![
                 AstNode::Stmt(&Stmt::Assign(StmtAssign {
-                    identifier: Identifier {
-                        name: "a".to_string()
-                    },
+                    identifier: (
+                        Identifier {
+                            name: "a".to_string()
+                        },
+                        4..5
+                    ),
                     type_expr: None,
                     is_const: false,
                     value: None
@@ -315,9 +299,12 @@ mod tests {
         assert_eq!(
             vec![
                 AstNode::Stmt(&Stmt::Assign(StmtAssign {
-                    identifier: Identifier {
-                        name: "a".to_string()
-                    },
+                    identifier: (
+                        Identifier {
+                            name: "a".to_string()
+                        },
+                        4..5
+                    ),
                     type_expr: None,
                     is_const: false,
                     value: Some((123f64.into(), 8..11))
@@ -340,16 +327,16 @@ mod tests {
         assert_eq!(
             vec![
                 AstNode::Stmt(&Stmt::Assign(StmtAssign {
-                    identifier: Identifier {
-                        name: "a".to_string()
-                    },
+                    identifier: (
+                        Identifier {
+                            name: "a".to_string()
+                        },
+                        4..5
+                    ),
                     type_expr: None,
                     is_const: false,
                     value: Some((123f64.into(), 8..11))
                 })),
-                AstNode::Identifier(&Identifier {
-                    name: "a".to_string()
-                }),
                 AstNode::Expr(&123f64.into()),
             ],
             nodes
@@ -366,9 +353,12 @@ mod tests {
         assert_eq!(
             vec![
                 AstNode::Stmt(&Stmt::Assign(StmtAssign {
-                    identifier: Identifier {
-                        name: "a".to_string()
-                    },
+                    identifier: (
+                        Identifier {
+                            name: "a".to_string()
+                        },
+                        4..5
+                    ),
                     type_expr: None,
                     is_const: false,
                     value: Some((123f64.into(), 8..11))
@@ -391,16 +381,16 @@ mod tests {
         assert_eq!(
             vec![
                 AstNode::Stmt(&Stmt::Assign(StmtAssign {
-                    identifier: Identifier {
-                        name: "a".to_string()
-                    },
+                    identifier: (
+                        Identifier {
+                            name: "a".to_string()
+                        },
+                        4..5
+                    ),
                     type_expr: Some((Expr::Type(ExprType(TypeRef::number())), 7..13)),
                     is_const: false,
                     value: Some((123f64.into(), 16..19))
                 })),
-                AstNode::Identifier(&Identifier {
-                    name: "a".to_string()
-                }),
                 AstNode::Expr(&Expr::Type(ExprType(TypeRef::number()))),
                 AstNode::TypeRef(&TypeRef::number()),
             ],
@@ -418,9 +408,12 @@ mod tests {
         assert_eq!(
             vec![
                 AstNode::Stmt(&Stmt::Assign(StmtAssign {
-                    identifier: Identifier {
-                        name: "a".to_string()
-                    },
+                    identifier: (
+                        Identifier {
+                            name: "a".to_string()
+                        },
+                        6..7
+                    ),
                     type_expr: None,
                     is_const: true,
                     value: None
@@ -443,9 +436,12 @@ mod tests {
         assert_eq!(
             vec![
                 AstNode::Stmt(&Stmt::Assign(StmtAssign {
-                    identifier: Identifier {
-                        name: "a".to_string()
-                    },
+                    identifier: (
+                        Identifier {
+                            name: "a".to_string()
+                        },
+                        6..7
+                    ),
                     type_expr: None,
                     is_const: true,
                     value: Some((123f64.into(), 10..13))
@@ -468,9 +464,38 @@ mod tests {
         assert_eq!(
             vec![
                 AstNode::Stmt(&Stmt::Assign(StmtAssign {
-                    identifier: Identifier {
-                        name: "a".to_string()
-                    },
+                    identifier: (
+                        Identifier {
+                            name: "a".to_string()
+                        },
+                        6..7
+                    ),
+                    type_expr: None,
+                    is_const: true,
+                    value: Some((123f64.into(), 10..13))
+                })),
+                AstNode::Expr(&123f64.into()),
+            ],
+            nodes
+        );
+    }
+
+    #[test]
+    fn module_get_ast_nodes_by_index_const_decl_ident() {
+        let source = "const a = 123;";
+        let module = parse(source, 0).unwrap();
+
+        let nodes = module.get_by_index(6);
+
+        assert_eq!(
+            vec![
+                AstNode::Stmt(&Stmt::Assign(StmtAssign {
+                    identifier: (
+                        Identifier {
+                            name: "a".to_string()
+                        },
+                        6..7
+                    ),
                     type_expr: None,
                     is_const: true,
                     value: Some((123f64.into(), 10..13))
@@ -478,7 +503,6 @@ mod tests {
                 AstNode::Identifier(&Identifier {
                     name: "a".to_string()
                 }),
-                AstNode::Expr(&123f64.into()),
             ],
             nodes
         );
@@ -494,16 +518,16 @@ mod tests {
         assert_eq!(
             vec![
                 AstNode::Stmt(&Stmt::Assign(StmtAssign {
-                    identifier: Identifier {
-                        name: "a".to_string()
-                    },
+                    identifier: (
+                        Identifier {
+                            name: "a".to_string()
+                        },
+                        6..7
+                    ),
                     type_expr: Some((Expr::Type(ExprType(TypeRef::number())), 9..15)),
                     is_const: true,
                     value: Some((123f64.into(), 18..21))
                 })),
-                AstNode::Identifier(&Identifier {
-                    name: "a".to_string()
-                }),
                 AstNode::Expr(&Expr::Type(ExprType(TypeRef::number()))),
                 AstNode::TypeRef(&TypeRef::number()),
             ],

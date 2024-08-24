@@ -14,7 +14,7 @@ stmt_rule!(
         let mut errs = vec![];
 
         if let ast::Stmt::TypeAlias(stmt_type_alias) = &stmt {
-            let name = &stmt_type_alias.alias.name;
+            let name = &stmt_type_alias.alias.0.name;
             let pattern = Regex::new("^[A-Z][A-Za-z0-9]*$").unwrap();
 
             if !pattern.is_match(name) {

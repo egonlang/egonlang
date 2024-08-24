@@ -17,9 +17,9 @@ Decl = {
 }
 
 DeclFn: ast::Stmt = {
-    "fn" <name:identifier> <fn_expr:Spanned<ExprFn>> =>
+    "fn" <name:Spanned<Identifier>> <fn_expr:Spanned<ExprFn>> =>
         ast::Stmt::Fn(Box::new(ast::StmtFn { 
-            name: ast::Identifier { name: name.clone() },
+            name,
             fn_expr
          })),
 }
@@ -31,19 +31,15 @@ DeclTypeAlias: ast::Stmt = <type_alias:StmtTypeAlias> =>
     ast::Stmt::TypeAlias(<>);
 
 StmtAssign: ast::StmtAssign = {
-    "let" <name:identifier> <type_expr:(":" <Spanned<TypeRef>>)?> <value:("=" <ExprS>)?> ";" => ast::StmtAssign {
-        identifier: ast::Identifier {
-            name,
-        },
+    "let" <identifier:Spanned<Identifier>> <type_expr:(":" <Spanned<TypeRef>>)?> <value:("=" <ExprS>)?> ";" => ast::StmtAssign {
+        identifier,
         type_expr: type_expr.map(|(ty, ty_span)|
             (ast::Expr::Type(ast::ExprType(ty)), ty_span)),
         is_const: false,
         value,
     },
-    "const" <name:identifier> <type_expr:(":" <Spanned<TypeRef>>)?> <value:("=" <ExprS>)?> ";" => ast::StmtAssign {
-        identifier: ast::Identifier {
-            name,
-        },
+    "const" <identifier:Spanned<Identifier>> <type_expr:(":" <Spanned<TypeRef>>)?> <value:("=" <ExprS>)?> ";" => ast::StmtAssign {
+        identifier,
         type_expr: type_expr.map(|(ty, ty_span)|
             (ast::Expr::Type(ast::ExprType(ty)), ty_span)),
         is_const: true,
@@ -52,12 +48,8 @@ StmtAssign: ast::StmtAssign = {
 }
 
 StmtTypeAlias: ast::StmtTypeAlias = {
-    "type" <name:identifier> <value:("=" <Spanned<TypeRef>>)> ";" => ast::StmtTypeAlias {
-        alias: ast::Identifier {
-            name,
-        },
-        value,
-    },
+    "type" <alias:Spanned<Identifier>> <value:("=" <Spanned<TypeRef>>)> ";" =>
+        ast::StmtTypeAlias { <> },
 }
 
 StmtS = Spanned<Stmt>;
@@ -87,11 +79,8 @@ Expr: ast::Expr = {
 };
 
 ExprAssign: ast::Expr = {
-    <name:identifier> "=" <value:ExprS> =>
-        ast::Expr::Assign(Box::new(ast::ExprAssign {
-            identifier: ast::Identifier { name },
-            value,
-        })),
+    <identifier:Spanned<Identifier>> "=" <value:ExprS> =>
+        ast::Expr::Assign(Box::new(ast::ExprAssign { <> })),
     ExprIf,
 }
 
@@ -201,6 +190,11 @@ ExprPrimary: ast::Expr = {
     "(" <Expr> ")",
 
 }
+
+Identifier: ast::Identifier = <name:identifier> =>
+    ast::Identifier {
+        name
+    };
 
 ExprIdentifier: ast::Expr = <name:identifier> =>
     ast::Expr::Identifier(ast::ExprIdentifier {
