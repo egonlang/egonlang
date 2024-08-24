@@ -4,12 +4,17 @@ default:
 build:
     cargo build
     cd vsc && just build
+    cd egon-book && just build
 
 build-release:
     cargo build --release
+    cd vsc && just build
+    cd egon-book && just build
 
 clean:
     cargo clean
+    cd vsc && just clean
+    cd egon-book && just clean
 
 cli *args:
     cargo run --bin egon {{args}}
@@ -54,3 +59,6 @@ build-docker:
 
 run-docker +args:
     docker run --rm --read-only -v "/$PWD":/home/egon:ro -it egonlang/egonlang:0.1.0 egon {{args}}
+
+serve-book:
+    cd egon-book && just serve

@@ -1,10 +1,19 @@
 # Egon Language Development Guide
 
+## Getting Started
+
+1. Clone/copy down https://github.com/egonlang/egonlang
+2. Install the [requirements](#requirements)
+3. Run `just clean build verify`
+4. Install the [VS Code extension](#vs-code-extension)
+5. Browser the code [examples](./res/examples/)
+
 ## Requirements
 
 - [rust](https://www.rust-lang.org/)
 - [nextest](https://nexte.st/)
 - [just](https://just.systems/)
+- [mdbook](https://rust-lang.github.io/mdBook/index.html)
 
 ## Technologies
 
@@ -18,6 +27,7 @@
 - [lsp](./egonlang-lsp/) Language server
 - [cli](./egonlang-cli/): Command line tool to lex and parse egon code files 
 - [vsc](./vsc/): VS Code language extension
+- [book](./egon-book/) The egon book documenting the language
 
 ## Build, test, verify, etc...
 
@@ -38,6 +48,7 @@
 | `just build-docker`            | Build the docker image for the egon language                                                       |
 | `just run-docker COMMAND PATH` | Run the egon command in docker e.g. `$ just run docker parse ./path/to/file.eg`                    |
 | `just lsp`                     | Start the egon language server                                                                     |
+| `just serve-book`              | Serve the [egon book](./egon-book/) at http://localhost:3000                                       |
 
 ## CLI
 
