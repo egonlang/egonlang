@@ -1,5 +1,7 @@
 name: Publish Book
 
+permissions: write-all
+
 on:
   push:
     paths:
