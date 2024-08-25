@@ -364,7 +364,6 @@ name = "egonlang-core"
 version = "0.1.0"
 dependencies = [
  "build-deps",
- "codespan-reporting",
  "egonlang-errors",
  "lalrpop",
  "lalrpop-util",
@@ -374,8 +373,6 @@ dependencies = [
  "regex",
  "serde",
  "span",
- "str-idxpos",
- "thiserror",
 ]
 
 [[package]]
