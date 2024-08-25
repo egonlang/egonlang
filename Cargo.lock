@@ -379,12 +379,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "egonlang-diagnostics"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "span",
+]
+
+[[package]]
 name = "egonlang-errors"
 version = "0.1.0"
 dependencies = [
+ "egonlang-diagnostics",
  "paste",
+ "pretty_assertions",
  "serde",
  "span",
+ "str-idxpos",
  "thiserror",
 ]
 
@@ -395,9 +406,11 @@ dependencies = [
  "anyhow",
  "codespan-reporting",
  "egonlang-core",
+ "egonlang-diagnostics",
  "egonlang-verifier",
  "serde",
  "serde_json",
+ "span",
  "str-idxpos",
  "tokio",
  "tower-lsp",
