@@ -157,7 +157,7 @@ impl LanguageServer for EgonLanguageServerBackend {
                 contents: HoverContents::Markup(MarkupContent {
                     kind: tower_lsp::lsp_types::MarkupKind::Markdown,
                     value: format!(
-                        "# AST\n## {first_node_type}\nIndex: {index}; {position:?}\n```\n{first_node}\n```\n## See Also\n{nodes}"
+                        "# AST\nHovered At: index={index}; {position:?}\n## {first_node_type}\n```\n{first_node}\n```\n## See Also\n{nodes}"
                     ),
                 }),
                 range: None,
