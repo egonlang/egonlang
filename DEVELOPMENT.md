@@ -62,6 +62,11 @@
 | `just docs`                    | Generate API documentation in `target/doc`                                                              |
 | `just open-docs`               | Generate API documentation then open them in browser                                                    |
 
+## Resources/Documentation
+
+- [API](https://egonlang.github.io/egonlang/docs/egon/)
+- [Egon Book](https://egonlang.github.io/egonlang/book/introduction.html)
+
 ## CLI
 
 ### Lex
