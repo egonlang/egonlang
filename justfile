@@ -11,6 +11,12 @@ build-release:
     cd vsc && just build
     cd egon-book && just build
 
+docs:
+    cargo doc --no-deps --workspace
+
+docs-open:
+    cargo doc --no-deps --workspace --open
+
 clean:
     cargo clean
     just clean-coverage

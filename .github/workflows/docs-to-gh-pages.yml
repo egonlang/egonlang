@@ -1,0 +1,44 @@
+name: Publish Docs
+
+permissions: write-all
+
+on:
+  push:
+    paths:
+      - 'egonlang-cli/**'
+      - 'egonlang-core/**'
+      - 'egonlang-diagnostics/**'
+      - 'egonlang-errors/**'
+      - 'egonlang-lsp/**'
+      - 'egonlang-verifier/**'
+      - 'span/**'
+      - 'str-idxpos/**'
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-20.04
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install just
+        uses: taiki-e/install-action@v2
+        with:
+          tool: just
+
+      - name: Build docs
+        run: just docs
+
+      - name: Deploy docs to gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ github.ref == 'refs/heads/main' }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          destination_dir: ./docs
+          publish_dir: ./target/doc

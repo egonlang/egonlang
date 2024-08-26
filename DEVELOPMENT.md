@@ -59,6 +59,8 @@
 | `just run-docker COMMAND PATH` | Run the egon command in docker e.g. `$ just run docker parse ./path/to/file.eg`                         |
 | `just lsp`                     | Start the egon language server                                                                          |
 | `just serve-book`              | Serve the [egon book](./egon-book/) at http://localhost:3000                                            |
+| `just docs`                    | Generate API documentation in `target/doc`                                                              |
+| `just open-docs`               | Generate API documentation then open them in browser                                                    |
 
 ## CLI
 
