@@ -1,0 +1,1 @@
+searchState.loadedDescShard("span", 0, "The upper bound of the range (exclusive).\nThe lower bound of the range (inclusive).")

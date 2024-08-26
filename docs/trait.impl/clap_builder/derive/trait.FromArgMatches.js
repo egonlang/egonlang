@@ -1,0 +1,3 @@
+(function() {var implementors = {
+"egon":[["impl FromArgMatches for <a class=\"enum\" href=\"egon/enum.Commands.html\" title=\"enum egon::Commands\">Commands</a>"],["impl FromArgMatches for <a class=\"struct\" href=\"egon/struct.Cli.html\" title=\"struct egon::Cli\">Cli</a>"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -1,0 +1,3 @@
+(function() {var implementors = {
+"egonlang_errors":[["impl Diagnosable for <a class=\"enum\" href=\"egonlang_errors/enum.EgonError.html\" title=\"enum egonlang_errors::EgonError\">EgonError</a>"],["impl Diagnosable for <a class=\"enum\" href=\"egonlang_errors/enum.EgonSyntaxError.html\" title=\"enum egonlang_errors::EgonSyntaxError\">EgonSyntaxError</a>"],["impl Diagnosable for <a class=\"enum\" href=\"egonlang_errors/enum.EgonTypeError.html\" title=\"enum egonlang_errors::EgonTypeError\">EgonTypeError</a>"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

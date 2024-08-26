@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["EgonError","EgonSyntaxError","EgonTypeError"],"type":["EgonErrorS"]};
