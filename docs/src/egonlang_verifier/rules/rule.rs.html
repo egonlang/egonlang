@@ -264,7 +264,11 @@
 <a href="#264" id="264">264</a>
 <a href="#265" id="265">265</a>
 <a href="#266" id="266">266</a>
-</pre></div><pre class="rust"><code><span class="kw">pub trait </span>ResolveIdent: Fn(<span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::TypeEnvValue&gt; {}
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span>egonlang_errors::EgonResultMultiSpannedErr;
+
+<span class="kw">pub trait </span>ResolveIdent: Fn(<span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::TypeEnvValue&gt; {}
 <span class="kw">pub trait </span>ResolveExpr:
     Fn(<span class="kw-2">&amp;</span>::egonlang_core::ast::Expr, <span class="kw-2">&amp;</span>::span::Span) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::TypeEnvValue&gt;
 {
@@ -284,7 +288,7 @@
         span: <span class="kw-2">&amp;</span>::span::Span,
         resolve_ident: <span class="kw-2">&amp;</span><span class="kw">dyn </span>ResolveIdent,
         resolve_expr: <span class="kw-2">&amp;</span><span class="kw">dyn </span>ResolveExpr,
-    ) -&gt; <span class="kw">crate</span>::VerificationResult;
+    ) -&gt; EgonResultMultiSpannedErr&lt;()&gt;;
 
     <span class="kw">fn </span>visit_expr(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
@@ -292,7 +296,7 @@
         span: <span class="kw-2">&amp;</span>::span::Span,
         resolve_ident: <span class="kw-2">&amp;</span><span class="kw">dyn </span>ResolveIdent,
         resolve_expr: <span class="kw-2">&amp;</span><span class="kw">dyn </span>ResolveExpr,
-    ) -&gt; <span class="kw">crate</span>::VerificationResult;
+    ) -&gt; EgonResultMultiSpannedErr&lt;()&gt;;
 }
 
 <span class="doccomment">/// Create a verifier [`Rule`] for an expression
@@ -312,7 +316,7 @@
                     _span: <span class="kw-2">&amp;</span>::span::Span,
                     _resolve_ident: <span class="kw-2">&amp;</span><span class="kw">dyn </span><span class="macro-nonterminal">$crate::rules::rule::ResolveIdent</span>,
                     _resolve_expr: <span class="kw-2">&amp;</span><span class="kw">dyn </span><span class="macro-nonterminal">$crate::rules::rule::ResolveExpr</span>,
-                ) -&gt; VerificationResult {
+                ) -&gt; ::egonlang_errors::EgonResultMultiSpannedErr&lt;()&gt; {
                     <span class="prelude-val">Ok</span>(())
                 }
 
@@ -322,7 +326,7 @@
                     _span: <span class="kw-2">&amp;</span>::span::Span,
                     _resolve_ident: <span class="kw-2">&amp;</span><span class="kw">dyn </span><span class="macro-nonterminal">$crate::rules::rule::ResolveIdent</span>,
                     _resolve_expr: <span class="kw-2">&amp;</span><span class="kw">dyn </span><span class="macro-nonterminal">$crate::rules::rule::ResolveExpr</span>,
-                ) -&gt; VerificationResult {
+                ) -&gt; ::egonlang_errors::EgonResultMultiSpannedErr&lt;()&gt; {
                     <span class="kw">let </span>internal = |<span class="macro-nonterminal">$expr</span>: <span class="kw-2">&amp;</span>::egonlang_core::ast::Expr| -&gt;
                         Vec&lt;::egonlang_errors::EgonErrorS&gt; {
                             <span class="macro-nonterminal">$body
@@ -354,7 +358,7 @@
                     _span: <span class="kw-2">&amp;</span>::egonlang_core::span::Span,
                     _resolve_ident: <span class="kw-2">&amp;</span><span class="kw">dyn </span><span class="macro-nonterminal">$crate::rules::rule::ResolveIdent</span>,
                     _resolve_expr: <span class="kw-2">&amp;</span><span class="kw">dyn </span><span class="macro-nonterminal">$crate::rules::rule::ResolveExpr</span>,
-                ) -&gt; VerificationResult {
+                ) -&gt; ::egonlang_errors::EgonResult&lt;()&gt; {
                     <span class="prelude-val">Ok</span>(())
                 }
 
@@ -364,7 +368,7 @@
                     span: <span class="kw-2">&amp;</span>::egonlang_core::span::Span,
                     _resolve_ident: <span class="kw-2">&amp;</span><span class="kw">dyn </span><span class="macro-nonterminal">$crate::rules::rule::ResolveIdent</span>,
                     _resolve_expr: <span class="kw-2">&amp;</span><span class="kw">dyn </span><span class="macro-nonterminal">$crate::rules::rule::ResolveExpr</span>,
-                ) -&gt; VerificationResult {
+                ) -&gt; ::egonlang_errors::EgonResult&lt;()&gt; {
                     <span class="kw">let </span>internal = | <span class="macro-nonterminal">$expr</span>: <span class="kw-2">&amp;</span>::egonlang_core::ast::Expr,
                                      <span class="macro-nonterminal">$span</span>: <span class="kw-2">&amp;</span>::egonlang_core::span::Span |
                         { <span class="macro-nonterminal">$body </span>};
@@ -395,7 +399,7 @@
                     _span: <span class="kw-2">&amp;</span>::span::Span,
                     _resolve_ident: <span class="kw-2">&amp;</span><span class="kw">dyn </span><span class="macro-nonterminal">$crate::rules::rule::ResolveIdent</span>,
                     _resolve_expr: <span class="kw-2">&amp;</span><span class="kw">dyn </span><span class="macro-nonterminal">$crate::rules::rule::ResolveExpr</span>,
-                ) -&gt; VerificationResult {
+                ) -&gt; ::egonlang_errors::EgonResultMultiSpannedErr&lt;()&gt; {
                     <span class="prelude-val">Ok</span>(())
                 }
 
@@ -405,7 +409,7 @@
                     span: <span class="kw-2">&amp;</span>::span::Span,
                     resolve_ident: <span class="kw-2">&amp;</span><span class="kw">dyn </span><span class="macro-nonterminal">$crate::rules::rule::ResolveIdent</span>,
                     resolve_expr: <span class="kw-2">&amp;</span><span class="kw">dyn </span><span class="macro-nonterminal">$crate::rules::rule::ResolveExpr</span>,
-                ) -&gt; VerificationResult {
+                ) -&gt; ::egonlang_errors::EgonResultMultiSpannedErr&lt;()&gt; {
                     <span class="kw">let </span>internal = | <span class="macro-nonterminal">$expr</span>: <span class="kw-2">&amp;</span>::egonlang_core::ast::Expr,
                                      <span class="macro-nonterminal">$span</span>: <span class="kw-2">&amp;</span>::span::Span,
                                      <span class="macro-nonterminal">$resolve_ident</span>: <span class="kw-2">&amp;</span><span class="kw">dyn </span><span class="macro-nonterminal">$crate::rules::rule::ResolveIdent</span>,
@@ -442,7 +446,7 @@
                     span: <span class="kw-2">&amp;</span>::span::Span,
                     resolve_ident: <span class="kw-2">&amp;</span><span class="kw">dyn </span><span class="macro-nonterminal">$crate::rules::rule::ResolveIdent</span>,
                     resolve_expr: <span class="kw-2">&amp;</span><span class="kw">dyn </span><span class="macro-nonterminal">$crate::rules::rule::ResolveExpr</span>,
-                ) -&gt; <span class="macro-nonterminal">$crate::VerificationResult </span>{
+                ) -&gt; ::egonlang_errors::EgonResultMultiSpannedErr&lt;()&gt; {
                     <span class="kw">let </span>internal = | <span class="macro-nonterminal">$stmt</span>: <span class="kw-2">&amp;</span>::egonlang_core::ast::Stmt,
                                      <span class="macro-nonterminal">$span</span>: <span class="kw-2">&amp;</span>::span::Span,
                                      <span class="macro-nonterminal">$resolve_ident</span>: <span class="kw-2">&amp;</span><span class="kw">dyn </span><span class="macro-nonterminal">$crate::rules::rule::ResolveIdent</span>,
@@ -464,7 +468,7 @@
                     _span: <span class="kw-2">&amp;</span>::span::Span,
                     _resolve_ident: <span class="kw-2">&amp;</span><span class="kw">dyn </span><span class="macro-nonterminal">$crate::rules::rule::ResolveIdent</span>,
                     _resolve_expr: <span class="kw-2">&amp;</span><span class="kw">dyn </span><span class="macro-nonterminal">$crate::rules::rule::ResolveExpr</span>,
-                ) -&gt; <span class="macro-nonterminal">$crate::VerificationResult </span>{
+                ) -&gt; ::egonlang_errors::EgonResultMultiSpannedErr&lt;()&gt; {
                     <span class="prelude-val">Ok</span>(())
                 }
             }

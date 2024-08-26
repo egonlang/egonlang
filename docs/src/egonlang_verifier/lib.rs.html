@@ -28,13 +28,14 @@
 <span class="kw">mod </span>verifier;
 <span class="kw">mod </span>verify_trace;
 
+<span class="kw">use </span>egonlang_errors::EgonResultMultiSpannedErr;
 <span class="kw">pub use </span>type_env::{TypeEnv, TypeEnvValue};
-<span class="kw">pub use </span>verifier::{VerificationResult, Verifier};
+<span class="kw">pub use </span>verifier::Verifier;
 
 <span class="doccomment">/// Verify a [`egonlang_core::ast::Module`] using the core [`rules::Rule`] set
 ///
 /// See: [`rules::core`]
-</span><span class="kw">pub fn </span>verify_module(module: <span class="kw-2">&amp;mut </span>egonlang_core::ast::Module) -&gt; VerificationResult {
+</span><span class="kw">pub fn </span>verify_module(module: <span class="kw-2">&amp;mut </span>egonlang_core::ast::Module) -&gt; EgonResultMultiSpannedErr&lt;()&gt; {
     Verifier::default().verify(module)
 }
 
@@ -43,7 +44,6 @@
     <span class="kw">pub use </span><span class="kw">crate</span>::rules;
     <span class="kw">pub use </span><span class="kw">crate</span>::stmt_rule;
     <span class="kw">pub use </span><span class="kw">crate</span>::type_env::{TypeEnv, TypeEnvValue};
-    <span class="kw">pub use </span><span class="kw">crate</span>::verifier::VerificationResult;
     <span class="kw">pub use </span><span class="kw">crate</span>::verifier::Verifier;
     <span class="kw">pub use </span><span class="kw">crate</span>::verify_module;
     <span class="kw">pub use </span><span class="kw">crate</span>::verify_trace;

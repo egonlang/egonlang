@@ -1322,10 +1322,9 @@
 <a href="#1322" id="1322">1322</a>
 <a href="#1323" id="1323">1323</a>
 <a href="#1324" id="1324">1324</a>
-<a href="#1325" id="1325">1325</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::{<span class="self">self</span>, Display, Formatter};
 
-<span class="kw">use </span>egonlang_errors::{EgonError, EgonTypeError};
+<span class="kw">use </span>egonlang_errors::EgonTypeError;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="kw">use </span><span class="kw">crate</span>::parser::parse;
@@ -1656,24 +1655,23 @@
     <span class="kw">fn </span>try_from(value: Expr) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
         <span class="kw">match </span>value {
             Expr::Literal(literal) =&gt; <span class="kw">match </span>literal {
-                ExprLiteral::Number(<span class="kw">_</span>) =&gt; {
-                    <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[EgonError::TypeError(EgonTypeError::MismatchType {
-                        expected: TypeRef::bool().to_string(),
-                        actual: TypeRef::number().to_string(),
-                    })])
+                ExprLiteral::Number(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[EgonTypeError::MismatchType {
+                    expected: TypeRef::bool().to_string(),
+                    actual: TypeRef::number().to_string(),
                 }
+                .into()]),
                 ExprLiteral::Bool(bool) =&gt; <span class="prelude-val">Ok</span>(bool),
-                ExprLiteral::String(<span class="kw">_</span>) =&gt; {
-                    <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[EgonError::TypeError(EgonTypeError::MismatchType {
-                        expected: TypeRef::bool().to_string(),
-                        actual: TypeRef::string().to_string(),
-                    })])
+                ExprLiteral::String(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[EgonTypeError::MismatchType {
+                    expected: TypeRef::bool().to_string(),
+                    actual: TypeRef::string().to_string(),
                 }
+                .into()]),
             },
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[EgonError::TypeError(EgonTypeError::MismatchType {
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[EgonTypeError::MismatchType {
                 expected: TypeRef::bool().to_string(),
                 actual: value.to_string(),
-            })]),
+            }
+            .into()]),
         }
     }
 }

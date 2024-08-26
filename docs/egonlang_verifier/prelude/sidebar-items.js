@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":["expr_rule","stmt_rule","verify_trace"],"struct":["TypeEnv","TypeEnvValue","Verifier"],"type":["VerificationResult"]};
+window.SIDEBAR_ITEMS = {"macro":["expr_rule","stmt_rule","verify_trace"],"struct":["TypeEnv","TypeEnvValue","Verifier"]};

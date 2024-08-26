@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["EgonError","EgonSyntaxError","EgonTypeError"],"type":["EgonErrorS"]};
+window.SIDEBAR_ITEMS = {"enum":["EgonError","EgonSyntaxError","EgonTypeError"],"type":["EgonErrorS","EgonResultMultiSpannedErr","EgonResultSingleSpannedErr"]};

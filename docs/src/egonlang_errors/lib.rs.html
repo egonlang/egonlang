@@ -313,6 +313,12 @@
 <a href="#313" id="313">313</a>
 <a href="#314" id="314">314</a>
 <a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>egonlang_diagnostics::Diagnosable;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>thiserror::Error;
@@ -320,6 +326,12 @@
 <span class="kw">use </span>span::{Span, Spanned};
 
 <span class="kw">pub type </span>EgonErrorS = Spanned&lt;EgonError&gt;;
+
+<span class="doccomment">/// A [`Result`] using a single [`EgonError`] wrapped in a [`Span`].
+</span><span class="kw">pub type </span>EgonResultSingleSpannedErr&lt;T&gt; = <span class="prelude-ty">Result</span>&lt;T, EgonErrorS&gt;;
+
+<span class="doccomment">/// A [`Result`] using multiple [`EgonError`] wrapped in [`Span`]s.
+</span><span class="kw">pub type </span>EgonResultMultiSpannedErr&lt;T&gt; = <span class="prelude-ty">Result</span>&lt;T, Vec&lt;EgonErrorS&gt;&gt;;
 
 <span class="attr">#[derive(Debug, Clone, Error, PartialEq, Serialize, Deserialize)]
 </span><span class="kw">pub enum </span>EgonError {

@@ -2114,20 +2114,16 @@
 <a href="#2114" id="2114">2114</a>
 <a href="#2115" id="2115">2115</a>
 <a href="#2116" id="2116">2116</a>
-<a href="#2117" id="2117">2117</a>
-<a href="#2118" id="2118">2118</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>ast::TypeRef;
 <span class="kw">use </span>colored::Colorize;
 <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
-<span class="kw">use </span>egonlang_errors::{EgonErrorS, EgonTypeError};
+<span class="kw">use </span>egonlang_errors::{EgonErrorS, EgonResultMultiSpannedErr, EgonTypeError};
 <span class="kw">use </span>span::Span;
 
 <span class="kw">use crate</span>::{
     rules::{<span class="self">self</span>, ResolveExpr, ResolveIdent},
     verify_trace, TypeEnv, TypeEnvValue,
 };
-
-<span class="kw">pub type </span>VerificationResult = <span class="prelude-ty">Result</span>&lt;(), Vec&lt;EgonErrorS&gt;&gt;;
 
 <span class="doccomment">/// Verify an AST [`Module`] using the registered [`Rule`] set
 ///
@@ -2220,7 +2216,7 @@
     </span>}
 
     <span class="doccomment">/// Verify an AST [`Module`] using the registered [`Rule`] set
-    </span><span class="kw">pub fn </span>verify(<span class="kw-2">&amp;mut </span><span class="self">self</span>, module: <span class="kw-2">&amp;mut </span>ast::Module) -&gt; VerificationResult {
+    </span><span class="kw">pub fn </span>verify(<span class="kw-2">&amp;mut </span><span class="self">self</span>, module: <span class="kw-2">&amp;mut </span>ast::Module) -&gt; EgonResultMultiSpannedErr&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>all_errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
 
         <span class="macro">verify_trace!</span>(verifier verify: <span class="string">"Verifying module..."</span>);
@@ -2426,7 +2422,7 @@
         resolved_type
     }
 
-    <span class="kw">fn </span>visit_stmt(<span class="kw-2">&amp;mut </span><span class="self">self</span>, stmt: <span class="kw-2">&amp;mut </span>ast::Stmt, span: <span class="kw-2">&amp;</span>Span) -&gt; <span class="prelude-ty">Result</span>&lt;(), Vec&lt;EgonErrorS&gt;&gt; {
+    <span class="kw">fn </span>visit_stmt(<span class="kw-2">&amp;mut </span><span class="self">self</span>, stmt: <span class="kw-2">&amp;mut </span>ast::Stmt, span: <span class="kw-2">&amp;</span>Span) -&gt; EgonResultMultiSpannedErr&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
 
         <span class="kw">let </span>stmt_string = stmt.clone().to_string().cyan();
@@ -2669,7 +2665,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         expr: <span class="kw-2">&amp;mut </span>ast::Expr,
         span: <span class="kw-2">&amp;</span>Span,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;TypeEnvValue, Vec&lt;EgonErrorS&gt;&gt; {
+    ) -&gt; EgonResultMultiSpannedErr&lt;TypeEnvValue&gt; {
         <span class="kw">let </span>expr_string = expr.to_string().cyan();
         <span class="kw">let </span>expr_clone = expr.clone();
 

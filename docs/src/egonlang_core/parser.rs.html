@@ -2145,6 +2145,9 @@
 <a href="#2145" id="2145">2145</a>
 <a href="#2146" id="2146">2146</a>
 <a href="#2147" id="2147">2147</a>
+<a href="#2148" id="2148">2148</a>
+<a href="#2149" id="2149">2149</a>
+<a href="#2150" id="2150">2150</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>lalrpop_util::lalrpop_mod;
 
 <span class="kw">use </span><span class="kw">crate</span>::lexer::Lexer;
@@ -2152,7 +2155,7 @@
 <span class="kw">use </span>lalrpop_util::ParseError;
 
 <span class="kw">use </span><span class="kw">crate</span>::ast::Module;
-<span class="kw">use </span>egonlang_errors::{EgonError, EgonErrorS, EgonSyntaxError};
+<span class="kw">use </span>egonlang_errors::{EgonResultMultiSpannedErr, EgonSyntaxError};
 
 <span class="macro">lalrpop_mod!</span>(
     <span class="attr">#[allow(clippy::all)]
@@ -2176,7 +2179,7 @@
 }
 
 <span class="doccomment">/// Parse a string source in to an AST [`Module`]
-</span><span class="kw">pub fn </span>parse(source: <span class="kw-2">&amp;</span>str, offset: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Module, Vec&lt;EgonErrorS&gt;&gt; {
+</span><span class="kw">pub fn </span>parse(source: <span class="kw-2">&amp;</span>str, offset: usize) -&gt; EgonResultMultiSpannedErr&lt;Module&gt; {
     <span class="kw">let </span>lexer = Lexer::new(source).map(|token| <span class="kw">match </span>token {
         <span class="prelude-val">Ok</span>((l, token, r)) =&gt; <span class="prelude-val">Ok</span>((l + offset, token, r + offset)),
         <span class="prelude-val">Err</span>((e, span)) =&gt; <span class="prelude-val">Err</span>((e, span.start + offset..span.end + offset)),
@@ -2194,34 +2197,37 @@
         }
     };
 
-    errors.extend(parser_errors.into_iter().map(|err| <span class="kw">match </span>err {
-        ParseError::ExtraToken {
-            token: (start, <span class="kw">_</span>, end),
-        } =&gt; (
-            EgonError::SyntaxError(EgonSyntaxError::ExtraToken {
-                token: source[start..end].to_string(),
-            }),
-            start..end,
-        ),
-        ParseError::InvalidToken { location } =&gt; (
-            EgonError::SyntaxError(EgonSyntaxError::InvalidToken),
-            location..location,
-        ),
-        ParseError::UnrecognizedEOF { location, expected } =&gt; (
-            EgonError::SyntaxError(EgonSyntaxError::UnrecognizedEOF { expected }),
-            location..location,
-        ),
-        ParseError::UnrecognizedToken {
-            token: (start, <span class="kw">_</span>, end),
-            expected,
-        } =&gt; (
-            EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
-                token: source[start - offset..end - offset].to_string(),
+    errors.extend(parser_errors.into_iter().map(|err| {
+        <span class="kw">match </span>err {
+            ParseError::ExtraToken {
+                token: (start, <span class="kw">_</span>, end),
+            } =&gt; (
+                EgonSyntaxError::ExtraToken {
+                    token: source[start..end].to_string(),
+                }
+                .into(),
+                start..end,
+            ),
+            ParseError::InvalidToken { location } =&gt; {
+                (EgonSyntaxError::InvalidToken.into(), location..location)
+            }
+            ParseError::UnrecognizedEOF { location, expected } =&gt; (
+                EgonSyntaxError::UnrecognizedEOF { expected }.into(),
+                location..location,
+            ),
+            ParseError::UnrecognizedToken {
+                token: (start, <span class="kw">_</span>, end),
                 expected,
-            }),
-            start..end,
-        ),
-        ParseError::User { error } =&gt; error,
+            } =&gt; (
+                EgonSyntaxError::UnrecognizedToken {
+                    token: source[start - offset..end - offset].to_string(),
+                    expected,
+                }
+                .into(),
+                start..end,
+            ),
+            ParseError::User { error } =&gt; error,
+        }
     }));
 
     <span class="kw">if </span>errors.is_empty() {
