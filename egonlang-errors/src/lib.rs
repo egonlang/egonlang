@@ -6,6 +6,12 @@ use span::{Span, Spanned};
 
 pub type EgonErrorS = Spanned<EgonError>;
 
+/// A [`Result`] using a single [`EgonError`] wrapped in a [`Span`].
+pub type EgonResultSingleSpannedErr<T> = Result<T, EgonErrorS>;
+
+/// A [`Result`] using multiple [`EgonError`] wrapped in [`Span`]s.
+pub type EgonResultMultiSpannedErr<T> = Result<T, Vec<EgonErrorS>>;
+
 #[derive(Debug, Clone, Error, PartialEq, Serialize, Deserialize)]
 pub enum EgonError {
     #[error("SyntaxError: {0}")]

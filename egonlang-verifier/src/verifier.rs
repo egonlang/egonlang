@@ -1,15 +1,13 @@
 use ast::TypeRef;
 use colored::Colorize;
 use egonlang_core::prelude::*;
-use egonlang_errors::{EgonErrorS, EgonTypeError};
+use egonlang_errors::{EgonErrorS, EgonResultMultiSpannedErr, EgonTypeError};
 use span::Span;
 
 use crate::{
     rules::{self, ResolveExpr, ResolveIdent},
     verify_trace, TypeEnv, TypeEnvValue,
 };
-
-pub type VerificationResult = Result<(), Vec<EgonErrorS>>;
 
 /// Verify an AST [`Module`] using the registered [`Rule`] set
 ///
@@ -102,7 +100,7 @@ impl<'a> Verifier<'a> {
     }
 
     /// Verify an AST [`Module`] using the registered [`Rule`] set
-    pub fn verify(&mut self, module: &mut ast::Module) -> VerificationResult {
+    pub fn verify(&mut self, module: &mut ast::Module) -> EgonResultMultiSpannedErr<()> {
         let mut all_errs: Vec<EgonErrorS> = vec![];
 
         verify_trace!(verifier verify: "Verifying module...");
@@ -308,7 +306,7 @@ impl<'a> Verifier<'a> {
         resolved_type
     }
 
-    fn visit_stmt(&mut self, stmt: &mut ast::Stmt, span: &Span) -> Result<(), Vec<EgonErrorS>> {
+    fn visit_stmt(&mut self, stmt: &mut ast::Stmt, span: &Span) -> EgonResultMultiSpannedErr<()> {
         let mut errs: Vec<EgonErrorS> = vec![];
 
         let stmt_string = stmt.clone().to_string().cyan();
@@ -551,7 +549,7 @@ impl<'a> Verifier<'a> {
         &mut self,
         expr: &mut ast::Expr,
         span: &Span,
-    ) -> Result<TypeEnvValue, Vec<EgonErrorS>> {
+    ) -> EgonResultMultiSpannedErr<TypeEnvValue> {
         let expr_string = expr.to_string().cyan();
         let expr_clone = expr.clone();
 

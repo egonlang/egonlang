@@ -3,7 +3,7 @@ use std::num::ParseFloatError;
 use logos::Logos;
 use serde::{Deserialize, Serialize};
 
-use egonlang_errors::{EgonError, EgonErrorS, EgonSyntaxError};
+use egonlang_errors::{EgonError, EgonResultSingleSpannedErr, EgonSyntaxError};
 
 /// Converts a [`String`] source in to a vector of [`Token`]
 #[derive(Debug)]
@@ -22,7 +22,7 @@ impl<'a> Lexer<'a> {
 }
 
 impl<'a> Iterator for Lexer<'a> {
-    type Item = Result<(usize, Token, usize), EgonErrorS>;
+    type Item = EgonResultSingleSpannedErr<(usize, Token, usize)>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(token) = self.pending.take() {

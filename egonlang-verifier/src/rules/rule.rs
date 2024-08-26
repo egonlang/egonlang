@@ -1,3 +1,5 @@
+use egonlang_errors::EgonResultMultiSpannedErr;
+
 pub trait ResolveIdent: Fn(&str) -> Option<crate::TypeEnvValue> {}
 pub trait ResolveExpr:
     Fn(&::egonlang_core::ast::Expr, &::span::Span) -> Option<crate::TypeEnvValue>
@@ -18,7 +20,7 @@ pub trait Rule<'a> {
         span: &::span::Span,
         resolve_ident: &dyn ResolveIdent,
         resolve_expr: &dyn ResolveExpr,
-    ) -> crate::VerificationResult;
+    ) -> EgonResultMultiSpannedErr<()>;
 
     fn visit_expr(
         &self,
@@ -26,7 +28,7 @@ pub trait Rule<'a> {
         span: &::span::Span,
         resolve_ident: &dyn ResolveIdent,
         resolve_expr: &dyn ResolveExpr,
-    ) -> crate::VerificationResult;
+    ) -> EgonResultMultiSpannedErr<()>;
 }
 
 /// Create a verifier [`Rule`] for an expression
@@ -46,7 +48,7 @@ macro_rules! expr_rule {
                     _span: &::span::Span,
                     _resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
                     _resolve_expr: &dyn $crate::rules::rule::ResolveExpr,
-                ) -> VerificationResult {
+                ) -> ::egonlang_errors::EgonResultMultiSpannedErr<()> {
                     Ok(())
                 }
 
@@ -56,7 +58,7 @@ macro_rules! expr_rule {
                     _span: &::span::Span,
                     _resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
                     _resolve_expr: &dyn $crate::rules::rule::ResolveExpr,
-                ) -> VerificationResult {
+                ) -> ::egonlang_errors::EgonResultMultiSpannedErr<()> {
                     let internal = |$expr: &::egonlang_core::ast::Expr| ->
                         Vec<::egonlang_errors::EgonErrorS> {
                             $body
@@ -88,7 +90,7 @@ macro_rules! expr_rule {
                     _span: &::egonlang_core::span::Span,
                     _resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
                     _resolve_expr: &dyn $crate::rules::rule::ResolveExpr,
-                ) -> VerificationResult {
+                ) -> ::egonlang_errors::EgonResult<()> {
                     Ok(())
                 }
 
@@ -98,7 +100,7 @@ macro_rules! expr_rule {
                     span: &::egonlang_core::span::Span,
                     _resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
                     _resolve_expr: &dyn $crate::rules::rule::ResolveExpr,
-                ) -> VerificationResult {
+                ) -> ::egonlang_errors::EgonResult<()> {
                     let internal = | $expr: &::egonlang_core::ast::Expr,
                                      $span: &::egonlang_core::span::Span |
                         { $body };
@@ -129,7 +131,7 @@ macro_rules! expr_rule {
                     _span: &::span::Span,
                     _resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
                     _resolve_expr: &dyn $crate::rules::rule::ResolveExpr,
-                ) -> VerificationResult {
+                ) -> ::egonlang_errors::EgonResultMultiSpannedErr<()> {
                     Ok(())
                 }
 
@@ -139,7 +141,7 @@ macro_rules! expr_rule {
                     span: &::span::Span,
                     resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
                     resolve_expr: &dyn $crate::rules::rule::ResolveExpr,
-                ) -> VerificationResult {
+                ) -> ::egonlang_errors::EgonResultMultiSpannedErr<()> {
                     let internal = | $expr: &::egonlang_core::ast::Expr,
                                      $span: &::span::Span,
                                      $resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
@@ -176,7 +178,7 @@ macro_rules! stmt_rule {
                     span: &::span::Span,
                     resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
                     resolve_expr: &dyn $crate::rules::rule::ResolveExpr,
-                ) -> $crate::VerificationResult {
+                ) -> ::egonlang_errors::EgonResultMultiSpannedErr<()> {
                     let internal = | $stmt: &::egonlang_core::ast::Stmt,
                                      $span: &::span::Span,
                                      $resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
@@ -198,7 +200,7 @@ macro_rules! stmt_rule {
                     _span: &::span::Span,
                     _resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
                     _resolve_expr: &dyn $crate::rules::rule::ResolveExpr,
-                ) -> $crate::VerificationResult {
+                ) -> ::egonlang_errors::EgonResultMultiSpannedErr<()> {
                     Ok(())
                 }
             }

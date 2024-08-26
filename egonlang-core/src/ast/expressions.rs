@@ -1,6 +1,6 @@
 use std::fmt::{self, Display, Formatter};
 
-use egonlang_errors::{EgonError, EgonTypeError};
+use egonlang_errors::EgonTypeError;
 use serde::{Deserialize, Serialize};
 
 use crate::parser::parse;
@@ -331,24 +331,23 @@ impl TryFrom<Expr> for bool {
     fn try_from(value: Expr) -> Result<Self, Self::Error> {
         match value {
             Expr::Literal(literal) => match literal {
-                ExprLiteral::Number(_) => {
-                    Err(vec![EgonError::TypeError(EgonTypeError::MismatchType {
-                        expected: TypeRef::bool().to_string(),
-                        actual: TypeRef::number().to_string(),
-                    })])
+                ExprLiteral::Number(_) => Err(vec![EgonTypeError::MismatchType {
+                    expected: TypeRef::bool().to_string(),
+                    actual: TypeRef::number().to_string(),
                 }
+                .into()]),
                 ExprLiteral::Bool(bool) => Ok(bool),
-                ExprLiteral::String(_) => {
-                    Err(vec![EgonError::TypeError(EgonTypeError::MismatchType {
-                        expected: TypeRef::bool().to_string(),
-                        actual: TypeRef::string().to_string(),
-                    })])
+                ExprLiteral::String(_) => Err(vec![EgonTypeError::MismatchType {
+                    expected: TypeRef::bool().to_string(),
+                    actual: TypeRef::string().to_string(),
                 }
+                .into()]),
             },
-            _ => Err(vec![EgonError::TypeError(EgonTypeError::MismatchType {
+            _ => Err(vec![EgonTypeError::MismatchType {
                 expected: TypeRef::bool().to_string(),
                 actual: value.to_string(),
-            })]),
+            }
+            .into()]),
         }
     }
 }

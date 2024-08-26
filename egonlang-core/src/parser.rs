@@ -5,7 +5,7 @@ use crate::lexer::Lexer;
 use lalrpop_util::ParseError;
 
 use crate::ast::Module;
-use egonlang_errors::{EgonError, EgonErrorS, EgonSyntaxError};
+use egonlang_errors::{EgonResultMultiSpannedErr, EgonSyntaxError};
 
 lalrpop_mod!(
     #[allow(clippy::all)]
@@ -29,7 +29,7 @@ pub fn is_complete(source: &str) -> bool {
 }
 
 /// Parse a string source in to an AST [`Module`]
-pub fn parse(source: &str, offset: usize) -> Result<Module, Vec<EgonErrorS>> {
+pub fn parse(source: &str, offset: usize) -> EgonResultMultiSpannedErr<Module> {
     let lexer = Lexer::new(source).map(|token| match token {
         Ok((l, token, r)) => Ok((l + offset, token, r + offset)),
         Err((e, span)) => Err((e, span.start + offset..span.end + offset)),
@@ -47,34 +47,37 @@ pub fn parse(source: &str, offset: usize) -> Result<Module, Vec<EgonErrorS>> {
         }
     };
 
-    errors.extend(parser_errors.into_iter().map(|err| match err {
-        ParseError::ExtraToken {
-            token: (start, _, end),
-        } => (
-            EgonError::SyntaxError(EgonSyntaxError::ExtraToken {
-                token: source[start..end].to_string(),
-            }),
-            start..end,
-        ),
-        ParseError::InvalidToken { location } => (
-            EgonError::SyntaxError(EgonSyntaxError::InvalidToken),
-            location..location,
-        ),
-        ParseError::UnrecognizedEOF { location, expected } => (
-            EgonError::SyntaxError(EgonSyntaxError::UnrecognizedEOF { expected }),
-            location..location,
-        ),
-        ParseError::UnrecognizedToken {
-            token: (start, _, end),
-            expected,
-        } => (
-            EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
-                token: source[start - offset..end - offset].to_string(),
+    errors.extend(parser_errors.into_iter().map(|err| {
+        match err {
+            ParseError::ExtraToken {
+                token: (start, _, end),
+            } => (
+                EgonSyntaxError::ExtraToken {
+                    token: source[start..end].to_string(),
+                }
+                .into(),
+                start..end,
+            ),
+            ParseError::InvalidToken { location } => {
+                (EgonSyntaxError::InvalidToken.into(), location..location)
+            }
+            ParseError::UnrecognizedEOF { location, expected } => (
+                EgonSyntaxError::UnrecognizedEOF { expected }.into(),
+                location..location,
+            ),
+            ParseError::UnrecognizedToken {
+                token: (start, _, end),
                 expected,
-            }),
-            start..end,
-        ),
-        ParseError::User { error } => error,
+            } => (
+                EgonSyntaxError::UnrecognizedToken {
+                    token: source[start - offset..end - offset].to_string(),
+                    expected,
+                }
+                .into(),
+                start..end,
+            ),
+            ParseError::User { error } => error,
+        }
     }));
 
     if errors.is_empty() {
