@@ -1097,6 +1097,7 @@ impl<'a> Verifier<'a> {
 #[cfg(test)]
 mod verifier_tests {
     use crate::prelude::*;
+    use ast::{ExprBlock, Module, StmtExpr, TypeRef};
     use egonlang_core::prelude::*;
     use egonlang_errors::{EgonSyntaxError, EgonTypeError};
     use pretty_assertions::assert_eq;
@@ -2112,5 +2113,32 @@ a = b;"#,
             .and_then(|mut module| verify_module(&mut module));
 
         assert_eq!(Ok(()), results);
+    }
+
+    #[test]
+    fn validate_applies_types_to_block_exprs() {
+        let mut module = parse("{ 123 };", 0).unwrap();
+        let _ = verify_module(&mut module);
+
+        assert_eq!(
+            Module {
+                stmts: vec![(
+                    StmtExpr {
+                        expr: (
+                            ExprBlock {
+                                stmts: vec![],
+                                return_expr: Some((123f64.into(), 2..5)),
+                                typeref: Some(TypeRef::number())
+                            }
+                            .into(),
+                            0..7
+                        )
+                    }
+                    .into(),
+                    0..8
+                )]
+            },
+            module
+        );
     }
 }

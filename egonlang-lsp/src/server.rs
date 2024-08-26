@@ -68,10 +68,8 @@ impl LanguageServer for EgonLanguageServerBackend {
         let version = Some(params.text_document.version);
 
         // Parse and verify egon code
-        let errs = parse(source, 0)
-            .and_then(|mut module| verify_module(&mut module))
-            .err()
-            .unwrap_or_default();
+        let mut module = parse(source, 0).unwrap();
+        let errs = verify_module(&mut module).err().unwrap_or_default();
 
         // Map errors to
         let diagnostics: Vec<LspDiagnosis> = errs
@@ -99,10 +97,9 @@ impl LanguageServer for EgonLanguageServerBackend {
         documents.insert(uri.clone(), source.to_string());
 
         let version = Some(params.text_document.version);
-        let errs = parse(source, 0)
-            .and_then(|mut module| verify_module(&mut module))
-            .err()
-            .unwrap_or_default();
+        let mut module = parse(source, 0).unwrap();
+        let errs = verify_module(&mut module).err().unwrap_or_default();
+
         let diagnostics: Vec<(&(dyn Diagnosable + Sync), &Span)> = errs
             .iter()
             .map(|e| {
@@ -134,7 +131,9 @@ impl LanguageServer for EgonLanguageServerBackend {
         let doc = docs.get(&source_uri).unwrap();
         let index = position_to_index(doc, (position.line as usize, position.character as usize));
 
-        if let Ok(module) = parse(doc, 0) {
+        if let Ok(mut module) = parse(doc, 0) {
+            let _ = verify_module(&mut module);
+
             let mut nodes = module.get_by_index(index);
 
             let first_node = nodes.pop().unwrap();
