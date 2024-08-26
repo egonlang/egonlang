@@ -15,3 +15,7 @@ fn main () {
     assert_eq!(index, position_to_index(input, position));
 }
 ```
+
+## Docs
+
+https://egonlang.github.io/egonlang/docs/str_idxpos/index.html
