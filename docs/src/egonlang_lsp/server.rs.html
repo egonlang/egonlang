@@ -219,7 +219,6 @@
 <a href="#219" id="219">219</a>
 <a href="#220" id="220">220</a>
 <a href="#221" id="221">221</a>
-<a href="#222" id="222">222</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::sync::Arc;
 
@@ -290,10 +289,8 @@
         <span class="kw">let </span>version = <span class="prelude-val">Some</span>(params.text_document.version);
 
         <span class="comment">// Parse and verify egon code
-        </span><span class="kw">let </span>errs = parse(source, <span class="number">0</span>)
-            .and_then(|<span class="kw-2">mut </span>module| verify_module(<span class="kw-2">&amp;mut </span>module))
-            .err()
-            .unwrap_or_default();
+        </span><span class="kw">let </span><span class="kw-2">mut </span>module = parse(source, <span class="number">0</span>).unwrap();
+        <span class="kw">let </span>errs = verify_module(<span class="kw-2">&amp;mut </span>module).err().unwrap_or_default();
 
         <span class="comment">// Map errors to
         </span><span class="kw">let </span>diagnostics: Vec&lt;LspDiagnosis&gt; = errs
@@ -321,10 +318,9 @@
         documents.insert(uri.clone(), source.to_string());
 
         <span class="kw">let </span>version = <span class="prelude-val">Some</span>(params.text_document.version);
-        <span class="kw">let </span>errs = parse(source, <span class="number">0</span>)
-            .and_then(|<span class="kw-2">mut </span>module| verify_module(<span class="kw-2">&amp;mut </span>module))
-            .err()
-            .unwrap_or_default();
+        <span class="kw">let </span><span class="kw-2">mut </span>module = parse(source, <span class="number">0</span>).unwrap();
+        <span class="kw">let </span>errs = verify_module(<span class="kw-2">&amp;mut </span>module).err().unwrap_or_default();
+
         <span class="kw">let </span>diagnostics: Vec&lt;(<span class="kw-2">&amp;</span>(<span class="kw">dyn </span>Diagnosable + Sync), <span class="kw-2">&amp;</span>Span)&gt; = errs
             .iter()
             .map(|e| {
@@ -356,7 +352,9 @@
         <span class="kw">let </span>doc = docs.get(<span class="kw-2">&amp;</span>source_uri).unwrap();
         <span class="kw">let </span>index = position_to_index(doc, (position.line <span class="kw">as </span>usize, position.character <span class="kw">as </span>usize));
 
-        <span class="kw">if let </span><span class="prelude-val">Ok</span>(module) = parse(doc, <span class="number">0</span>) {
+        <span class="kw">if let </span><span class="prelude-val">Ok</span>(<span class="kw-2">mut </span>module) = parse(doc, <span class="number">0</span>) {
+            <span class="kw">let _ </span>= verify_module(<span class="kw-2">&amp;mut </span>module);
+
             <span class="kw">let </span><span class="kw-2">mut </span>nodes = module.get_by_index(index);
 
             <span class="kw">let </span>first_node = nodes.pop().unwrap();
