@@ -16,10 +16,7 @@ expr_rule!(
     |expr, _span, _resolve_ident, resolve_expr| {
         let mut errs: Vec<EgonErrorS> = vec![];
 
-
         if let ast::Expr::Infix(infix) = expr {
-            verify_trace!("Verifying infix expression: {}", expr.to_string().cyan());
-
             match infix.op {
                 ast::OpInfix::Greater => {
                     let infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
@@ -120,8 +117,6 @@ fn validate_infix_types(
     let rt_type = resolve_expr(rt_expr, rt_span).unwrap().typeref;
 
     if lt_type != expected_type {
-        verify_trace!(error: "infix operation received non number: {lt_expr}");
-
         errs.push((
             EgonTypeError::MismatchType {
                 expected: expected_type.to_string(),
@@ -132,8 +127,6 @@ fn validate_infix_types(
         ));
     }
     if rt_type != expected_type {
-        verify_trace!(error: "infix operation received non number: {rt_expr}");
-
         errs.push((
             EgonTypeError::MismatchType {
                 expected: expected_type.to_string(),

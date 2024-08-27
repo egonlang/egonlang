@@ -18,11 +18,6 @@ expr_rule!(
     TypeMismatchFnReturnExpr,
     |expr, _span, _resolve_ident, resolve_expr| {
         if let ast::Expr::Fn(fn_expr) = expr {
-            verify_trace!(
-                "Verifying fn return type and body expression: {}",
-                expr.to_string().cyan()
-            );
-
             let (fn_return_type_typeref, _) = &fn_expr.return_type;
             let (body_expr, body_span) = &fn_expr.body;
 
@@ -31,12 +26,6 @@ expr_rule!(
                     let mut errs = vec![];
 
                     if body_typeref.typeref != *fn_return_type_typeref {
-                        verify_trace!(error:
-                            "fn body type {} doesn't match fn return type {}",
-                            body_typeref.typeref.to_string().yellow().italic(),
-                            fn_return_type_typeref.to_string().yellow().italic()
-                        );
-
                         errs.push((
                             EgonTypeError::MismatchType {
                                 expected: fn_return_type_typeref.to_string(),

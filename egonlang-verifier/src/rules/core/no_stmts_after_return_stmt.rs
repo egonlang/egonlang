@@ -12,22 +12,17 @@ expr_rule!(
 
             for (stmt, stmt_span) in &expr_block.stmts {
                 if return_stmt_found {
-                    verify_trace!("Statement found after return statement was found. ERROR");
                     errs.push((EgonSyntaxError::UnreachableCode.into(), stmt_span.clone()));
                     continue;
                 }
 
                 if let ast::Stmt::Return(_) = &stmt {
-                    verify_trace!("Return statement found in block expression");
                     return_stmt_found = true;
                 }
             }
 
             if return_stmt_found {
                 if let Some((_, return_expr_span)) = &expr_block.return_expr {
-                    verify_trace!(
-                        "Return expression found after return statement was found. ERROR"
-                    );
                     errs.push((
                         EgonSyntaxError::UnreachableCode.into(),
                         return_expr_span.clone(),

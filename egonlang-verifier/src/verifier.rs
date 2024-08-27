@@ -6,7 +6,7 @@ use span::Span;
 
 use crate::{
     rules::{self, ResolveExpr, ResolveIdent},
-    verify_trace, TypeEnv, TypeEnvValue,
+    TypeEnv, TypeEnvValue,
 };
 
 /// Verify an AST [`Module`] using the registered [`Rule`] set
@@ -97,7 +97,10 @@ impl<'a> Verifier<'a> {
     pub fn verify(&mut self, module: &mut ast::Module) -> EgonResultMultiSpannedErr<()> {
         let mut all_errs: Vec<EgonErrorS> = vec![];
 
-        verify_trace!(verifier verify: "Verifying module...");
+        tracelog::tracelog!(
+            label = verifier,verify;
+            "Verifying module..."
+        );
 
         for (stmt, stmt_span) in &mut module.stmts {
             if let Err(stmt_errs) = self.visit_stmt(stmt, stmt_span) {
@@ -116,8 +119,9 @@ impl<'a> Verifier<'a> {
 impl<'a> Verifier<'a> {
     /// Resolves an identifier through all type environment scopes
     fn resolve_identifier(&self, identifier: &str) -> Option<TypeEnvValue> {
-        verify_trace!(
-            verifier resolve_expr_type: "(level: {}) Resolving identifier type: {}",
+        tracelog::tracelog!(
+            label = verifier,resolve_expr_type;
+            "(level: {}) Resolving identifier type: {}",
             self.current_type_env_level(),
             identifier.to_string().cyan()
         );
@@ -142,8 +146,9 @@ impl<'a> Verifier<'a> {
     ///
     /// (a, b,); // This expression's type resolves to (number, bool,)
     pub fn resolve_expr_type(&self, expr: &ast::Expr) -> Option<TypeEnvValue> {
-        verify_trace!(
-            verifier resolve_expr_type: "(level: {}) Resolving type for expression {}",
+        tracelog::tracelog!(
+            label = verifier,resolve_expr_type;
+            "(level: {}) Resolving type for expression {}",
             self.current_type_env_level(),
             expr.to_string().cyan()
         );
@@ -177,8 +182,9 @@ impl<'a> Verifier<'a> {
                 Some(TypeEnvValue::new(Type::tuple(item_types)))
             }
             ast::Expr::Block(block_expr) => {
-                verify_trace!(
-                    verifier resolve_expr_type: "(level: {}) Resolving type for block {}",
+                tracelog::tracelog!(
+                    label = verifier,resolve_expr_type;
+                    "(level: {}) Resolving type for block {}",
                     self.current_type_env_level(),
                     block_expr.to_string().cyan()
                 );
@@ -193,8 +199,9 @@ impl<'a> Verifier<'a> {
                 if let Some((block_expr_return_expr, _)) = &block_expr.return_expr {
                     self.resolve_expr_type(block_expr_return_expr)
                 } else {
-                    verify_trace!(
-                        verifier resolve_expr_type block: "(level: {}) Resolved block expression {} to type {}",
+                    tracelog::tracelog!(
+                        label = verifier,resolve_expr_type,block;
+                        "(level: {}) Resolved block expression {} to type {}",
                         self.current_type_env_level(),
                         block_expr.to_string().cyan(),
                         Type::unit().to_string().italic().yellow()
@@ -204,15 +211,17 @@ impl<'a> Verifier<'a> {
                 }
             }
             ast::Expr::Type(type_expr) => {
-                verify_trace!(
-                    verifier resolve_expr_type type_expr: "(level: {}) Resolving type for type expression {}",
+                tracelog::tracelog!(
+                    label = verifier,resolve_expr_type,type_expr;
+                    "(level: {}) Resolving type for type expression {}",
                     self.current_type_env_level(),
                     type_expr.to_string().cyan()
                 );
 
                 if type_expr.0.is_builtin() {
-                    verify_trace!(
-                        verifier resolve_expr_type type_expr: "(level: {}) Resolved type expression {} to builtin type {}",
+                    tracelog::tracelog!(
+                        label = verifier,resolve_expr_type,type_expr;
+                        "(level: {}) Resolved type expression {} to builtin type {}",
                         self.current_type_env_level(),
                         type_expr.to_string().cyan(),
                         type_expr.to_string().italic().yellow()
@@ -224,8 +233,9 @@ impl<'a> Verifier<'a> {
                 if let Some(type_env_value) =
                     &self.resolve_identifier(type_expr.0.to_string().as_str())
                 {
-                    verify_trace!(
-                        verifier resolve_expr_type type_expr: "(level: {}) Resolved type expression {} to type {}",
+                    tracelog::tracelog!(
+                        label = verifier,resolve_expr_type,type_expr;
+                        "(level: {}) Resolved type expression {} to type {}",
                         self.current_type_env_level(),
                         type_expr.to_string().cyan(),
                         type_env_value.typeref.to_string().italic().yellow()
@@ -234,8 +244,9 @@ impl<'a> Verifier<'a> {
                     return Some(type_env_value.clone());
                 }
 
-                verify_trace!(
-                    verifier resolve_expr_type type_expr: "(level: {}) Resolved type expression {} to type NONE",
+                tracelog::tracelog!(
+                    label = verifier,resolve_expr_type,type_expr;
+                    "(level: {}) Resolved type expression {} to type NONE",
                     self.current_type_env_level(),
                     type_expr.to_string().cyan()
                 );
@@ -298,8 +309,8 @@ impl<'a> Verifier<'a> {
         if let Some(resolved_type) = &resolved_type {
             let resolved_type_string = format!("{}", resolved_type.typeref);
 
-            verify_trace!(
-                verifier resolve_expr_type:
+            tracelog::tracelog!(
+                label = verifier,resolve_expr_type;
                 "(level: {}) Resolved expression {} to the type {}",
                 self.current_type_env_level(),
                 expr.to_string().cyan(),
@@ -315,19 +326,29 @@ impl<'a> Verifier<'a> {
 
         let stmt_string = stmt.clone().to_string().cyan();
 
-        verify_trace!(verifier visit_stmt: "{}", stmt_string);
+        tracelog::tracelog!(label = verifier,visit_stmt; "{}", stmt_string);
 
         let result = match stmt {
             ast::Stmt::Expr(stmt_expr) => {
-                verify_trace!(verifier visit_stmt expr: "{} is an expression statement", stmt_string);
+                tracelog::tracelog!(label = verifier,visit_stmt,expr; "{} is an expression statement", stmt_string);
 
                 let (expr, expr_span) = &mut stmt_expr.expr;
 
-                verify_trace!(verifier visit_stmt expr: "Checking expression {} from stmt {}", expr.to_string().cyan(), stmt_string);
+                tracelog::tracelog!(
+                    label = verifier,visit_stmt,expr;
+                    "Checking expression {} from stmt {}",
+                    expr.to_string().cyan(),
+                    stmt_string
+                );
 
                 let expr_errs = self.visit_expr(expr, expr_span).err().unwrap_or_default();
 
-                verify_trace!(verifier visit_stmt expr error: "Value expression {} had {} errors", &expr.to_string().cyan(), expr_errs.len());
+                tracelog::tracelog!(
+                    label = verifier,visit_stmt,expr,error;
+                    "Value expression {} had {} errors",
+                    expr.to_string().cyan(),
+                    expr_errs.len()
+                );
 
                 errs.extend(expr_errs);
 
@@ -338,7 +359,11 @@ impl<'a> Verifier<'a> {
                 Ok(())
             }
             ast::Stmt::Assign(stmt_assign) => {
-                verify_trace!(verifier visit_stmt assign: "{} is an assignment statement", stmt_string);
+                tracelog::tracelog!(
+                    label = verifier,visit_stmt,assign;
+                    "{} is an assignment statement",
+                    stmt_string
+                );
 
                 match (&mut stmt_assign.type_expr, &mut stmt_assign.value) {
                     (None, None) => {}
@@ -392,7 +417,11 @@ impl<'a> Verifier<'a> {
                 Ok(())
             }
             ast::Stmt::TypeAlias(stmt_type_alias) => {
-                verify_trace!(verifier visit_stmt type_alias: "{} is a type alias statement", stmt_string);
+                tracelog::tracelog!(
+                    label = verifier,visit_stmt,type_alias;
+                    "{} is a type alias statement",
+                    stmt_string
+                );
 
                 let alias = &stmt_type_alias.alias;
                 let value = self
@@ -407,11 +436,19 @@ impl<'a> Verifier<'a> {
                 Ok(())
             }
             ast::Stmt::Fn(stmt_fn) => {
-                verify_trace!(verifier visit_stmt function: "{} is an function statement", stmt_string);
+                tracelog::tracelog!(
+                    label = verifier,visit_stmt,function;
+                    "{} is an function statement",
+                    stmt_string
+                );
 
                 let (fn_expr, fn_expr_span) = &mut stmt_fn.fn_expr;
 
-                verify_trace!(verifier visit_stmt function: "Checking function statement's function expression {}", fn_expr.to_string().cyan());
+                tracelog::tracelog!(
+                    label = verifier,visit_stmt,function;
+                    "Checking function statement's function expression {}",
+                    fn_expr.to_string().cyan()
+                );
 
                 let fn_expr_errs = self
                     .visit_expr(fn_expr, fn_expr_span)
@@ -419,7 +456,12 @@ impl<'a> Verifier<'a> {
                     .unwrap_or_default();
 
                 if !fn_expr_errs.is_empty() {
-                    verify_trace!(verifier visit_stmt function error: "Function expression {} had {} errors", &fn_expr.to_string().cyan(), fn_expr_errs.len());
+                    tracelog::tracelog!(
+                        label = verifier,visit_stmt,function,error;
+                        "Function expression {} had {} errors",
+                        fn_expr.to_string().cyan(),
+                        fn_expr_errs.len()
+                    );
                 }
 
                 errs.extend(fn_expr_errs);
@@ -470,12 +512,21 @@ impl<'a> Verifier<'a> {
                 Ok(())
             }
             ast::Stmt::Error => {
-                verify_trace!(verifier visit_stmt error_stmt: "{} is an error statement", stmt_string);
+                tracelog::tracelog!(
+                    label = verifier,visit_stmt,error_stmt;
+                    "{} is an error statement",
+                    stmt_string
+                );
+
                 Ok(())
             }
         };
 
-        verify_trace!(verifier visit_stmt: "Running rules for statement {}", stmt_string);
+        tracelog::tracelog!(
+            label = verifier,visit_stmt;
+            "Running rules for statement {}",
+            stmt_string
+        );
 
         for rule in &self.rules {
             let resolve_ident: Box<dyn ResolveIdent> =
@@ -494,10 +545,15 @@ impl<'a> Verifier<'a> {
             errs.extend(rule_errs);
         }
 
-        verify_trace!(verifier visit_stmt: "There were a total of {} rule errors with statement {}", errs.len(), stmt_string);
+        tracelog::tracelog!(
+            label = verifier,visit_stmt;
+            "There were a total of {} rule errors with statement {}",
+            errs.len(),
+            stmt_string
+        );
 
-        verify_trace!(
-            verifier visit_stmt exit_stmt:
+        tracelog::tracelog!(
+            label = verifier,visit_stmt,exit_stmt;
             "{}",
             stmt_string
         );
@@ -557,11 +613,11 @@ impl<'a> Verifier<'a> {
         let expr_string = expr.to_string().cyan();
         let expr_clone = expr.clone();
 
-        verify_trace!(verifier visit_expr: "{}", expr_string);
+        tracelog::tracelog!(label = verifier,visit_expr; "{}", expr_string);
 
         match expr {
             ast::Expr::Block(block_expr) => {
-                verify_trace!(verifier visit_expr block: "{} is a block expression", expr_string);
+                tracelog::tracelog!(label = verifier,visit_expr,block; "{} is a block expression", expr_string);
 
                 let mut errs: Vec<EgonErrorS> = vec![];
 
@@ -574,13 +630,14 @@ impl<'a> Verifier<'a> {
 
                 for (stmt, stmt_span) in &mut block_expr.stmts {
                     if let ast::Stmt::Return(stmt_return) = stmt {
-                        verify_trace!(verifier visit_expr block return_stmt: "{} has a return statement", expr_string);
+                        tracelog::tracelog!(label = verifier,visit_expr,block,return_stmt; "{} has a return statement", expr_string);
 
                         stmt_return.set_used_in_block();
 
                         if let Some(v) = self.resolve_expr_type(&stmt_return.value.0) {
-                            verify_trace!(
-                                verifier visit_expr block return_stmt: "caching return value: {}",
+                            tracelog::tracelog!(
+                                label = verifier,visit_expr,block,return_stmt;
+                                "caching return value: {}",
                                 v.typeref.to_string().yellow().italic()
                             );
 
@@ -595,8 +652,9 @@ impl<'a> Verifier<'a> {
 
                 match &mut block_expr.return_expr {
                     Some((return_expr, return_span)) => {
-                        verify_trace!(
-                            verifier visit_expr block: "{} has a return expression {}",
+                        tracelog::tracelog!(
+                            label = verifier,visit_expr,block;
+                            "{} has a return expression {}",
                             expr_string,
                             return_expr.to_string().cyan()
                         );
@@ -612,8 +670,9 @@ impl<'a> Verifier<'a> {
                                     return Err(errs);
                                 }
 
-                                verify_trace!(
-                                    verifier visit_expr block: "{} resolved to type of {}",
+                                tracelog::tracelog!(
+                                    label = verifier,visit_expr,block;
+                                    "{} resolved to type of {}",
                                     expr_string,
                                     return_type.typeref.to_string().yellow().italic()
                                 );
@@ -667,7 +726,11 @@ impl<'a> Verifier<'a> {
                 }
             }
             ast::Expr::Assign(assign_expr) => {
-                verify_trace!(visit_expr assign: "{} is an assign expression", expr_string);
+                tracelog::tracelog!(
+                    label = visit_expr,assign;
+                    "{} is an assign expression",
+                    expr_string
+                );
 
                 let mut errs: Vec<EgonErrorS> = vec![];
 
@@ -712,7 +775,11 @@ impl<'a> Verifier<'a> {
                 }
             }
             ast::Expr::Infix(infix_expr) => {
-                verify_trace!(visit_expr infix: "{} is an infix expression", expr_string);
+                tracelog::tracelog!(
+                    label = visit_expr,infix;
+                    "{} is an infix expression",
+                    expr_string
+                );
 
                 let mut errs: Vec<EgonErrorS> = vec![];
 
@@ -791,7 +858,11 @@ impl<'a> Verifier<'a> {
                 })
             }
             ast::Expr::Prefix(prefix_expr) => {
-                verify_trace!(visit_expr infix: "{} is an prefix expression", expr_string);
+                tracelog::tracelog!(
+                    label = visit_expr,infix;
+                    "{} is an prefix expression",
+                    expr_string
+                );
 
                 let (rt_expr, rt_span) = &mut prefix_expr.rt;
 
@@ -812,7 +883,11 @@ impl<'a> Verifier<'a> {
                 }
             }
             ast::Expr::Fn(fn_expr) => {
-                verify_trace!(visit_expr function: "{} is a function expression", expr_string);
+                tracelog::tracelog!(
+                    label = visit_expr,function;
+                    "{} is a function expression",
+                    expr_string
+                );
 
                 self.start_new_type_env();
 
@@ -867,7 +942,11 @@ impl<'a> Verifier<'a> {
                 }
             }
             ast::Expr::If(if_expr) => {
-                verify_trace!(visit_expr if_expr: "{} is an if expression", expr_string);
+                tracelog::tracelog!(
+                    label = visit_expr,if_expr;
+                    "{} is an if expression",
+                    expr_string
+                );
 
                 let (cond_expr, cond_span) = &mut if_expr.cond;
 
@@ -943,7 +1022,11 @@ impl<'a> Verifier<'a> {
                 }
             }
             ast::Expr::List(list_expr) => {
-                verify_trace!(visit_expr infix: "{} is an list expression", expr_string);
+                tracelog::tracelog!(
+                    label = visit_expr,infix;
+                    "{} is an list expression",
+                    expr_string
+                );
 
                 if list_expr.items.is_empty() {
                     return Ok(TypeEnvValue {
@@ -1031,7 +1114,11 @@ impl<'a> Verifier<'a> {
                 })
             }
             ast::Expr::Type(type_expr) => {
-                verify_trace!(verifier visit_expr type_expr: "{} is an type expression", expr_string);
+                tracelog::tracelog!(
+                    label = verifier,visit_expr,type_expr;
+                    "{} is an type expression",
+                    expr_string
+                );
 
                 let mut errs: Vec<EgonErrorS> = vec![];
 
@@ -1075,8 +1162,8 @@ impl<'a> Verifier<'a> {
 
         let level = self.current_type_env_level();
 
-        verify_trace!(
-            verifier start_new_type_env:
+        tracelog::tracelog!(
+            label = verifier,start_new_type_env;
             "Starting new type environment (new level: {level})"
         );
     }
@@ -1085,8 +1172,8 @@ impl<'a> Verifier<'a> {
     fn end_current_type_env(&mut self) {
         let level = self.current_type_env_level();
 
-        verify_trace!(
-            verifier end_new_type_env:
+        tracelog::tracelog!(
+            label = verifier,end_new_type_env;
             "Ending type environment (new level: {level})"
         );
 

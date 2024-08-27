@@ -15,11 +15,6 @@ expr_rule!(
         let mut errs = vec![];
 
         if let ast::Expr::List(expr_list) = expr {
-            verify_trace!(
-                "Verifying list expression for matching item types: {}",
-                expr.to_string().cyan()
-            );
-
             let items = &expr_list.items;
 
             if !items.is_empty() {
@@ -32,12 +27,6 @@ expr_rule!(
                 for (item, item_span) in &remaining_items {
                     if let Some(item_typeref) = resolve_expr(item, item_span) {
                         if item_typeref.typeref != first_item_typeref.typeref {
-                            verify_trace!(error:
-                                "Found {} in a list of {}",
-                                item_typeref.typeref.to_string().yellow(),
-                                first_item_typeref.typeref.to_string().yellow()
-                            );
-
                             errs.push((
                                 EgonTypeError::MismatchType {
                                     expected: first_item_typeref.typeref.to_string(),

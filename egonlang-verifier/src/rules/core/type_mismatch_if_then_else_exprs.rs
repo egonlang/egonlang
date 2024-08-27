@@ -15,8 +15,6 @@ expr_rule!(
         let mut errs = vec![];
 
         if let ast::Expr::If(if_expr) = expr {
-            verify_trace!("Verifying if expression then/else types: {expr}");
-
             let (then_expr, then_span) = &if_expr.then;
             let then_typeref = resolve_expr(then_expr, then_span).unwrap().typeref;
 
@@ -26,8 +24,6 @@ expr_rule!(
                 if then_typeref != else_typeref {
                     if then_typeref.is_list() && else_typeref.is_list() {
                         if then_typeref.is_known_list() && else_typeref.is_known_list() {
-                            verify_trace!(error: "then and else branches types don't match {then_typeref:?} vs {else_typeref:?} {expr}");
-
                             errs.push((
                                 EgonTypeError::MismatchType {
                                     expected: then_typeref.to_string(),
@@ -38,8 +34,6 @@ expr_rule!(
                             ));
                         }
                     } else {
-                        verify_trace!(error: "then and else branches types don't match {then_typeref:?} vs {else_typeref:?} {expr}");
-
                         errs.push((
                             EgonTypeError::MismatchType {
                                 expected: then_typeref.to_string(),

@@ -14,10 +14,6 @@ expr_rule!(
 
         if let ast::Expr::Infix(infix_expr) = &expr {
             if let ast::OpInfix::Divide = infix_expr.op {
-                verify_trace!(
-                    "Verifying division infix expression doesn't divide by zero: {}",
-                    expr.to_string().cyan()
-                );
 
                 let (lt_expr, lt_span) = &infix_expr.lt;
 
@@ -27,18 +23,10 @@ expr_rule!(
                 let rt_value: f64 = rt_expr.clone().try_into().unwrap();
 
                 if lt_value == 0f64 {
-                    verify_trace!(
-                        error: "Trying to divide by zero on the left side: {}",
-                        lt_expr.to_string().cyan()
-                    );
                     errs.push((EgonSyntaxError::DivideByZero.into(), lt_span.clone()));
                 }
 
                 if rt_value == 0f64 {
-                    verify_trace!(
-                        error: "Trying to divide by zero on the right side: {}",
-                        rt_expr.to_string().cyan()
-                    );
                     errs.push((EgonSyntaxError::DivideByZero.into(), rt_span.clone()));
                 }
             }

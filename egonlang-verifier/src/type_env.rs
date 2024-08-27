@@ -2,8 +2,6 @@ use std::collections::HashMap;
 
 use egonlang_types::Type;
 
-use crate::verify_trace;
-
 /// Typing information stored about an identifier
 #[derive(Debug, PartialEq, Clone)]
 pub struct TypeEnvValue {
@@ -59,8 +57,9 @@ impl TypeEnv {
 
     /// Attempt to resolve an identifier's type
     pub fn get(&self, identifier: &str) -> Option<TypeEnvValue> {
-        verify_trace!(
-            type_env get: "(level: {}) Looking up identifier {}",
+        tracelog::tracelog!(
+            label = type_env,get;
+            "(level: {}) Looking up identifier {}",
             self.level(),
             identifier.cyan()
         );
@@ -71,7 +70,8 @@ impl TypeEnv {
             let result = result.unwrap();
 
             if result.typeref.is_type() {
-                verify_trace!(
+                tracelog::tracelog!(
+                    label = type_env,get;
                     "(level:{}) Got type alias {} for {}",
                     self.level(),
                     result.typeref.to_string().italic().yellow(),
@@ -84,16 +84,17 @@ impl TypeEnv {
 
         match result {
             Some(result) => {
-                verify_trace!(
-                    type_env get: "(level:{}) Got type {} for {}",
+                tracelog::tracelog!(
+                    label = type_env,get;
+                    "(level:{}) Got type {} for {}",
                     self.level(),
                     result.typeref.to_string().italic().yellow(),
                     identifier.cyan()
                 );
             }
             None => {
-                verify_trace!(
-                    type_env get error:
+                tracelog::tracelog!(
+                    label = type_env,get,error;
                     "(level: {}) Unable to find type for {} in type env",
                     self.level(),
                     identifier.cyan()
@@ -125,8 +126,8 @@ impl TypeEnv {
             // ---------^ Type::typed(Type::number())
             return match self.get(&new_typeref.to_string()) {
                 Some(aliased_type) => {
-                    verify_trace!(
-                        type_env set type_alias:
+                    tracelog::tracelog!(
+                        label = type_env,set,type_alias;
                         "(level:{}) Setting {} to type alias {}",
                         self.level(),
                         identifier.cyan(),
@@ -143,8 +144,8 @@ impl TypeEnv {
                     self.values.insert(identifier.to_string(), aliased_type)
                 }
                 None => {
-                    verify_trace!(
-                        type_env set:
+                    tracelog::tracelog!(
+                        label = type_env,set;
                         "(level: {}) Setting {} to the type alias {}",
                         self.level(),
                         identifier.cyan(),
@@ -162,8 +163,8 @@ impl TypeEnv {
             };
         }
 
-        verify_trace!(
-            type_env set:
+        tracelog::tracelog!(
+            label = type_env,set;
             "(level: {}) Setting {} to the type {}",
             self.level(),
             identifier.cyan(),

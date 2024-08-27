@@ -15,16 +15,9 @@ expr_rule!(
         let mut errs = vec![];
 
         if let ast::Expr::Identifier(ast::ExprIdentifier { identifier }) = expr {
-            verify_trace!(
-                "Checking if idenitifer {} has been defined",
-                expr.to_string().cyan()
-            );
-
             let name = &identifier.name;
 
             if resolve_ident(name).is_none() {
-                verify_trace!(error: "identifier not defined: {expr}");
-
                 errs.push((EgonTypeError::Undefined(name.to_string()).into(), span.clone()));
             }
         }

@@ -27,7 +27,7 @@ cli *args:
     cargo run --bin egon {{args}}
 
 cli-trace *args:
-    just cli --features='verify-trace' {{args}}
+    just cli --features='tracelog' {{args}}
 
 lsp:
     cargo run --bin egonlang-lsp
@@ -64,7 +64,7 @@ clean-coverage:
     find ./ -name "*.profraw" | xargs rm -r
 
 test-trace *args:
-    just test --features='verify-trace' --no-capture {{args}}
+    just test --features='tracelog' --no-capture {{args}}
 
 clean-git-branches:
     git branch -d $(git branch --merged=main | grep -v main) && git fetch --prune

@@ -15,21 +15,10 @@ expr_rule!(
         let mut errs = vec![];
 
         if let ast::Expr::If(if_expr) = expr {
-            verify_trace!(
-                "Verifying if expression condition: {}",
-                expr.to_string().cyan()
-            );
-
             let (cond_expr, cond_span) = &if_expr.cond;
             let cond_typeref = resolve_expr(cond_expr, cond_span).unwrap().typeref;
 
             if cond_typeref != Type::bool() {
-                verify_trace!(error:
-                    "condition expr expected to be a {} but was a {}",
-                    "bool".to_string().yellow().italic(),
-                    cond_typeref.to_string().yellow().italic()
-                );
-
                 errs.push((
                     EgonTypeError::MismatchType {
                         expected: Type::bool().to_string(),

@@ -18,15 +18,12 @@ expr_rule!(
         let mut errs = vec![];
 
         if let ast::Expr::Prefix(prefix_expr) = expr {
-            verify_trace!("Verifying prefix expression: {}", expr.to_string().cyan());
-
             match prefix_expr.op {
                 ast::OpPrefix::Negate => {
                     let (value_expr, value_span) = &prefix_expr.rt;
                     let value_typeref = resolve_expr(value_expr, value_span).unwrap();
 
                     if value_typeref.typeref != Type::number() {
-                        verify_trace!(error: "negate prefix on a none number value: {expr}");
                         errs.push((
                             EgonTypeError::MismatchType {
                                 expected: Type::number().to_string(),
@@ -42,7 +39,6 @@ expr_rule!(
                     let value_typeref = resolve_expr(value_expr, value_span).unwrap();
 
                     if value_typeref.typeref != Type::bool() {
-                        verify_trace!(error: "not prefix on a none bool value: {expr}");
                         errs.push((
                             EgonTypeError::MismatchType {
                                 expected: Type::bool().to_string(),

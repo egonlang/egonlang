@@ -1,7 +1,6 @@
 pub mod rules;
 mod type_env;
 mod verifier;
-mod verify_trace;
 
 use egonlang_errors::EgonResultMultiSpannedErr;
 pub use type_env::{TypeEnv, TypeEnvValue};
@@ -21,5 +20,4 @@ pub mod prelude {
     pub use crate::type_env::{TypeEnv, TypeEnvValue};
     pub use crate::verifier::Verifier;
     pub use crate::verify_module;
-    pub use crate::verify_trace;
 }

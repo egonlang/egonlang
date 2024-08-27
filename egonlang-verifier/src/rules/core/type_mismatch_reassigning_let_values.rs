@@ -26,11 +26,6 @@ expr_rule!(
             let identifier = &expr_assign.identifier.0.name;
 
             if let Some(type_env_value) = resolve_ident(identifier) {
-                verify_trace!(
-                    "Verifying assign expression types: {}",
-                    expr.to_string().cyan()
-                );
-
                 let type_env_typeref = &type_env_value.typeref;
                 let is_const = &type_env_value.is_const;
 
@@ -38,9 +33,6 @@ expr_rule!(
                 let value_typeref = resolve_expr(value_expr, value_span).unwrap();
 
                 if !is_const && type_env_typeref != &value_typeref.typeref {
-                    verify_trace!(error:
-                        "Type mismatching reassigning value ({type_env_typeref:?} vs {value_typeref:?}): {expr}");
-
                     errs.push((
                         EgonTypeError::MismatchType {
                             expected: type_env_typeref.to_string(),
