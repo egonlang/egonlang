@@ -46,13 +46,7 @@ impl<'a> Verifier<'a> {
         }
     }
 
-    pub fn current_type_env(&self) -> &TypeEnv {
-        self.type_envs
-            .last()
-            .expect("Verifier setup without a type environment")
-    }
-
-    pub fn current_type_env_mut(&mut self) -> &mut TypeEnv {
+    fn current_type_env_mut(&mut self) -> &mut TypeEnv {
         self.type_envs
             .last_mut()
             .expect("Verifier setup without a type environment")
