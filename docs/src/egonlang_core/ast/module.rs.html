@@ -930,9 +930,9 @@
 <a href="#930" id="930">930</a>
 <a href="#931" id="931">931</a>
 <a href="#932" id="932">932</a>
-<a href="#933" id="933">933</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::Debug;
 
+<span class="kw">use </span>egonlang_types::Type;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="kw">use </span>span::{Span, Spanned};
@@ -994,10 +994,7 @@
             Stmt::TypeAlias(stmt_type_alias) =&gt; {
                 <span class="kw">let </span>(value_typeref, value_span) = <span class="kw-2">&amp;</span>stmt_type_alias.value;
                 <span class="kw">if </span>value_span.contains(<span class="kw-2">&amp;</span>index) {
-                    nodes.push(AstNode::TypeRef((
-                        value_typeref.clone(),
-                        value_span.clone(),
-                    )));
+                    nodes.push(AstNode::Type((value_typeref.clone(), value_span.clone())));
                 }
 
                 <span class="kw">let </span>(ident, ident_span) = <span class="kw-2">&amp;</span>stmt_type_alias.alias;
@@ -1117,7 +1114,7 @@
             Expr::Fn(expr_fn) =&gt; {
                 <span class="kw">for </span>((param_identifier, param_type), param_span) <span class="kw">in </span><span class="kw-2">&amp;</span>expr_fn.params {
                     <span class="kw">if </span>param_span.contains(<span class="kw-2">&amp;</span>index) {
-                        nodes.push(AstNode::TypeRef((param_type.clone(), param_span.clone())));
+                        nodes.push(AstNode::Type((param_type.clone(), param_span.clone())));
                         nodes.push(AstNode::Identifier((
                             param_identifier.clone(),
                             param_span.clone(),
@@ -1127,7 +1124,7 @@
 
                 <span class="kw">let </span>(return_type_type, return_type_span) = <span class="kw-2">&amp;</span>expr_fn.return_type;
                 <span class="kw">if </span>return_type_span.contains(<span class="kw-2">&amp;</span>index) {
-                    nodes.push(AstNode::TypeRef((
+                    nodes.push(AstNode::Type((
                         return_type_type.clone(),
                         return_type_span.clone(),
                     )));
@@ -1143,7 +1140,7 @@
             }
             Expr::Range(<span class="kw">_</span>) =&gt; {}
             Expr::Type(expr_type) =&gt; {
-                nodes.push(AstNode::TypeRef((expr_type.<span class="number">0</span>.clone(), span.clone())));
+                nodes.push(AstNode::Type((expr_type.<span class="number">0</span>.clone(), span.clone())));
             }
         };
 
@@ -1169,7 +1166,7 @@
     Stmt(<span class="kw">super</span>::StmtS),
     Expr(<span class="kw">super</span>::ExprS),
     Identifier(Spanned&lt;<span class="kw">super</span>::Identifier&gt;),
-    TypeRef(Spanned&lt;<span class="kw">super</span>::TypeRef&gt;),
+    Type(Spanned&lt;Type&gt;),
 }
 
 <span class="kw">impl </span>AstNode {
@@ -1178,7 +1175,7 @@
             AstNode::Stmt(<span class="kw">_</span>) =&gt; <span class="string">"Statement"</span>,
             AstNode::Expr(<span class="kw">_</span>) =&gt; <span class="string">"Expression"</span>,
             AstNode::Identifier(<span class="kw">_</span>) =&gt; <span class="string">"Identifier"</span>,
-            AstNode::TypeRef(<span class="kw">_</span>) =&gt; <span class="string">"Type"</span>,
+            AstNode::Type(<span class="kw">_</span>) =&gt; <span class="string">"Type"</span>,
         }
         .to_string()
     }
@@ -1190,7 +1187,7 @@
             <span class="self">Self</span>::Stmt(arg0) =&gt; f.write_fmt(<span class="macro">format_args!</span>(<span class="string">"{:#?}"</span>, arg0)),
             <span class="self">Self</span>::Expr(arg0) =&gt; f.write_fmt(<span class="macro">format_args!</span>(<span class="string">"{:#?}"</span>, arg0)),
             <span class="self">Self</span>::Identifier(arg0) =&gt; f.write_fmt(<span class="macro">format_args!</span>(<span class="string">"{:#?}"</span>, arg0)),
-            <span class="self">Self</span>::TypeRef(arg0) =&gt; f.write_fmt(<span class="macro">format_args!</span>(<span class="string">"{:#?}"</span>, arg0)),
+            <span class="self">Self</span>::Type(arg0) =&gt; f.write_fmt(<span class="macro">format_args!</span>(<span class="string">"{:#?}"</span>, arg0)),
         }
     }
 }
@@ -1201,6 +1198,7 @@
 
     <span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
     <span class="kw">use </span>ast::<span class="kw-2">*</span>;
+    <span class="kw">use </span>egonlang_types::Type;
     <span class="kw">use </span>pretty_assertions::assert_eq;
 
     <span class="attr">#[test]
@@ -1351,14 +1349,14 @@
                             },
                             <span class="number">4</span>..<span class="number">5
                         </span>),
-                        type_expr: <span class="prelude-val">Some</span>((Expr::Type(ExprType(TypeRef::number())), <span class="number">7</span>..<span class="number">13</span>)),
+                        type_expr: <span class="prelude-val">Some</span>((Expr::Type(ExprType(Type::number())), <span class="number">7</span>..<span class="number">13</span>)),
                         is_const: <span class="bool-val">false</span>,
                         value: <span class="prelude-val">Some</span>((<span class="number">123f64</span>.into(), <span class="number">16</span>..<span class="number">19</span>))
                     }),
                     <span class="number">0</span>..<span class="number">20
                 </span>)),
-                AstNode::Expr((Expr::Type(ExprType(TypeRef::number())), <span class="number">7</span>..<span class="number">13</span>)),
-                AstNode::TypeRef((TypeRef::number(), <span class="number">7</span>..<span class="number">13</span>)),
+                AstNode::Expr((Expr::Type(ExprType(Type::number())), <span class="number">7</span>..<span class="number">13</span>)),
+                AstNode::Type((Type::number(), <span class="number">7</span>..<span class="number">13</span>)),
             ],
             nodes
         );
@@ -1512,14 +1510,14 @@
                             },
                             <span class="number">6</span>..<span class="number">7
                         </span>),
-                        type_expr: <span class="prelude-val">Some</span>((Expr::Type(ExprType(TypeRef::number())), <span class="number">9</span>..<span class="number">15</span>)),
+                        type_expr: <span class="prelude-val">Some</span>((Expr::Type(ExprType(Type::number())), <span class="number">9</span>..<span class="number">15</span>)),
                         is_const: <span class="bool-val">true</span>,
                         value: <span class="prelude-val">Some</span>((<span class="number">123f64</span>.into(), <span class="number">18</span>..<span class="number">21</span>))
                     }),
                     <span class="number">0</span>..<span class="number">22
                 </span>)),
-                AstNode::Expr((Expr::Type(ExprType(TypeRef::number())), <span class="number">9</span>..<span class="number">15</span>)),
-                AstNode::TypeRef((TypeRef::number(), <span class="number">9</span>..<span class="number">15</span>)),
+                AstNode::Expr((Expr::Type(ExprType(Type::number())), <span class="number">9</span>..<span class="number">15</span>)),
+                AstNode::Type((Type::number(), <span class="number">9</span>..<span class="number">15</span>)),
             ],
             nodes
         );
@@ -1717,11 +1715,11 @@
                                         Identifier {
                                             name: <span class="string">"a"</span>.to_string()
                                         },
-                                        TypeRef::string()
+                                        Type::string()
                                     ),
                                     <span class="number">1</span>..<span class="number">10
                                 </span>)],
-                                return_type: (TypeRef::bool(), <span class="number">13</span>..<span class="number">17</span>),
+                                return_type: (Type::bool(), <span class="number">13</span>..<span class="number">17</span>),
                                 body: (
                                     Expr::Block(Box::new(ExprBlock {
                                         stmts: <span class="macro">vec!</span>[],
@@ -1757,11 +1755,11 @@
                                 Identifier {
                                     name: <span class="string">"a"</span>.to_string()
                                 },
-                                TypeRef::string()
+                                Type::string()
                             ),
                             <span class="number">1</span>..<span class="number">10
                         </span>)],
-                        return_type: (TypeRef::bool(), <span class="number">13</span>..<span class="number">17</span>),
+                        return_type: (Type::bool(), <span class="number">13</span>..<span class="number">17</span>),
                         body: (
                             Expr::Block(Box::new(ExprBlock {
                                 stmts: <span class="macro">vec!</span>[],
@@ -1853,12 +1851,12 @@
                             }),
                             <span class="number">12</span>..<span class="number">13
                         </span>),
-                        expected_type: (Expr::Type(ExprType(TypeRef::bool())), <span class="number">15</span>..<span class="number">19</span>)
+                        expected_type: (Expr::Type(ExprType(Type::bool())), <span class="number">15</span>..<span class="number">19</span>)
                     }),
                     <span class="number">0</span>..<span class="number">20
                 </span>)),
-                AstNode::Expr((Expr::Type(ExprType(TypeRef::bool())), <span class="number">15</span>..<span class="number">19</span>)),
-                AstNode::TypeRef((TypeRef::bool(), <span class="number">15</span>..<span class="number">19</span>)),
+                AstNode::Expr((Expr::Type(ExprType(Type::bool())), <span class="number">15</span>..<span class="number">19</span>)),
+                AstNode::Type((Type::bool(), <span class="number">15</span>..<span class="number">19</span>)),
             ],
             nodes
         );

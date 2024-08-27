@@ -114,17 +114,6 @@
 <a href="#114" id="114">114</a>
 <a href="#115" id="115">115</a>
 <a href="#116" id="116">116</a>
-<a href="#117" id="117">117</a>
-<a href="#118" id="118">118</a>
-<a href="#119" id="119">119</a>
-<a href="#120" id="120">120</a>
-<a href="#121" id="121">121</a>
-<a href="#122" id="122">122</a>
-<a href="#123" id="123">123</a>
-<a href="#124" id="124">124</a>
-<a href="#125" id="125">125</a>
-<a href="#126" id="126">126</a>
-<a href="#127" id="127">127</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_errors::EgonTypeError;
@@ -145,11 +134,6 @@
     </span>TypeMismatchFnReturnExpr,
     |expr, _span, _resolve_ident, resolve_expr| {
         <span class="kw">if let </span>ast::Expr::Fn(fn_expr) = expr {
-            <span class="macro">verify_trace!</span>(
-                <span class="string">"Verifying fn return type and body expression: {}"</span>,
-                expr.to_string().cyan()
-            );
-
             <span class="kw">let </span>(fn_return_type_typeref, <span class="kw">_</span>) = <span class="kw-2">&amp;</span>fn_expr.return_type;
             <span class="kw">let </span>(body_expr, body_span) = <span class="kw-2">&amp;</span>fn_expr.body;
 
@@ -158,12 +142,6 @@
                     <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
 
                     <span class="kw">if </span>body_typeref.typeref != <span class="kw-2">*</span>fn_return_type_typeref {
-                        <span class="macro">verify_trace!</span>(error:
-                            <span class="string">"fn body type {} doesn't match fn return type {}"</span>,
-                            body_typeref.typeref.to_string().yellow().italic(),
-                            fn_return_type_typeref.to_string().yellow().italic()
-                        );
-
                         errs.push((
                             EgonTypeError::MismatchType {
                                 expected: fn_return_type_typeref.to_string(),

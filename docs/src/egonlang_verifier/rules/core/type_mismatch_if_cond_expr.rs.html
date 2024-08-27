@@ -223,19 +223,10 @@
 <a href="#223" id="223">223</a>
 <a href="#224" id="224">224</a>
 <a href="#225" id="225">225</a>
-<a href="#226" id="226">226</a>
-<a href="#227" id="227">227</a>
-<a href="#228" id="228">228</a>
-<a href="#229" id="229">229</a>
-<a href="#230" id="230">230</a>
-<a href="#231" id="231">231</a>
-<a href="#232" id="232">232</a>
-<a href="#233" id="233">233</a>
-<a href="#234" id="234">234</a>
-<a href="#235" id="235">235</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_errors::EgonTypeError;
+<span class="kw">use </span>egonlang_types::Type;
 
 <span class="macro">expr_rule!</span>(
     <span class="doccomment">/// Checks the condition expression of a if statement is a boolean
@@ -249,24 +240,13 @@
         <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
 
         <span class="kw">if let </span>ast::Expr::If(if_expr) = expr {
-            <span class="macro">verify_trace!</span>(
-                <span class="string">"Verifying if expression condition: {}"</span>,
-                expr.to_string().cyan()
-            );
-
             <span class="kw">let </span>(cond_expr, cond_span) = <span class="kw-2">&amp;</span>if_expr.cond;
             <span class="kw">let </span>cond_typeref = resolve_expr(cond_expr, cond_span).unwrap().typeref;
 
-            <span class="kw">if </span>cond_typeref != ast::TypeRef::bool() {
-                <span class="macro">verify_trace!</span>(error:
-                    <span class="string">"condition expr expected to be a {} but was a {}"</span>,
-                    <span class="string">"bool"</span>.to_string().yellow().italic(),
-                    cond_typeref.to_string().yellow().italic()
-                );
-
+            <span class="kw">if </span>cond_typeref != Type::bool() {
                 errs.push((
                     EgonTypeError::MismatchType {
-                        expected: ast::TypeRef::bool().to_string(),
+                        expected: Type::bool().to_string(),
                         actual: cond_typeref.to_string(),
                     }
                     .into(),

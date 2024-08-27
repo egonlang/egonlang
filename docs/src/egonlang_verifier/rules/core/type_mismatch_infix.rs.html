@@ -208,15 +208,10 @@
 <a href="#208" id="208">208</a>
 <a href="#209" id="209">209</a>
 <a href="#210" id="210">210</a>
-<a href="#211" id="211">211</a>
-<a href="#212" id="212">212</a>
-<a href="#213" id="213">213</a>
-<a href="#214" id="214">214</a>
-<a href="#215" id="215">215</a>
-<a href="#216" id="216">216</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_errors::{EgonErrorS, EgonTypeError};
+<span class="kw">use </span>egonlang_types::Type;
 <span class="kw">use </span>rules::rule::ResolveExpr;
 
 <span class="macro">expr_rule!</span>(
@@ -231,83 +226,80 @@
     |expr, _span, _resolve_ident, resolve_expr| {
         <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
 
-
         <span class="kw">if let </span>ast::Expr::Infix(infix) = expr {
-            <span class="macro">verify_trace!</span>(<span class="string">"Verifying infix expression: {}"</span>, expr.to_string().cyan());
-
             <span class="kw">match </span>infix.op {
                 ast::OpInfix::Greater =&gt; {
-                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
+                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::GreaterEqual =&gt; {
-                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
+                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::Less =&gt; {
-                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
+                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::LessEqual =&gt; {
-                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
+                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::Add =&gt; {
-                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
+                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::Subtract =&gt; {
-                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
+                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::Multiply =&gt; {
-                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
+                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::Divide =&gt; {
-                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
+                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::LogicAnd =&gt; {
-                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, ast::TypeRef::bool(), resolve_expr)
+                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::bool(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::LogicOr =&gt; {
-                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, ast::TypeRef::bool(), resolve_expr)
+                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::bool(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::Modulus =&gt; {
-                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
+                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
@@ -323,7 +315,7 @@
 
 <span class="kw">fn </span>validate_infix_types(
     infix: <span class="kw-2">&amp;</span>ast::ExprInfix,
-    expected_type: ast::TypeRef,
+    expected_type: Type,
     resolve_expr: <span class="kw-2">&amp;</span><span class="kw">dyn </span>ResolveExpr,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;(), Vec&lt;EgonErrorS&gt;&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
@@ -335,8 +327,6 @@
     <span class="kw">let </span>rt_type = resolve_expr(rt_expr, rt_span).unwrap().typeref;
 
     <span class="kw">if </span>lt_type != expected_type {
-        <span class="macro">verify_trace!</span>(error: <span class="string">"infix operation received non number: {lt_expr}"</span>);
-
         errs.push((
             EgonTypeError::MismatchType {
                 expected: expected_type.to_string(),
@@ -347,8 +337,6 @@
         ));
     }
     <span class="kw">if </span>rt_type != expected_type {
-        <span class="macro">verify_trace!</span>(error: <span class="string">"infix operation received non number: {rt_expr}"</span>);
-
         errs.push((
             EgonTypeError::MismatchType {
                 expected: expected_type.to_string(),
@@ -369,8 +357,8 @@
 </span><span class="kw">mod </span>type_mismatch_infix_tests {
     <span class="kw">use </span><span class="kw">super</span>::TypeMismatchInfixRule;
     <span class="kw">use </span><span class="kw">crate</span>::verifier_rule_test;
-    <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
     <span class="kw">use </span>egonlang_errors::EgonTypeError;
+    <span class="kw">use </span>egonlang_types::Type;
 
     <span class="macro">verifier_rule_test!</span>(
         TypeMismatchInfixRule,
@@ -384,8 +372,8 @@
         <span class="string">"true &gt; 100;"</span>,
         <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[(
             EgonTypeError::MismatchType {
-                expected: ast::TypeRef::number().to_string(),
-                actual: ast::TypeRef::bool().to_string()
+                expected: Type::number().to_string(),
+                actual: Type::bool().to_string()
             }
             .into(),
             <span class="number">0</span>..<span class="number">4
@@ -398,8 +386,8 @@
         <span class="string">"10 &gt; false;"</span>,
         <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[(
             EgonTypeError::MismatchType {
-                expected: ast::TypeRef::number().to_string(),
-                actual: ast::TypeRef::bool().to_string()
+                expected: Type::number().to_string(),
+                actual: Type::bool().to_string()
             }
             .into(),
             <span class="number">5</span>..<span class="number">10
@@ -413,16 +401,16 @@
         <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[
             (
                 EgonTypeError::MismatchType {
-                    expected: ast::TypeRef::number().to_string(),
-                    actual: ast::TypeRef::bool().to_string()
+                    expected: Type::number().to_string(),
+                    actual: Type::bool().to_string()
                 }
                 .into(),
                 <span class="number">0</span>..<span class="number">5
             </span>),
             (
                 EgonTypeError::MismatchType {
-                    expected: ast::TypeRef::number().to_string(),
-                    actual: ast::TypeRef::bool().to_string()
+                    expected: Type::number().to_string(),
+                    actual: Type::bool().to_string()
                 }
                 .into(),
                 <span class="number">8</span>..<span class="number">13

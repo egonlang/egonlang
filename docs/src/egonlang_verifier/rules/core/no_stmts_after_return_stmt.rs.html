@@ -128,11 +128,6 @@
 <a href="#128" id="128">128</a>
 <a href="#129" id="129">129</a>
 <a href="#130" id="130">130</a>
-<a href="#131" id="131">131</a>
-<a href="#132" id="132">132</a>
-<a href="#133" id="133">133</a>
-<a href="#134" id="134">134</a>
-<a href="#135" id="135">135</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_errors::EgonSyntaxError;
@@ -147,22 +142,17 @@
 
             <span class="kw">for </span>(stmt, stmt_span) <span class="kw">in </span><span class="kw-2">&amp;</span>expr_block.stmts {
                 <span class="kw">if </span>return_stmt_found {
-                    <span class="macro">verify_trace!</span>(<span class="string">"Statement found after return statement was found. ERROR"</span>);
                     errs.push((EgonSyntaxError::UnreachableCode.into(), stmt_span.clone()));
                     <span class="kw">continue</span>;
                 }
 
                 <span class="kw">if let </span>ast::Stmt::Return(<span class="kw">_</span>) = <span class="kw-2">&amp;</span>stmt {
-                    <span class="macro">verify_trace!</span>(<span class="string">"Return statement found in block expression"</span>);
                     return_stmt_found = <span class="bool-val">true</span>;
                 }
             }
 
             <span class="kw">if </span>return_stmt_found {
                 <span class="kw">if let </span><span class="prelude-val">Some</span>((<span class="kw">_</span>, return_expr_span)) = <span class="kw-2">&amp;</span>expr_block.return_expr {
-                    <span class="macro">verify_trace!</span>(
-                        <span class="string">"Return expression found after return statement was found. ERROR"
-                    </span>);
                     errs.push((
                         EgonSyntaxError::UnreachableCode.into(),
                         return_expr_span.clone(),

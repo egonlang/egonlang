@@ -94,17 +94,6 @@
 <a href="#94" id="94">94</a>
 <a href="#95" id="95">95</a>
 <a href="#96" id="96">96</a>
-<a href="#97" id="97">97</a>
-<a href="#98" id="98">98</a>
-<a href="#99" id="99">99</a>
-<a href="#100" id="100">100</a>
-<a href="#101" id="101">101</a>
-<a href="#102" id="102">102</a>
-<a href="#103" id="103">103</a>
-<a href="#104" id="104">104</a>
-<a href="#105" id="105">105</a>
-<a href="#106" id="106">106</a>
-<a href="#107" id="107">107</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_errors::EgonTypeError;
@@ -122,11 +111,6 @@
         <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
 
         <span class="kw">if let </span>ast::Expr::List(expr_list) = expr {
-            <span class="macro">verify_trace!</span>(
-                <span class="string">"Verifying list expression for matching item types: {}"</span>,
-                expr.to_string().cyan()
-            );
-
             <span class="kw">let </span>items = <span class="kw-2">&amp;</span>expr_list.items;
 
             <span class="kw">if </span>!items.is_empty() {
@@ -139,12 +123,6 @@
                 <span class="kw">for </span>(item, item_span) <span class="kw">in </span><span class="kw-2">&amp;</span>remaining_items {
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(item_typeref) = resolve_expr(item, item_span) {
                         <span class="kw">if </span>item_typeref.typeref != first_item_typeref.typeref {
-                            <span class="macro">verify_trace!</span>(error:
-                                <span class="string">"Found {} in a list of {}"</span>,
-                                item_typeref.typeref.to_string().yellow(),
-                                first_item_typeref.typeref.to_string().yellow()
-                            );
-
                             errs.push((
                                 EgonTypeError::MismatchType {
                                     expected: first_item_typeref.typeref.to_string(),
@@ -167,8 +145,8 @@
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span><span class="kw">super</span>::TypeMisMatchListItemsRule;
     <span class="kw">use </span><span class="kw">crate</span>::verifier_rule_test;
-    <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
     <span class="kw">use </span>egonlang_errors::EgonTypeError;
+    <span class="kw">use </span>egonlang_types::Type;
 
     <span class="macro">verifier_rule_test!</span>(
         TypeMisMatchListItemsRule,
@@ -195,16 +173,16 @@
         <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[
             (
                 EgonTypeError::MismatchType {
-                    expected: ast::TypeRef::number().to_string(),
-                    actual: ast::TypeRef::bool().to_string()
+                    expected: Type::number().to_string(),
+                    actual: Type::bool().to_string()
                 }
                 .into(),
                 <span class="number">5</span>..<span class="number">10
             </span>),
             (
                 EgonTypeError::MismatchType {
-                    expected: ast::TypeRef::number().to_string(),
-                    actual: ast::TypeRef::string().to_string()
+                    expected: Type::number().to_string(),
+                    actual: Type::string().to_string()
                 }
                 .into(),
                 <span class="number">12</span>..<span class="number">17

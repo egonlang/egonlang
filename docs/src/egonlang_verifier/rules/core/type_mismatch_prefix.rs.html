@@ -117,12 +117,10 @@
 <a href="#117" id="117">117</a>
 <a href="#118" id="118">118</a>
 <a href="#119" id="119">119</a>
-<a href="#120" id="120">120</a>
-<a href="#121" id="121">121</a>
-<a href="#122" id="122">122</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_errors::EgonTypeError;
+<span class="kw">use </span>egonlang_types::Type;
 
 <span class="macro">expr_rule!</span>(
     <span class="doccomment">/// Checks value types for all prefix operation expressions
@@ -139,18 +137,15 @@
         <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
 
         <span class="kw">if let </span>ast::Expr::Prefix(prefix_expr) = expr {
-            <span class="macro">verify_trace!</span>(<span class="string">"Verifying prefix expression: {}"</span>, expr.to_string().cyan());
-
             <span class="kw">match </span>prefix_expr.op {
                 ast::OpPrefix::Negate =&gt; {
                     <span class="kw">let </span>(value_expr, value_span) = <span class="kw-2">&amp;</span>prefix_expr.rt;
                     <span class="kw">let </span>value_typeref = resolve_expr(value_expr, value_span).unwrap();
 
-                    <span class="kw">if </span>value_typeref.typeref != ast::TypeRef::number() {
-                        <span class="macro">verify_trace!</span>(error: <span class="string">"negate prefix on a none number value: {expr}"</span>);
+                    <span class="kw">if </span>value_typeref.typeref != Type::number() {
                         errs.push((
                             EgonTypeError::MismatchType {
-                                expected: ast::TypeRef::number().to_string(),
+                                expected: Type::number().to_string(),
                                 actual: value_typeref.typeref.to_string(),
                             }
                             .into(),
@@ -162,11 +157,10 @@
                     <span class="kw">let </span>(value_expr, value_span) = <span class="kw-2">&amp;</span>prefix_expr.rt;
                     <span class="kw">let </span>value_typeref = resolve_expr(value_expr, value_span).unwrap();
 
-                    <span class="kw">if </span>value_typeref.typeref != ast::TypeRef::bool() {
-                        <span class="macro">verify_trace!</span>(error: <span class="string">"not prefix on a none bool value: {expr}"</span>);
+                    <span class="kw">if </span>value_typeref.typeref != Type::bool() {
                         errs.push((
                             EgonTypeError::MismatchType {
-                                expected: ast::TypeRef::bool().to_string(),
+                                expected: Type::bool().to_string(),
                                 actual: value_typeref.typeref.to_string(),
                             }
                             .into(),
@@ -185,8 +179,8 @@
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span><span class="kw">super</span>::TypeMismatchPrefixRule;
     <span class="kw">use </span><span class="kw">crate</span>::verifier_rule_test;
-    <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
     <span class="kw">use </span>egonlang_errors::EgonTypeError;
+    <span class="kw">use </span>egonlang_types::Type;
 
     <span class="macro">verifier_rule_test!</span> {
         TypeMismatchPrefixRule,
@@ -200,8 +194,8 @@
         <span class="string">"-true;"</span>,
         <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[(
             EgonTypeError::MismatchType {
-                expected: ast::TypeRef::number().to_string(),
-                actual: ast::TypeRef::bool().to_string()
+                expected: Type::number().to_string(),
+                actual: Type::bool().to_string()
             }
             .into(),
             <span class="number">1</span>..<span class="number">5
@@ -220,8 +214,8 @@
         <span class="string">"!123;"</span>,
         <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[(
             EgonTypeError::MismatchType {
-                expected: ast::TypeRef::bool().to_string(),
-                actual: ast::TypeRef::number().to_string()
+                expected: Type::bool().to_string(),
+                actual: Type::number().to_string()
             }
             .into(),
             <span class="number">1</span>..<span class="number">4
@@ -234,8 +228,8 @@
         <span class="string">r#"!"test";"#</span>,
         <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[(
             EgonTypeError::MismatchType {
-                expected: ast::TypeRef::bool().to_string(),
-                actual: ast::TypeRef::string().to_string()
+                expected: Type::bool().to_string(),
+                actual: Type::string().to_string()
             }
             .into(),
             <span class="number">1</span>..<span class="number">7

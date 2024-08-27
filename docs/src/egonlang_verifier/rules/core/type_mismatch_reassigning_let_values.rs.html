@@ -88,14 +88,6 @@
 <a href="#88" id="88">88</a>
 <a href="#89" id="89">89</a>
 <a href="#90" id="90">90</a>
-<a href="#91" id="91">91</a>
-<a href="#92" id="92">92</a>
-<a href="#93" id="93">93</a>
-<a href="#94" id="94">94</a>
-<a href="#95" id="95">95</a>
-<a href="#96" id="96">96</a>
-<a href="#97" id="97">97</a>
-<a href="#98" id="98">98</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_errors::EgonTypeError;
@@ -124,11 +116,6 @@
             <span class="kw">let </span>identifier = <span class="kw-2">&amp;</span>expr_assign.identifier.<span class="number">0</span>.name;
 
             <span class="kw">if let </span><span class="prelude-val">Some</span>(type_env_value) = resolve_ident(identifier) {
-                <span class="macro">verify_trace!</span>(
-                    <span class="string">"Verifying assign expression types: {}"</span>,
-                    expr.to_string().cyan()
-                );
-
                 <span class="kw">let </span>type_env_typeref = <span class="kw-2">&amp;</span>type_env_value.typeref;
                 <span class="kw">let </span>is_const = <span class="kw-2">&amp;</span>type_env_value.is_const;
 
@@ -136,9 +123,6 @@
                 <span class="kw">let </span>value_typeref = resolve_expr(value_expr, value_span).unwrap();
 
                 <span class="kw">if </span>!is_const &amp;&amp; type_env_typeref != <span class="kw-2">&amp;</span>value_typeref.typeref {
-                    <span class="macro">verify_trace!</span>(error:
-                        <span class="string">"Type mismatching reassigning value ({type_env_typeref:?} vs {value_typeref:?}): {expr}"</span>);
-
                     errs.push((
                         EgonTypeError::MismatchType {
                             expected: type_env_typeref.to_string(),
@@ -159,8 +143,8 @@
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span><span class="kw">super</span>::TypeMismatchReassigningLetValuesRule;
     <span class="kw">use </span><span class="kw">crate</span>::verifier_rule_test;
-    <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
     <span class="kw">use </span>egonlang_errors::EgonTypeError;
+    <span class="kw">use </span>egonlang_types::Type;
 
     <span class="macro">verifier_rule_test!</span> {
         TypeMismatchReassigningLetValuesRule,
@@ -174,8 +158,8 @@
         <span class="string">"let a = 123; a = false;"</span>,
         <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[(
             EgonTypeError::MismatchType {
-                expected: ast::TypeRef::number().to_string(),
-                actual: ast::TypeRef::bool().to_string()
+                expected: Type::number().to_string(),
+                actual: Type::bool().to_string()
             }.into(),
             <span class="number">17</span>..<span class="number">22
         </span>)])
@@ -187,8 +171,8 @@
         <span class="string">"let a = [1, 2, 3]; a = [false, true];"</span>,
         <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[(
             EgonTypeError::MismatchType {
-                expected: ast::TypeRef::list(ast::TypeRef::number()).to_string(),
-                actual: ast::TypeRef::list(ast::TypeRef::bool()).to_string()
+                expected: Type::list(Type::number()).to_string(),
+                actual: Type::list(Type::bool()).to_string()
             }.into(),
             <span class="number">23</span>..<span class="number">36
         </span>)])

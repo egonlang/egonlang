@@ -2148,6 +2148,7 @@
 <a href="#2148" id="2148">2148</a>
 <a href="#2149" id="2149">2149</a>
 <a href="#2150" id="2150">2150</a>
+<a href="#2151" id="2151">2151</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>lalrpop_util::lalrpop_mod;
 
 <span class="kw">use </span><span class="kw">crate</span>::lexer::Lexer;
@@ -2241,12 +2242,13 @@
 </span><span class="kw">mod </span>parser_tests {
     <span class="kw">use </span>std::vec;
 
+    <span class="kw">use </span>egonlang_types::Type;
     <span class="kw">use </span>pretty_assertions::assert_eq;
 
     <span class="kw">use </span><span class="kw">crate</span>::ast::{
         <span class="self">self</span>, Expr, ExprAssign, ExprBlock, ExprFn, ExprIdentifier, ExprIf, ExprInfix, ExprList,
         ExprLiteral, ExprRange, ExprTuple, ExprType, Identifier, Module, OpInfix, Stmt,
-        StmtAssertType, StmtAssign, StmtExpr, StmtTypeAlias, TypeRef,
+        StmtAssertType, StmtAssign, StmtExpr, StmtTypeAlias,
     };
 
     <span class="kw">use </span>egonlang_errors::{EgonError, EgonSyntaxError};
@@ -3970,7 +3972,7 @@
                         },
                         <span class="number">4</span>..<span class="number">5
                     </span>),
-                    type_expr: <span class="prelude-val">Some</span>((Expr::Type(ExprType(TypeRef::number())), <span class="number">7</span>..<span class="number">13</span>)),
+                    type_expr: <span class="prelude-val">Some</span>((Expr::Type(ExprType(Type::number())), <span class="number">7</span>..<span class="number">13</span>)),
                     is_const: <span class="bool-val">false</span>,
                     value: <span class="prelude-val">Some</span>((
                         ast::Expr::Assign(Box::new(ExprAssign {
@@ -4002,7 +4004,7 @@
                         },
                         <span class="number">4</span>..<span class="number">5
                     </span>),
-                    type_expr: <span class="prelude-val">Some</span>((Expr::Type(ExprType(TypeRef::number())), <span class="number">7</span>..<span class="number">13</span>)),
+                    type_expr: <span class="prelude-val">Some</span>((Expr::Type(ExprType(Type::number())), <span class="number">7</span>..<span class="number">13</span>)),
                     is_const: <span class="bool-val">false</span>,
                     value: <span class="prelude-val">Some</span>((ast::Expr::Literal(ExprLiteral::Number(<span class="number">123f64</span>)), <span class="number">16</span>..<span class="number">19</span>))
                 }),
@@ -4044,7 +4046,7 @@
                         },
                         <span class="number">5</span>..<span class="number">15
                     </span>),
-                    value: (TypeRef::list(TypeRef::number()), <span class="number">18</span>..<span class="number">30</span>)
+                    value: (Type::list(Type::number()), <span class="number">18</span>..<span class="number">30</span>)
                 }),
                 <span class="number">0</span>..<span class="number">31
             </span>)]
@@ -4067,7 +4069,7 @@
                             },
                             <span class="number">14</span>..<span class="number">24
                         </span>),
-                        value: (TypeRef::list(TypeRef::number()), <span class="number">27</span>..<span class="number">39</span>)
+                        value: (Type::list(Type::number()), <span class="number">27</span>..<span class="number">39</span>)
                     }),
                     <span class="number">9</span>..<span class="number">40
                 </span>),
@@ -4080,7 +4082,7 @@
                             <span class="number">53</span>..<span class="number">54
                         </span>),
                         type_expr: <span class="prelude-val">Some</span>((
-                            Expr::Type(ExprType(TypeRef(<span class="string">"NumberList"</span>.to_string(), <span class="macro">vec!</span>[]))),
+                            Expr::Type(ExprType(Type(<span class="string">"NumberList"</span>.to_string(), <span class="macro">vec!</span>[]))),
                             <span class="number">56</span>..<span class="number">66
                         </span>)),
                         is_const: <span class="bool-val">false</span>,
@@ -4117,7 +4119,7 @@
                         Expr::Fn(Box::new(ExprFn {
                             name: <span class="prelude-val">None</span>,
                             params: <span class="macro">vec!</span>[],
-                            return_type: (TypeRef::unit(), <span class="number">13</span>..<span class="number">15</span>),
+                            return_type: (Type::unit(), <span class="number">13</span>..<span class="number">15</span>),
                             body: (
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: <span class="macro">vec!</span>[
@@ -4129,7 +4131,7 @@
                                                     },
                                                     <span class="number">38</span>..<span class="number">41
                                                 </span>),
-                                                value: (TypeRef::number(), <span class="number">44</span>..<span class="number">50</span>)
+                                                value: (Type::number(), <span class="number">44</span>..<span class="number">50</span>)
                                             }),
                                             <span class="number">33</span>..<span class="number">51
                                         </span>),
@@ -4142,7 +4144,7 @@
                                                     <span class="number">68</span>..<span class="number">69
                                                 </span>),
                                                 type_expr: <span class="prelude-val">Some</span>((
-                                                    Expr::Type(ExprType(TypeRef::number())),
+                                                    Expr::Type(ExprType(Type::number())),
                                                     <span class="number">71</span>..<span class="number">77
                                                 </span>)),
                                                 is_const: <span class="bool-val">false</span>,
@@ -4162,7 +4164,7 @@
                                                     <span class="number">99</span>..<span class="number">100
                                                 </span>),
                                                 type_expr: <span class="prelude-val">Some</span>((
-                                                    Expr::Type(ExprType(TypeRef(
+                                                    Expr::Type(ExprType(Type(
                                                         <span class="string">"Int"</span>.to_string(),
                                                         <span class="macro">vec!</span>[]
                                                     ))),
@@ -4226,7 +4228,7 @@
                         },
                         <span class="number">4</span>..<span class="number">5
                     </span>),
-                    type_expr: <span class="prelude-val">Some</span>((Expr::Type(ExprType(TypeRef::number())), <span class="number">7</span>..<span class="number">13</span>)),
+                    type_expr: <span class="prelude-val">Some</span>((Expr::Type(ExprType(Type::number())), <span class="number">7</span>..<span class="number">13</span>)),
                     is_const: <span class="bool-val">false</span>,
                     value: <span class="prelude-val">None
                 </span>}),
@@ -4290,7 +4292,7 @@
             stmts: <span class="macro">vec!</span>[(
                 StmtAssertType {
                     value: (<span class="number">123f64</span>.into(), <span class="number">12</span>..<span class="number">15</span>),
-                    expected_type: (ast::ExprType(TypeRef::number()).into(), <span class="number">17</span>..<span class="number">23</span>)
+                    expected_type: (ast::ExprType(Type::number()).into(), <span class="number">17</span>..<span class="number">23</span>)
                 }
                 .into(),
                 <span class="number">0</span>..<span class="number">24

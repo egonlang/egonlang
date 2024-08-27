@@ -322,15 +322,17 @@
 <a href="#322" id="322">322</a>
 <a href="#323" id="323">323</a>
 <a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::{<span class="self">self</span>, Debug, Display, Formatter};
 
+<span class="kw">use </span>egonlang_types::Type;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="kw">use </span><span class="kw">crate</span>::parser::parse;
 
 <span class="kw">use </span>span::Spanned;
 
-<span class="kw">use super</span>::{Expr, ExprS, Identifier, TypeRef};
+<span class="kw">use super</span>::{Expr, ExprS, Identifier};
 
 <span class="doccomment">/// A tuple containing a statement and it's span e.g. (stmt, span)
 </span><span class="kw">pub type </span>StmtS = Spanned&lt;Stmt&gt;;
@@ -520,7 +522,7 @@
 </span><span class="attr">#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 </span><span class="kw">pub struct </span>StmtTypeAlias {
     <span class="kw">pub </span>alias: Spanned&lt;Identifier&gt;,
-    <span class="kw">pub </span>value: Spanned&lt;TypeRef&gt;,
+    <span class="kw">pub </span>value: Spanned&lt;Type&gt;,
 }
 
 <span class="kw">impl </span>Display <span class="kw">for </span>StmtTypeAlias {

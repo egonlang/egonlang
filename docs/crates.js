@@ -1,1 +1,1 @@
-window.ALL_CRATES = ["egon","egonlang_core","egonlang_diagnostics","egonlang_errors","egonlang_lsp","egonlang_verifier","span","str_idxpos"];
+window.ALL_CRATES = ["egon","egonlang_core","egonlang_diagnostics","egonlang_errors","egonlang_lsp","egonlang_types","egonlang_verifier","span","str_idxpos","tracelog"];

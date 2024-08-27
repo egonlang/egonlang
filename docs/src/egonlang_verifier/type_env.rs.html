@@ -266,35 +266,34 @@
 <a href="#266" id="266">266</a>
 <a href="#267" id="267">267</a>
 <a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 
-<span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
-
-<span class="kw">use </span><span class="kw">crate</span>::verify_trace;
+<span class="kw">use </span>egonlang_types::Type;
 
 <span class="doccomment">/// Typing information stored about an identifier
 </span><span class="attr">#[derive(Debug, PartialEq, Clone)]
 </span><span class="kw">pub struct </span>TypeEnvValue {
-    <span class="kw">pub </span>typeref: ast::TypeRef,
+    <span class="kw">pub </span>typeref: Type,
     <span class="kw">pub </span>is_const: bool,
 }
 
 <span class="kw">impl </span>TypeEnvValue {
-    <span class="kw">pub fn </span>new(typeref: ast::TypeRef) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(typeref: Type) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             typeref,
             is_const: <span class="bool-val">false</span>,
         }
     }
 
-    <span class="kw">pub fn </span>new_const(typeref: ast::TypeRef) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new_const(typeref: Type) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             typeref,
             is_const: <span class="bool-val">true</span>,
         }
     }
 
-    <span class="kw">fn </span>map_typeref(<span class="kw-2">&amp;</span><span class="self">self</span>, typeref: ast::TypeRef) -&gt; TypeEnvValue {
+    <span class="kw">fn </span>map_typeref(<span class="kw-2">&amp;</span><span class="self">self</span>, typeref: Type) -&gt; TypeEnvValue {
         <span class="kw">let </span><span class="kw-2">mut </span>env_var = <span class="self">self</span>.clone();
         env_var.typeref = typeref;
 
@@ -327,8 +326,9 @@
 
     <span class="doccomment">/// Attempt to resolve an identifier's type
     </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, identifier: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;TypeEnvValue&gt; {
-        <span class="macro">verify_trace!</span>(
-            type_env get: <span class="string">"(level: {}) Looking up identifier {}"</span>,
+        <span class="macro">tracelog::tracelog!</span>(
+            label = type_env,get;
+            <span class="string">"(level: {}) Looking up identifier {}"</span>,
             <span class="self">self</span>.level(),
             identifier.cyan()
         );
@@ -339,7 +339,8 @@
             <span class="kw">let </span>result = result.unwrap();
 
             <span class="kw">if </span>result.typeref.is_type() {
-                <span class="macro">verify_trace!</span>(
+                <span class="macro">tracelog::tracelog!</span>(
+                    label = type_env,get;
                     <span class="string">"(level:{}) Got type alias {} for {}"</span>,
                     <span class="self">self</span>.level(),
                     result.typeref.to_string().italic().yellow(),
@@ -352,16 +353,17 @@
 
         <span class="kw">match </span>result {
             <span class="prelude-val">Some</span>(result) =&gt; {
-                <span class="macro">verify_trace!</span>(
-                    type_env get: <span class="string">"(level:{}) Got type {} for {}"</span>,
+                <span class="macro">tracelog::tracelog!</span>(
+                    label = type_env,get;
+                    <span class="string">"(level:{}) Got type {} for {}"</span>,
                     <span class="self">self</span>.level(),
                     result.typeref.to_string().italic().yellow(),
                     identifier.cyan()
                 );
             }
             <span class="prelude-val">None </span>=&gt; {
-                <span class="macro">verify_trace!</span>(
-                    type_env get error:
+                <span class="macro">tracelog::tracelog!</span>(
+                    label = type_env,get,error;
                     <span class="string">"(level: {}) Unable to find type for {} in type env"</span>,
                     <span class="self">self</span>.level(),
                     identifier.cyan()
@@ -379,10 +381,10 @@
             <span class="comment">// Grab the aliased type from the value's typeref
             //
             // type A = number;
-            // ---------^ TypeRef::typed(TypeRef::number())
+            // ---------^ Type::typed(Type::number())
             //
             // This grabs the type `number` from the assigment value
-            // new_type = TypeRef::number()
+            // new_type = Type::number()
             </span><span class="kw">let </span>new_typeref = value.typeref.<span class="number">1</span>.first().unwrap().clone();
 
             <span class="comment">// Look up the new typeref (as a string) in the type environment
@@ -390,11 +392,11 @@
             //
             // type A = number;
             // type B = A;
-            // ---------^ TypeRef::typed(TypeRef::number())
+            // ---------^ Type::typed(Type::number())
             </span><span class="kw">return match </span><span class="self">self</span>.get(<span class="kw-2">&amp;</span>new_typeref.to_string()) {
                 <span class="prelude-val">Some</span>(aliased_type) =&gt; {
-                    <span class="macro">verify_trace!</span>(
-                        type_env set type_alias:
+                    <span class="macro">tracelog::tracelog!</span>(
+                        label = type_env,set,type_alias;
                         <span class="string">"(level:{}) Setting {} to type alias {}"</span>,
                         <span class="self">self</span>.level(),
                         identifier.cyan(),
@@ -411,8 +413,8 @@
                     </span><span class="self">self</span>.values.insert(identifier.to_string(), aliased_type)
                 }
                 <span class="prelude-val">None </span>=&gt; {
-                    <span class="macro">verify_trace!</span>(
-                        type_env set:
+                    <span class="macro">tracelog::tracelog!</span>(
+                        label = type_env,set;
                         <span class="string">"(level: {}) Setting {} to the type alias {}"</span>,
                         <span class="self">self</span>.level(),
                         identifier.cyan(),
@@ -430,8 +432,8 @@
             };
         }
 
-        <span class="macro">verify_trace!</span>(
-            type_env set:
+        <span class="macro">tracelog::tracelog!</span>(
+            label = type_env,set;
             <span class="string">"(level: {}) Setting {} to the type {}"</span>,
             <span class="self">self</span>.level(),
             identifier.cyan(),
@@ -446,7 +448,7 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>type_env_tests {
-    <span class="kw">use </span>egonlang_core::ast::TypeRef;
+    <span class="kw">use </span>egonlang_types::Type;
     <span class="kw">use </span>pretty_assertions::assert_eq;
 
     <span class="kw">use super</span>::{TypeEnv, TypeEnvValue};
@@ -458,14 +460,14 @@
         env.set(
             <span class="string">"a"</span>,
             TypeEnvValue {
-                typeref: TypeRef::number(),
+                typeref: Type::number(),
                 is_const: <span class="bool-val">false</span>,
             },
         );
 
         <span class="macro">assert_eq!</span>(
             <span class="prelude-val">Some</span>(TypeEnvValue {
-                typeref: TypeRef::number(),
+                typeref: Type::number(),
                 is_const: <span class="bool-val">false</span>,
             }),
             env.get(<span class="string">"a"</span>)
@@ -487,14 +489,14 @@
         </span>env.set(
             <span class="string">"Int"</span>,
             TypeEnvValue {
-                typeref: TypeRef::typed(TypeRef::number()),
+                typeref: Type::typed(Type::number()),
                 is_const: <span class="bool-val">true</span>,
             },
         );
 
         <span class="macro">assert_eq!</span>(
             <span class="prelude-val">Some</span>(TypeEnvValue {
-                typeref: TypeRef::number(),
+                typeref: Type::number(),
                 is_const: <span class="bool-val">true</span>,
             }),
             env.get(<span class="string">"Int"</span>)
@@ -509,7 +511,7 @@
         </span>env.set(
             <span class="string">"Int"</span>,
             TypeEnvValue {
-                typeref: TypeRef::typed(TypeRef::number()),
+                typeref: Type::typed(Type::number()),
                 is_const: <span class="bool-val">true</span>,
             },
         );
@@ -518,7 +520,7 @@
         </span>env.set(
             <span class="string">"Int2"</span>,
             TypeEnvValue {
-                typeref: TypeRef::typed(TypeRef(<span class="string">"Int"</span>.to_string(), <span class="macro">vec!</span>[])),
+                typeref: Type::typed(Type(<span class="string">"Int"</span>.to_string(), <span class="macro">vec!</span>[])),
                 is_const: <span class="bool-val">true</span>,
             },
         );
@@ -527,7 +529,7 @@
         // `Int2` -&gt; `Int` -&gt; `number`
         </span><span class="macro">assert_eq!</span>(
             <span class="prelude-val">Some</span>(TypeEnvValue {
-                typeref: TypeRef::number(),
+                typeref: Type::number(),
                 is_const: <span class="bool-val">true</span>,
             }),
             env.get(<span class="string">"Int2"</span>)

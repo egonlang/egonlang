@@ -1322,16 +1322,19 @@
 <a href="#1322" id="1322">1322</a>
 <a href="#1323" id="1323">1323</a>
 <a href="#1324" id="1324">1324</a>
+<a href="#1325" id="1325">1325</a>
+<a href="#1326" id="1326">1326</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::{<span class="self">self</span>, Display, Formatter};
 
 <span class="kw">use </span>egonlang_errors::EgonTypeError;
+<span class="kw">use </span>egonlang_types::Type;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="kw">use </span><span class="kw">crate</span>::parser::parse;
 
 <span class="kw">use </span>span::Spanned;
 
-<span class="kw">use super</span>::{Stmt, StmtS, TypeRef};
+<span class="kw">use super</span>::{Stmt, StmtS};
 
 <span class="doccomment">/// A tuple containing an expression and it's span e.g. (expr, span)
 </span><span class="kw">pub type </span>ExprS = Spanned&lt;Expr&gt;;
@@ -1595,26 +1598,26 @@
             Expr::Literal(literal) =&gt; <span class="kw">match </span>literal {
                 ExprLiteral::Number(number) =&gt; <span class="prelude-val">Ok</span>(number),
                 ExprLiteral::Bool(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[egonlang_errors::EgonTypeError::MismatchType {
-                    expected: TypeRef::number().to_string(),
-                    actual: TypeRef::bool().to_string(),
+                    expected: Type::number().to_string(),
+                    actual: Type::bool().to_string(),
                 }
                 .into()]),
                 ExprLiteral::String(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[egonlang_errors::EgonTypeError::MismatchType {
-                    expected: TypeRef::number().to_string(),
-                    actual: TypeRef::string().to_string(),
+                    expected: Type::number().to_string(),
+                    actual: Type::string().to_string(),
                 }
                 .into()]),
             },
             Expr::Prefix(prefix) =&gt; <span class="kw">match </span>prefix.op {
                 OpPrefix::Negate =&gt; prefix.rt.<span class="number">0</span>.try_into(),
                 OpPrefix::Not =&gt; <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[egonlang_errors::EgonTypeError::MismatchType {
-                    expected: TypeRef::number().to_string(),
-                    actual: TypeRef::bool().to_string(),
+                    expected: Type::number().to_string(),
+                    actual: Type::bool().to_string(),
                 }
                 .into()]),
             },
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[egonlang_errors::EgonTypeError::MismatchType {
-                expected: TypeRef::number().to_string(),
+                expected: Type::number().to_string(),
                 actual: value.to_string(),
             }
             .into()]),
@@ -1629,19 +1632,19 @@
         <span class="kw">match </span>value {
             Expr::Literal(literal) =&gt; <span class="kw">match </span>literal {
                 ExprLiteral::Number(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[egonlang_errors::EgonTypeError::MismatchType {
-                    expected: TypeRef::string().to_string(),
-                    actual: TypeRef::number().to_string(),
+                    expected: Type::string().to_string(),
+                    actual: Type::number().to_string(),
                 }
                 .into()]),
                 ExprLiteral::Bool(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[egonlang_errors::EgonTypeError::MismatchType {
-                    expected: TypeRef::string().to_string(),
-                    actual: TypeRef::bool().to_string(),
+                    expected: Type::string().to_string(),
+                    actual: Type::bool().to_string(),
                 }
                 .into()]),
                 ExprLiteral::String(string) =&gt; <span class="prelude-val">Ok</span>(string),
             },
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[egonlang_errors::EgonTypeError::MismatchType {
-                expected: TypeRef::string().to_string(),
+                expected: Type::string().to_string(),
                 actual: value.to_string(),
             }
             .into()]),
@@ -1656,19 +1659,19 @@
         <span class="kw">match </span>value {
             Expr::Literal(literal) =&gt; <span class="kw">match </span>literal {
                 ExprLiteral::Number(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[EgonTypeError::MismatchType {
-                    expected: TypeRef::bool().to_string(),
-                    actual: TypeRef::number().to_string(),
+                    expected: Type::bool().to_string(),
+                    actual: Type::number().to_string(),
                 }
                 .into()]),
                 ExprLiteral::Bool(bool) =&gt; <span class="prelude-val">Ok</span>(bool),
                 ExprLiteral::String(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[EgonTypeError::MismatchType {
-                    expected: TypeRef::bool().to_string(),
-                    actual: TypeRef::string().to_string(),
+                    expected: Type::bool().to_string(),
+                    actual: Type::string().to_string(),
                 }
                 .into()]),
             },
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[EgonTypeError::MismatchType {
-                expected: TypeRef::bool().to_string(),
+                expected: Type::bool().to_string(),
                 actual: value.to_string(),
             }
             .into()]),
@@ -1740,7 +1743,7 @@
     ///   b // The block's resolved type is `number`
     /// };
     /// ```
-    </span><span class="kw">pub </span>typeref: <span class="prelude-ty">Option</span>&lt;TypeRef&gt;,
+    </span><span class="kw">pub </span>typeref: <span class="prelude-ty">Option</span>&lt;Type&gt;,
 }
 
 <span class="kw">impl </span>Display <span class="kw">for </span>ExprBlock {
@@ -1982,8 +1985,8 @@
 </span><span class="attr">#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 </span><span class="kw">pub struct </span>ExprFn {
     <span class="kw">pub </span>name: <span class="prelude-ty">Option</span>&lt;Identifier&gt;,
-    <span class="kw">pub </span>params: Vec&lt;Spanned&lt;(Identifier, TypeRef)&gt;&gt;,
-    <span class="kw">pub </span>return_type: Spanned&lt;TypeRef&gt;,
+    <span class="kw">pub </span>params: Vec&lt;Spanned&lt;(Identifier, Type)&gt;&gt;,
+    <span class="kw">pub </span>return_type: Spanned&lt;Type&gt;,
     <span class="kw">pub </span>body: ExprS,
 }
 
@@ -2035,7 +2038,7 @@
 /// type Int = number; // `number` is a type expression
 /// ```
 </span><span class="attr">#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-</span><span class="kw">pub struct </span>ExprType(<span class="kw">pub </span>TypeRef);
+</span><span class="kw">pub struct </span>ExprType(<span class="kw">pub </span>Type);
 
 <span class="kw">impl </span>Display <span class="kw">for </span>ExprType {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
@@ -2098,6 +2101,7 @@
 </span><span class="kw">mod </span>display_tests {
     <span class="kw">use </span>std::vec;
 
+    <span class="kw">use </span>egonlang_types::Type;
     <span class="kw">use </span>pretty_assertions::assert_eq;
 
     <span class="kw">use </span><span class="kw">crate</span>::ast::<span class="kw-2">*</span>;
@@ -2472,7 +2476,7 @@
         Expr::Fn(Box::new(ExprFn {
             name: <span class="prelude-val">None</span>,
             params: <span class="macro">vec!</span>[],
-            return_type: (TypeRef::unit(), <span class="number">0</span>..<span class="number">0</span>),
+            return_type: (Type::unit(), <span class="number">0</span>..<span class="number">0</span>),
             body: (
                 ExprBlock {
                     stmts: <span class="macro">vec!</span>[],
@@ -2495,11 +2499,11 @@
                     Identifier {
                         name: <span class="string">"a"</span>.to_string()
                     },
-                    TypeRef::number()
+                    Type::number()
                 ),
                 <span class="number">0</span>..<span class="number">0
             </span>)],
-            return_type: (TypeRef::unit(), <span class="number">0</span>..<span class="number">0</span>),
+            return_type: (Type::unit(), <span class="number">0</span>..<span class="number">0</span>),
             body: (
                 ExprBlock {
                     stmts: <span class="macro">vec!</span>[],
@@ -2523,7 +2527,7 @@
                         Identifier {
                             name: <span class="string">"a"</span>.to_string()
                         },
-                        TypeRef::number()
+                        Type::number()
                     ),
                     <span class="number">0</span>..<span class="number">0
                 </span>),
@@ -2532,12 +2536,12 @@
                         Identifier {
                             name: <span class="string">"b"</span>.to_string()
                         },
-                        TypeRef::number()
+                        Type::number()
                     ),
                     <span class="number">0</span>..<span class="number">0
                 </span>)
             ],
-            return_type: (TypeRef::unit(), <span class="number">0</span>..<span class="number">0</span>),
+            return_type: (Type::unit(), <span class="number">0</span>..<span class="number">0</span>),
             body: (
                 ExprBlock {
                     stmts: <span class="macro">vec!</span>[],
@@ -2561,7 +2565,7 @@
                         Identifier {
                             name: <span class="string">"a"</span>.to_string()
                         },
-                        TypeRef::number()
+                        Type::number()
                     ),
                     <span class="number">0</span>..<span class="number">0
                 </span>),
@@ -2570,12 +2574,12 @@
                         Identifier {
                             name: <span class="string">"b"</span>.to_string()
                         },
-                        TypeRef::number()
+                        Type::number()
                     ),
                     <span class="number">0</span>..<span class="number">0
                 </span>)
             ],
-            return_type: (TypeRef::number(), <span class="number">0</span>..<span class="number">0</span>),
+            return_type: (Type::number(), <span class="number">0</span>..<span class="number">0</span>),
             body: (
                 ExprBlock {
                     stmts: <span class="macro">vec!</span>[],
@@ -2599,7 +2603,7 @@
                         Identifier {
                             name: <span class="string">"a"</span>.to_string()
                         },
-                        TypeRef::number()
+                        Type::number()
                     ),
                     <span class="number">0</span>..<span class="number">0
                 </span>),
@@ -2608,12 +2612,12 @@
                         Identifier {
                             name: <span class="string">"b"</span>.to_string()
                         },
-                        TypeRef::number()
+                        Type::number()
                     ),
                     <span class="number">0</span>..<span class="number">0
                 </span>)
             ],
-            return_type: (TypeRef::number(), <span class="number">0</span>..<span class="number">0</span>),
+            return_type: (Type::number(), <span class="number">0</span>..<span class="number">0</span>),
             body: (
                 ExprBlock {
                     stmts: <span class="macro">vec!</span>[],

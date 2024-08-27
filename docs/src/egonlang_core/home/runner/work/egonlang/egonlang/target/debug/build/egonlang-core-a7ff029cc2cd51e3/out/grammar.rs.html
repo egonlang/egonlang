@@ -11716,12 +11716,15 @@
 <a href="#11716" id="11716">11716</a>
 <a href="#11717" id="11717">11717</a>
 <a href="#11718" id="11718">11718</a>
+<a href="#11719" id="11719">11719</a>
+<a href="#11720" id="11720">11720</a>
 </pre></div><pre class="rust"><code><span class="comment">// auto-generated: "lalrpop 0.19.12"
-// sha3: a4ec2f48381de6b655ae5721fd4dd51826a66655dd62debcd65ae6d1250535a7
+// sha3: 006eda049eaace7d56a31b5bd0da959c090d71ea5500ba197b783a077a6b928b
 </span><span class="kw">use </span>lalrpop_util::ParseError;
 <span class="kw">use </span>egonlang_errors::EgonErrorS;
 <span class="kw">use crate</span>::{ast, lexer};
 <span class="kw">use </span>span;
+<span class="kw">use </span>egonlang_types::Type;
 <span class="attr">#[allow(unused_extern_crates)]
 </span><span class="kw">extern crate </span>lalrpop_util <span class="kw">as </span>__lalrpop_util;
 <span class="attr">#[allow(unused_imports)]
@@ -11737,6 +11740,7 @@
     <span class="kw">use </span>egonlang_errors::EgonErrorS;
     <span class="kw">use crate</span>::{ast, lexer};
     <span class="kw">use </span>span;
+    <span class="kw">use </span>egonlang_types::Type;
     <span class="attr">#[allow(unused_extern_crates)]
     </span><span class="kw">extern crate </span>lalrpop_util <span class="kw">as </span>__lalrpop_util;
     <span class="attr">#[allow(unused_imports)]
@@ -11754,14 +11758,14 @@
         Variant4(core::option::Option&lt;lexer::Token&gt;),
         Variant5(span::Spanned&lt;ast::Expr&gt;),
         Variant6(alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;),
-        Variant7(span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;),
-        Variant8(alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;&gt;),
-        Variant9(ast::TypeRef),
-        Variant10(alloc::vec::Vec&lt;ast::TypeRef&gt;),
-        Variant11(span::Spanned&lt;ast::TypeRef&gt;),
-        Variant12(core::option::Option&lt;span::Spanned&lt;ast::TypeRef&gt;&gt;),
-        Variant13(Vec&lt;ast::TypeRef&gt;),
-        Variant14(core::option::Option&lt;Vec&lt;ast::TypeRef&gt;&gt;),
+        Variant7(span::Spanned&lt;(ast::Identifier, Type)&gt;),
+        Variant8(alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, Type)&gt;&gt;),
+        Variant9(Type),
+        Variant10(alloc::vec::Vec&lt;Type&gt;),
+        Variant11(span::Spanned&lt;Type&gt;),
+        Variant12(core::option::Option&lt;span::Spanned&lt;Type&gt;&gt;),
+        Variant13(Vec&lt;Type&gt;),
+        Variant14(core::option::Option&lt;Vec&lt;Type&gt;&gt;),
         Variant15(core::option::Option&lt;span::Spanned&lt;ast::Expr&gt;&gt;),
         Variant16(()),
         Variant17(span::Spanned&lt;ast::Stmt&gt;),
@@ -11769,13 +11773,13 @@
         Variant19(usize),
         Variant20(ast::Stmt),
         Variant21(ast::Expr),
-        Variant22((ast::Identifier, ast::TypeRef)),
+        Variant22((ast::Identifier, Type)),
         Variant23(ast::Identifier),
         Variant24(ast::Module),
         Variant25(ast::OpInfix),
         Variant26(ast::OpPrefix),
         Variant27(Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;),
-        Variant28(Vec&lt;span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;&gt;),
+        Variant28(Vec&lt;span::Spanned&lt;(ast::Identifier, Type)&gt;&gt;),
         Variant29(Vec&lt;ast::ExprS&gt;),
         Variant30(span::Spanned&lt;ast::Identifier&gt;),
         Variant31(span::Spanned&lt;f64&gt;),
@@ -14914,7 +14918,7 @@
     <span class="kw">fn </span>__pop_Variant22&lt;
     &gt;(
         __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
-    ) -&gt; (usize, (ast::Identifier, ast::TypeRef), usize)
+    ) -&gt; (usize, (ast::Identifier, Type), usize)
      {
         <span class="kw">match </span>__symbols.pop() {
             <span class="prelude-val">Some</span>((__l, __Symbol::Variant22(__v), __r)) =&gt; (__l, __v, __r),
@@ -14931,6 +14935,26 @@
             <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
         }
     }
+    <span class="kw">fn </span>__pop_Variant9&lt;
+    &gt;(
+        __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
+    ) -&gt; (usize, Type, usize)
+     {
+        <span class="kw">match </span>__symbols.pop() {
+            <span class="prelude-val">Some</span>((__l, __Symbol::Variant9(__v), __r)) =&gt; (__l, __v, __r),
+            <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
+        }
+    }
+    <span class="kw">fn </span>__pop_Variant13&lt;
+    &gt;(
+        __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
+    ) -&gt; (usize, Vec&lt;Type&gt;, usize)
+     {
+        <span class="kw">match </span>__symbols.pop() {
+            <span class="prelude-val">Some</span>((__l, __Symbol::Variant13(__v), __r)) =&gt; (__l, __v, __r),
+            <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
+        }
+    }
     <span class="kw">fn </span>__pop_Variant29&lt;
     &gt;(
         __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
@@ -14941,20 +14965,10 @@
             <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
         }
     }
-    <span class="kw">fn </span>__pop_Variant13&lt;
-    &gt;(
-        __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
-    ) -&gt; (usize, Vec&lt;ast::TypeRef&gt;, usize)
-     {
-        <span class="kw">match </span>__symbols.pop() {
-            <span class="prelude-val">Some</span>((__l, __Symbol::Variant13(__v), __r)) =&gt; (__l, __v, __r),
-            <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
-        }
-    }
     <span class="kw">fn </span>__pop_Variant28&lt;
     &gt;(
         __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
-    ) -&gt; (usize, Vec&lt;span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;&gt;, usize)
+    ) -&gt; (usize, Vec&lt;span::Spanned&lt;(ast::Identifier, Type)&gt;&gt;, usize)
      {
         <span class="kw">match </span>__symbols.pop() {
             <span class="prelude-val">Some</span>((__l, __Symbol::Variant28(__v), __r)) =&gt; (__l, __v, __r),
@@ -14984,7 +14998,7 @@
     <span class="kw">fn </span>__pop_Variant10&lt;
     &gt;(
         __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
-    ) -&gt; (usize, alloc::vec::Vec&lt;ast::TypeRef&gt;, usize)
+    ) -&gt; (usize, alloc::vec::Vec&lt;Type&gt;, usize)
      {
         <span class="kw">match </span>__symbols.pop() {
             <span class="prelude-val">Some</span>((__l, __Symbol::Variant10(__v), __r)) =&gt; (__l, __v, __r),
@@ -14994,7 +15008,7 @@
     <span class="kw">fn </span>__pop_Variant8&lt;
     &gt;(
         __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
-    ) -&gt; (usize, alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;&gt;, usize)
+    ) -&gt; (usize, alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, Type)&gt;&gt;, usize)
      {
         <span class="kw">match </span>__symbols.pop() {
             <span class="prelude-val">Some</span>((__l, __Symbol::Variant8(__v), __r)) =&gt; (__l, __v, __r),
@@ -15101,20 +15115,10 @@
             <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
         }
     }
-    <span class="kw">fn </span>__pop_Variant9&lt;
-    &gt;(
-        __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
-    ) -&gt; (usize, ast::TypeRef, usize)
-     {
-        <span class="kw">match </span>__symbols.pop() {
-            <span class="prelude-val">Some</span>((__l, __Symbol::Variant9(__v), __r)) =&gt; (__l, __v, __r),
-            <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
-        }
-    }
     <span class="kw">fn </span>__pop_Variant14&lt;
     &gt;(
         __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
-    ) -&gt; (usize, core::option::Option&lt;Vec&lt;ast::TypeRef&gt;&gt;, usize)
+    ) -&gt; (usize, core::option::Option&lt;Vec&lt;Type&gt;&gt;, usize)
      {
         <span class="kw">match </span>__symbols.pop() {
             <span class="prelude-val">Some</span>((__l, __Symbol::Variant14(__v), __r)) =&gt; (__l, __v, __r),
@@ -15131,6 +15135,16 @@
             <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
         }
     }
+    <span class="kw">fn </span>__pop_Variant12&lt;
+    &gt;(
+        __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
+    ) -&gt; (usize, core::option::Option&lt;span::Spanned&lt;Type&gt;&gt;, usize)
+     {
+        <span class="kw">match </span>__symbols.pop() {
+            <span class="prelude-val">Some</span>((__l, __Symbol::Variant12(__v), __r)) =&gt; (__l, __v, __r),
+            <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
+        }
+    }
     <span class="kw">fn </span>__pop_Variant15&lt;
     &gt;(
         __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
@@ -15138,16 +15152,6 @@
      {
         <span class="kw">match </span>__symbols.pop() {
             <span class="prelude-val">Some</span>((__l, __Symbol::Variant15(__v), __r)) =&gt; (__l, __v, __r),
-            <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
-        }
-    }
-    <span class="kw">fn </span>__pop_Variant12&lt;
-    &gt;(
-        __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
-    ) -&gt; (usize, core::option::Option&lt;span::Spanned&lt;ast::TypeRef&gt;&gt;, usize)
-     {
-        <span class="kw">match </span>__symbols.pop() {
-            <span class="prelude-val">Some</span>((__l, __Symbol::Variant12(__v), __r)) =&gt; (__l, __v, __r),
             <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
         }
     }
@@ -15174,10 +15178,20 @@
     <span class="kw">fn </span>__pop_Variant7&lt;
     &gt;(
         __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
-    ) -&gt; (usize, span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;, usize)
+    ) -&gt; (usize, span::Spanned&lt;(ast::Identifier, Type)&gt;, usize)
      {
         <span class="kw">match </span>__symbols.pop() {
             <span class="prelude-val">Some</span>((__l, __Symbol::Variant7(__v), __r)) =&gt; (__l, __v, __r),
+            <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
+        }
+    }
+    <span class="kw">fn </span>__pop_Variant11&lt;
+    &gt;(
+        __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
+    ) -&gt; (usize, span::Spanned&lt;Type&gt;, usize)
+     {
+        <span class="kw">match </span>__symbols.pop() {
+            <span class="prelude-val">Some</span>((__l, __Symbol::Variant11(__v), __r)) =&gt; (__l, __v, __r),
             <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
         }
     }
@@ -15208,16 +15222,6 @@
      {
         <span class="kw">match </span>__symbols.pop() {
             <span class="prelude-val">Some</span>((__l, __Symbol::Variant17(__v), __r)) =&gt; (__l, __v, __r),
-            <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
-        }
-    }
-    <span class="kw">fn </span>__pop_Variant11&lt;
-    &gt;(
-        __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
-    ) -&gt; (usize, span::Spanned&lt;ast::TypeRef&gt;, usize)
-     {
-        <span class="kw">match </span>__symbols.pop() {
-            <span class="prelude-val">Some</span>((__l, __Symbol::Variant11(__v), __r)) =&gt; (__l, __v, __r),
             <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
         }
     }
@@ -15465,7 +15469,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// ("," &lt;TypeRef&gt;) = ",", TypeRef =&gt; ActionFn(148);
+        <span class="comment">// ("," &lt;Type&gt;) = ",", Type =&gt; ActionFn(148);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">2</span>);
         <span class="kw">let </span>__sym1 = __pop_Variant9(__symbols);
         <span class="kw">let </span>__sym0 = __pop_Variant0(__symbols);
@@ -15484,7 +15488,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// ("," &lt;TypeRef&gt;)* =  =&gt; ActionFn(146);
+        <span class="comment">// ("," &lt;Type&gt;)* =  =&gt; ActionFn(146);
         </span><span class="kw">let </span>__start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.<span class="number">2</span>.clone())).unwrap_or_default();
         <span class="kw">let </span>__end = __start.clone();
         <span class="kw">let </span>__nt = <span class="kw">super</span>::__action146::&lt;&gt;(errors, <span class="kw-2">&amp;</span>__start, <span class="kw-2">&amp;</span>__end);
@@ -15500,7 +15504,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// ("," &lt;TypeRef&gt;)* = ("," &lt;TypeRef&gt;)+ =&gt; ActionFn(147);
+        <span class="comment">// ("," &lt;Type&gt;)* = ("," &lt;Type&gt;)+ =&gt; ActionFn(147);
         </span><span class="kw">let </span>__sym0 = __pop_Variant10(__symbols);
         <span class="kw">let </span>__start = __sym0.<span class="number">0</span>.clone();
         <span class="kw">let </span>__end = __sym0.<span class="number">2</span>.clone();
@@ -15517,7 +15521,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// ("," &lt;TypeRef&gt;)+ = ",", TypeRef =&gt; ActionFn(169);
+        <span class="comment">// ("," &lt;Type&gt;)+ = ",", Type =&gt; ActionFn(169);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">2</span>);
         <span class="kw">let </span>__sym1 = __pop_Variant9(__symbols);
         <span class="kw">let </span>__sym0 = __pop_Variant0(__symbols);
@@ -15536,7 +15540,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// ("," &lt;TypeRef&gt;)+ = ("," &lt;TypeRef&gt;)+, ",", TypeRef =&gt; ActionFn(170);
+        <span class="comment">// ("," &lt;Type&gt;)+ = ("," &lt;Type&gt;)+, ",", Type =&gt; ActionFn(170);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">3</span>);
         <span class="kw">let </span>__sym2 = __pop_Variant9(__symbols);
         <span class="kw">let </span>__sym1 = __pop_Variant0(__symbols);
@@ -15556,7 +15560,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// (":" &lt;Spanned&lt;TypeRef&gt;&gt;) = ":", Spanned&lt;TypeRef&gt; =&gt; ActionFn(121);
+        <span class="comment">// (":" &lt;Spanned&lt;Type&gt;&gt;) = ":", Spanned&lt;Type&gt; =&gt; ActionFn(121);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">2</span>);
         <span class="kw">let </span>__sym1 = __pop_Variant11(__symbols);
         <span class="kw">let </span>__sym0 = __pop_Variant0(__symbols);
@@ -15575,7 +15579,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// (":" &lt;Spanned&lt;TypeRef&gt;&gt;)? = ":", Spanned&lt;TypeRef&gt; =&gt; ActionFn(173);
+        <span class="comment">// (":" &lt;Spanned&lt;Type&gt;&gt;)? = ":", Spanned&lt;Type&gt; =&gt; ActionFn(173);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">2</span>);
         <span class="kw">let </span>__sym1 = __pop_Variant11(__symbols);
         <span class="kw">let </span>__sym0 = __pop_Variant0(__symbols);
@@ -15594,7 +15598,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// (":" &lt;Spanned&lt;TypeRef&gt;&gt;)? =  =&gt; ActionFn(120);
+        <span class="comment">// (":" &lt;Spanned&lt;Type&gt;&gt;)? =  =&gt; ActionFn(120);
         </span><span class="kw">let </span>__start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.<span class="number">2</span>.clone())).unwrap_or_default();
         <span class="kw">let </span>__end = __start.clone();
         <span class="kw">let </span>__nt = <span class="kw">super</span>::__action120::&lt;&gt;(errors, <span class="kw-2">&amp;</span>__start, <span class="kw-2">&amp;</span>__end);
@@ -15610,7 +15614,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// ("&lt;" &lt;Seperated&lt;TypeRef, ","&gt;&gt; "&gt;") = "&lt;", TypeRef, "&gt;" =&gt; ActionFn(181);
+        <span class="comment">// ("&lt;" &lt;Seperated&lt;Type, ","&gt;&gt; "&gt;") = "&lt;", Type, "&gt;" =&gt; ActionFn(181);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">3</span>);
         <span class="kw">let </span>__sym2 = __pop_Variant0(__symbols);
         <span class="kw">let </span>__sym1 = __pop_Variant9(__symbols);
@@ -15630,7 +15634,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// ("&lt;" &lt;Seperated&lt;TypeRef, ","&gt;&gt; "&gt;") = "&lt;", TypeRef, ("," &lt;TypeRef&gt;)+, "&gt;" =&gt; ActionFn(182);
+        <span class="comment">// ("&lt;" &lt;Seperated&lt;Type, ","&gt;&gt; "&gt;") = "&lt;", Type, ("," &lt;Type&gt;)+, "&gt;" =&gt; ActionFn(182);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">4</span>);
         <span class="kw">let </span>__sym3 = __pop_Variant0(__symbols);
         <span class="kw">let </span>__sym2 = __pop_Variant10(__symbols);
@@ -15651,7 +15655,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// ("&lt;" &lt;Seperated&lt;TypeRef, ","&gt;&gt; "&gt;") = "&lt;", "&gt;" =&gt; ActionFn(183);
+        <span class="comment">// ("&lt;" &lt;Seperated&lt;Type, ","&gt;&gt; "&gt;") = "&lt;", "&gt;" =&gt; ActionFn(183);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">2</span>);
         <span class="kw">let </span>__sym1 = __pop_Variant0(__symbols);
         <span class="kw">let </span>__sym0 = __pop_Variant0(__symbols);
@@ -15670,7 +15674,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// ("&lt;" &lt;Seperated&lt;TypeRef, ","&gt;&gt; "&gt;")? = "&lt;", TypeRef, "&gt;" =&gt; ActionFn(184);
+        <span class="comment">// ("&lt;" &lt;Seperated&lt;Type, ","&gt;&gt; "&gt;")? = "&lt;", Type, "&gt;" =&gt; ActionFn(184);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">3</span>);
         <span class="kw">let </span>__sym2 = __pop_Variant0(__symbols);
         <span class="kw">let </span>__sym1 = __pop_Variant9(__symbols);
@@ -15690,7 +15694,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// ("&lt;" &lt;Seperated&lt;TypeRef, ","&gt;&gt; "&gt;")? = "&lt;", TypeRef, ("," &lt;TypeRef&gt;)+, "&gt;" =&gt; ActionFn(185);
+        <span class="comment">// ("&lt;" &lt;Seperated&lt;Type, ","&gt;&gt; "&gt;")? = "&lt;", Type, ("," &lt;Type&gt;)+, "&gt;" =&gt; ActionFn(185);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">4</span>);
         <span class="kw">let </span>__sym3 = __pop_Variant0(__symbols);
         <span class="kw">let </span>__sym2 = __pop_Variant10(__symbols);
@@ -15711,7 +15715,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// ("&lt;" &lt;Seperated&lt;TypeRef, ","&gt;&gt; "&gt;")? = "&lt;", "&gt;" =&gt; ActionFn(186);
+        <span class="comment">// ("&lt;" &lt;Seperated&lt;Type, ","&gt;&gt; "&gt;")? = "&lt;", "&gt;" =&gt; ActionFn(186);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">2</span>);
         <span class="kw">let </span>__sym1 = __pop_Variant0(__symbols);
         <span class="kw">let </span>__sym0 = __pop_Variant0(__symbols);
@@ -15730,7 +15734,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// ("&lt;" &lt;Seperated&lt;TypeRef, ","&gt;&gt; "&gt;")? =  =&gt; ActionFn(74);
+        <span class="comment">// ("&lt;" &lt;Seperated&lt;Type, ","&gt;&gt; "&gt;")? =  =&gt; ActionFn(74);
         </span><span class="kw">let </span>__start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.<span class="number">2</span>.clone())).unwrap_or_default();
         <span class="kw">let </span>__end = __start.clone();
         <span class="kw">let </span>__nt = <span class="kw">super</span>::__action74::&lt;&gt;(errors, <span class="kw-2">&amp;</span>__start, <span class="kw-2">&amp;</span>__end);
@@ -15800,7 +15804,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// ("=" &lt;Spanned&lt;TypeRef&gt;&gt;) = "=", Spanned&lt;TypeRef&gt; =&gt; ActionFn(115);
+        <span class="comment">// ("=" &lt;Spanned&lt;Type&gt;&gt;) = "=", Spanned&lt;Type&gt; =&gt; ActionFn(115);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">2</span>);
         <span class="kw">let </span>__sym1 = __pop_Variant11(__symbols);
         <span class="kw">let </span>__sym0 = __pop_Variant0(__symbols);
@@ -16400,7 +16404,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// ExprFn = "(", Spanned&lt;FnParam&gt;, ")", ":", Spanned&lt;TypeRef&gt;, "=&gt;", Spanned&lt;ExprBlock&gt; =&gt; ActionFn(256);
+        <span class="comment">// ExprFn = "(", Spanned&lt;FnParam&gt;, ")", ":", Spanned&lt;Type&gt;, "=&gt;", Spanned&lt;ExprBlock&gt; =&gt; ActionFn(256);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">7</span>);
         <span class="kw">let </span>__sym6 = __pop_Variant5(__symbols);
         <span class="kw">let </span>__sym5 = __pop_Variant0(__symbols);
@@ -16424,7 +16428,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// ExprFn = "(", Spanned&lt;FnParam&gt;, ("," &lt;Spanned&lt;FnParam&gt;&gt;)+, ")", ":", Spanned&lt;TypeRef&gt;, "=&gt;", Spanned&lt;ExprBlock&gt; =&gt; ActionFn(257);
+        <span class="comment">// ExprFn = "(", Spanned&lt;FnParam&gt;, ("," &lt;Spanned&lt;FnParam&gt;&gt;)+, ")", ":", Spanned&lt;Type&gt;, "=&gt;", Spanned&lt;ExprBlock&gt; =&gt; ActionFn(257);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">8</span>);
         <span class="kw">let </span>__sym7 = __pop_Variant5(__symbols);
         <span class="kw">let </span>__sym6 = __pop_Variant0(__symbols);
@@ -16449,7 +16453,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// ExprFn = "(", ")", ":", Spanned&lt;TypeRef&gt;, "=&gt;", Spanned&lt;ExprBlock&gt; =&gt; ActionFn(258);
+        <span class="comment">// ExprFn = "(", ")", ":", Spanned&lt;Type&gt;, "=&gt;", Spanned&lt;ExprBlock&gt; =&gt; ActionFn(258);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">6</span>);
         <span class="kw">let </span>__sym5 = __pop_Variant5(__symbols);
         <span class="kw">let </span>__sym4 = __pop_Variant0(__symbols);
@@ -16472,7 +16476,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// ExprFn = "(", Spanned&lt;FnParam&gt;, ")", ":", Spanned&lt;TypeRef&gt;, "=&gt;", Spanned&lt;ExprFn&gt; =&gt; ActionFn(259);
+        <span class="comment">// ExprFn = "(", Spanned&lt;FnParam&gt;, ")", ":", Spanned&lt;Type&gt;, "=&gt;", Spanned&lt;ExprFn&gt; =&gt; ActionFn(259);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">7</span>);
         <span class="kw">let </span>__sym6 = __pop_Variant5(__symbols);
         <span class="kw">let </span>__sym5 = __pop_Variant0(__symbols);
@@ -16496,7 +16500,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// ExprFn = "(", Spanned&lt;FnParam&gt;, ("," &lt;Spanned&lt;FnParam&gt;&gt;)+, ")", ":", Spanned&lt;TypeRef&gt;, "=&gt;", Spanned&lt;ExprFn&gt; =&gt; ActionFn(260);
+        <span class="comment">// ExprFn = "(", Spanned&lt;FnParam&gt;, ("," &lt;Spanned&lt;FnParam&gt;&gt;)+, ")", ":", Spanned&lt;Type&gt;, "=&gt;", Spanned&lt;ExprFn&gt; =&gt; ActionFn(260);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">8</span>);
         <span class="kw">let </span>__sym7 = __pop_Variant5(__symbols);
         <span class="kw">let </span>__sym6 = __pop_Variant0(__symbols);
@@ -16521,7 +16525,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// ExprFn = "(", ")", ":", Spanned&lt;TypeRef&gt;, "=&gt;", Spanned&lt;ExprFn&gt; =&gt; ActionFn(261);
+        <span class="comment">// ExprFn = "(", ")", ":", Spanned&lt;Type&gt;, "=&gt;", Spanned&lt;ExprFn&gt; =&gt; ActionFn(261);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">6</span>);
         <span class="kw">let </span>__sym5 = __pop_Variant5(__symbols);
         <span class="kw">let </span>__sym4 = __pop_Variant0(__symbols);
@@ -17438,7 +17442,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// FnParam = identifier, ":", TypeRef =&gt; ActionFn(68);
+        <span class="comment">// FnParam = identifier, ":", Type =&gt; ActionFn(68);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">3</span>);
         <span class="kw">let </span>__sym2 = __pop_Variant9(__symbols);
         <span class="kw">let </span>__sym1 = __pop_Variant0(__symbols);
@@ -17867,7 +17871,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// Seperated&lt;TypeRef, ","&gt; = TypeRef =&gt; ActionFn(171);
+        <span class="comment">// Seperated&lt;Type, ","&gt; = Type =&gt; ActionFn(171);
         </span><span class="kw">let </span>__sym0 = __pop_Variant9(__symbols);
         <span class="kw">let </span>__start = __sym0.<span class="number">0</span>.clone();
         <span class="kw">let </span>__end = __sym0.<span class="number">2</span>.clone();
@@ -17884,7 +17888,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// Seperated&lt;TypeRef, ","&gt; = TypeRef, ("," &lt;TypeRef&gt;)+ =&gt; ActionFn(172);
+        <span class="comment">// Seperated&lt;Type, ","&gt; = Type, ("," &lt;Type&gt;)+ =&gt; ActionFn(172);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">2</span>);
         <span class="kw">let </span>__sym1 = __pop_Variant10(__symbols);
         <span class="kw">let </span>__sym0 = __pop_Variant9(__symbols);
@@ -17903,7 +17907,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// Seperated&lt;TypeRef, ","&gt; =  =&gt; ActionFn(180);
+        <span class="comment">// Seperated&lt;Type, ","&gt; =  =&gt; ActionFn(180);
         </span><span class="kw">let </span>__start = __lookahead_start.cloned().or_else(|| __symbols.last().map(|s| s.<span class="number">2</span>.clone())).unwrap_or_default();
         <span class="kw">let </span>__end = __start.clone();
         <span class="kw">let </span>__nt = <span class="kw">super</span>::__action180::&lt;&gt;(errors, <span class="kw-2">&amp;</span>__start, <span class="kw-2">&amp;</span>__end);
@@ -18282,7 +18286,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// Spanned&lt;TypeRef&gt; = TypeRef =&gt; ActionFn(246);
+        <span class="comment">// Spanned&lt;Type&gt; = Type =&gt; ActionFn(246);
         </span><span class="kw">let </span>__sym0 = __pop_Variant9(__symbols);
         <span class="kw">let </span>__start = __sym0.<span class="number">0</span>.clone();
         <span class="kw">let </span>__end = __sym0.<span class="number">2</span>.clone();
@@ -18335,7 +18339,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// Stmt = "assert_type", ExprS, ",", Spanned&lt;TypeRef&gt;, ";" =&gt; ActionFn(14);
+        <span class="comment">// Stmt = "assert_type", ExprS, ",", Spanned&lt;Type&gt;, ";" =&gt; ActionFn(14);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">5</span>);
         <span class="kw">let </span>__sym4 = __pop_Variant0(__symbols);
         <span class="kw">let </span>__sym3 = __pop_Variant11(__symbols);
@@ -18394,7 +18398,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// StmtAssign = "let", Spanned&lt;Identifier&gt;, ":", Spanned&lt;TypeRef&gt;, "=", ExprS, ";" =&gt; ActionFn(192);
+        <span class="comment">// StmtAssign = "let", Spanned&lt;Identifier&gt;, ":", Spanned&lt;Type&gt;, "=", ExprS, ";" =&gt; ActionFn(192);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">7</span>);
         <span class="kw">let </span>__sym6 = __pop_Variant0(__symbols);
         <span class="kw">let </span>__sym5 = __pop_Variant5(__symbols);
@@ -18418,7 +18422,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// StmtAssign = "let", Spanned&lt;Identifier&gt;, ":", Spanned&lt;TypeRef&gt;, ";" =&gt; ActionFn(193);
+        <span class="comment">// StmtAssign = "let", Spanned&lt;Identifier&gt;, ":", Spanned&lt;Type&gt;, ";" =&gt; ActionFn(193);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">5</span>);
         <span class="kw">let </span>__sym4 = __pop_Variant0(__symbols);
         <span class="kw">let </span>__sym3 = __pop_Variant11(__symbols);
@@ -18482,7 +18486,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// StmtAssign = "const", Spanned&lt;Identifier&gt;, ":", Spanned&lt;TypeRef&gt;, "=", ExprS, ";" =&gt; ActionFn(196);
+        <span class="comment">// StmtAssign = "const", Spanned&lt;Identifier&gt;, ":", Spanned&lt;Type&gt;, "=", ExprS, ";" =&gt; ActionFn(196);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">7</span>);
         <span class="kw">let </span>__sym6 = __pop_Variant0(__symbols);
         <span class="kw">let </span>__sym5 = __pop_Variant5(__symbols);
@@ -18506,7 +18510,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// StmtAssign = "const", Spanned&lt;Identifier&gt;, ":", Spanned&lt;TypeRef&gt;, ";" =&gt; ActionFn(197);
+        <span class="comment">// StmtAssign = "const", Spanned&lt;Identifier&gt;, ":", Spanned&lt;Type&gt;, ";" =&gt; ActionFn(197);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">5</span>);
         <span class="kw">let </span>__sym4 = __pop_Variant0(__symbols);
         <span class="kw">let </span>__sym3 = __pop_Variant11(__symbols);
@@ -18587,7 +18591,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// StmtTypeAlias = "type", Spanned&lt;Identifier&gt;, "=", Spanned&lt;TypeRef&gt;, ";" =&gt; ActionFn(200);
+        <span class="comment">// StmtTypeAlias = "type", Spanned&lt;Identifier&gt;, "=", Spanned&lt;Type&gt;, ";" =&gt; ActionFn(200);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">5</span>);
         <span class="kw">let </span>__sym4 = __pop_Variant0(__symbols);
         <span class="kw">let </span>__sym3 = __pop_Variant11(__symbols);
@@ -18609,7 +18613,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// TypeRef = identifier, "&lt;", TypeRef, "&gt;" =&gt; ActionFn(187);
+        <span class="comment">// Type = identifier, "&lt;", Type, "&gt;" =&gt; ActionFn(187);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">4</span>);
         <span class="kw">let </span>__sym3 = __pop_Variant0(__symbols);
         <span class="kw">let </span>__sym2 = __pop_Variant9(__symbols);
@@ -18630,7 +18634,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// TypeRef = identifier, "&lt;", TypeRef, ("," &lt;TypeRef&gt;)+, "&gt;" =&gt; ActionFn(188);
+        <span class="comment">// Type = identifier, "&lt;", Type, ("," &lt;Type&gt;)+, "&gt;" =&gt; ActionFn(188);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">5</span>);
         <span class="kw">let </span>__sym4 = __pop_Variant0(__symbols);
         <span class="kw">let </span>__sym3 = __pop_Variant10(__symbols);
@@ -18652,7 +18656,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// TypeRef = identifier, "&lt;", "&gt;" =&gt; ActionFn(189);
+        <span class="comment">// Type = identifier, "&lt;", "&gt;" =&gt; ActionFn(189);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">3</span>);
         <span class="kw">let </span>__sym2 = __pop_Variant0(__symbols);
         <span class="kw">let </span>__sym1 = __pop_Variant0(__symbols);
@@ -18672,7 +18676,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// TypeRef = identifier =&gt; ActionFn(190);
+        <span class="comment">// Type = identifier =&gt; ActionFn(190);
         </span><span class="kw">let </span>__sym0 = __pop_Variant1(__symbols);
         <span class="kw">let </span>__start = __sym0.<span class="number">0</span>.clone();
         <span class="kw">let </span>__end = __sym0.<span class="number">2</span>.clone();
@@ -18689,7 +18693,7 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'err </span>())&gt;,
     ) -&gt; (usize, usize)
     {
-        <span class="comment">// TypeRef = "(", ")" =&gt; ActionFn(72);
+        <span class="comment">// Type = "(", ")" =&gt; ActionFn(72);
         </span><span class="macro">assert!</span>(__symbols.len() &gt;= <span class="number">2</span>);
         <span class="kw">let </span>__sym1 = __pop_Variant0(__symbols);
         <span class="kw">let </span>__sym0 = __pop_Variant0(__symbols);
@@ -18813,7 +18817,7 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
     (<span class="kw">_</span>, identifier, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Identifier&gt;, usize),
-    (<span class="kw">_</span>, type_expr, <span class="kw">_</span>): (usize, core::option::Option&lt;span::Spanned&lt;ast::TypeRef&gt;&gt;, usize),
+    (<span class="kw">_</span>, type_expr, <span class="kw">_</span>): (usize, core::option::Option&lt;span::Spanned&lt;Type&gt;&gt;, usize),
     (<span class="kw">_</span>, value, <span class="kw">_</span>): (usize, core::option::Option&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
 ) -&gt; ast::StmtAssign
@@ -18834,7 +18838,7 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
     (<span class="kw">_</span>, identifier, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Identifier&gt;, usize),
-    (<span class="kw">_</span>, type_expr, <span class="kw">_</span>): (usize, core::option::Option&lt;span::Spanned&lt;ast::TypeRef&gt;&gt;, usize),
+    (<span class="kw">_</span>, type_expr, <span class="kw">_</span>): (usize, core::option::Option&lt;span::Spanned&lt;Type&gt;&gt;, usize),
     (<span class="kw">_</span>, value, <span class="kw">_</span>): (usize, core::option::Option&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
 ) -&gt; ast::StmtAssign
@@ -18855,7 +18859,7 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
     (<span class="kw">_</span>, alias, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Identifier&gt;, usize),
-    (<span class="kw">_</span>, value, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::TypeRef&gt;, usize),
+    (<span class="kw">_</span>, value, <span class="kw">_</span>): (usize, span::Spanned&lt;Type&gt;, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
 ) -&gt; ast::StmtTypeAlias
 {
@@ -18893,7 +18897,7 @@
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
     (<span class="kw">_</span>, value, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-    (<span class="kw">_</span>, expected_type, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::TypeRef&gt;, usize),
+    (<span class="kw">_</span>, expected_type, <span class="kw">_</span>): (usize, span::Spanned&lt;Type&gt;, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
 ) -&gt; ast::Stmt
 {
@@ -19555,8 +19559,8 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, name, <span class="kw">_</span>): (usize, String, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-    (<span class="kw">_</span>, typeref, <span class="kw">_</span>): (usize, ast::TypeRef, usize),
-) -&gt; (ast::Identifier, ast::TypeRef)
+    (<span class="kw">_</span>, typeref, <span class="kw">_</span>): (usize, Type, usize),
+) -&gt; (ast::Identifier, Type)
 {
     (ast::Identifier { name }, typeref)
 }
@@ -19567,10 +19571,10 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-    (<span class="kw">_</span>, params, <span class="kw">_</span>): (usize, Vec&lt;span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;&gt;, usize),
+    (<span class="kw">_</span>, params, <span class="kw">_</span>): (usize, Vec&lt;span::Spanned&lt;(ast::Identifier, Type)&gt;&gt;, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-    (<span class="kw">_</span>, return_type, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::TypeRef&gt;, usize),
+    (<span class="kw">_</span>, return_type, <span class="kw">_</span>): (usize, span::Spanned&lt;Type&gt;, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
     (<span class="kw">_</span>, body, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
 ) -&gt; ast::Expr
@@ -19589,10 +19593,10 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-    (<span class="kw">_</span>, params, <span class="kw">_</span>): (usize, Vec&lt;span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;&gt;, usize),
+    (<span class="kw">_</span>, params, <span class="kw">_</span>): (usize, Vec&lt;span::Spanned&lt;(ast::Identifier, Type)&gt;&gt;, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-    (<span class="kw">_</span>, return_type, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::TypeRef&gt;, usize),
+    (<span class="kw">_</span>, return_type, <span class="kw">_</span>): (usize, span::Spanned&lt;Type&gt;, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
     (<span class="kw">_</span>, body, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
 ) -&gt; ast::Expr
@@ -19611,11 +19615,11 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, base, <span class="kw">_</span>): (usize, String, usize),
-    (<span class="kw">_</span>, args, <span class="kw">_</span>): (usize, core::option::Option&lt;Vec&lt;ast::TypeRef&gt;&gt;, usize),
-) -&gt; ast::TypeRef
+    (<span class="kw">_</span>, args, <span class="kw">_</span>): (usize, core::option::Option&lt;Vec&lt;Type&gt;&gt;, usize),
+) -&gt; Type
 {
     {
-        ast::TypeRef(base, args.unwrap_or_default())
+        Type(base, args.unwrap_or_default())
     }
 }
 
@@ -19626,9 +19630,9 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, lexer::Token, usize),
     (<span class="kw">_</span>, __1, <span class="kw">_</span>): (usize, lexer::Token, usize),
-) -&gt; ast::TypeRef
+) -&gt; Type
 {
-    ast::TypeRef::unit()
+    Type::unit()
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -19636,8 +19640,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Vec&lt;ast::TypeRef&gt;, usize),
-) -&gt; core::option::Option&lt;Vec&lt;ast::TypeRef&gt;&gt;
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Vec&lt;Type&gt;, usize),
+) -&gt; core::option::Option&lt;Vec&lt;Type&gt;&gt;
 {
     <span class="prelude-val">Some</span>(__0)
 }
@@ -19649,7 +19653,7 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __lookbehind: <span class="kw-2">&amp;</span>usize,
     __lookahead: <span class="kw-2">&amp;</span>usize,
-) -&gt; core::option::Option&lt;Vec&lt;ast::TypeRef&gt;&gt;
+) -&gt; core::option::Option&lt;Vec&lt;Type&gt;&gt;
 {
     <span class="prelude-val">None
 </span>}
@@ -19660,9 +19664,9 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Vec&lt;ast::TypeRef&gt;, usize),
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Vec&lt;Type&gt;, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-) -&gt; Vec&lt;ast::TypeRef&gt;
+) -&gt; Vec&lt;Type&gt;
 {
     __0
 }
@@ -19672,9 +19676,9 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, first, <span class="kw">_</span>): (usize, ast::TypeRef, usize),
-    (<span class="kw">_</span>, <span class="kw-2">mut </span>args, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;ast::TypeRef&gt;, usize),
-) -&gt; Vec&lt;ast::TypeRef&gt;
+    (<span class="kw">_</span>, first, <span class="kw">_</span>): (usize, Type, usize),
+    (<span class="kw">_</span>, <span class="kw-2">mut </span>args, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;Type&gt;, usize),
+) -&gt; Vec&lt;Type&gt;
 {
     {
         args.insert(<span class="number">0</span>, first);
@@ -19688,7 +19692,7 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, (), usize),
-) -&gt; Vec&lt;ast::TypeRef&gt;
+) -&gt; Vec&lt;Type&gt;
 {
     Vec::new()
 }
@@ -19698,9 +19702,9 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, first, <span class="kw">_</span>): (usize, span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;, usize),
-    (<span class="kw">_</span>, <span class="kw-2">mut </span>args, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;&gt;, usize),
-) -&gt; Vec&lt;span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;&gt;
+    (<span class="kw">_</span>, first, <span class="kw">_</span>): (usize, span::Spanned&lt;(ast::Identifier, Type)&gt;, usize),
+    (<span class="kw">_</span>, <span class="kw-2">mut </span>args, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, Type)&gt;&gt;, usize),
+) -&gt; Vec&lt;span::Spanned&lt;(ast::Identifier, Type)&gt;&gt;
 {
     {
         args.insert(<span class="number">0</span>, first);
@@ -19714,7 +19718,7 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, (), usize),
-) -&gt; Vec&lt;span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;&gt;
+) -&gt; Vec&lt;span::Spanned&lt;(ast::Identifier, Type)&gt;&gt;
 {
     Vec::new()
 }
@@ -19725,9 +19729,9 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, l, <span class="kw">_</span>): (usize, usize, usize),
-    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, (ast::Identifier, ast::TypeRef), usize),
+    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, (ast::Identifier, Type), usize),
     (<span class="kw">_</span>, r, <span class="kw">_</span>): (usize, usize, usize),
-) -&gt; span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;
+) -&gt; span::Spanned&lt;(ast::Identifier, Type)&gt;
 {
     (t, l..r)
 }
@@ -20153,8 +20157,8 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::TypeRef&gt;, usize),
-) -&gt; span::Spanned&lt;ast::TypeRef&gt;
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;Type&gt;, usize),
+) -&gt; span::Spanned&lt;Type&gt;
 {
     __0
 }
@@ -20199,8 +20203,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::TypeRef&gt;, usize),
-) -&gt; core::option::Option&lt;span::Spanned&lt;ast::TypeRef&gt;&gt;
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;Type&gt;, usize),
+) -&gt; core::option::Option&lt;span::Spanned&lt;Type&gt;&gt;
 {
     <span class="prelude-val">Some</span>(__0)
 }
@@ -20212,7 +20216,7 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __lookbehind: <span class="kw-2">&amp;</span>usize,
     __lookahead: <span class="kw-2">&amp;</span>usize,
-) -&gt; core::option::Option&lt;span::Spanned&lt;ast::TypeRef&gt;&gt;
+) -&gt; core::option::Option&lt;span::Spanned&lt;Type&gt;&gt;
 {
     <span class="prelude-val">None
 </span>}
@@ -20223,8 +20227,8 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::TypeRef&gt;, usize),
-) -&gt; span::Spanned&lt;ast::TypeRef&gt;
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;Type&gt;, usize),
+) -&gt; span::Spanned&lt;Type&gt;
 {
     __0
 }
@@ -20235,9 +20239,9 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, l, <span class="kw">_</span>): (usize, usize, usize),
-    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, ast::TypeRef, usize),
+    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, Type, usize),
     (<span class="kw">_</span>, r, <span class="kw">_</span>): (usize, usize, usize),
-) -&gt; span::Spanned&lt;ast::TypeRef&gt;
+) -&gt; span::Spanned&lt;Type&gt;
 {
     (t, l..r)
 }
@@ -20481,7 +20485,7 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __lookbehind: <span class="kw-2">&amp;</span>usize,
     __lookahead: <span class="kw-2">&amp;</span>usize,
-) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;&gt;
+) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, Type)&gt;&gt;
 {
     <span class="macro">alloc::vec!</span>[]
 }
@@ -20491,8 +20495,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, v, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;&gt;, usize),
-) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;&gt;
+    (<span class="kw">_</span>, v, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, Type)&gt;&gt;, usize),
+) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, Type)&gt;&gt;
 {
     v
 }
@@ -20503,8 +20507,8 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;, usize),
-) -&gt; span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;(ast::Identifier, Type)&gt;, usize),
+) -&gt; span::Spanned&lt;(ast::Identifier, Type)&gt;
 {
     __0
 }
@@ -20528,7 +20532,7 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __lookbehind: <span class="kw-2">&amp;</span>usize,
     __lookahead: <span class="kw-2">&amp;</span>usize,
-) -&gt; alloc::vec::Vec&lt;ast::TypeRef&gt;
+) -&gt; alloc::vec::Vec&lt;Type&gt;
 {
     <span class="macro">alloc::vec!</span>[]
 }
@@ -20538,8 +20542,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, v, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;ast::TypeRef&gt;, usize),
-) -&gt; alloc::vec::Vec&lt;ast::TypeRef&gt;
+    (<span class="kw">_</span>, v, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;Type&gt;, usize),
+) -&gt; alloc::vec::Vec&lt;Type&gt;
 {
     v
 }
@@ -20550,8 +20554,8 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, ast::TypeRef, usize),
-) -&gt; ast::TypeRef
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Type, usize),
+) -&gt; Type
 {
     __0
 }
@@ -20561,8 +20565,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, ast::TypeRef, usize),
-) -&gt; alloc::vec::Vec&lt;ast::TypeRef&gt;
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Type, usize),
+) -&gt; alloc::vec::Vec&lt;Type&gt;
 {
     <span class="macro">alloc::vec!</span>[__0]
 }
@@ -20572,9 +20576,9 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, v, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;ast::TypeRef&gt;, usize),
-    (<span class="kw">_</span>, e, <span class="kw">_</span>): (usize, ast::TypeRef, usize),
-) -&gt; alloc::vec::Vec&lt;ast::TypeRef&gt;
+    (<span class="kw">_</span>, v, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;Type&gt;, usize),
+    (<span class="kw">_</span>, e, <span class="kw">_</span>): (usize, Type, usize),
+) -&gt; alloc::vec::Vec&lt;Type&gt;
 {
     { <span class="kw">let </span><span class="kw-2">mut </span>v = v; v.push(e); v }
 }
@@ -20584,8 +20588,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;, usize),
-) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;&gt;
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;(ast::Identifier, Type)&gt;, usize),
+) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, Type)&gt;&gt;
 {
     <span class="macro">alloc::vec!</span>[__0]
 }
@@ -20595,9 +20599,9 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, v, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;&gt;, usize),
-    (<span class="kw">_</span>, e, <span class="kw">_</span>): (usize, span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;, usize),
-) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;&gt;
+    (<span class="kw">_</span>, v, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, Type)&gt;&gt;, usize),
+    (<span class="kw">_</span>, e, <span class="kw">_</span>): (usize, span::Spanned&lt;(ast::Identifier, Type)&gt;, usize),
+) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, Type)&gt;&gt;
 {
     { <span class="kw">let </span><span class="kw-2">mut </span>v = v; v.push(e); v }
 }
@@ -20879,8 +20883,8 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
-    __1: (usize, span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;, usize),
-) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;&gt;
+    __1: (usize, span::Spanned&lt;(ast::Identifier, Type)&gt;, usize),
+) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, Type)&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>.clone();
     <span class="kw">let </span>__end0 = __1.<span class="number">2</span>.clone();
@@ -20901,10 +20905,10 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;&gt;, usize),
+    __0: (usize, alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, Type)&gt;&gt;, usize),
     __1: (usize, lexer::Token, usize),
-    __2: (usize, span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;, usize),
-) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;&gt;
+    __2: (usize, span::Spanned&lt;(ast::Identifier, Type)&gt;, usize),
+) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, Type)&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __1.<span class="number">0</span>.clone();
     <span class="kw">let </span>__end0 = __2.<span class="number">2</span>.clone();
@@ -20926,8 +20930,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;, usize),
-) -&gt; Vec&lt;span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;&gt;
+    __0: (usize, span::Spanned&lt;(ast::Identifier, Type)&gt;, usize),
+) -&gt; Vec&lt;span::Spanned&lt;(ast::Identifier, Type)&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">2</span>.clone();
     <span class="kw">let </span>__end0 = __0.<span class="number">2</span>.clone();
@@ -20949,9 +20953,9 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;, usize),
-    __1: (usize, alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;&gt;, usize),
-) -&gt; Vec&lt;span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;&gt;
+    __0: (usize, span::Spanned&lt;(ast::Identifier, Type)&gt;, usize),
+    __1: (usize, alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, Type)&gt;&gt;, usize),
+) -&gt; Vec&lt;span::Spanned&lt;(ast::Identifier, Type)&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __1.<span class="number">0</span>.clone();
     <span class="kw">let </span>__end0 = __1.<span class="number">2</span>.clone();
@@ -20973,8 +20977,8 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
-    __1: (usize, ast::TypeRef, usize),
-) -&gt; alloc::vec::Vec&lt;ast::TypeRef&gt;
+    __1: (usize, Type, usize),
+) -&gt; alloc::vec::Vec&lt;Type&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>.clone();
     <span class="kw">let </span>__end0 = __1.<span class="number">2</span>.clone();
@@ -20995,10 +20999,10 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, alloc::vec::Vec&lt;ast::TypeRef&gt;, usize),
+    __0: (usize, alloc::vec::Vec&lt;Type&gt;, usize),
     __1: (usize, lexer::Token, usize),
-    __2: (usize, ast::TypeRef, usize),
-) -&gt; alloc::vec::Vec&lt;ast::TypeRef&gt;
+    __2: (usize, Type, usize),
+) -&gt; alloc::vec::Vec&lt;Type&gt;
 {
     <span class="kw">let </span>__start0 = __1.<span class="number">0</span>.clone();
     <span class="kw">let </span>__end0 = __2.<span class="number">2</span>.clone();
@@ -21020,8 +21024,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::TypeRef, usize),
-) -&gt; Vec&lt;ast::TypeRef&gt;
+    __0: (usize, Type, usize),
+) -&gt; Vec&lt;Type&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">2</span>.clone();
     <span class="kw">let </span>__end0 = __0.<span class="number">2</span>.clone();
@@ -21043,9 +21047,9 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::TypeRef, usize),
-    __1: (usize, alloc::vec::Vec&lt;ast::TypeRef&gt;, usize),
-) -&gt; Vec&lt;ast::TypeRef&gt;
+    __0: (usize, Type, usize),
+    __1: (usize, alloc::vec::Vec&lt;Type&gt;, usize),
+) -&gt; Vec&lt;Type&gt;
 {
     <span class="kw">let </span>__start0 = __1.<span class="number">0</span>.clone();
     <span class="kw">let </span>__end0 = __1.<span class="number">2</span>.clone();
@@ -21067,8 +21071,8 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
-    __1: (usize, span::Spanned&lt;ast::TypeRef&gt;, usize),
-) -&gt; core::option::Option&lt;span::Spanned&lt;ast::TypeRef&gt;&gt;
+    __1: (usize, span::Spanned&lt;Type&gt;, usize),
+) -&gt; core::option::Option&lt;span::Spanned&lt;Type&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>.clone();
     <span class="kw">let </span>__end0 = __1.<span class="number">2</span>.clone();
@@ -21092,7 +21096,7 @@
     __0: (usize, lexer::Token, usize),
     __1: (usize, span::Spanned&lt;ast::Identifier&gt;, usize),
     __2: (usize, lexer::Token, usize),
-    __3: (usize, span::Spanned&lt;ast::TypeRef&gt;, usize),
+    __3: (usize, span::Spanned&lt;Type&gt;, usize),
     __4: (usize, core::option::Option&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
     __5: (usize, lexer::Token, usize),
 ) -&gt; ast::StmtAssign
@@ -21152,7 +21156,7 @@
     __0: (usize, lexer::Token, usize),
     __1: (usize, span::Spanned&lt;ast::Identifier&gt;, usize),
     __2: (usize, lexer::Token, usize),
-    __3: (usize, span::Spanned&lt;ast::TypeRef&gt;, usize),
+    __3: (usize, span::Spanned&lt;Type&gt;, usize),
     __4: (usize, core::option::Option&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
     __5: (usize, lexer::Token, usize),
 ) -&gt; ast::StmtAssign
@@ -21234,7 +21238,7 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __lookbehind: <span class="kw-2">&amp;</span>usize,
     __lookahead: <span class="kw-2">&amp;</span>usize,
-) -&gt; Vec&lt;span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;&gt;
+) -&gt; Vec&lt;span::Spanned&lt;(ast::Identifier, Type)&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __lookbehind.clone();
     <span class="kw">let </span>__end0 = __lookahead.clone();
@@ -21257,7 +21261,7 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __lookbehind: <span class="kw-2">&amp;</span>usize,
     __lookahead: <span class="kw-2">&amp;</span>usize,
-) -&gt; Vec&lt;ast::TypeRef&gt;
+) -&gt; Vec&lt;Type&gt;
 {
     <span class="kw">let </span>__start0 = __lookbehind.clone();
     <span class="kw">let </span>__end0 = __lookahead.clone();
@@ -21279,9 +21283,9 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
-    __1: (usize, ast::TypeRef, usize),
+    __1: (usize, Type, usize),
     __2: (usize, lexer::Token, usize),
-) -&gt; Vec&lt;ast::TypeRef&gt;
+) -&gt; Vec&lt;Type&gt;
 {
     <span class="kw">let </span>__start0 = __1.<span class="number">0</span>.clone();
     <span class="kw">let </span>__end0 = __1.<span class="number">2</span>.clone();
@@ -21304,10 +21308,10 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
-    __1: (usize, ast::TypeRef, usize),
-    __2: (usize, alloc::vec::Vec&lt;ast::TypeRef&gt;, usize),
+    __1: (usize, Type, usize),
+    __2: (usize, alloc::vec::Vec&lt;Type&gt;, usize),
     __3: (usize, lexer::Token, usize),
-) -&gt; Vec&lt;ast::TypeRef&gt;
+) -&gt; Vec&lt;Type&gt;
 {
     <span class="kw">let </span>__start0 = __1.<span class="number">0</span>.clone();
     <span class="kw">let </span>__end0 = __2.<span class="number">2</span>.clone();
@@ -21332,7 +21336,7 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
     __1: (usize, lexer::Token, usize),
-) -&gt; Vec&lt;ast::TypeRef&gt;
+) -&gt; Vec&lt;Type&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">2</span>.clone();
     <span class="kw">let </span>__end0 = __1.<span class="number">0</span>.clone();
@@ -21356,9 +21360,9 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
-    __1: (usize, ast::TypeRef, usize),
+    __1: (usize, Type, usize),
     __2: (usize, lexer::Token, usize),
-) -&gt; core::option::Option&lt;Vec&lt;ast::TypeRef&gt;&gt;
+) -&gt; core::option::Option&lt;Vec&lt;Type&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>.clone();
     <span class="kw">let </span>__end0 = __2.<span class="number">2</span>.clone();
@@ -21381,10 +21385,10 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
-    __1: (usize, ast::TypeRef, usize),
-    __2: (usize, alloc::vec::Vec&lt;ast::TypeRef&gt;, usize),
+    __1: (usize, Type, usize),
+    __2: (usize, alloc::vec::Vec&lt;Type&gt;, usize),
     __3: (usize, lexer::Token, usize),
-) -&gt; core::option::Option&lt;Vec&lt;ast::TypeRef&gt;&gt;
+) -&gt; core::option::Option&lt;Vec&lt;Type&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>.clone();
     <span class="kw">let </span>__end0 = __3.<span class="number">2</span>.clone();
@@ -21409,7 +21413,7 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
     __1: (usize, lexer::Token, usize),
-) -&gt; core::option::Option&lt;Vec&lt;ast::TypeRef&gt;&gt;
+) -&gt; core::option::Option&lt;Vec&lt;Type&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>.clone();
     <span class="kw">let </span>__end0 = __1.<span class="number">2</span>.clone();
@@ -21432,9 +21436,9 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, String, usize),
     __1: (usize, lexer::Token, usize),
-    __2: (usize, ast::TypeRef, usize),
+    __2: (usize, Type, usize),
     __3: (usize, lexer::Token, usize),
-) -&gt; ast::TypeRef
+) -&gt; Type
 {
     <span class="kw">let </span>__start0 = __1.<span class="number">0</span>.clone();
     <span class="kw">let </span>__end0 = __3.<span class="number">2</span>.clone();
@@ -21459,10 +21463,10 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, String, usize),
     __1: (usize, lexer::Token, usize),
-    __2: (usize, ast::TypeRef, usize),
-    __3: (usize, alloc::vec::Vec&lt;ast::TypeRef&gt;, usize),
+    __2: (usize, Type, usize),
+    __3: (usize, alloc::vec::Vec&lt;Type&gt;, usize),
     __4: (usize, lexer::Token, usize),
-) -&gt; ast::TypeRef
+) -&gt; Type
 {
     <span class="kw">let </span>__start0 = __1.<span class="number">0</span>.clone();
     <span class="kw">let </span>__end0 = __4.<span class="number">2</span>.clone();
@@ -21489,7 +21493,7 @@
     __0: (usize, String, usize),
     __1: (usize, lexer::Token, usize),
     __2: (usize, lexer::Token, usize),
-) -&gt; ast::TypeRef
+) -&gt; Type
 {
     <span class="kw">let </span>__start0 = __1.<span class="number">0</span>.clone();
     <span class="kw">let </span>__end0 = __2.<span class="number">2</span>.clone();
@@ -21512,7 +21516,7 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, String, usize),
-) -&gt; ast::TypeRef
+) -&gt; Type
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">2</span>.clone();
     <span class="kw">let </span>__end0 = __0.<span class="number">2</span>.clone();
@@ -21560,7 +21564,7 @@
     __0: (usize, lexer::Token, usize),
     __1: (usize, span::Spanned&lt;ast::Identifier&gt;, usize),
     __2: (usize, lexer::Token, usize),
-    __3: (usize, span::Spanned&lt;ast::TypeRef&gt;, usize),
+    __3: (usize, span::Spanned&lt;Type&gt;, usize),
     __4: (usize, lexer::Token, usize),
     __5: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
     __6: (usize, lexer::Token, usize),
@@ -21593,7 +21597,7 @@
     __0: (usize, lexer::Token, usize),
     __1: (usize, span::Spanned&lt;ast::Identifier&gt;, usize),
     __2: (usize, lexer::Token, usize),
-    __3: (usize, span::Spanned&lt;ast::TypeRef&gt;, usize),
+    __3: (usize, span::Spanned&lt;Type&gt;, usize),
     __4: (usize, lexer::Token, usize),
 ) -&gt; ast::StmtAssign
 {
@@ -21680,7 +21684,7 @@
     __0: (usize, lexer::Token, usize),
     __1: (usize, span::Spanned&lt;ast::Identifier&gt;, usize),
     __2: (usize, lexer::Token, usize),
-    __3: (usize, span::Spanned&lt;ast::TypeRef&gt;, usize),
+    __3: (usize, span::Spanned&lt;Type&gt;, usize),
     __4: (usize, lexer::Token, usize),
     __5: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
     __6: (usize, lexer::Token, usize),
@@ -21713,7 +21717,7 @@
     __0: (usize, lexer::Token, usize),
     __1: (usize, span::Spanned&lt;ast::Identifier&gt;, usize),
     __2: (usize, lexer::Token, usize),
-    __3: (usize, span::Spanned&lt;ast::TypeRef&gt;, usize),
+    __3: (usize, span::Spanned&lt;Type&gt;, usize),
     __4: (usize, lexer::Token, usize),
 ) -&gt; ast::StmtAssign
 {
@@ -21800,7 +21804,7 @@
     __0: (usize, lexer::Token, usize),
     __1: (usize, span::Spanned&lt;ast::Identifier&gt;, usize),
     __2: (usize, lexer::Token, usize),
-    __3: (usize, span::Spanned&lt;ast::TypeRef&gt;, usize),
+    __3: (usize, span::Spanned&lt;Type&gt;, usize),
     __4: (usize, lexer::Token, usize),
 ) -&gt; ast::StmtTypeAlias
 {
@@ -22457,9 +22461,9 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, (ast::Identifier, ast::TypeRef), usize),
+    __0: (usize, (ast::Identifier, Type), usize),
     __1: (usize, usize, usize),
-) -&gt; span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;
+) -&gt; span::Spanned&lt;(ast::Identifier, Type)&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>.clone();
     <span class="kw">let </span>__end0 = __0.<span class="number">0</span>.clone();
@@ -22532,9 +22536,9 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::TypeRef, usize),
+    __0: (usize, Type, usize),
     __1: (usize, usize, usize),
-) -&gt; span::Spanned&lt;ast::TypeRef&gt;
+) -&gt; span::Spanned&lt;Type&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>.clone();
     <span class="kw">let </span>__end0 = __0.<span class="number">0</span>.clone();
@@ -22858,8 +22862,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, (ast::Identifier, ast::TypeRef), usize),
-) -&gt; span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;
+    __0: (usize, (ast::Identifier, Type), usize),
+) -&gt; span::Spanned&lt;(ast::Identifier, Type)&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">2</span>.clone();
     <span class="kw">let </span>__end0 = __0.<span class="number">2</span>.clone();
@@ -22927,8 +22931,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::TypeRef, usize),
-) -&gt; span::Spanned&lt;ast::TypeRef&gt;
+    __0: (usize, Type, usize),
+) -&gt; span::Spanned&lt;Type&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">2</span>.clone();
     <span class="kw">let </span>__end0 = __0.<span class="number">2</span>.clone();
@@ -23174,10 +23178,10 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
-    __1: (usize, span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;, usize),
+    __1: (usize, span::Spanned&lt;(ast::Identifier, Type)&gt;, usize),
     __2: (usize, lexer::Token, usize),
     __3: (usize, lexer::Token, usize),
-    __4: (usize, span::Spanned&lt;ast::TypeRef&gt;, usize),
+    __4: (usize, span::Spanned&lt;Type&gt;, usize),
     __5: (usize, lexer::Token, usize),
     __6: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
 ) -&gt; ast::Expr
@@ -23207,11 +23211,11 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
-    __1: (usize, span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;, usize),
-    __2: (usize, alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;&gt;, usize),
+    __1: (usize, span::Spanned&lt;(ast::Identifier, Type)&gt;, usize),
+    __2: (usize, alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, Type)&gt;&gt;, usize),
     __3: (usize, lexer::Token, usize),
     __4: (usize, lexer::Token, usize),
-    __5: (usize, span::Spanned&lt;ast::TypeRef&gt;, usize),
+    __5: (usize, span::Spanned&lt;Type&gt;, usize),
     __6: (usize, lexer::Token, usize),
     __7: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
 ) -&gt; ast::Expr
@@ -23244,7 +23248,7 @@
     __0: (usize, lexer::Token, usize),
     __1: (usize, lexer::Token, usize),
     __2: (usize, lexer::Token, usize),
-    __3: (usize, span::Spanned&lt;ast::TypeRef&gt;, usize),
+    __3: (usize, span::Spanned&lt;Type&gt;, usize),
     __4: (usize, lexer::Token, usize),
     __5: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
 ) -&gt; ast::Expr
@@ -23275,10 +23279,10 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
-    __1: (usize, span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;, usize),
+    __1: (usize, span::Spanned&lt;(ast::Identifier, Type)&gt;, usize),
     __2: (usize, lexer::Token, usize),
     __3: (usize, lexer::Token, usize),
-    __4: (usize, span::Spanned&lt;ast::TypeRef&gt;, usize),
+    __4: (usize, span::Spanned&lt;Type&gt;, usize),
     __5: (usize, lexer::Token, usize),
     __6: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
 ) -&gt; ast::Expr
@@ -23308,11 +23312,11 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
-    __1: (usize, span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;, usize),
-    __2: (usize, alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, ast::TypeRef)&gt;&gt;, usize),
+    __1: (usize, span::Spanned&lt;(ast::Identifier, Type)&gt;, usize),
+    __2: (usize, alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, Type)&gt;&gt;, usize),
     __3: (usize, lexer::Token, usize),
     __4: (usize, lexer::Token, usize),
-    __5: (usize, span::Spanned&lt;ast::TypeRef&gt;, usize),
+    __5: (usize, span::Spanned&lt;Type&gt;, usize),
     __6: (usize, lexer::Token, usize),
     __7: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
 ) -&gt; ast::Expr
@@ -23345,7 +23349,7 @@
     __0: (usize, lexer::Token, usize),
     __1: (usize, lexer::Token, usize),
     __2: (usize, lexer::Token, usize),
-    __3: (usize, span::Spanned&lt;ast::TypeRef&gt;, usize),
+    __3: (usize, span::Spanned&lt;Type&gt;, usize),
     __4: (usize, lexer::Token, usize),
     __5: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
 ) -&gt; ast::Expr
