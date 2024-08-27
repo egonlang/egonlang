@@ -1,32 +1,32 @@
 use std::collections::HashMap;
 
-use egonlang_core::prelude::*;
+use egonlang_types::Type;
 
 use crate::verify_trace;
 
 /// Typing information stored about an identifier
 #[derive(Debug, PartialEq, Clone)]
 pub struct TypeEnvValue {
-    pub typeref: ast::TypeRef,
+    pub typeref: Type,
     pub is_const: bool,
 }
 
 impl TypeEnvValue {
-    pub fn new(typeref: ast::TypeRef) -> Self {
+    pub fn new(typeref: Type) -> Self {
         Self {
             typeref,
             is_const: false,
         }
     }
 
-    pub fn new_const(typeref: ast::TypeRef) -> Self {
+    pub fn new_const(typeref: Type) -> Self {
         Self {
             typeref,
             is_const: true,
         }
     }
 
-    fn map_typeref(&self, typeref: ast::TypeRef) -> TypeEnvValue {
+    fn map_typeref(&self, typeref: Type) -> TypeEnvValue {
         let mut env_var = self.clone();
         env_var.typeref = typeref;
 
@@ -111,10 +111,10 @@ impl TypeEnv {
             // Grab the aliased type from the value's typeref
             //
             // type A = number;
-            // ---------^ TypeRef::typed(TypeRef::number())
+            // ---------^ Type::typed(Type::number())
             //
             // This grabs the type `number` from the assigment value
-            // new_type = TypeRef::number()
+            // new_type = Type::number()
             let new_typeref = value.typeref.1.first().unwrap().clone();
 
             // Look up the new typeref (as a string) in the type environment
@@ -122,7 +122,7 @@ impl TypeEnv {
             //
             // type A = number;
             // type B = A;
-            // ---------^ TypeRef::typed(TypeRef::number())
+            // ---------^ Type::typed(Type::number())
             return match self.get(&new_typeref.to_string()) {
                 Some(aliased_type) => {
                     verify_trace!(
@@ -178,7 +178,7 @@ impl TypeEnv {
 
 #[cfg(test)]
 mod type_env_tests {
-    use egonlang_core::ast::TypeRef;
+    use egonlang_types::Type;
     use pretty_assertions::assert_eq;
 
     use super::{TypeEnv, TypeEnvValue};
@@ -190,14 +190,14 @@ mod type_env_tests {
         env.set(
             "a",
             TypeEnvValue {
-                typeref: TypeRef::number(),
+                typeref: Type::number(),
                 is_const: false,
             },
         );
 
         assert_eq!(
             Some(TypeEnvValue {
-                typeref: TypeRef::number(),
+                typeref: Type::number(),
                 is_const: false,
             }),
             env.get("a")
@@ -219,14 +219,14 @@ mod type_env_tests {
         env.set(
             "Int",
             TypeEnvValue {
-                typeref: TypeRef::typed(TypeRef::number()),
+                typeref: Type::typed(Type::number()),
                 is_const: true,
             },
         );
 
         assert_eq!(
             Some(TypeEnvValue {
-                typeref: TypeRef::number(),
+                typeref: Type::number(),
                 is_const: true,
             }),
             env.get("Int")
@@ -241,7 +241,7 @@ mod type_env_tests {
         env.set(
             "Int",
             TypeEnvValue {
-                typeref: TypeRef::typed(TypeRef::number()),
+                typeref: Type::typed(Type::number()),
                 is_const: true,
             },
         );
@@ -250,7 +250,7 @@ mod type_env_tests {
         env.set(
             "Int2",
             TypeEnvValue {
-                typeref: TypeRef::typed(TypeRef("Int".to_string(), vec![])),
+                typeref: Type::typed(Type("Int".to_string(), vec![])),
                 is_const: true,
             },
         );
@@ -259,7 +259,7 @@ mod type_env_tests {
         // `Int2` -> `Int` -> `number`
         assert_eq!(
             Some(TypeEnvValue {
-                typeref: TypeRef::number(),
+                typeref: Type::number(),
                 is_const: true,
             }),
             env.get("Int2")

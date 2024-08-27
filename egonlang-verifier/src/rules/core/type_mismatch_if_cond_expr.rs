@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
 use egonlang_errors::EgonTypeError;
+use egonlang_types::Type;
 
 expr_rule!(
     /// Checks the condition expression of a if statement is a boolean
@@ -22,7 +23,7 @@ expr_rule!(
             let (cond_expr, cond_span) = &if_expr.cond;
             let cond_typeref = resolve_expr(cond_expr, cond_span).unwrap().typeref;
 
-            if cond_typeref != ast::TypeRef::bool() {
+            if cond_typeref != Type::bool() {
                 verify_trace!(error:
                     "condition expr expected to be a {} but was a {}",
                     "bool".to_string().yellow().italic(),
@@ -31,7 +32,7 @@ expr_rule!(
 
                 errs.push((
                     EgonTypeError::MismatchType {
-                        expected: ast::TypeRef::bool().to_string(),
+                        expected: Type::bool().to_string(),
                         actual: cond_typeref.to_string(),
                     }
                     .into(),

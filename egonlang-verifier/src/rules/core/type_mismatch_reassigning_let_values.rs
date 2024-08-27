@@ -61,8 +61,8 @@ expr_rule!(
 mod tests {
     use super::TypeMismatchReassigningLetValuesRule;
     use crate::verifier_rule_test;
-    use egonlang_core::prelude::*;
     use egonlang_errors::EgonTypeError;
+    use egonlang_types::Type;
 
     verifier_rule_test! {
         TypeMismatchReassigningLetValuesRule,
@@ -76,8 +76,8 @@ mod tests {
         "let a = 123; a = false;",
         Err(vec![(
             EgonTypeError::MismatchType {
-                expected: ast::TypeRef::number().to_string(),
-                actual: ast::TypeRef::bool().to_string()
+                expected: Type::number().to_string(),
+                actual: Type::bool().to_string()
             }.into(),
             17..22
         )])
@@ -89,8 +89,8 @@ mod tests {
         "let a = [1, 2, 3]; a = [false, true];",
         Err(vec![(
             EgonTypeError::MismatchType {
-                expected: ast::TypeRef::list(ast::TypeRef::number()).to_string(),
-                actual: ast::TypeRef::list(ast::TypeRef::bool()).to_string()
+                expected: Type::list(Type::number()).to_string(),
+                actual: Type::list(Type::bool()).to_string()
             }.into(),
             23..36
         )])

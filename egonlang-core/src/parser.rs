@@ -91,12 +91,13 @@ pub fn parse(source: &str, offset: usize) -> EgonResultMultiSpannedErr<Module> {
 mod parser_tests {
     use std::vec;
 
+    use egonlang_types::Type;
     use pretty_assertions::assert_eq;
 
     use crate::ast::{
         self, Expr, ExprAssign, ExprBlock, ExprFn, ExprIdentifier, ExprIf, ExprInfix, ExprList,
         ExprLiteral, ExprRange, ExprTuple, ExprType, Identifier, Module, OpInfix, Stmt,
-        StmtAssertType, StmtAssign, StmtExpr, StmtTypeAlias, TypeRef,
+        StmtAssertType, StmtAssign, StmtExpr, StmtTypeAlias,
     };
 
     use egonlang_errors::{EgonError, EgonSyntaxError};
@@ -1820,7 +1821,7 @@ mod parser_tests {
                         },
                         4..5
                     ),
-                    type_expr: Some((Expr::Type(ExprType(TypeRef::number())), 7..13)),
+                    type_expr: Some((Expr::Type(ExprType(Type::number())), 7..13)),
                     is_const: false,
                     value: Some((
                         ast::Expr::Assign(Box::new(ExprAssign {
@@ -1852,7 +1853,7 @@ mod parser_tests {
                         },
                         4..5
                     ),
-                    type_expr: Some((Expr::Type(ExprType(TypeRef::number())), 7..13)),
+                    type_expr: Some((Expr::Type(ExprType(Type::number())), 7..13)),
                     is_const: false,
                     value: Some((ast::Expr::Literal(ExprLiteral::Number(123f64)), 16..19))
                 }),
@@ -1894,7 +1895,7 @@ mod parser_tests {
                         },
                         5..15
                     ),
-                    value: (TypeRef::list(TypeRef::number()), 18..30)
+                    value: (Type::list(Type::number()), 18..30)
                 }),
                 0..31
             )]
@@ -1917,7 +1918,7 @@ mod parser_tests {
                             },
                             14..24
                         ),
-                        value: (TypeRef::list(TypeRef::number()), 27..39)
+                        value: (Type::list(Type::number()), 27..39)
                     }),
                     9..40
                 ),
@@ -1930,7 +1931,7 @@ mod parser_tests {
                             53..54
                         ),
                         type_expr: Some((
-                            Expr::Type(ExprType(TypeRef("NumberList".to_string(), vec![]))),
+                            Expr::Type(ExprType(Type("NumberList".to_string(), vec![]))),
                             56..66
                         )),
                         is_const: false,
@@ -1967,7 +1968,7 @@ mod parser_tests {
                         Expr::Fn(Box::new(ExprFn {
                             name: None,
                             params: vec![],
-                            return_type: (TypeRef::unit(), 13..15),
+                            return_type: (Type::unit(), 13..15),
                             body: (
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: vec![
@@ -1979,7 +1980,7 @@ mod parser_tests {
                                                     },
                                                     38..41
                                                 ),
-                                                value: (TypeRef::number(), 44..50)
+                                                value: (Type::number(), 44..50)
                                             }),
                                             33..51
                                         ),
@@ -1992,7 +1993,7 @@ mod parser_tests {
                                                     68..69
                                                 ),
                                                 type_expr: Some((
-                                                    Expr::Type(ExprType(TypeRef::number())),
+                                                    Expr::Type(ExprType(Type::number())),
                                                     71..77
                                                 )),
                                                 is_const: false,
@@ -2012,7 +2013,7 @@ mod parser_tests {
                                                     99..100
                                                 ),
                                                 type_expr: Some((
-                                                    Expr::Type(ExprType(TypeRef(
+                                                    Expr::Type(ExprType(Type(
                                                         "Int".to_string(),
                                                         vec![]
                                                     ))),
@@ -2076,7 +2077,7 @@ mod parser_tests {
                         },
                         4..5
                     ),
-                    type_expr: Some((Expr::Type(ExprType(TypeRef::number())), 7..13)),
+                    type_expr: Some((Expr::Type(ExprType(Type::number())), 7..13)),
                     is_const: false,
                     value: None
                 }),
@@ -2140,7 +2141,7 @@ mod parser_tests {
             stmts: vec![(
                 StmtAssertType {
                     value: (123f64.into(), 12..15),
-                    expected_type: (ast::ExprType(TypeRef::number()).into(), 17..23)
+                    expected_type: (ast::ExprType(Type::number()).into(), 17..23)
                 }
                 .into(),
                 0..24

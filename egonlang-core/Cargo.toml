@@ -13,6 +13,7 @@ regex = "1.10.4"
 paste = "1.0.15"
 egonlang-errors = { path = "../egonlang-errors" }
 span = { path = "../span" }
+egonlang-types = { path = "../egonlang-types" }
 
 [dev-dependencies]
 pretty_assertions = "1.1.0"

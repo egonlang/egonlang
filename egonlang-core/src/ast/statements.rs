@@ -1,12 +1,13 @@
 use std::fmt::{self, Debug, Display, Formatter};
 
+use egonlang_types::Type;
 use serde::{Deserialize, Serialize};
 
 use crate::parser::parse;
 
 use span::Spanned;
 
-use super::{Expr, ExprS, Identifier, TypeRef};
+use super::{Expr, ExprS, Identifier};
 
 /// A tuple containing a statement and it's span e.g. (stmt, span)
 pub type StmtS = Spanned<Stmt>;
@@ -196,7 +197,7 @@ impl Display for StmtAssign {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct StmtTypeAlias {
     pub alias: Spanned<Identifier>,
-    pub value: Spanned<TypeRef>,
+    pub value: Spanned<Type>,
 }
 
 impl Display for StmtTypeAlias {

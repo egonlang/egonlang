@@ -9,6 +9,7 @@ edition = "2021"
 regex = "1.10.4"
 egonlang-core = { path = "../egonlang-core" }
 egonlang-errors = { path = "../egonlang-errors" }
+egonlang-types = { path = "../egonlang-types" }
 span = { path = "../span" }
 colored = "2"
 paste = "1.0.15"

@@ -1,13 +1,14 @@
 use std::fmt::{self, Display, Formatter};
 
 use egonlang_errors::EgonTypeError;
+use egonlang_types::Type;
 use serde::{Deserialize, Serialize};
 
 use crate::parser::parse;
 
 use span::Spanned;
 
-use super::{Stmt, StmtS, TypeRef};
+use super::{Stmt, StmtS};
 
 /// A tuple containing an expression and it's span e.g. (expr, span)
 pub type ExprS = Spanned<Expr>;
@@ -271,26 +272,26 @@ impl TryFrom<Expr> for f64 {
             Expr::Literal(literal) => match literal {
                 ExprLiteral::Number(number) => Ok(number),
                 ExprLiteral::Bool(_) => Err(vec![egonlang_errors::EgonTypeError::MismatchType {
-                    expected: TypeRef::number().to_string(),
-                    actual: TypeRef::bool().to_string(),
+                    expected: Type::number().to_string(),
+                    actual: Type::bool().to_string(),
                 }
                 .into()]),
                 ExprLiteral::String(_) => Err(vec![egonlang_errors::EgonTypeError::MismatchType {
-                    expected: TypeRef::number().to_string(),
-                    actual: TypeRef::string().to_string(),
+                    expected: Type::number().to_string(),
+                    actual: Type::string().to_string(),
                 }
                 .into()]),
             },
             Expr::Prefix(prefix) => match prefix.op {
                 OpPrefix::Negate => prefix.rt.0.try_into(),
                 OpPrefix::Not => Err(vec![egonlang_errors::EgonTypeError::MismatchType {
-                    expected: TypeRef::number().to_string(),
-                    actual: TypeRef::bool().to_string(),
+                    expected: Type::number().to_string(),
+                    actual: Type::bool().to_string(),
                 }
                 .into()]),
             },
             _ => Err(vec![egonlang_errors::EgonTypeError::MismatchType {
-                expected: TypeRef::number().to_string(),
+                expected: Type::number().to_string(),
                 actual: value.to_string(),
             }
             .into()]),
@@ -305,19 +306,19 @@ impl TryFrom<Expr> for String {
         match value {
             Expr::Literal(literal) => match literal {
                 ExprLiteral::Number(_) => Err(vec![egonlang_errors::EgonTypeError::MismatchType {
-                    expected: TypeRef::string().to_string(),
-                    actual: TypeRef::number().to_string(),
+                    expected: Type::string().to_string(),
+                    actual: Type::number().to_string(),
                 }
                 .into()]),
                 ExprLiteral::Bool(_) => Err(vec![egonlang_errors::EgonTypeError::MismatchType {
-                    expected: TypeRef::string().to_string(),
-                    actual: TypeRef::bool().to_string(),
+                    expected: Type::string().to_string(),
+                    actual: Type::bool().to_string(),
                 }
                 .into()]),
                 ExprLiteral::String(string) => Ok(string),
             },
             _ => Err(vec![egonlang_errors::EgonTypeError::MismatchType {
-                expected: TypeRef::string().to_string(),
+                expected: Type::string().to_string(),
                 actual: value.to_string(),
             }
             .into()]),
@@ -332,19 +333,19 @@ impl TryFrom<Expr> for bool {
         match value {
             Expr::Literal(literal) => match literal {
                 ExprLiteral::Number(_) => Err(vec![EgonTypeError::MismatchType {
-                    expected: TypeRef::bool().to_string(),
-                    actual: TypeRef::number().to_string(),
+                    expected: Type::bool().to_string(),
+                    actual: Type::number().to_string(),
                 }
                 .into()]),
                 ExprLiteral::Bool(bool) => Ok(bool),
                 ExprLiteral::String(_) => Err(vec![EgonTypeError::MismatchType {
-                    expected: TypeRef::bool().to_string(),
-                    actual: TypeRef::string().to_string(),
+                    expected: Type::bool().to_string(),
+                    actual: Type::string().to_string(),
                 }
                 .into()]),
             },
             _ => Err(vec![EgonTypeError::MismatchType {
-                expected: TypeRef::bool().to_string(),
+                expected: Type::bool().to_string(),
                 actual: value.to_string(),
             }
             .into()]),
@@ -416,7 +417,7 @@ pub struct ExprBlock {
     ///   b // The block's resolved type is `number`
     /// };
     /// ```
-    pub typeref: Option<TypeRef>,
+    pub typeref: Option<Type>,
 }
 
 impl Display for ExprBlock {
@@ -658,8 +659,8 @@ impl Display for ExprIf {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ExprFn {
     pub name: Option<Identifier>,
-    pub params: Vec<Spanned<(Identifier, TypeRef)>>,
-    pub return_type: Spanned<TypeRef>,
+    pub params: Vec<Spanned<(Identifier, Type)>>,
+    pub return_type: Spanned<Type>,
     pub body: ExprS,
 }
 
@@ -711,7 +712,7 @@ impl Display for ExprRange {
 /// type Int = number; // `number` is a type expression
 /// ```
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct ExprType(pub TypeRef);
+pub struct ExprType(pub Type);
 
 impl Display for ExprType {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
@@ -774,6 +775,7 @@ mod into_tests {
 mod display_tests {
     use std::vec;
 
+    use egonlang_types::Type;
     use pretty_assertions::assert_eq;
 
     use crate::ast::*;
@@ -1148,7 +1150,7 @@ mod display_tests {
         Expr::Fn(Box::new(ExprFn {
             name: None,
             params: vec![],
-            return_type: (TypeRef::unit(), 0..0),
+            return_type: (Type::unit(), 0..0),
             body: (
                 ExprBlock {
                     stmts: vec![],
@@ -1171,11 +1173,11 @@ mod display_tests {
                     Identifier {
                         name: "a".to_string()
                     },
-                    TypeRef::number()
+                    Type::number()
                 ),
                 0..0
             )],
-            return_type: (TypeRef::unit(), 0..0),
+            return_type: (Type::unit(), 0..0),
             body: (
                 ExprBlock {
                     stmts: vec![],
@@ -1199,7 +1201,7 @@ mod display_tests {
                         Identifier {
                             name: "a".to_string()
                         },
-                        TypeRef::number()
+                        Type::number()
                     ),
                     0..0
                 ),
@@ -1208,12 +1210,12 @@ mod display_tests {
                         Identifier {
                             name: "b".to_string()
                         },
-                        TypeRef::number()
+                        Type::number()
                     ),
                     0..0
                 )
             ],
-            return_type: (TypeRef::unit(), 0..0),
+            return_type: (Type::unit(), 0..0),
             body: (
                 ExprBlock {
                     stmts: vec![],
@@ -1237,7 +1239,7 @@ mod display_tests {
                         Identifier {
                             name: "a".to_string()
                         },
-                        TypeRef::number()
+                        Type::number()
                     ),
                     0..0
                 ),
@@ -1246,12 +1248,12 @@ mod display_tests {
                         Identifier {
                             name: "b".to_string()
                         },
-                        TypeRef::number()
+                        Type::number()
                     ),
                     0..0
                 )
             ],
-            return_type: (TypeRef::number(), 0..0),
+            return_type: (Type::number(), 0..0),
             body: (
                 ExprBlock {
                     stmts: vec![],
@@ -1275,7 +1277,7 @@ mod display_tests {
                         Identifier {
                             name: "a".to_string()
                         },
-                        TypeRef::number()
+                        Type::number()
                     ),
                     0..0
                 ),
@@ -1284,12 +1286,12 @@ mod display_tests {
                         Identifier {
                             name: "b".to_string()
                         },
-                        TypeRef::number()
+                        Type::number()
                     ),
                     0..0
                 )
             ],
-            return_type: (TypeRef::number(), 0..0),
+            return_type: (Type::number(), 0..0),
             body: (
                 ExprBlock {
                     stmts: vec![],

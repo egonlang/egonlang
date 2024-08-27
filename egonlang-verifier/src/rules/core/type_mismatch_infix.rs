@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
 use egonlang_errors::{EgonErrorS, EgonTypeError};
+use egonlang_types::Type;
 use rules::rule::ResolveExpr;
 
 expr_rule!(
@@ -21,77 +22,77 @@ expr_rule!(
 
             match infix.op {
                 ast::OpInfix::Greater => {
-                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
+                    let infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::GreaterEqual => {
-                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
+                    let infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::Less => {
-                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
+                    let infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::LessEqual => {
-                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
+                    let infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::Add => {
-                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
+                    let infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::Subtract => {
-                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
+                    let infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::Multiply => {
-                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
+                    let infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::Divide => {
-                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
+                    let infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::LogicAnd => {
-                    let infix_errs = validate_infix_types(infix, ast::TypeRef::bool(), resolve_expr)
+                    let infix_errs = validate_infix_types(infix, Type::bool(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::LogicOr => {
-                    let infix_errs = validate_infix_types(infix, ast::TypeRef::bool(), resolve_expr)
+                    let infix_errs = validate_infix_types(infix, Type::bool(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
                     errs.extend(infix_errs);
                 }
                 ast::OpInfix::Modulus => {
-                    let infix_errs = validate_infix_types(infix, ast::TypeRef::number(), resolve_expr)
+                    let infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
                         .err()
                         .unwrap_or_default();
 
@@ -107,7 +108,7 @@ expr_rule!(
 
 fn validate_infix_types(
     infix: &ast::ExprInfix,
-    expected_type: ast::TypeRef,
+    expected_type: Type,
     resolve_expr: &dyn ResolveExpr,
 ) -> Result<(), Vec<EgonErrorS>> {
     let mut errs = vec![];
@@ -153,8 +154,8 @@ fn validate_infix_types(
 mod type_mismatch_infix_tests {
     use super::TypeMismatchInfixRule;
     use crate::verifier_rule_test;
-    use egonlang_core::prelude::*;
     use egonlang_errors::EgonTypeError;
+    use egonlang_types::Type;
 
     verifier_rule_test!(
         TypeMismatchInfixRule,
@@ -168,8 +169,8 @@ mod type_mismatch_infix_tests {
         "true > 100;",
         Err(vec![(
             EgonTypeError::MismatchType {
-                expected: ast::TypeRef::number().to_string(),
-                actual: ast::TypeRef::bool().to_string()
+                expected: Type::number().to_string(),
+                actual: Type::bool().to_string()
             }
             .into(),
             0..4
@@ -182,8 +183,8 @@ mod type_mismatch_infix_tests {
         "10 > false;",
         Err(vec![(
             EgonTypeError::MismatchType {
-                expected: ast::TypeRef::number().to_string(),
-                actual: ast::TypeRef::bool().to_string()
+                expected: Type::number().to_string(),
+                actual: Type::bool().to_string()
             }
             .into(),
             5..10
@@ -197,16 +198,16 @@ mod type_mismatch_infix_tests {
         Err(vec![
             (
                 EgonTypeError::MismatchType {
-                    expected: ast::TypeRef::number().to_string(),
-                    actual: ast::TypeRef::bool().to_string()
+                    expected: Type::number().to_string(),
+                    actual: Type::bool().to_string()
                 }
                 .into(),
                 0..5
             ),
             (
                 EgonTypeError::MismatchType {
-                    expected: ast::TypeRef::number().to_string(),
-                    actual: ast::TypeRef::bool().to_string()
+                    expected: Type::number().to_string(),
+                    actual: Type::bool().to_string()
                 }
                 .into(),
                 8..13

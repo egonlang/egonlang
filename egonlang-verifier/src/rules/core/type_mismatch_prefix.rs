@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
 use egonlang_errors::EgonTypeError;
+use egonlang_types::Type;
 
 expr_rule!(
     /// Checks value types for all prefix operation expressions
@@ -24,11 +25,11 @@ expr_rule!(
                     let (value_expr, value_span) = &prefix_expr.rt;
                     let value_typeref = resolve_expr(value_expr, value_span).unwrap();
 
-                    if value_typeref.typeref != ast::TypeRef::number() {
+                    if value_typeref.typeref != Type::number() {
                         verify_trace!(error: "negate prefix on a none number value: {expr}");
                         errs.push((
                             EgonTypeError::MismatchType {
-                                expected: ast::TypeRef::number().to_string(),
+                                expected: Type::number().to_string(),
                                 actual: value_typeref.typeref.to_string(),
                             }
                             .into(),
@@ -40,11 +41,11 @@ expr_rule!(
                     let (value_expr, value_span) = &prefix_expr.rt;
                     let value_typeref = resolve_expr(value_expr, value_span).unwrap();
 
-                    if value_typeref.typeref != ast::TypeRef::bool() {
+                    if value_typeref.typeref != Type::bool() {
                         verify_trace!(error: "not prefix on a none bool value: {expr}");
                         errs.push((
                             EgonTypeError::MismatchType {
-                                expected: ast::TypeRef::bool().to_string(),
+                                expected: Type::bool().to_string(),
                                 actual: value_typeref.typeref.to_string(),
                             }
                             .into(),
@@ -63,8 +64,8 @@ expr_rule!(
 mod tests {
     use super::TypeMismatchPrefixRule;
     use crate::verifier_rule_test;
-    use egonlang_core::prelude::*;
     use egonlang_errors::EgonTypeError;
+    use egonlang_types::Type;
 
     verifier_rule_test! {
         TypeMismatchPrefixRule,
@@ -78,8 +79,8 @@ mod tests {
         "-true;",
         Err(vec![(
             EgonTypeError::MismatchType {
-                expected: ast::TypeRef::number().to_string(),
-                actual: ast::TypeRef::bool().to_string()
+                expected: Type::number().to_string(),
+                actual: Type::bool().to_string()
             }
             .into(),
             1..5
@@ -98,8 +99,8 @@ mod tests {
         "!123;",
         Err(vec![(
             EgonTypeError::MismatchType {
-                expected: ast::TypeRef::bool().to_string(),
-                actual: ast::TypeRef::number().to_string()
+                expected: Type::bool().to_string(),
+                actual: Type::number().to_string()
             }
             .into(),
             1..4
@@ -112,8 +113,8 @@ mod tests {
         r#"!"test";"#,
         Err(vec![(
             EgonTypeError::MismatchType {
-                expected: ast::TypeRef::bool().to_string(),
-                actual: ast::TypeRef::string().to_string()
+                expected: Type::bool().to_string(),
+                actual: Type::string().to_string()
             }
             .into(),
             1..7

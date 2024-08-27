@@ -60,8 +60,8 @@ expr_rule!(
 mod tests {
     use super::TypeMisMatchListItemsRule;
     use crate::verifier_rule_test;
-    use egonlang_core::prelude::*;
     use egonlang_errors::EgonTypeError;
+    use egonlang_types::Type;
 
     verifier_rule_test!(
         TypeMisMatchListItemsRule,
@@ -88,16 +88,16 @@ mod tests {
         Err(vec![
             (
                 EgonTypeError::MismatchType {
-                    expected: ast::TypeRef::number().to_string(),
-                    actual: ast::TypeRef::bool().to_string()
+                    expected: Type::number().to_string(),
+                    actual: Type::bool().to_string()
                 }
                 .into(),
                 5..10
             ),
             (
                 EgonTypeError::MismatchType {
-                    expected: ast::TypeRef::number().to_string(),
-                    actual: ast::TypeRef::string().to_string()
+                    expected: Type::number().to_string(),
+                    actual: Type::string().to_string()
                 }
                 .into(),
                 12..17

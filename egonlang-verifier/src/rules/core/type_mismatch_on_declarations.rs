@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
 use egonlang_errors::EgonTypeError;
+use egonlang_types::Type;
 
 stmt_rule!(
     /// Checks the value type of an assignment declaration matches the declaration type
@@ -26,7 +27,7 @@ stmt_rule!(
                         // Check for empty list assignment
                         // Example:
                         // let a = [];
-                        if value_typeref.typeref == ast::TypeRef::list(ast::TypeRef::unknown()) {
+                        if value_typeref.typeref == Type::list(Type::unknown()) {
                             errs.push((EgonTypeError::UknownListType.into(), value_span.clone()));
                         }
                     }
@@ -72,7 +73,7 @@ stmt_rule!(
                                 // Check for empty list assignment
                                 // Example:
                                 // let a: list<number> = [];
-                                if value_typeref.typeref == ast::TypeRef::list(ast::TypeRef::unknown())
+                                if value_typeref.typeref == Type::list(Type::unknown())
                                     && assign_typeref.typeref.is_known_list()
                                 {
                                     return vec![];
@@ -100,7 +101,7 @@ stmt_rule!(
                                 // Check for empty list assignment
                                 // Example:
                                 // let a: list<unknown> = [];
-                                if value_typeref.typeref == ast::TypeRef::list(ast::TypeRef::unknown())
+                                if value_typeref.typeref == Type::list(Type::unknown())
                                     && assign_typeref.typeref.is_unknown_list()
                                 {
                                     errs.push((EgonTypeError::UknownListType.into(), span.clone()));
@@ -121,8 +122,8 @@ stmt_rule!(
 mod tests {
     use super::TypeMismatchOnDeclarationsRule;
     use crate::verifier_rule_test;
-    use egonlang_core::prelude::*;
     use egonlang_errors::EgonTypeError;
+    use egonlang_types::Type;
 
     verifier_rule_test! {
         TypeMismatchOnDeclarationsRule,
@@ -136,8 +137,8 @@ mod tests {
         "const a: () = 123;",
         Err(vec![(
             EgonTypeError::MismatchType {
-                expected: ast::TypeRef::unit().to_string(),
-                actual: ast::TypeRef::number().to_string()
+                expected: Type::unit().to_string(),
+                actual: Type::number().to_string()
             }
             .into(),
             14..17

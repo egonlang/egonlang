@@ -365,6 +365,7 @@ version = "0.1.0"
 dependencies = [
  "build-deps",
  "egonlang-errors",
+ "egonlang-types",
  "lalrpop",
  "lalrpop-util",
  "logos",
@@ -414,12 +415,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "egonlang-types"
+version = "0.1.0"
+dependencies = [
+ "paste",
+ "pretty_assertions",
+ "serde",
+]
+
+[[package]]
 name = "egonlang-verifier"
 version = "0.1.0"
 dependencies = [
  "colored",
  "egonlang-core",
  "egonlang-errors",
+ "egonlang-types",
  "paste",
  "pretty_assertions",
  "regex",

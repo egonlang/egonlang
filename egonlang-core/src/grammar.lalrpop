@@ -3,6 +3,7 @@ use egonlang_errors::EgonErrorS;
 
 use crate::{ast, lexer};
 use span;
+use egonlang_types::Type;
 
 grammar<'err>(
     errors: &'err mut Vec<ParseError<usize, lexer::Token, EgonErrorS>>
@@ -32,14 +33,14 @@ DeclTypeAlias: ast::Stmt = <type_alias:StmtTypeAlias> =>
     ast::Stmt::TypeAlias(<>);
 
 StmtAssign: ast::StmtAssign = {
-    "let" <identifier:Spanned<Identifier>> <type_expr:(":" <Spanned<TypeRef>>)?> <value:("=" <ExprS>)?> ";" => ast::StmtAssign {
+    "let" <identifier:Spanned<Identifier>> <type_expr:(":" <Spanned<Type>>)?> <value:("=" <ExprS>)?> ";" => ast::StmtAssign {
         identifier,
         type_expr: type_expr.map(|(ty, ty_span)|
             (ast::Expr::Type(ast::ExprType(ty)), ty_span)),
         is_const: false,
         value,
     },
-    "const" <identifier:Spanned<Identifier>> <type_expr:(":" <Spanned<TypeRef>>)?> <value:("=" <ExprS>)?> ";" => ast::StmtAssign {
+    "const" <identifier:Spanned<Identifier>> <type_expr:(":" <Spanned<Type>>)?> <value:("=" <ExprS>)?> ";" => ast::StmtAssign {
         identifier,
         type_expr: type_expr.map(|(ty, ty_span)|
             (ast::Expr::Type(ast::ExprType(ty)), ty_span)),
@@ -49,7 +50,7 @@ StmtAssign: ast::StmtAssign = {
 }
 
 StmtTypeAlias: ast::StmtTypeAlias = {
-    "type" <alias:Spanned<Identifier>> <value:("=" <Spanned<TypeRef>>)> ";" =>
+    "type" <alias:Spanned<Identifier>> <value:("=" <Spanned<Type>>)> ";" =>
         ast::StmtTypeAlias { <> },
 }
 
@@ -59,7 +60,7 @@ StmtS = Spanned<Stmt>;
 Stmt: ast::Stmt = {
     <expr:ExprS> ";" =>
         ast::Stmt::Expr(ast::StmtExpr { <> }),
-    "assert_type" <value:ExprS> "," <expected_type:Spanned<TypeRef>> ";" => ast::Stmt::AssertType(ast::StmtAssertType { 
+    "assert_type" <value:ExprS> "," <expected_type:Spanned<Type>> ";" => ast::Stmt::AssertType(ast::StmtAssertType { 
         value,
         expected_type: (ast::Expr::Type(ast::ExprType(expected_type.0)), expected_type.1)
      }),
@@ -237,17 +238,17 @@ ExprBlock: ast::Expr = {
     )),
 }
 
-FnParam: (ast::Identifier, ast::TypeRef) = <name:identifier> ":" <typeref:TypeRef> => (ast::Identifier { name }, typeref);
+FnParam: (ast::Identifier, Type) = <name:identifier> ":" <typeref:Type> => (ast::Identifier { name }, typeref);
 
 ExprFn: ast::Expr = {
-   "(" <params:Seperated<Spanned<FnParam>, ",">> ")" ":" <return_type:Spanned<TypeRef>> "=>" <body:Spanned<ExprBlock>> =>
+   "(" <params:Seperated<Spanned<FnParam>, ",">> ")" ":" <return_type:Spanned<Type>> "=>" <body:Spanned<ExprBlock>> =>
         ast::Expr::Fn(Box::new(ast::ExprFn { 
             name: None,
             params,
             return_type,
             body,
          })),
-    "(" <params:Seperated<Spanned<FnParam>, ",">> ")" ":" <return_type:Spanned<TypeRef>> "=>" <body:Spanned<ExprFn>> =>
+    "(" <params:Seperated<Spanned<FnParam>, ",">> ")" ":" <return_type:Spanned<Type>> "=>" <body:Spanned<ExprFn>> =>
         ast::Expr::Fn(Box::new(ast::ExprFn { 
             name: None,
             params,
@@ -258,12 +259,12 @@ ExprFn: ast::Expr = {
 
 /// Utilities
 
-TypeRef: ast::TypeRef = {
-    <base:identifier> <args:("<" <Seperated<TypeRef, ",">> ">")?> => {
-        ast::TypeRef(base, args.unwrap_or_default())
+Type: Type = {
+    <base:identifier> <args:("<" <Seperated<Type, ",">> ">")?> => {
+        Type(base, args.unwrap_or_default())
     },
 
-    "(" ")" => ast::TypeRef::unit()
+    "(" ")" => Type::unit()
 }
 
 Spanned<T>: span::Spanned<T> = <l:@L> <t:T> <r:@R> =>

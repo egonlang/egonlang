@@ -1,7 +1,7 @@
-use ast::TypeRef;
 use colored::Colorize;
 use egonlang_core::prelude::*;
 use egonlang_errors::{EgonErrorS, EgonResultMultiSpannedErr, EgonTypeError};
+use egonlang_types::Type;
 use span::Span;
 
 use crate::{
@@ -160,27 +160,27 @@ impl<'a> Verifier<'a> {
             }
             ast::Expr::List(list_expr) => {
                 if list_expr.items.is_empty() {
-                    return Some(TypeEnvValue::new(ast::TypeRef::unknown_list()));
+                    return Some(TypeEnvValue::new(Type::unknown_list()));
                 }
 
                 let (first_item_expr, _) = list_expr.items.first().unwrap().clone();
                 let first_item_type = self.resolve_expr_type(&first_item_expr)?.typeref;
 
-                Some(TypeEnvValue::new(ast::TypeRef::list(first_item_type)))
+                Some(TypeEnvValue::new(Type::list(first_item_type)))
             }
             ast::Expr::Tuple(tuple_expr) => {
                 if tuple_expr.items.is_empty() {
-                    return Some(TypeEnvValue::new(ast::TypeRef::tuple(vec![])));
+                    return Some(TypeEnvValue::new(Type::tuple(vec![])));
                 }
 
-                let item_types: Vec<ast::TypeRef> = tuple_expr
+                let item_types: Vec<Type> = tuple_expr
                     .items
                     .clone()
                     .into_iter()
                     .map(|(x_expr, _)| self.resolve_expr_type(&x_expr).unwrap().typeref)
                     .collect();
 
-                Some(TypeEnvValue::new(ast::TypeRef::tuple(item_types)))
+                Some(TypeEnvValue::new(Type::tuple(item_types)))
             }
             ast::Expr::Block(block_expr) => {
                 verify_trace!(
@@ -203,10 +203,10 @@ impl<'a> Verifier<'a> {
                         verifier resolve_expr_type block: "(level: {}) Resolved block expression {} to type {}",
                         self.current_type_env_level(),
                         block_expr.to_string().cyan(),
-                        ast::TypeRef::unit().to_string().italic().yellow()
+                        Type::unit().to_string().italic().yellow()
                     );
 
-                    return Some(TypeEnvValue::new(ast::TypeRef::unit()));
+                    return Some(TypeEnvValue::new(Type::unit()));
                 }
             }
             ast::Expr::Type(type_expr) => {
@@ -217,28 +217,36 @@ impl<'a> Verifier<'a> {
                 );
 
                 if type_expr.0.is_builtin() {
-                    Some(TypeEnvValue::new(type_expr.0.clone()))
-                } else {
-                    let type_string = type_expr.0.to_string();
-                    if let Some(type_env_value) = &self.resolve_identifier(type_string.as_str()) {
-                        verify_trace!(
-                            verifier resolve_expr_type type_expr: "(level: {}) Resolved type expression {} to type {}",
-                            self.current_type_env_level(),
-                            type_expr.to_string().cyan(),
-                            type_env_value.typeref.to_string().italic().yellow()
-                        );
-
-                        return Some(type_env_value.clone());
-                    }
-
                     verify_trace!(
-                        verifier resolve_expr_type type_expr: "(level: {}) Resolved type expression {} to type NONE",
+                        verifier resolve_expr_type type_expr: "(level: {}) Resolved type expression {} to builtin type {}",
                         self.current_type_env_level(),
-                        type_expr.to_string().cyan()
+                        type_expr.to_string().cyan(),
+                        type_expr.to_string().italic().yellow()
                     );
 
-                    None
+                    return Some(TypeEnvValue::new(type_expr.0.clone()));
                 }
+
+                if let Some(type_env_value) =
+                    &self.resolve_identifier(type_expr.0.to_string().as_str())
+                {
+                    verify_trace!(
+                        verifier resolve_expr_type type_expr: "(level: {}) Resolved type expression {} to type {}",
+                        self.current_type_env_level(),
+                        type_expr.to_string().cyan(),
+                        type_env_value.typeref.to_string().italic().yellow()
+                    );
+
+                    return Some(type_env_value.clone());
+                }
+
+                verify_trace!(
+                    verifier resolve_expr_type type_expr: "(level: {}) Resolved type expression {} to type NONE",
+                    self.current_type_env_level(),
+                    type_expr.to_string().cyan()
+                );
+
+                None
             }
             ast::Expr::Assign(assign_expr) => {
                 let name = &assign_expr.identifier.0.name;
@@ -255,40 +263,42 @@ impl<'a> Verifier<'a> {
 
                 Some(then_typeref)
             }
-            ast::Expr::Unit => Some(TypeEnvValue::new(ast::TypeRef::unit())),
+            ast::Expr::Unit => Some(TypeEnvValue::new(Type::unit())),
             ast::Expr::Literal(literal) => Some(TypeEnvValue::new(match literal {
-                ast::ExprLiteral::Bool(_) => ast::TypeRef::bool(),
-                ast::ExprLiteral::Number(_) => ast::TypeRef::number(),
-                ast::ExprLiteral::String(_) => ast::TypeRef::string(),
+                ast::ExprLiteral::Bool(_) => Type::bool(),
+                ast::ExprLiteral::Number(_) => Type::number(),
+                ast::ExprLiteral::String(_) => Type::string(),
             })),
             ast::Expr::Infix(infix) => Some(TypeEnvValue::new(match infix.op {
-                ast::OpInfix::Add => ast::TypeRef::number(),
-                ast::OpInfix::Subtract => ast::TypeRef::number(),
-                ast::OpInfix::Multiply => ast::TypeRef::number(),
-                ast::OpInfix::Divide => ast::TypeRef::number(),
-                ast::OpInfix::Modulus => ast::TypeRef::number(),
-                ast::OpInfix::Less => ast::TypeRef::bool(),
-                ast::OpInfix::LessEqual => ast::TypeRef::bool(),
-                ast::OpInfix::Greater => ast::TypeRef::bool(),
-                ast::OpInfix::GreaterEqual => ast::TypeRef::bool(),
-                ast::OpInfix::Equal => ast::TypeRef::bool(),
-                ast::OpInfix::NotEqual => ast::TypeRef::bool(),
-                ast::OpInfix::LogicAnd => ast::TypeRef::bool(),
-                ast::OpInfix::LogicOr => ast::TypeRef::bool(),
+                ast::OpInfix::Add => Type::number(),
+                ast::OpInfix::Subtract => Type::number(),
+                ast::OpInfix::Multiply => Type::number(),
+                ast::OpInfix::Divide => Type::number(),
+                ast::OpInfix::Modulus => Type::number(),
+                ast::OpInfix::Less => Type::bool(),
+                ast::OpInfix::LessEqual => Type::bool(),
+                ast::OpInfix::Greater => Type::bool(),
+                ast::OpInfix::GreaterEqual => Type::bool(),
+                ast::OpInfix::Equal => Type::bool(),
+                ast::OpInfix::NotEqual => Type::bool(),
+                ast::OpInfix::LogicAnd => Type::bool(),
+                ast::OpInfix::LogicOr => Type::bool(),
             })),
             ast::Expr::Prefix(prefix) => Some(TypeEnvValue::new(match prefix.op {
-                ast::OpPrefix::Negate => ast::TypeRef::number(),
-                ast::OpPrefix::Not => ast::TypeRef::bool(),
+                ast::OpPrefix::Negate => Type::number(),
+                ast::OpPrefix::Not => Type::bool(),
             })),
-            ast::Expr::Fn(fn_) => Some(TypeEnvValue::new(ast::TypeRef::function(
-                fn_.params
-                    .clone()
-                    .into_iter()
-                    .map(|((_, typeref), _)| typeref)
-                    .collect(),
+            ast::Expr::Fn(fn_) => Some(TypeEnvValue::new(Type::function(
+                Type::tuple(
+                    fn_.params
+                        .clone()
+                        .into_iter()
+                        .map(|((_, typeref), _)| typeref)
+                        .collect(),
+                ),
                 fn_.return_type.clone().0,
             ))),
-            ast::Expr::Range(_) => Some(TypeEnvValue::new(ast::TypeRef::range())),
+            ast::Expr::Range(_) => Some(TypeEnvValue::new(Type::range())),
         };
 
         if let Some(resolved_type) = &resolved_type {
@@ -563,7 +573,7 @@ impl<'a> Verifier<'a> {
 
                 self.start_new_type_env();
 
-                let mut return_stmt_type: Option<ast::TypeRef> = None;
+                let mut return_stmt_type: Option<Type> = None;
 
                 let rule_errs = self.run_expr_rules(&expr_clone, span);
                 errs.extend(rule_errs);
@@ -656,7 +666,7 @@ impl<'a> Verifier<'a> {
                         }
 
                         Ok(TypeEnvValue {
-                            typeref: ast::TypeRef::unit(),
+                            typeref: Type::unit(),
                             is_const: true,
                         })
                     }
@@ -733,55 +743,55 @@ impl<'a> Verifier<'a> {
 
                 Ok(match infix_expr.op {
                     ast::OpInfix::Add => TypeEnvValue {
-                        typeref: TypeRef::number(),
+                        typeref: Type::number(),
                         is_const: true,
                     },
                     ast::OpInfix::Subtract => TypeEnvValue {
-                        typeref: TypeRef::number(),
+                        typeref: Type::number(),
                         is_const: true,
                     },
                     ast::OpInfix::Multiply => TypeEnvValue {
-                        typeref: TypeRef::number(),
+                        typeref: Type::number(),
                         is_const: true,
                     },
                     ast::OpInfix::Divide => TypeEnvValue {
-                        typeref: TypeRef::number(),
+                        typeref: Type::number(),
                         is_const: true,
                     },
                     ast::OpInfix::Modulus => TypeEnvValue {
-                        typeref: TypeRef::number(),
+                        typeref: Type::number(),
                         is_const: true,
                     },
                     ast::OpInfix::Less => TypeEnvValue {
-                        typeref: TypeRef::bool(),
+                        typeref: Type::bool(),
                         is_const: true,
                     },
                     ast::OpInfix::LessEqual => TypeEnvValue {
-                        typeref: TypeRef::bool(),
+                        typeref: Type::bool(),
                         is_const: true,
                     },
                     ast::OpInfix::Greater => TypeEnvValue {
-                        typeref: TypeRef::bool(),
+                        typeref: Type::bool(),
                         is_const: true,
                     },
                     ast::OpInfix::GreaterEqual => TypeEnvValue {
-                        typeref: TypeRef::bool(),
+                        typeref: Type::bool(),
                         is_const: true,
                     },
                     ast::OpInfix::Equal => TypeEnvValue {
-                        typeref: TypeRef::bool(),
+                        typeref: Type::bool(),
                         is_const: true,
                     },
                     ast::OpInfix::NotEqual => TypeEnvValue {
-                        typeref: TypeRef::bool(),
+                        typeref: Type::bool(),
                         is_const: true,
                     },
                     ast::OpInfix::LogicAnd => TypeEnvValue {
-                        typeref: TypeRef::bool(),
+                        typeref: Type::bool(),
                         is_const: true,
                     },
                     ast::OpInfix::LogicOr => TypeEnvValue {
-                        typeref: TypeRef::bool(),
+                        typeref: Type::bool(),
                         is_const: true,
                     },
                 })
@@ -812,7 +822,7 @@ impl<'a> Verifier<'a> {
 
                 self.start_new_type_env();
 
-                let mut param_types: Vec<TypeRef> = vec![];
+                let mut param_types: Vec<Type> = vec![];
 
                 for ((ident, type_ref), _) in &fn_expr.params {
                     let name = &ident.name;
@@ -844,7 +854,7 @@ impl<'a> Verifier<'a> {
                         }
 
                         Ok(TypeEnvValue {
-                            typeref: TypeRef::function(param_types, body_type.typeref),
+                            typeref: Type::function(Type::tuple(param_types), body_type.typeref),
                             is_const: true,
                         })
                     }
@@ -911,20 +921,20 @@ impl<'a> Verifier<'a> {
                 }
             }
             ast::Expr::Unit => Ok(TypeEnvValue {
-                typeref: TypeRef::unit(),
+                typeref: Type::unit(),
                 is_const: true,
             }),
             ast::Expr::Literal(literal_expr) => Ok(match literal_expr {
                 ast::ExprLiteral::Bool(_) => TypeEnvValue {
-                    typeref: TypeRef::bool(),
+                    typeref: Type::bool(),
                     is_const: true,
                 },
                 ast::ExprLiteral::Number(_) => TypeEnvValue {
-                    typeref: TypeRef::number(),
+                    typeref: Type::number(),
                     is_const: true,
                 },
                 ast::ExprLiteral::String(_) => TypeEnvValue {
-                    typeref: TypeRef::string(),
+                    typeref: Type::string(),
                     is_const: true,
                 },
             }),
@@ -943,14 +953,14 @@ impl<'a> Verifier<'a> {
 
                 if list_expr.items.is_empty() {
                     return Ok(TypeEnvValue {
-                        typeref: TypeRef::list(TypeRef::unknown()),
+                        typeref: Type::list(Type::unknown()),
                         is_const: true,
                     });
                 }
 
                 let mut errs: Vec<EgonErrorS> = vec![];
                 let mut first_item_type = TypeEnvValue {
-                    typeref: TypeRef::unknown(),
+                    typeref: Type::unknown(),
                     is_const: true,
                 };
 
@@ -977,14 +987,14 @@ impl<'a> Verifier<'a> {
                 }
 
                 let t = TypeEnvValue {
-                    typeref: TypeRef::list(first_item_type.typeref),
+                    typeref: Type::list(first_item_type.typeref),
                     is_const: false,
                 };
 
                 Ok(t)
             }
             ast::Expr::Tuple(tuple_expr) => {
-                let mut item_types: Vec<TypeRef> = vec![];
+                let mut item_types: Vec<Type> = vec![];
                 let mut errs: Vec<EgonErrorS> = vec![];
 
                 for (item_expr, item_span) in &mut tuple_expr.items {
@@ -993,7 +1003,7 @@ impl<'a> Verifier<'a> {
                             item_types.push(item_type.typeref.clone());
                         }
                         Err(item_errs) => {
-                            item_types.push(TypeRef::unknown());
+                            item_types.push(Type::unknown());
                             errs.extend(item_errs);
                         }
                     };
@@ -1007,7 +1017,7 @@ impl<'a> Verifier<'a> {
                 }
 
                 Ok(TypeEnvValue {
-                    typeref: TypeRef::tuple(item_types.clone()),
+                    typeref: Type::tuple(item_types.clone()),
                     is_const: false,
                 })
             }
@@ -1022,7 +1032,7 @@ impl<'a> Verifier<'a> {
                 }
 
                 Ok(TypeEnvValue {
-                    typeref: TypeRef::range(),
+                    typeref: Type::range(),
                     is_const: false,
                 })
             }
@@ -1097,9 +1107,10 @@ impl<'a> Verifier<'a> {
 #[cfg(test)]
 mod verifier_tests {
     use crate::prelude::*;
-    use ast::{ExprBlock, Module, StmtExpr, TypeRef};
+    use ast::{ExprBlock, Module, StmtExpr};
     use egonlang_core::prelude::*;
     use egonlang_errors::{EgonSyntaxError, EgonTypeError};
+    use egonlang_types::Type;
     use pretty_assertions::assert_eq;
 
     use super::Verifier;
@@ -1573,8 +1584,8 @@ mod verifier_tests {
         ",
         Err(vec![(
             EgonTypeError::MismatchType {
-                expected: ast::TypeRef::number().to_string(),
-                actual: ast::TypeRef::string().to_string()
+                expected: Type::number().to_string(),
+                actual: Type::string().to_string()
             }
             .into(),
             34..39
@@ -1589,8 +1600,8 @@ mod verifier_tests {
         ",
         Err(vec![(
             EgonTypeError::MismatchType {
-                expected: ast::TypeRef::string().to_string(),
-                actual: ast::TypeRef::number().to_string()
+                expected: Type::string().to_string(),
+                actual: Type::number().to_string()
             }
             .into(),
             46..47
@@ -1620,8 +1631,8 @@ mod verifier_tests {
         ",
         Err(vec![(
             EgonTypeError::MismatchType {
-                expected: ast::TypeRef::number().to_string(),
-                actual: ast::TypeRef::string().to_string()
+                expected: Type::number().to_string(),
+                actual: Type::string().to_string()
             }
             .into(),
             47..48
@@ -1636,8 +1647,8 @@ mod verifier_tests {
         ",
         Err(vec![(
             EgonTypeError::MismatchType {
-                expected: ast::TypeRef::string().to_string(),
-                actual: ast::TypeRef::number().to_string()
+                expected: Type::string().to_string(),
+                actual: Type::number().to_string()
             }
             .into(),
             51..52
@@ -1837,24 +1848,24 @@ mod verifier_tests {
         ])
     );
 
-    // verifier_test!(
-    //     validate_mismatch_type_when_let_decl_with_block_value,
-    //     r#"
-    //     let a: number = {
-    //         let a: string = "foo";
+    verifier_test!(
+        validate_mismatch_type_when_let_decl_with_block_value,
+        r#"
+        let a: number = {
+            let a: string = "foo";
 
-    //         a
-    //     };
-    //     "#,
-    //     Err(vec![(
-    //         EgonTypeError::MismatchType {
-    //             expected: TypeRef::number().to_string(),
-    //             actual: TypeRef::string().to_string()
-    //         }
-    //         .into(),
-    //         25..93
-    //     )])
-    // );
+            a
+        };
+        "#,
+        Err(vec![(
+            EgonTypeError::MismatchType {
+                expected: Type::number().to_string(),
+                actual: Type::string().to_string()
+            }
+            .into(),
+            25..86
+        )])
+    );
 
     verifier_test!(
         validate_reassign_const_value_3,
@@ -2058,8 +2069,8 @@ a = b;"#,
         assert_eq!(
             Err(vec![(
                 EgonTypeError::MismatchType {
-                    expected: ast::TypeRef::number().to_string(),
-                    actual: ast::TypeRef::bool().to_string()
+                    expected: Type::number().to_string(),
+                    actual: Type::bool().to_string()
                 }
                 .into(),
                 13..18
@@ -2076,8 +2087,8 @@ a = b;"#,
         assert_eq!(
             Err(vec![(
                 EgonTypeError::MismatchType {
-                    expected: ast::TypeRef::number().to_string(),
-                    actual: ast::TypeRef::bool().to_string()
+                    expected: Type::number().to_string(),
+                    actual: Type::bool().to_string()
                 }
                 .into(),
                 30..35
@@ -2096,8 +2107,8 @@ a = b;"#,
                 (EgonTypeError::Undefined("a".to_string()).into(), 0..15),
                 (
                     EgonTypeError::MismatchType {
-                        expected: ast::TypeRef::number().to_string(),
-                        actual: ast::TypeRef::bool().to_string()
+                        expected: Type::number().to_string(),
+                        actual: Type::bool().to_string()
                     }
                     .into(),
                     9..14
@@ -2128,7 +2139,7 @@ a = b;"#,
                             ExprBlock {
                                 stmts: vec![],
                                 return_expr: Some((123f64.into(), 2..5)),
-                                typeref: Some(TypeRef::number())
+                                typeref: Some(Type::number())
                             }
                             .into(),
                             0..7
