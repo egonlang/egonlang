@@ -134,7 +134,7 @@ impl<'a> Verifier<'a> {
     /// let b = false;
     ///
     /// (a, b,); // This expression's type resolves to (number, bool,)
-    pub fn resolve_expr_type(&self, expr: &ast::Expr) -> Option<TypeEnvValue> {
+    fn resolve_expr_type(&self, expr: &ast::Expr) -> Option<TypeEnvValue> {
         tracelog::tracelog!(
             label = verifier,resolve_expr_type;
             "(level: {}) Resolving type for expression {}",
