@@ -307,22 +307,6 @@
 <a href="#307" id="307">307</a>
 <a href="#308" id="308">308</a>
 <a href="#309" id="309">309</a>
-<a href="#310" id="310">310</a>
-<a href="#311" id="311">311</a>
-<a href="#312" id="312">312</a>
-<a href="#313" id="313">313</a>
-<a href="#314" id="314">314</a>
-<a href="#315" id="315">315</a>
-<a href="#316" id="316">316</a>
-<a href="#317" id="317">317</a>
-<a href="#318" id="318">318</a>
-<a href="#319" id="319">319</a>
-<a href="#320" id="320">320</a>
-<a href="#321" id="321">321</a>
-<a href="#322" id="322">322</a>
-<a href="#323" id="323">323</a>
-<a href="#324" id="324">324</a>
-<a href="#325" id="325">325</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::{<span class="self">self</span>, Debug, Display, Formatter};
 
 <span class="kw">use </span>egonlang_types::Type;
@@ -332,10 +316,11 @@
 
 <span class="kw">use </span>span::Spanned;
 
-<span class="kw">use super</span>::{Expr, ExprS, Identifier};
+<span class="kw">use super</span>::{ExprS, Identifier};
 
 <span class="doccomment">/// A tuple containing a statement and it's span e.g. (stmt, span)
 </span><span class="kw">pub type </span>StmtS = Spanned&lt;Stmt&gt;;
+
 <span class="doccomment">/// A statement (e.g. that does not produce a value)
 </span><span class="attr">#[derive(Clone, PartialEq, Serialize, Deserialize)]
 </span><span class="kw">pub enum </span>Stmt {
@@ -479,37 +464,20 @@
         <span class="kw">let </span>decl = <span class="kw">if </span><span class="self">self</span>.is_const { <span class="string">"const" </span>} <span class="kw">else </span>{ <span class="string">"let" </span>};
         <span class="kw">let </span>name = <span class="kw-2">&amp;</span><span class="self">self</span>.identifier.<span class="number">0</span>.name;
 
-        <span class="kw">let </span>is_type_alias = <span class="self">self
+        <span class="kw">let </span>typing = <span class="self">self
+            </span>.type_expr
+            .clone()
+            .map(|f| f.<span class="number">0</span>)
+            .map(|f| <span class="macro">format!</span>(<span class="string">": {f}"</span>))
+            .unwrap_or_default();
+        <span class="kw">let </span>value = <span class="self">self
             </span>.value
-            .as_ref()
-            .map(|(type_expr, <span class="kw">_</span>)| <span class="macro">matches!</span>(type_expr, Expr::Type(<span class="kw">_</span>)))
-            .unwrap_or(<span class="bool-val">false</span>);
+            .clone()
+            .map(|f| f.<span class="number">0</span>)
+            .map(|v| <span class="macro">format!</span>(<span class="string">" = {v}"</span>))
+            .unwrap_or_default();
 
-        <span class="kw">if </span>is_type_alias {
-            <span class="kw">let </span>typing = <span class="self">self
-                </span>.type_expr
-                .clone()
-                .map(|f| f.<span class="number">0</span>)
-                .map(|f| <span class="macro">format!</span>(<span class="string">"{f}"</span>))
-                .unwrap_or_default();
-
-            f.write_fmt(<span class="macro">format_args!</span>(<span class="string">"type {} = {};"</span>, name, typing))
-        } <span class="kw">else </span>{
-            <span class="kw">let </span>typing = <span class="self">self
-                </span>.type_expr
-                .clone()
-                .map(|f| f.<span class="number">0</span>)
-                .map(|f| <span class="macro">format!</span>(<span class="string">": {f}"</span>))
-                .unwrap_or_default();
-            <span class="kw">let </span>value = <span class="self">self
-                </span>.value
-                .clone()
-                .map(|f| f.<span class="number">0</span>)
-                .map(|v| <span class="macro">format!</span>(<span class="string">" = {v}"</span>))
-                .unwrap_or_default();
-
-            f.write_fmt(<span class="macro">format_args!</span>(<span class="string">"{} {}{}{};"</span>, decl, name, typing, value))
-        }
+        f.write_fmt(<span class="macro">format_args!</span>(<span class="string">"{} {}{}{};"</span>, decl, name, typing, value))
     }
 }
 

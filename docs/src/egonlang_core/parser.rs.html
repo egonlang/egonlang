@@ -2089,66 +2089,6 @@
 <a href="#2089" id="2089">2089</a>
 <a href="#2090" id="2090">2090</a>
 <a href="#2091" id="2091">2091</a>
-<a href="#2092" id="2092">2092</a>
-<a href="#2093" id="2093">2093</a>
-<a href="#2094" id="2094">2094</a>
-<a href="#2095" id="2095">2095</a>
-<a href="#2096" id="2096">2096</a>
-<a href="#2097" id="2097">2097</a>
-<a href="#2098" id="2098">2098</a>
-<a href="#2099" id="2099">2099</a>
-<a href="#2100" id="2100">2100</a>
-<a href="#2101" id="2101">2101</a>
-<a href="#2102" id="2102">2102</a>
-<a href="#2103" id="2103">2103</a>
-<a href="#2104" id="2104">2104</a>
-<a href="#2105" id="2105">2105</a>
-<a href="#2106" id="2106">2106</a>
-<a href="#2107" id="2107">2107</a>
-<a href="#2108" id="2108">2108</a>
-<a href="#2109" id="2109">2109</a>
-<a href="#2110" id="2110">2110</a>
-<a href="#2111" id="2111">2111</a>
-<a href="#2112" id="2112">2112</a>
-<a href="#2113" id="2113">2113</a>
-<a href="#2114" id="2114">2114</a>
-<a href="#2115" id="2115">2115</a>
-<a href="#2116" id="2116">2116</a>
-<a href="#2117" id="2117">2117</a>
-<a href="#2118" id="2118">2118</a>
-<a href="#2119" id="2119">2119</a>
-<a href="#2120" id="2120">2120</a>
-<a href="#2121" id="2121">2121</a>
-<a href="#2122" id="2122">2122</a>
-<a href="#2123" id="2123">2123</a>
-<a href="#2124" id="2124">2124</a>
-<a href="#2125" id="2125">2125</a>
-<a href="#2126" id="2126">2126</a>
-<a href="#2127" id="2127">2127</a>
-<a href="#2128" id="2128">2128</a>
-<a href="#2129" id="2129">2129</a>
-<a href="#2130" id="2130">2130</a>
-<a href="#2131" id="2131">2131</a>
-<a href="#2132" id="2132">2132</a>
-<a href="#2133" id="2133">2133</a>
-<a href="#2134" id="2134">2134</a>
-<a href="#2135" id="2135">2135</a>
-<a href="#2136" id="2136">2136</a>
-<a href="#2137" id="2137">2137</a>
-<a href="#2138" id="2138">2138</a>
-<a href="#2139" id="2139">2139</a>
-<a href="#2140" id="2140">2140</a>
-<a href="#2141" id="2141">2141</a>
-<a href="#2142" id="2142">2142</a>
-<a href="#2143" id="2143">2143</a>
-<a href="#2144" id="2144">2144</a>
-<a href="#2145" id="2145">2145</a>
-<a href="#2146" id="2146">2146</a>
-<a href="#2147" id="2147">2147</a>
-<a href="#2148" id="2148">2148</a>
-<a href="#2149" id="2149">2149</a>
-<a href="#2150" id="2150">2150</a>
-<a href="#2151" id="2151">2151</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>lalrpop_util::lalrpop_mod;
 
 <span class="kw">use </span><span class="kw">crate</span>::lexer::Lexer;
@@ -2176,7 +2116,7 @@
     };
     !errors
         .iter()
-        .any(|e| <span class="macro">matches!</span>(e, ParseError::UnrecognizedEOF { .. }))
+        .any(|e| <span class="macro">matches!</span>(e, ParseError::UnrecognizedEof { .. }))
 }
 
 <span class="doccomment">/// Parse a string source in to an AST [`Module`]
@@ -2212,7 +2152,7 @@
             ParseError::InvalidToken { location } =&gt; {
                 (EgonSyntaxError::InvalidToken.into(), location..location)
             }
-            ParseError::UnrecognizedEOF { location, expected } =&gt; (
+            ParseError::UnrecognizedEof { location, expected } =&gt; (
                 EgonSyntaxError::UnrecognizedEOF { expected }.into(),
                 location..location,
             ),
@@ -2270,26 +2210,21 @@
         <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[(
             EgonError::SyntaxError(EgonSyntaxError::UnrecognizedEOF {
                 expected: <span class="macro">vec!</span>[
-                    <span class="string">"\"!=\""</span>.to_string(),
-                    <span class="string">"\"%\""</span>.to_string(),
-                    <span class="string">"\")\""</span>.to_string(),
-                    <span class="string">"\"*\""</span>.to_string(),
-                    <span class="string">"\"+\""</span>.to_string(),
-                    <span class="string">"\",\""</span>.to_string(),
-                    <span class="string">"\"-\""</span>.to_string(),
-                    <span class="string">"\"..\""</span>.to_string(),
-                    <span class="string">"\"/\""</span>.to_string(),
                     <span class="string">"\";\""</span>.to_string(),
-                    <span class="string">"\"&lt;\""</span>.to_string(),
-                    <span class="string">"\"&lt;=\""</span>.to_string(),
+                    <span class="string">"\"..\""</span>.to_string(),
+                    <span class="string">"\"-\""</span>.to_string(),
+                    <span class="string">"\"+\""</span>.to_string(),
+                    <span class="string">"\"/\""</span>.to_string(),
+                    <span class="string">"\"%\""</span>.to_string(),
+                    <span class="string">"\"*\""</span>.to_string(),
+                    <span class="string">"\"!=\""</span>.to_string(),
                     <span class="string">"\"==\""</span>.to_string(),
                     <span class="string">"\"&gt;\""</span>.to_string(),
                     <span class="string">"\"&gt;=\""</span>.to_string(),
-                    <span class="string">"\"]\""</span>.to_string(),
+                    <span class="string">"\"&lt;\""</span>.to_string(),
+                    <span class="string">"\"&lt;=\""</span>.to_string(),
                     <span class="string">"\"and\""</span>.to_string(),
                     <span class="string">"\"or\""</span>.to_string(),
-                    <span class="string">"\"{\""</span>.to_string(),
-                    <span class="string">"\"}\""</span>.to_string(),
                 ]
             }),
             <span class="number">3</span>..<span class="number">3
@@ -2302,25 +2237,20 @@
         <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[(
             EgonError::SyntaxError(EgonSyntaxError::UnrecognizedEOF {
                 expected: <span class="macro">vec!</span>[
-                    <span class="string">"\"!=\""</span>.to_string(),
-                    <span class="string">"\"%\""</span>.to_string(),
-                    <span class="string">"\")\""</span>.to_string(),
-                    <span class="string">"\"*\""</span>.to_string(),
-                    <span class="string">"\"+\""</span>.to_string(),
-                    <span class="string">"\",\""</span>.to_string(),
-                    <span class="string">"\"-\""</span>.to_string(),
-                    <span class="string">"\"/\""</span>.to_string(),
                     <span class="string">"\";\""</span>.to_string(),
-                    <span class="string">"\"&lt;\""</span>.to_string(),
-                    <span class="string">"\"&lt;=\""</span>.to_string(),
+                    <span class="string">"\"-\""</span>.to_string(),
+                    <span class="string">"\"+\""</span>.to_string(),
+                    <span class="string">"\"/\""</span>.to_string(),
+                    <span class="string">"\"%\""</span>.to_string(),
+                    <span class="string">"\"*\""</span>.to_string(),
+                    <span class="string">"\"!=\""</span>.to_string(),
                     <span class="string">"\"==\""</span>.to_string(),
                     <span class="string">"\"&gt;\""</span>.to_string(),
                     <span class="string">"\"&gt;=\""</span>.to_string(),
-                    <span class="string">"\"]\""</span>.to_string(),
+                    <span class="string">"\"&lt;\""</span>.to_string(),
+                    <span class="string">"\"&lt;=\""</span>.to_string(),
                     <span class="string">"\"and\""</span>.to_string(),
                     <span class="string">"\"or\""</span>.to_string(),
-                    <span class="string">"\"{\""</span>.to_string(),
-                    <span class="string">"\"}\""</span>.to_string(),
                 ]
             }),
             <span class="number">5</span>..<span class="number">5
@@ -2333,25 +2263,21 @@
         <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[(
             EgonError::SyntaxError(EgonSyntaxError::UnrecognizedEOF {
                 expected: <span class="macro">vec!</span>[
-                    <span class="string">"\"!=\""</span>.to_string(),
-                    <span class="string">"\"%\""</span>.to_string(),
-                    <span class="string">"\")\""</span>.to_string(),
-                    <span class="string">"\"*\""</span>.to_string(),
-                    <span class="string">"\"+\""</span>.to_string(),
-                    <span class="string">"\",\""</span>.to_string(),
-                    <span class="string">"\"-\""</span>.to_string(),
-                    <span class="string">"\"/\""</span>.to_string(),
                     <span class="string">"\";\""</span>.to_string(),
-                    <span class="string">"\"&lt;\""</span>.to_string(),
-                    <span class="string">"\"&lt;=\""</span>.to_string(),
+                    <span class="string">"\"-\""</span>.to_string(),
+                    <span class="string">"\"+\""</span>.to_string(),
+                    <span class="string">"\"/\""</span>.to_string(),
+                    <span class="string">"\"%\""</span>.to_string(),
+                    <span class="string">"\"*\""</span>.to_string(),
+                    <span class="string">"\"!=\""</span>.to_string(),
                     <span class="string">"\"=\""</span>.to_string(),
                     <span class="string">"\"==\""</span>.to_string(),
                     <span class="string">"\"&gt;\""</span>.to_string(),
                     <span class="string">"\"&gt;=\""</span>.to_string(),
-                    <span class="string">"\"]\""</span>.to_string(),
+                    <span class="string">"\"&lt;\""</span>.to_string(),
+                    <span class="string">"\"&lt;=\""</span>.to_string(),
                     <span class="string">"\"and\""</span>.to_string(),
-                    <span class="string">"\"or\""</span>.to_string(),
-                    <span class="string">"\"}\""</span>.to_string(),
+                    <span class="string">"\"or\""</span>.to_string()
                 ]
             }),
             <span class="number">3</span>..<span class="number">3
@@ -2364,25 +2290,20 @@
         <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[(
             EgonError::SyntaxError(EgonSyntaxError::UnrecognizedEOF {
                 expected: <span class="macro">vec!</span>[
-                    <span class="string">"\"!=\""</span>.to_string(),
-                    <span class="string">"\"%\""</span>.to_string(),
-                    <span class="string">"\")\""</span>.to_string(),
-                    <span class="string">"\"*\""</span>.to_string(),
-                    <span class="string">"\"+\""</span>.to_string(),
-                    <span class="string">"\",\""</span>.to_string(),
-                    <span class="string">"\"-\""</span>.to_string(),
-                    <span class="string">"\"/\""</span>.to_string(),
                     <span class="string">"\";\""</span>.to_string(),
-                    <span class="string">"\"&lt;\""</span>.to_string(),
-                    <span class="string">"\"&lt;=\""</span>.to_string(),
+                    <span class="string">"\"-\""</span>.to_string(),
+                    <span class="string">"\"+\""</span>.to_string(),
+                    <span class="string">"\"/\""</span>.to_string(),
+                    <span class="string">"\"%\""</span>.to_string(),
+                    <span class="string">"\"*\""</span>.to_string(),
+                    <span class="string">"\"!=\""</span>.to_string(),
                     <span class="string">"\"==\""</span>.to_string(),
                     <span class="string">"\"&gt;\""</span>.to_string(),
                     <span class="string">"\"&gt;=\""</span>.to_string(),
-                    <span class="string">"\"]\""</span>.to_string(),
+                    <span class="string">"\"&lt;\""</span>.to_string(),
+                    <span class="string">"\"&lt;=\""</span>.to_string(),
                     <span class="string">"\"and\""</span>.to_string(),
                     <span class="string">"\"or\""</span>.to_string(),
-                    <span class="string">"\"{\""</span>.to_string(),
-                    <span class="string">"\"}\""</span>.to_string(),
                 ]
             }),
             <span class="number">4</span>..<span class="number">4
@@ -2395,25 +2316,20 @@
         <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[(
             EgonError::SyntaxError(EgonSyntaxError::UnrecognizedEOF {
                 expected: <span class="macro">vec!</span>[
-                    <span class="string">"\"!=\""</span>.to_string(),
-                    <span class="string">"\"%\""</span>.to_string(),
-                    <span class="string">"\")\""</span>.to_string(),
-                    <span class="string">"\"*\""</span>.to_string(),
-                    <span class="string">"\"+\""</span>.to_string(),
-                    <span class="string">"\",\""</span>.to_string(),
-                    <span class="string">"\"-\""</span>.to_string(),
-                    <span class="string">"\"/\""</span>.to_string(),
                     <span class="string">"\";\""</span>.to_string(),
-                    <span class="string">"\"&lt;\""</span>.to_string(),
-                    <span class="string">"\"&lt;=\""</span>.to_string(),
+                    <span class="string">"\"-\""</span>.to_string(),
+                    <span class="string">"\"+\""</span>.to_string(),
+                    <span class="string">"\"/\""</span>.to_string(),
+                    <span class="string">"\"%\""</span>.to_string(),
+                    <span class="string">"\"*\""</span>.to_string(),
+                    <span class="string">"\"!=\""</span>.to_string(),
                     <span class="string">"\"==\""</span>.to_string(),
                     <span class="string">"\"&gt;\""</span>.to_string(),
                     <span class="string">"\"&gt;=\""</span>.to_string(),
-                    <span class="string">"\"]\""</span>.to_string(),
+                    <span class="string">"\"&lt;\""</span>.to_string(),
+                    <span class="string">"\"&lt;=\""</span>.to_string(),
                     <span class="string">"\"and\""</span>.to_string(),
                     <span class="string">"\"or\""</span>.to_string(),
-                    <span class="string">"\"{\""</span>.to_string(),
-                    <span class="string">"\"}\""</span>.to_string(),
                 ]
             }),
             <span class="number">5</span>..<span class="number">5
@@ -2425,13 +2341,7 @@
         <span class="string">r#"{}"#</span>,
         <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[(
             EgonError::SyntaxError(EgonSyntaxError::UnrecognizedEOF {
-                expected: <span class="macro">vec!</span>[
-                    <span class="string">"\")\""</span>.to_string(),
-                    <span class="string">"\",\""</span>.to_string(),
-                    <span class="string">"\";\""</span>.to_string(),
-                    <span class="string">"\"]\""</span>.to_string(),
-                    <span class="string">"\"}\""</span>.to_string(),
-                ]
+                expected: <span class="macro">vec!</span>[<span class="string">"\";\""</span>.to_string(),]
             }),
             <span class="number">2</span>..<span class="number">2
         </span>)])
@@ -2443,25 +2353,20 @@
         <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[(
             EgonError::SyntaxError(EgonSyntaxError::UnrecognizedEOF {
                 expected: <span class="macro">vec!</span>[
-                    <span class="string">"\"!=\""</span>.to_string(),
-                    <span class="string">"\"%\""</span>.to_string(),
-                    <span class="string">"\")\""</span>.to_string(),
-                    <span class="string">"\"*\""</span>.to_string(),
-                    <span class="string">"\"+\""</span>.to_string(),
-                    <span class="string">"\",\""</span>.to_string(),
-                    <span class="string">"\"-\""</span>.to_string(),
-                    <span class="string">"\"/\""</span>.to_string(),
                     <span class="string">"\";\""</span>.to_string(),
-                    <span class="string">"\"&lt;\""</span>.to_string(),
-                    <span class="string">"\"&lt;=\""</span>.to_string(),
+                    <span class="string">"\"-\""</span>.to_string(),
+                    <span class="string">"\"+\""</span>.to_string(),
+                    <span class="string">"\"/\""</span>.to_string(),
+                    <span class="string">"\"%\""</span>.to_string(),
+                    <span class="string">"\"*\""</span>.to_string(),
+                    <span class="string">"\"!=\""</span>.to_string(),
                     <span class="string">"\"==\""</span>.to_string(),
                     <span class="string">"\"&gt;\""</span>.to_string(),
                     <span class="string">"\"&gt;=\""</span>.to_string(),
-                    <span class="string">"\"]\""</span>.to_string(),
+                    <span class="string">"\"&lt;\""</span>.to_string(),
+                    <span class="string">"\"&lt;=\""</span>.to_string(),
                     <span class="string">"\"and\""</span>.to_string(),
                     <span class="string">"\"or\""</span>.to_string(),
-                    <span class="string">"\"{\""</span>.to_string(),
-                    <span class="string">"\"}\""</span>.to_string(),
                 ]
             }),
             <span class="number">2</span>..<span class="number">2
@@ -2875,19 +2780,19 @@
             EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
                 token: <span class="string">","</span>.to_string(),
                 expected: <span class="macro">vec!</span>[
-                    <span class="string">"\"!\""</span>.to_string(),
-                    <span class="string">"\"(\""</span>.to_string(),
-                    <span class="string">"\"-\""</span>.to_string(),
-                    <span class="string">"\"..\""</span>.to_string(),
+                    <span class="string">"\"{\""</span>.to_string(),
                     <span class="string">"\"[\""</span>.to_string(),
                     <span class="string">"\"]\""</span>.to_string(),
+                    <span class="string">"\"(\""</span>.to_string(),
+                    <span class="string">"\"..\""</span>.to_string(),
+                    <span class="string">"\"-\""</span>.to_string(),
+                    <span class="string">"\"!\""</span>.to_string(),
+                    <span class="string">"\"true\""</span>.to_string(),
                     <span class="string">"\"false\""</span>.to_string(),
                     <span class="string">"\"if\""</span>.to_string(),
-                    <span class="string">"\"true\""</span>.to_string(),
-                    <span class="string">"\"{\""</span>.to_string(),
                     <span class="string">"identifier"</span>.to_string(),
-                    <span class="string">"number"</span>.to_string(),
                     <span class="string">"string"</span>.to_string(),
+                    <span class="string">"number"</span>.to_string(),
                 ]
             }),
             <span class="number">1</span>..<span class="number">2
@@ -2944,18 +2849,18 @@
             EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
                 token: <span class="string">"]"</span>.to_string(),
                 expected: <span class="macro">vec!</span>[
-                    <span class="string">"\"!\""</span>.to_string(),
-                    <span class="string">"\"(\""</span>.to_string(),
-                    <span class="string">"\"-\""</span>.to_string(),
-                    <span class="string">"\"..\""</span>.to_string(),
+                    <span class="string">"\"{\""</span>.to_string(),
                     <span class="string">"\"[\""</span>.to_string(),
+                    <span class="string">"\"(\""</span>.to_string(),
+                    <span class="string">"\"..\""</span>.to_string(),
+                    <span class="string">"\"-\""</span>.to_string(),
+                    <span class="string">"\"!\""</span>.to_string(),
+                    <span class="string">"\"true\""</span>.to_string(),
                     <span class="string">"\"false\""</span>.to_string(),
                     <span class="string">"\"if\""</span>.to_string(),
-                    <span class="string">"\"true\""</span>.to_string(),
-                    <span class="string">"\"{\""</span>.to_string(),
                     <span class="string">"identifier"</span>.to_string(),
-                    <span class="string">"number"</span>.to_string(),
                     <span class="string">"string"</span>.to_string(),
+                    <span class="string">"number"</span>.to_string(),
                 ]
             }),
             <span class="number">9</span>..<span class="number">10
@@ -3030,19 +2935,19 @@
             EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
                 token: <span class="string">","</span>.to_string(),
                 expected: <span class="macro">vec!</span>[
-                    <span class="string">"\"!\""</span>.to_string(),
+                    <span class="string">"\"{\""</span>.to_string(),
+                    <span class="string">"\"[\""</span>.to_string(),
                     <span class="string">"\"(\""</span>.to_string(),
                     <span class="string">"\")\""</span>.to_string(),
-                    <span class="string">"\"-\""</span>.to_string(),
                     <span class="string">"\"..\""</span>.to_string(),
-                    <span class="string">"\"[\""</span>.to_string(),
+                    <span class="string">"\"-\""</span>.to_string(),
+                    <span class="string">"\"!\""</span>.to_string(),
+                    <span class="string">"\"true\""</span>.to_string(),
                     <span class="string">"\"false\""</span>.to_string(),
                     <span class="string">"\"if\""</span>.to_string(),
-                    <span class="string">"\"true\""</span>.to_string(),
-                    <span class="string">"\"{\""</span>.to_string(),
                     <span class="string">"identifier"</span>.to_string(),
-                    <span class="string">"number"</span>.to_string(),
                     <span class="string">"string"</span>.to_string(),
+                    <span class="string">"number"</span>.to_string(),
                 ]
             }),
             <span class="number">1</span>..<span class="number">2
@@ -3635,25 +3540,20 @@
                 EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
                     token: <span class="string">"123"</span>.to_string(),
                     expected: <span class="macro">vec!</span>[
-                        <span class="string">"\"!=\""</span>.to_string(),
-                        <span class="string">"\"%\""</span>.to_string(),
-                        <span class="string">"\")\""</span>.to_string(),
-                        <span class="string">"\"*\""</span>.to_string(),
-                        <span class="string">"\"+\""</span>.to_string(),
-                        <span class="string">"\",\""</span>.to_string(),
+                        <span class="string">"\"{\""</span>.to_string(),
                         <span class="string">"\"-\""</span>.to_string(),
+                        <span class="string">"\"+\""</span>.to_string(),
                         <span class="string">"\"/\""</span>.to_string(),
-                        <span class="string">"\";\""</span>.to_string(),
-                        <span class="string">"\"&lt;\""</span>.to_string(),
-                        <span class="string">"\"&lt;=\""</span>.to_string(),
+                        <span class="string">"\"%\""</span>.to_string(),
+                        <span class="string">"\"*\""</span>.to_string(),
+                        <span class="string">"\"!=\""</span>.to_string(),
                         <span class="string">"\"==\""</span>.to_string(),
                         <span class="string">"\"&gt;\""</span>.to_string(),
                         <span class="string">"\"&gt;=\""</span>.to_string(),
-                        <span class="string">"\"]\""</span>.to_string(),
+                        <span class="string">"\"&lt;\""</span>.to_string(),
+                        <span class="string">"\"&lt;=\""</span>.to_string(),
                         <span class="string">"\"and\""</span>.to_string(),
                         <span class="string">"\"or\""</span>.to_string(),
-                        <span class="string">"\"{\""</span>.to_string(),
-                        <span class="string">"\"}\""</span>.to_string(),
                     ]
                 }),
                 <span class="number">10</span>..<span class="number">13
@@ -3662,26 +3562,21 @@
                 EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
                     token: <span class="string">"else"</span>.to_string(),
                     expected: <span class="macro">vec!</span>[
-                        <span class="string">"\"!=\""</span>.to_string(),
-                        <span class="string">"\"%\""</span>.to_string(),
-                        <span class="string">"\")\""</span>.to_string(),
-                        <span class="string">"\"*\""</span>.to_string(),
-                        <span class="string">"\"+\""</span>.to_string(),
-                        <span class="string">"\",\""</span>.to_string(),
-                        <span class="string">"\"-\""</span>.to_string(),
-                        <span class="string">"\"..\""</span>.to_string(),
-                        <span class="string">"\"/\""</span>.to_string(),
                         <span class="string">"\";\""</span>.to_string(),
-                        <span class="string">"\"&lt;\""</span>.to_string(),
-                        <span class="string">"\"&lt;=\""</span>.to_string(),
+                        <span class="string">"\"..\""</span>.to_string(),
+                        <span class="string">"\"-\""</span>.to_string(),
+                        <span class="string">"\"+\""</span>.to_string(),
+                        <span class="string">"\"/\""</span>.to_string(),
+                        <span class="string">"\"%\""</span>.to_string(),
+                        <span class="string">"\"*\""</span>.to_string(),
+                        <span class="string">"\"!=\""</span>.to_string(),
                         <span class="string">"\"==\""</span>.to_string(),
                         <span class="string">"\"&gt;\""</span>.to_string(),
                         <span class="string">"\"&gt;=\""</span>.to_string(),
-                        <span class="string">"\"]\""</span>.to_string(),
+                        <span class="string">"\"&lt;\""</span>.to_string(),
+                        <span class="string">"\"&lt;=\""</span>.to_string(),
                         <span class="string">"\"and\""</span>.to_string(),
                         <span class="string">"\"or\""</span>.to_string(),
-                        <span class="string">"\"{\""</span>.to_string(),
-                        <span class="string">"\"}\""</span>.to_string(),
                     ]
                 }),
                 <span class="number">14</span>..<span class="number">18
@@ -3690,25 +3585,20 @@
                 EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
                     token: <span class="string">"456"</span>.to_string(),
                     expected: <span class="macro">vec!</span>[
-                        <span class="string">"\"!=\""</span>.to_string(),
-                        <span class="string">"\"%\""</span>.to_string(),
-                        <span class="string">"\")\""</span>.to_string(),
-                        <span class="string">"\"*\""</span>.to_string(),
-                        <span class="string">"\"+\""</span>.to_string(),
-                        <span class="string">"\",\""</span>.to_string(),
+                        <span class="string">"\"{\""</span>.to_string(),
                         <span class="string">"\"-\""</span>.to_string(),
+                        <span class="string">"\"+\""</span>.to_string(),
                         <span class="string">"\"/\""</span>.to_string(),
-                        <span class="string">"\";\""</span>.to_string(),
-                        <span class="string">"\"&lt;\""</span>.to_string(),
-                        <span class="string">"\"&lt;=\""</span>.to_string(),
+                        <span class="string">"\"%\""</span>.to_string(),
+                        <span class="string">"\"*\""</span>.to_string(),
+                        <span class="string">"\"!=\""</span>.to_string(),
                         <span class="string">"\"==\""</span>.to_string(),
                         <span class="string">"\"&gt;\""</span>.to_string(),
                         <span class="string">"\"&gt;=\""</span>.to_string(),
-                        <span class="string">"\"]\""</span>.to_string(),
+                        <span class="string">"\"&lt;\""</span>.to_string(),
+                        <span class="string">"\"&lt;=\""</span>.to_string(),
                         <span class="string">"\"and\""</span>.to_string(),
                         <span class="string">"\"or\""</span>.to_string(),
-                        <span class="string">"\"{\""</span>.to_string(),
-                        <span class="string">"\"}\""</span>.to_string(),
                     ]
                 }),
                 <span class="number">29</span>..<span class="number">32
@@ -3717,26 +3607,21 @@
                 EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
                     token: <span class="string">"else"</span>.to_string(),
                     expected: <span class="macro">vec!</span>[
-                        <span class="string">"\"!=\""</span>.to_string(),
-                        <span class="string">"\"%\""</span>.to_string(),
-                        <span class="string">"\")\""</span>.to_string(),
-                        <span class="string">"\"*\""</span>.to_string(),
-                        <span class="string">"\"+\""</span>.to_string(),
-                        <span class="string">"\",\""</span>.to_string(),
-                        <span class="string">"\"-\""</span>.to_string(),
-                        <span class="string">"\"..\""</span>.to_string(),
-                        <span class="string">"\"/\""</span>.to_string(),
                         <span class="string">"\";\""</span>.to_string(),
-                        <span class="string">"\"&lt;\""</span>.to_string(),
-                        <span class="string">"\"&lt;=\""</span>.to_string(),
+                        <span class="string">"\"..\""</span>.to_string(),
+                        <span class="string">"\"-\""</span>.to_string(),
+                        <span class="string">"\"+\""</span>.to_string(),
+                        <span class="string">"\"/\""</span>.to_string(),
+                        <span class="string">"\"%\""</span>.to_string(),
+                        <span class="string">"\"*\""</span>.to_string(),
+                        <span class="string">"\"!=\""</span>.to_string(),
                         <span class="string">"\"==\""</span>.to_string(),
                         <span class="string">"\"&gt;\""</span>.to_string(),
                         <span class="string">"\"&gt;=\""</span>.to_string(),
-                        <span class="string">"\"]\""</span>.to_string(),
+                        <span class="string">"\"&lt;\""</span>.to_string(),
+                        <span class="string">"\"&lt;=\""</span>.to_string(),
                         <span class="string">"\"and\""</span>.to_string(),
                         <span class="string">"\"or\""</span>.to_string(),
-                        <span class="string">"\"{\""</span>.to_string(),
-                        <span class="string">"\"}\""</span>.to_string(),
                     ]
                 }),
                 <span class="number">33</span>..<span class="number">37
@@ -3744,26 +3629,21 @@
             (
                 EgonError::SyntaxError(EgonSyntaxError::UnrecognizedEOF {
                     expected: <span class="macro">vec!</span>[
-                        <span class="string">"\"!=\""</span>.to_string(),
-                        <span class="string">"\"%\""</span>.to_string(),
-                        <span class="string">"\")\""</span>.to_string(),
-                        <span class="string">"\"*\""</span>.to_string(),
-                        <span class="string">"\"+\""</span>.to_string(),
-                        <span class="string">"\",\""</span>.to_string(),
-                        <span class="string">"\"-\""</span>.to_string(),
-                        <span class="string">"\"..\""</span>.to_string(),
-                        <span class="string">"\"/\""</span>.to_string(),
                         <span class="string">"\";\""</span>.to_string(),
-                        <span class="string">"\"&lt;\""</span>.to_string(),
-                        <span class="string">"\"&lt;=\""</span>.to_string(),
+                        <span class="string">"\"..\""</span>.to_string(),
+                        <span class="string">"\"-\""</span>.to_string(),
+                        <span class="string">"\"+\""</span>.to_string(),
+                        <span class="string">"\"/\""</span>.to_string(),
+                        <span class="string">"\"%\""</span>.to_string(),
+                        <span class="string">"\"*\""</span>.to_string(),
+                        <span class="string">"\"!=\""</span>.to_string(),
                         <span class="string">"\"==\""</span>.to_string(),
                         <span class="string">"\"&gt;\""</span>.to_string(),
                         <span class="string">"\"&gt;=\""</span>.to_string(),
-                        <span class="string">"\"]\""</span>.to_string(),
+                        <span class="string">"\"&lt;\""</span>.to_string(),
+                        <span class="string">"\"&lt;=\""</span>.to_string(),
                         <span class="string">"\"and\""</span>.to_string(),
                         <span class="string">"\"or\""</span>.to_string(),
-                        <span class="string">"\"{\""</span>.to_string(),
-                        <span class="string">"\"}\""</span>.to_string(),
                     ]
                 }),
                 <span class="number">41</span>..<span class="number">41
