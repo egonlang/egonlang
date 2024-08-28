@@ -1,28 +1,46 @@
+pub mod type_env;
+
 use std::fmt::{self, Display, Formatter};
 
 use serde::{Deserialize, Serialize};
+use type_env::TypeEnvValue;
 
 /// Type in the Egon language
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Type(pub String, pub Vec<Type>);
 
+impl From<Type> for TypeEnvValue {
+    fn from(value: Type) -> Self {
+        TypeEnvValue {
+            of_type: value,
+            is_const: true,
+        }
+    }
+}
+
 impl Type {
+    pub fn type_name(&self) -> &str {
+        &self.0
+    }
+
+    pub fn type_args(&self) -> &Vec<Type> {
+        &self.1
+    }
+
     /// Is this type a type?
     pub fn is_type(&self) -> bool {
-        self.0 == *"type"
+        self.type_name() == "type"
     }
 
     /// Is this type a list?
     pub fn is_list(&self) -> bool {
-        self.0 == *"list"
+        self.type_name() == "list"
     }
 
     /// Is this type a list with a known value type?
     pub fn is_known_list(&self) -> bool {
         if self.is_list() {
-            let f = self.1.first().unwrap();
-
-            Type::unknown() != *f
+            Type::unknown() != *self.type_args().first().unwrap()
         } else {
             false
         }
@@ -30,7 +48,7 @@ impl Type {
 
     /// Is this type unknown?
     pub fn is_unknown(&self) -> bool {
-        self.0 == *"unknown"
+        self.type_name() == "unknown"
     }
 
     /// Is this type a list with a unknown value type?
@@ -64,42 +82,42 @@ impl Type {
 
     /// Is this type a bool type?
     pub fn is_bool(&self) -> bool {
-        "bool" == self.0
+        "bool" == self.type_name()
     }
 
     /// Is this type a number type?
     pub fn is_number(&self) -> bool {
-        "number" == self.0
+        "number" == self.type_name()
     }
 
     /// Is this type a string type?
     pub fn is_string(&self) -> bool {
-        "string" == self.0
+        "string" == self.type_name()
     }
 
     /// Is this type a tuple type?
     pub fn is_tuple(&self) -> bool {
-        "tuple" == self.0
+        "tuple" == self.type_name()
     }
 
     /// Is this type a range type?
     pub fn is_range(&self) -> bool {
-        "range" == self.0
+        "range" == self.type_name()
     }
 
     /// Is this type a function type?
     pub fn is_function(&self) -> bool {
-        "function" == self.0
+        "function" == self.type_name()
     }
 
     /// Is this type the unit type?
     pub fn is_unit(&self) -> bool {
-        "()" == self.0
+        "()" == self.type_name()
     }
 
     /// Is this type an identifier type?
     pub fn is_identifier(&self) -> bool {
-        "identifier" == self.0
+        "identifier" == self.type_name()
     }
 
     /// Create a `string` type instance
@@ -165,23 +183,22 @@ impl Type {
 
 impl Display for Type {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let base = if self.1.is_empty() {
-            self.0.clone()
+        let base = if self.type_args().is_empty() {
+            self.type_name().to_string()
         } else if self.is_type() {
-            self.1.first().unwrap().to_string()
+            self.type_args().clone().first().unwrap().to_string()
         } else {
-            let m = format!(
+            format!(
                 "{}<{}>",
-                self.0,
-                self.1
-                    .clone()
-                    .into_iter()
+                self.type_name(),
+                self.type_args()
+                    .iter()
                     .map(|typeref| typeref.to_string())
                     .collect::<Vec<String>>()
                     .join(", ")
-            );
-            m
+            )
         };
+
         f.write_fmt(format_args!("{}", base))
     }
 }

@@ -27,7 +27,7 @@ stmt_rule!(
                         // Check for empty list assignment
                         // Example:
                         // let a = [];
-                        if value_typeref.typeref == Type::list(Type::unknown()) {
+                        if value_typeref.of_type == Type::list(Type::unknown()) {
                             errs.push((EgonTypeError::UknownListType.into(), value_span.clone()));
                         }
                     }
@@ -40,7 +40,7 @@ stmt_rule!(
                             // Check for empty list assignment
                             // Example:
                             // let a: unknown;
-                            if assign_type.typeref.is_unknown() {
+                            if assign_type.of_type.is_unknown() {
                                 errs.push((
                                     EgonTypeError::UnknownType.into(),
                                     assign_type_span.clone()
@@ -62,28 +62,28 @@ stmt_rule!(
                         // Check for empty list assignment
                         // Example:
                         // let a: unknown;
-                        if assign_typeref.typeref.is_unknown() {
+                        if assign_typeref.of_type.is_unknown() {
                             errs.push((
                                 EgonTypeError::UnknownType.into(),
                                 assign_type_span.clone()
                             ));
                         } else if let Some(value_typeref) = resolve_expr(value_expr, value_span) {
                             // Types mismatched
-                            if assign_typeref.typeref != value_typeref.typeref {
+                            if assign_typeref.of_type != value_typeref.of_type {
                                 // Check for empty list assignment
                                 // Example:
                                 // let a: list<number> = [];
-                                if value_typeref.typeref == Type::list(Type::unknown())
-                                    && assign_typeref.typeref.is_known_list()
+                                if value_typeref.of_type == Type::list(Type::unknown())
+                                    && assign_typeref.of_type.is_known_list()
                                 {
                                     return vec![];
                                 }
 
-                                if value_typeref.typeref.0 == *"identifier" {
+                                if value_typeref.of_type.is_identifier() {
                                     let identifier = &stmt_assign.identifier.0.name;
 
                                     if let Some(identifier_type) = resolve_ident(identifier) {
-                                        if assign_typeref.typeref == identifier_type.typeref {
+                                        if assign_typeref.of_type == identifier_type.of_type {
                                             return vec![];
                                         }
                                     }
@@ -91,8 +91,8 @@ stmt_rule!(
 
                                 errs.push((
                                     EgonTypeError::MismatchType {
-                                        expected: assign_typeref.typeref.to_string(),
-                                        actual: value_typeref.typeref.to_string(),
+                                        expected: assign_typeref.of_type.to_string(),
+                                        actual: value_typeref.of_type.to_string(),
                                     }
                                     .into(),
                                     value_span.clone(),
@@ -101,8 +101,8 @@ stmt_rule!(
                                 // Check for empty list assignment
                                 // Example:
                                 // let a: list<unknown> = [];
-                                if value_typeref.typeref == Type::list(Type::unknown())
-                                    && assign_typeref.typeref.is_unknown_list()
+                                if value_typeref.of_type == Type::list(Type::unknown())
+                                    && assign_typeref.of_type.is_unknown_list()
                                 {
                                     errs.push((EgonTypeError::UknownListType.into(), span.clone()));
                                 }

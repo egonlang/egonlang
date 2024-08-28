@@ -6,6 +6,8 @@ edition = "2021"
 [dependencies]
 serde = { version = "1.0.195", features = ["derive"] }
 paste = "1.0.15"
+tracelog = { path = "../tracelog" }
+colored = "2"
 
 [dev-dependencies]
 pretty_assertions = "1.1.0"

@@ -1,14 +1,17 @@
 use egonlang_errors::EgonResultMultiSpannedErr;
 
-pub trait ResolveIdent: Fn(&str) -> Option<crate::TypeEnvValue> {}
+pub trait ResolveIdent: Fn(&str) -> Option<egonlang_types::type_env::TypeEnvValue> {}
 pub trait ResolveExpr:
-    Fn(&::egonlang_core::ast::Expr, &::span::Span) -> Option<crate::TypeEnvValue>
+    Fn(&::egonlang_core::ast::Expr, &::span::Span) -> Option<egonlang_types::type_env::TypeEnvValue>
 {
 }
 
-impl<F> ResolveIdent for F where F: Fn(&str) -> Option<crate::TypeEnvValue> {}
+impl<F> ResolveIdent for F where F: Fn(&str) -> Option<egonlang_types::type_env::TypeEnvValue> {}
 impl<F> ResolveExpr for F where
-    F: Fn(&::egonlang_core::ast::Expr, &::span::Span) -> Option<crate::TypeEnvValue>
+    F: Fn(
+        &::egonlang_core::ast::Expr,
+        &::span::Span,
+    ) -> Option<egonlang_types::type_env::TypeEnvValue>
 {
 }
 

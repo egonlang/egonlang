@@ -26,6 +26,7 @@
 - [core](./egonlang-core/): Library responsible for lexing, and parsing egon code
 - [errors](./egonlang-errors/): Shared errors used across egon crates
 - [diagnostics](./egonlang-diagnostics/): Library for mapping different types (e.g. errors) to diagnostics
+- [types](./egonlang-types/): Library for types and type envrionments
 - [verifier](./egonlang-verifier/): Library responsible verifying AST (e.g. syntax errors, type checking)
 - [lsp](./egonlang-lsp/) Language server
 - [cli](./egonlang-cli/): Command line tool to lex and parse egon code files 

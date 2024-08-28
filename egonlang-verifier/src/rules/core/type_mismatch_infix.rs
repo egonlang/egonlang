@@ -111,10 +111,10 @@ fn validate_infix_types(
     let mut errs = vec![];
 
     let (lt_expr, lt_span) = &infix.lt;
-    let lt_type = resolve_expr(lt_expr, lt_span).unwrap().typeref;
+    let lt_type = resolve_expr(lt_expr, lt_span).unwrap().of_type;
 
     let (rt_expr, rt_span) = &infix.rt;
-    let rt_type = resolve_expr(rt_expr, rt_span).unwrap().typeref;
+    let rt_type = resolve_expr(rt_expr, rt_span).unwrap().of_type;
 
     if lt_type != expected_type {
         errs.push((

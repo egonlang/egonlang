@@ -26,11 +26,11 @@ expr_rule!(
 
                 for (item, item_span) in &remaining_items {
                     if let Some(item_typeref) = resolve_expr(item, item_span) {
-                        if item_typeref.typeref != first_item_typeref.typeref {
+                        if item_typeref.of_type != first_item_typeref.of_type {
                             errs.push((
                                 EgonTypeError::MismatchType {
-                                    expected: first_item_typeref.typeref.to_string(),
-                                    actual: item_typeref.typeref.to_string(),
+                                    expected: first_item_typeref.of_type.to_string(),
+                                    actual: item_typeref.of_type.to_string(),
                                 }
                                 .into(),
                                 item_span.clone(),

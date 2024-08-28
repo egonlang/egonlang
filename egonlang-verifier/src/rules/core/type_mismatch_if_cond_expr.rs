@@ -16,7 +16,7 @@ expr_rule!(
 
         if let ast::Expr::If(if_expr) = expr {
             let (cond_expr, cond_span) = &if_expr.cond;
-            let cond_typeref = resolve_expr(cond_expr, cond_span).unwrap().typeref;
+            let cond_typeref = resolve_expr(cond_expr, cond_span).unwrap().of_type;
 
             if cond_typeref != Type::bool() {
                 errs.push((

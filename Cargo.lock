@@ -418,9 +418,11 @@ dependencies = [
 name = "egonlang-types"
 version = "0.1.0"
 dependencies = [
+ "colored",
  "paste",
  "pretty_assertions",
  "serde",
+ "tracelog",
 ]
 
 [[package]]

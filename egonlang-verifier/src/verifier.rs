@@ -1,21 +1,22 @@
 use colored::Colorize;
 use egonlang_core::prelude::*;
 use egonlang_errors::{EgonErrorS, EgonResultMultiSpannedErr, EgonTypeError};
-use egonlang_types::Type;
+use egonlang_types::{
+    type_env::{TypeEnv, TypeEnvValue},
+    Type,
+};
 use span::Span;
 
-use crate::{
-    rules::{self, ResolveExpr, ResolveIdent},
-    TypeEnv, TypeEnvValue,
-};
+use crate::rules::{self, ResolveExpr, ResolveIdent};
 
-/// Verify an AST [`Module`] using the registered [`Rule`] set
+/// Verify an AST [`Module`](egonlang_core::ast::Module) using the registered
+/// [`Rule`](crate::rules::Rule) set
 ///
 /// ```
 /// use egonlang_core::prelude::*;
 /// use egonlang_verifier::prelude::*;
 ///
-/// /// Verifier with the default [`Rule`] set
+/// // Verifier with the default rule set
 /// let verifier = Verifier::default();
 ///
 /// let mut module = parse("let a = 123;", 0).expect("Unable to parse");
@@ -26,33 +27,26 @@ use crate::{
 /// ```
 pub struct Verifier<'a> {
     rules: Vec<Box<dyn rules::Rule<'a>>>,
-    /// Type environments in a stack to support scopes
-    type_envs: Vec<TypeEnv>,
+    type_env: TypeEnv,
 }
 
 impl Default for Verifier<'_> {
-    /// Create a [`Verifier`] with the [`Rule`] set
+    /// Create a [`Verifier`] with the [`Rule`](crate::rules::Rule) set
     fn default() -> Self {
         Self::new().with_default_rules()
     }
 }
 
 impl<'a> Verifier<'a> {
-    /// Create a [`Verifier`] with no default [`Rule`] set
+    /// Create a [`Verifier`] with no default [`Rule`](crate::rules::Rule) set
     pub fn new() -> Self {
         Verifier {
             rules: Default::default(),
-            type_envs: vec![TypeEnv::new(0)],
+            type_env: TypeEnv::new(),
         }
     }
 
-    fn current_type_env_mut(&mut self) -> &mut TypeEnv {
-        self.type_envs
-            .last_mut()
-            .expect("Verifier setup without a type environment")
-    }
-
-    /// Register a [`Rule`]
+    /// Register a [`Rule`](crate::rules::Rule)
     ///
     /// ```ignore
     /// use egonlang_verifier::prelude::*;
@@ -63,7 +57,7 @@ impl<'a> Verifier<'a> {
         self.rules.push(Box::new(rule));
     }
 
-    /// Register the core language [`Rule`] set
+    /// Register the core language [`Rule`](crate::rules::Rule) set
     ///
     /// ```
     /// use egonlang_verifier::prelude::*;
@@ -93,7 +87,7 @@ impl<'a> Verifier<'a> {
         self
     }
 
-    /// Verify an AST [`Module`] using the registered [`Rule`] set
+    /// Verify an AST [`Module`](egonlang_core::ast::Module) using the registered [`Rule`](crate::rules::Rule) set
     pub fn verify(&mut self, module: &mut ast::Module) -> EgonResultMultiSpannedErr<()> {
         let mut all_errs: Vec<EgonErrorS> = vec![];
 
@@ -126,16 +120,11 @@ impl<'a> Verifier<'a> {
             identifier.to_string().cyan()
         );
 
-        for type_env in self.type_envs.iter().rev() {
-            if let Some(value) = type_env.get(identifier) {
-                return Some(value);
-            }
-        }
-
-        None
+        self.type_env.get(identifier)
     }
 
     /// Resolve an expression's type recursively.
+    ///
     /// This will resolve value identifiers types as well.
     ///
     /// Example
@@ -159,27 +148,27 @@ impl<'a> Verifier<'a> {
             }
             ast::Expr::List(list_expr) => {
                 if list_expr.items.is_empty() {
-                    return Some(TypeEnvValue::new(Type::unknown_list()));
+                    return Some(Type::unknown_list().into());
                 }
 
                 let (first_item_expr, _) = list_expr.items.first().unwrap().clone();
-                let first_item_type = self.resolve_expr_type(&first_item_expr)?.typeref;
+                let first_item_type = self.resolve_expr_type(&first_item_expr)?.of_type;
 
-                Some(TypeEnvValue::new(Type::list(first_item_type)))
+                Some(Type::list(first_item_type).into())
             }
             ast::Expr::Tuple(tuple_expr) => {
                 if tuple_expr.items.is_empty() {
-                    return Some(TypeEnvValue::new(Type::tuple(vec![])));
+                    return Some(Type::tuple(vec![]).into());
                 }
 
                 let item_types: Vec<Type> = tuple_expr
                     .items
                     .clone()
                     .into_iter()
-                    .map(|(x_expr, _)| self.resolve_expr_type(&x_expr).unwrap().typeref)
+                    .map(|(x_expr, _)| self.resolve_expr_type(&x_expr).unwrap().of_type)
                     .collect();
 
-                Some(TypeEnvValue::new(Type::tuple(item_types)))
+                Some(Type::tuple(item_types).into())
             }
             ast::Expr::Block(block_expr) => {
                 tracelog::tracelog!(
@@ -191,7 +180,7 @@ impl<'a> Verifier<'a> {
 
                 if let Some(block_typeref) = &block_expr.typeref {
                     return Some(TypeEnvValue {
-                        typeref: block_typeref.clone(),
+                        of_type: block_typeref.clone(),
                         is_const: true,
                     });
                 }
@@ -207,7 +196,7 @@ impl<'a> Verifier<'a> {
                         Type::unit().to_string().italic().yellow()
                     );
 
-                    return Some(TypeEnvValue::new(Type::unit()));
+                    return Some(Type::unit().into());
                 }
             }
             ast::Expr::Type(type_expr) => {
@@ -227,7 +216,7 @@ impl<'a> Verifier<'a> {
                         type_expr.to_string().italic().yellow()
                     );
 
-                    return Some(TypeEnvValue::new(type_expr.0.clone()));
+                    return Some(type_expr.0.clone().into());
                 }
 
                 if let Some(type_env_value) =
@@ -238,7 +227,7 @@ impl<'a> Verifier<'a> {
                         "(level: {}) Resolved type expression {} to type {}",
                         self.current_type_env_level(),
                         type_expr.to_string().cyan(),
-                        type_env_value.typeref.to_string().italic().yellow()
+                        type_env_value.of_type.to_string().italic().yellow()
                     );
 
                     return Some(type_env_value.clone());
@@ -268,46 +257,58 @@ impl<'a> Verifier<'a> {
 
                 Some(then_typeref)
             }
-            ast::Expr::Unit => Some(TypeEnvValue::new(Type::unit())),
-            ast::Expr::Literal(literal) => Some(TypeEnvValue::new(match literal {
-                ast::ExprLiteral::Bool(_) => Type::bool(),
-                ast::ExprLiteral::Number(_) => Type::number(),
-                ast::ExprLiteral::String(_) => Type::string(),
-            })),
-            ast::Expr::Infix(infix) => Some(TypeEnvValue::new(match infix.op {
-                ast::OpInfix::Add => Type::number(),
-                ast::OpInfix::Subtract => Type::number(),
-                ast::OpInfix::Multiply => Type::number(),
-                ast::OpInfix::Divide => Type::number(),
-                ast::OpInfix::Modulus => Type::number(),
-                ast::OpInfix::Less => Type::bool(),
-                ast::OpInfix::LessEqual => Type::bool(),
-                ast::OpInfix::Greater => Type::bool(),
-                ast::OpInfix::GreaterEqual => Type::bool(),
-                ast::OpInfix::Equal => Type::bool(),
-                ast::OpInfix::NotEqual => Type::bool(),
-                ast::OpInfix::LogicAnd => Type::bool(),
-                ast::OpInfix::LogicOr => Type::bool(),
-            })),
-            ast::Expr::Prefix(prefix) => Some(TypeEnvValue::new(match prefix.op {
-                ast::OpPrefix::Negate => Type::number(),
-                ast::OpPrefix::Not => Type::bool(),
-            })),
-            ast::Expr::Fn(fn_) => Some(TypeEnvValue::new(Type::function(
-                Type::tuple(
-                    fn_.params
-                        .clone()
-                        .into_iter()
-                        .map(|((_, typeref), _)| typeref)
-                        .collect(),
-                ),
-                fn_.return_type.clone().0,
-            ))),
-            ast::Expr::Range(_) => Some(TypeEnvValue::new(Type::range())),
+            ast::Expr::Unit => Some(Type::unit().into()),
+            ast::Expr::Literal(literal) => Some(
+                match literal {
+                    ast::ExprLiteral::Bool(_) => Type::bool(),
+                    ast::ExprLiteral::Number(_) => Type::number(),
+                    ast::ExprLiteral::String(_) => Type::string(),
+                }
+                .into(),
+            ),
+            ast::Expr::Infix(infix) => Some(
+                match infix.op {
+                    ast::OpInfix::Add => Type::number(),
+                    ast::OpInfix::Subtract => Type::number(),
+                    ast::OpInfix::Multiply => Type::number(),
+                    ast::OpInfix::Divide => Type::number(),
+                    ast::OpInfix::Modulus => Type::number(),
+                    ast::OpInfix::Less => Type::bool(),
+                    ast::OpInfix::LessEqual => Type::bool(),
+                    ast::OpInfix::Greater => Type::bool(),
+                    ast::OpInfix::GreaterEqual => Type::bool(),
+                    ast::OpInfix::Equal => Type::bool(),
+                    ast::OpInfix::NotEqual => Type::bool(),
+                    ast::OpInfix::LogicAnd => Type::bool(),
+                    ast::OpInfix::LogicOr => Type::bool(),
+                }
+                .into(),
+            ),
+            ast::Expr::Prefix(prefix) => Some(
+                match prefix.op {
+                    ast::OpPrefix::Negate => Type::number(),
+                    ast::OpPrefix::Not => Type::bool(),
+                }
+                .into(),
+            ),
+            ast::Expr::Fn(fn_) => Some(
+                Type::function(
+                    Type::tuple(
+                        fn_.params
+                            .clone()
+                            .into_iter()
+                            .map(|((_, typeref), _)| typeref)
+                            .collect(),
+                    ),
+                    fn_.return_type.clone().0,
+                )
+                .into(),
+            ),
+            ast::Expr::Range(_) => Some(Type::range().into()),
         };
 
         if let Some(resolved_type) = &resolved_type {
-            let resolved_type_string = format!("{}", resolved_type.typeref);
+            let resolved_type_string = format!("{}", resolved_type.of_type);
 
             tracelog::tracelog!(
                 label = verifier,resolve_expr_type;
@@ -370,10 +371,10 @@ impl<'a> Verifier<'a> {
                     (None, Some((value_expr, value_span))) => {
                         let value_typeref = self.visit_expr(value_expr, value_span)?;
 
-                        self.current_type_env_mut().set(
+                        self.type_env.set(
                             &stmt_assign.identifier.0.name,
                             TypeEnvValue {
-                                typeref: value_typeref.typeref,
+                                of_type: value_typeref.of_type,
                                 is_const: stmt_assign.is_const,
                             },
                         );
@@ -381,10 +382,10 @@ impl<'a> Verifier<'a> {
                     (Some((type_expr, type_span)), None) => {
                         match self.visit_expr(type_expr, type_span) {
                             Ok(type_typeref) => {
-                                self.current_type_env_mut().set(
+                                self.type_env.set(
                                     &stmt_assign.identifier.0.name,
                                     TypeEnvValue {
-                                        typeref: type_typeref.typeref,
+                                        of_type: type_typeref.of_type,
                                         is_const: stmt_assign.is_const,
                                     },
                                 );
@@ -399,10 +400,10 @@ impl<'a> Verifier<'a> {
                             Ok(type_typeref) => {
                                 self.visit_expr(value_expr, value_span)?;
 
-                                self.current_type_env_mut().set(
+                                self.type_env.set(
                                     &stmt_assign.identifier.0.name,
                                     TypeEnvValue {
-                                        typeref: type_typeref.typeref,
+                                        of_type: type_typeref.of_type,
                                         is_const: stmt_assign.is_const,
                                     },
                                 );
@@ -426,12 +427,9 @@ impl<'a> Verifier<'a> {
                 let alias = &stmt_type_alias.alias;
                 let value = self
                     .resolve_identifier(&stmt_type_alias.value.0.to_string())
-                    .unwrap_or(TypeEnvValue {
-                        typeref: stmt_type_alias.value.0.clone(),
-                        is_const: true,
-                    });
+                    .unwrap_or(stmt_type_alias.value.0.clone().into());
 
-                self.current_type_env_mut().set(&alias.0.name, value);
+                self.type_env.set(&alias.0.name, value);
 
                 Ok(())
             }
@@ -638,10 +636,10 @@ impl<'a> Verifier<'a> {
                             tracelog::tracelog!(
                                 label = verifier,visit_expr,block,return_stmt;
                                 "caching return value: {}",
-                                v.typeref.to_string().yellow().italic()
+                                v.of_type.to_string().yellow().italic()
                             );
 
-                            return_stmt_type = Some(v.typeref);
+                            return_stmt_type = Some(v.of_type);
                         }
                     }
 
@@ -674,7 +672,7 @@ impl<'a> Verifier<'a> {
                                     label = verifier,visit_expr,block;
                                     "{} resolved to type of {}",
                                     expr_string,
-                                    return_type.typeref.to_string().yellow().italic()
+                                    return_type.of_type.to_string().yellow().italic()
                                 );
 
                                 // Record the block's returning expression
@@ -687,7 +685,7 @@ impl<'a> Verifier<'a> {
                                 //   b
                                 // };
                                 // ```
-                                block_expr.typeref = Some(return_type.typeref.clone());
+                                block_expr.typeref = Some(return_type.of_type.clone());
 
                                 Ok(return_type)
                             }
@@ -712,16 +710,10 @@ impl<'a> Verifier<'a> {
                         }
 
                         if let Some(block_return_type) = &block_expr.typeref {
-                            return Ok(TypeEnvValue {
-                                typeref: block_return_type.clone(),
-                                is_const: true,
-                            });
+                            return Ok(block_return_type.clone().into());
                         }
 
-                        Ok(TypeEnvValue {
-                            typeref: Type::unit(),
-                            is_const: true,
-                        })
+                        Ok(Type::unit().into())
                     }
                 }
             }
@@ -803,58 +795,19 @@ impl<'a> Verifier<'a> {
                 }
 
                 Ok(match infix_expr.op {
-                    ast::OpInfix::Add => TypeEnvValue {
-                        typeref: Type::number(),
-                        is_const: true,
-                    },
-                    ast::OpInfix::Subtract => TypeEnvValue {
-                        typeref: Type::number(),
-                        is_const: true,
-                    },
-                    ast::OpInfix::Multiply => TypeEnvValue {
-                        typeref: Type::number(),
-                        is_const: true,
-                    },
-                    ast::OpInfix::Divide => TypeEnvValue {
-                        typeref: Type::number(),
-                        is_const: true,
-                    },
-                    ast::OpInfix::Modulus => TypeEnvValue {
-                        typeref: Type::number(),
-                        is_const: true,
-                    },
-                    ast::OpInfix::Less => TypeEnvValue {
-                        typeref: Type::bool(),
-                        is_const: true,
-                    },
-                    ast::OpInfix::LessEqual => TypeEnvValue {
-                        typeref: Type::bool(),
-                        is_const: true,
-                    },
-                    ast::OpInfix::Greater => TypeEnvValue {
-                        typeref: Type::bool(),
-                        is_const: true,
-                    },
-                    ast::OpInfix::GreaterEqual => TypeEnvValue {
-                        typeref: Type::bool(),
-                        is_const: true,
-                    },
-                    ast::OpInfix::Equal => TypeEnvValue {
-                        typeref: Type::bool(),
-                        is_const: true,
-                    },
-                    ast::OpInfix::NotEqual => TypeEnvValue {
-                        typeref: Type::bool(),
-                        is_const: true,
-                    },
-                    ast::OpInfix::LogicAnd => TypeEnvValue {
-                        typeref: Type::bool(),
-                        is_const: true,
-                    },
-                    ast::OpInfix::LogicOr => TypeEnvValue {
-                        typeref: Type::bool(),
-                        is_const: true,
-                    },
+                    ast::OpInfix::Add => Type::number().into(),
+                    ast::OpInfix::Subtract => Type::number().into(),
+                    ast::OpInfix::Multiply => Type::number().into(),
+                    ast::OpInfix::Divide => Type::number().into(),
+                    ast::OpInfix::Modulus => Type::number().into(),
+                    ast::OpInfix::Less => Type::bool().into(),
+                    ast::OpInfix::LessEqual => Type::bool().into(),
+                    ast::OpInfix::Greater => Type::bool().into(),
+                    ast::OpInfix::GreaterEqual => Type::bool().into(),
+                    ast::OpInfix::Equal => Type::bool().into(),
+                    ast::OpInfix::NotEqual => Type::bool().into(),
+                    ast::OpInfix::LogicAnd => Type::bool().into(),
+                    ast::OpInfix::LogicOr => Type::bool().into(),
                 })
             }
             ast::Expr::Prefix(prefix_expr) => {
@@ -898,10 +851,10 @@ impl<'a> Verifier<'a> {
 
                     param_types.push(type_ref.clone());
 
-                    self.current_type_env_mut().set(
+                    self.type_env.set(
                         name,
                         TypeEnvValue {
-                            typeref: type_ref.clone(),
+                            of_type: type_ref.clone(),
                             is_const: true,
                         },
                     );
@@ -922,10 +875,7 @@ impl<'a> Verifier<'a> {
                             return Err(errs);
                         }
 
-                        Ok(TypeEnvValue {
-                            typeref: Type::function(Type::tuple(param_types), body_type.typeref),
-                            is_const: true,
-                        })
+                        Ok(Type::function(Type::tuple(param_types), body_type.of_type).into())
                     }
                     Err(body_errs) => {
                         let mut errs: Vec<EgonErrorS> = vec![];
@@ -993,23 +943,11 @@ impl<'a> Verifier<'a> {
                     Err(cond_errs) => Err(cond_errs),
                 }
             }
-            ast::Expr::Unit => Ok(TypeEnvValue {
-                typeref: Type::unit(),
-                is_const: true,
-            }),
+            ast::Expr::Unit => Ok(Type::unit().into()),
             ast::Expr::Literal(literal_expr) => Ok(match literal_expr {
-                ast::ExprLiteral::Bool(_) => TypeEnvValue {
-                    typeref: Type::bool(),
-                    is_const: true,
-                },
-                ast::ExprLiteral::Number(_) => TypeEnvValue {
-                    typeref: Type::number(),
-                    is_const: true,
-                },
-                ast::ExprLiteral::String(_) => TypeEnvValue {
-                    typeref: Type::string(),
-                    is_const: true,
-                },
+                ast::ExprLiteral::Bool(_) => Type::bool().into(),
+                ast::ExprLiteral::Number(_) => Type::number().into(),
+                ast::ExprLiteral::String(_) => Type::string().into(),
             }),
             ast::Expr::Identifier(ident_expr) => {
                 //
@@ -1029,17 +967,11 @@ impl<'a> Verifier<'a> {
                 );
 
                 if list_expr.items.is_empty() {
-                    return Ok(TypeEnvValue {
-                        typeref: Type::list(Type::unknown()),
-                        is_const: true,
-                    });
+                    return Ok(Type::list(Type::unknown()).into());
                 }
 
                 let mut errs: Vec<EgonErrorS> = vec![];
-                let mut first_item_type = TypeEnvValue {
-                    typeref: Type::unknown(),
-                    is_const: true,
-                };
+                let mut first_item_type = Type::unknown().into();
 
                 for (i, (item_expr, item_span)) in list_expr.items.iter_mut().enumerate() {
                     match self.visit_expr(item_expr, item_span) {
@@ -1063,10 +995,7 @@ impl<'a> Verifier<'a> {
                     return Err(errs);
                 }
 
-                let t = TypeEnvValue {
-                    typeref: Type::list(first_item_type.typeref),
-                    is_const: false,
-                };
+                let t = Type::list(first_item_type.of_type).into();
 
                 Ok(t)
             }
@@ -1077,7 +1006,7 @@ impl<'a> Verifier<'a> {
                 for (item_expr, item_span) in &mut tuple_expr.items {
                     match self.visit_expr(item_expr, item_span) {
                         Ok(item_type) => {
-                            item_types.push(item_type.typeref.clone());
+                            item_types.push(item_type.of_type.clone());
                         }
                         Err(item_errs) => {
                             item_types.push(Type::unknown());
@@ -1093,10 +1022,7 @@ impl<'a> Verifier<'a> {
                     return Err(errs);
                 }
 
-                Ok(TypeEnvValue {
-                    typeref: Type::tuple(item_types.clone()),
-                    is_const: false,
-                })
+                Ok(Type::tuple(item_types.clone()).into())
             }
             ast::Expr::Range(_) => {
                 let mut errs: Vec<EgonErrorS> = vec![];
@@ -1108,10 +1034,7 @@ impl<'a> Verifier<'a> {
                     return Err(errs);
                 }
 
-                Ok(TypeEnvValue {
-                    typeref: Type::range(),
-                    is_const: false,
-                })
+                Ok(Type::range().into())
             }
             ast::Expr::Type(type_expr) => {
                 tracelog::tracelog!(
@@ -1140,10 +1063,7 @@ impl<'a> Verifier<'a> {
                     }
                     None => {
                         if typeref.is_builtin() {
-                            Ok(TypeEnvValue {
-                                typeref: typeref.clone(),
-                                is_const: true,
-                            })
+                            Ok(typeref.clone().into())
                         } else {
                             Err(vec![(
                                 EgonTypeError::Undefined(typeref_ident.to_string()).into(),
@@ -1158,9 +1078,7 @@ impl<'a> Verifier<'a> {
 
     /// Start new type environment scope
     fn start_new_type_env(&mut self) {
-        self.type_envs.push(TypeEnv::new(self.type_envs.len()));
-
-        let level = self.current_type_env_level();
+        let level = self.type_env.start_scope();
 
         tracelog::tracelog!(
             label = verifier,start_new_type_env;
@@ -1177,11 +1095,11 @@ impl<'a> Verifier<'a> {
             "Ending type environment (new level: {level})"
         );
 
-        self.type_envs.pop();
+        let _ = self.type_env.end_scope();
     }
 
     fn current_type_env_level(&self) -> usize {
-        self.type_envs.len() - 1
+        self.type_env.get_scope_depth()
     }
 }
 
