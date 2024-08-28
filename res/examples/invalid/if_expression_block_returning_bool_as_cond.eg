@@ -1,5 +1,5 @@
 if { true } { 123 } else { 456 };
 
-// out: SyntaxError: unexpected "{"; expected: ["\"!\"", "\"(\"", "\"-\"", "\"..\"", "\"[\"", "\"false\"", "\"true\"", "identifier", "number", "string"]
-// out: SyntaxError: unexpected "{"; expected: ["\")\"", "\",\"", "\";\"", "\"]\"", "\"}\""]
-// out: SyntaxError: unexpected "else"; expected: ["\")\"", "\",\"", "\";\"", "\"]\"", "\"}\""]
+// out: SyntaxError: unexpected "{"; expected: ["\"[\"", "\"(\"", "\"..\"", "\"-\"", "\"!\"", "\"true\"", "\"false\"", "identifier", "string", "number"]
+// out: SyntaxError: unexpected "{"; expected: ["\";\""]
+// out: SyntaxError: unexpected "else"; expected: ["\";\""]

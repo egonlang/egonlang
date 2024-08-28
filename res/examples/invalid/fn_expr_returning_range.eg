@@ -1,3 +1,3 @@
 (a: number, b: number): range => 1..10;
 
-// out: SyntaxError: unexpected "1"; expected: ["\"(\"", "\"{\""]
+// out: SyntaxError: unexpected "1"; expected: ["\"{\"", "\"(\""]
