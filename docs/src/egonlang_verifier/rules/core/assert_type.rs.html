@@ -34,11 +34,11 @@
     <span class="kw">if let </span>Stmt::AssertType(x) = stmt {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(value_type) = resolve_expr(<span class="kw-2">&amp;</span>x.value.<span class="number">0</span>, <span class="kw-2">&amp;</span>x.value.<span class="number">1</span>) {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(expected_type_type) = resolve_expr(<span class="kw-2">&amp;</span>x.expected_type.<span class="number">0</span>, <span class="kw-2">&amp;</span>x.expected_type.<span class="number">1</span>) {
-                <span class="kw">if </span>value_type.typeref != expected_type_type.typeref {
+                <span class="kw">if </span>value_type.of_type != expected_type_type.of_type {
                     errs.push((
                         EgonTypeError::MismatchType {
-                            expected: expected_type_type.typeref.to_string(),
-                            actual: value_type.typeref.to_string(),
+                            expected: expected_type_type.of_type.to_string(),
+                            actual: value_type.of_type.to_string(),
                         }
                         .into(),
                         span.clone(),

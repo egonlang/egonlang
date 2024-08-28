@@ -555,31 +555,66 @@
 <a href="#555" id="555">555</a>
 <a href="#556" id="556">556</a>
 <a href="#557" id="557">557</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::{<span class="self">self</span>, Display, Formatter};
+<a href="#558" id="558">558</a>
+<a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
+</pre></div><pre class="rust"><code><span class="kw">pub mod </span>type_env;
+
+<span class="kw">use </span>std::fmt::{<span class="self">self</span>, Display, Formatter};
 
 <span class="kw">use </span>serde::{Deserialize, Serialize};
+<span class="kw">use </span>type_env::TypeEnvValue;
 
 <span class="doccomment">/// Type in the Egon language
 </span><span class="attr">#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 </span><span class="kw">pub struct </span>Type(<span class="kw">pub </span>String, <span class="kw">pub </span>Vec&lt;Type&gt;);
 
+<span class="kw">impl </span>From&lt;Type&gt; <span class="kw">for </span>TypeEnvValue {
+    <span class="kw">fn </span>from(value: Type) -&gt; <span class="self">Self </span>{
+        TypeEnvValue {
+            of_type: value,
+            is_const: <span class="bool-val">true</span>,
+        }
+    }
+}
+
 <span class="kw">impl </span>Type {
+    <span class="kw">pub fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0
+    </span>}
+
+    <span class="kw">pub fn </span>type_args(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Vec&lt;Type&gt; {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">1
+    </span>}
+
     <span class="doccomment">/// Is this type a type?
     </span><span class="kw">pub fn </span>is_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.<span class="number">0 </span>== <span class="kw-2">*</span><span class="string">"type"
+        <span class="self">self</span>.type_name() == <span class="string">"type"
     </span>}
 
     <span class="doccomment">/// Is this type a list?
     </span><span class="kw">pub fn </span>is_list(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.<span class="number">0 </span>== <span class="kw-2">*</span><span class="string">"list"
+        <span class="self">self</span>.type_name() == <span class="string">"list"
     </span>}
 
     <span class="doccomment">/// Is this type a list with a known value type?
     </span><span class="kw">pub fn </span>is_known_list(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="kw">if </span><span class="self">self</span>.is_list() {
-            <span class="kw">let </span>f = <span class="self">self</span>.<span class="number">1</span>.first().unwrap();
-
-            Type::unknown() != <span class="kw-2">*</span>f
+            Type::unknown() != <span class="kw-2">*</span><span class="self">self</span>.type_args().first().unwrap()
         } <span class="kw">else </span>{
             <span class="bool-val">false
         </span>}
@@ -587,7 +622,7 @@
 
     <span class="doccomment">/// Is this type unknown?
     </span><span class="kw">pub fn </span>is_unknown(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.<span class="number">0 </span>== <span class="kw-2">*</span><span class="string">"unknown"
+        <span class="self">self</span>.type_name() == <span class="string">"unknown"
     </span>}
 
     <span class="doccomment">/// Is this type a list with a unknown value type?
@@ -621,43 +656,43 @@
 
     <span class="doccomment">/// Is this type a bool type?
     </span><span class="kw">pub fn </span>is_bool(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="string">"bool" </span>== <span class="self">self</span>.<span class="number">0
-    </span>}
+        <span class="string">"bool" </span>== <span class="self">self</span>.type_name()
+    }
 
     <span class="doccomment">/// Is this type a number type?
     </span><span class="kw">pub fn </span>is_number(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="string">"number" </span>== <span class="self">self</span>.<span class="number">0
-    </span>}
+        <span class="string">"number" </span>== <span class="self">self</span>.type_name()
+    }
 
     <span class="doccomment">/// Is this type a string type?
     </span><span class="kw">pub fn </span>is_string(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="string">"string" </span>== <span class="self">self</span>.<span class="number">0
-    </span>}
+        <span class="string">"string" </span>== <span class="self">self</span>.type_name()
+    }
 
     <span class="doccomment">/// Is this type a tuple type?
     </span><span class="kw">pub fn </span>is_tuple(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="string">"tuple" </span>== <span class="self">self</span>.<span class="number">0
-    </span>}
+        <span class="string">"tuple" </span>== <span class="self">self</span>.type_name()
+    }
 
     <span class="doccomment">/// Is this type a range type?
     </span><span class="kw">pub fn </span>is_range(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="string">"range" </span>== <span class="self">self</span>.<span class="number">0
-    </span>}
+        <span class="string">"range" </span>== <span class="self">self</span>.type_name()
+    }
 
     <span class="doccomment">/// Is this type a function type?
     </span><span class="kw">pub fn </span>is_function(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="string">"function" </span>== <span class="self">self</span>.<span class="number">0
-    </span>}
+        <span class="string">"function" </span>== <span class="self">self</span>.type_name()
+    }
 
     <span class="doccomment">/// Is this type the unit type?
     </span><span class="kw">pub fn </span>is_unit(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="string">"()" </span>== <span class="self">self</span>.<span class="number">0
-    </span>}
+        <span class="string">"()" </span>== <span class="self">self</span>.type_name()
+    }
 
     <span class="doccomment">/// Is this type an identifier type?
     </span><span class="kw">pub fn </span>is_identifier(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="string">"identifier" </span>== <span class="self">self</span>.<span class="number">0
-    </span>}
+        <span class="string">"identifier" </span>== <span class="self">self</span>.type_name()
+    }
 
     <span class="doccomment">/// Create a `string` type instance
     </span><span class="kw">pub fn </span>string() -&gt; Type {
@@ -722,23 +757,22 @@
 
 <span class="kw">impl </span>Display <span class="kw">for </span>Type {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
-        <span class="kw">let </span>base = <span class="kw">if </span><span class="self">self</span>.<span class="number">1</span>.is_empty() {
-            <span class="self">self</span>.<span class="number">0</span>.clone()
+        <span class="kw">let </span>base = <span class="kw">if </span><span class="self">self</span>.type_args().is_empty() {
+            <span class="self">self</span>.type_name().to_string()
         } <span class="kw">else if </span><span class="self">self</span>.is_type() {
-            <span class="self">self</span>.<span class="number">1</span>.first().unwrap().to_string()
+            <span class="self">self</span>.type_args().clone().first().unwrap().to_string()
         } <span class="kw">else </span>{
-            <span class="kw">let </span>m = <span class="macro">format!</span>(
+            <span class="macro">format!</span>(
                 <span class="string">"{}&lt;{}&gt;"</span>,
-                <span class="self">self</span>.<span class="number">0</span>,
-                <span class="self">self</span>.<span class="number">1
-                    </span>.clone()
-                    .into_iter()
+                <span class="self">self</span>.type_name(),
+                <span class="self">self</span>.type_args()
+                    .iter()
                     .map(|typeref| typeref.to_string())
                     .collect::&lt;Vec&lt;String&gt;&gt;()
                     .join(<span class="string">", "</span>)
-            );
-            m
+            )
         };
+
         f.write_fmt(<span class="macro">format_args!</span>(<span class="string">"{}"</span>, base))
     }
 }

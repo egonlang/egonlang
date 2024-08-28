@@ -187,7 +187,7 @@
                         <span class="comment">// Check for empty list assignment
                         // Example:
                         // let a = [];
-                        </span><span class="kw">if </span>value_typeref.typeref == Type::list(Type::unknown()) {
+                        </span><span class="kw">if </span>value_typeref.of_type == Type::list(Type::unknown()) {
                             errs.push((EgonTypeError::UknownListType.into(), value_span.clone()));
                         }
                     }
@@ -200,7 +200,7 @@
                             <span class="comment">// Check for empty list assignment
                             // Example:
                             // let a: unknown;
-                            </span><span class="kw">if </span>assign_type.typeref.is_unknown() {
+                            </span><span class="kw">if </span>assign_type.of_type.is_unknown() {
                                 errs.push((
                                     EgonTypeError::UnknownType.into(),
                                     assign_type_span.clone()
@@ -222,28 +222,28 @@
                         <span class="comment">// Check for empty list assignment
                         // Example:
                         // let a: unknown;
-                        </span><span class="kw">if </span>assign_typeref.typeref.is_unknown() {
+                        </span><span class="kw">if </span>assign_typeref.of_type.is_unknown() {
                             errs.push((
                                 EgonTypeError::UnknownType.into(),
                                 assign_type_span.clone()
                             ));
                         } <span class="kw">else if let </span><span class="prelude-val">Some</span>(value_typeref) = resolve_expr(value_expr, value_span) {
                             <span class="comment">// Types mismatched
-                            </span><span class="kw">if </span>assign_typeref.typeref != value_typeref.typeref {
+                            </span><span class="kw">if </span>assign_typeref.of_type != value_typeref.of_type {
                                 <span class="comment">// Check for empty list assignment
                                 // Example:
                                 // let a: list&lt;number&gt; = [];
-                                </span><span class="kw">if </span>value_typeref.typeref == Type::list(Type::unknown())
-                                    &amp;&amp; assign_typeref.typeref.is_known_list()
+                                </span><span class="kw">if </span>value_typeref.of_type == Type::list(Type::unknown())
+                                    &amp;&amp; assign_typeref.of_type.is_known_list()
                                 {
                                     <span class="kw">return </span><span class="macro">vec!</span>[];
                                 }
 
-                                <span class="kw">if </span>value_typeref.typeref.<span class="number">0 </span>== <span class="kw-2">*</span><span class="string">"identifier" </span>{
+                                <span class="kw">if </span>value_typeref.of_type.is_identifier() {
                                     <span class="kw">let </span>identifier = <span class="kw-2">&amp;</span>stmt_assign.identifier.<span class="number">0</span>.name;
 
                                     <span class="kw">if let </span><span class="prelude-val">Some</span>(identifier_type) = resolve_ident(identifier) {
-                                        <span class="kw">if </span>assign_typeref.typeref == identifier_type.typeref {
+                                        <span class="kw">if </span>assign_typeref.of_type == identifier_type.of_type {
                                             <span class="kw">return </span><span class="macro">vec!</span>[];
                                         }
                                     }
@@ -251,8 +251,8 @@
 
                                 errs.push((
                                     EgonTypeError::MismatchType {
-                                        expected: assign_typeref.typeref.to_string(),
-                                        actual: value_typeref.typeref.to_string(),
+                                        expected: assign_typeref.of_type.to_string(),
+                                        actual: value_typeref.of_type.to_string(),
                                     }
                                     .into(),
                                     value_span.clone(),
@@ -261,8 +261,8 @@
                                 <span class="comment">// Check for empty list assignment
                                 // Example:
                                 // let a: list&lt;unknown&gt; = [];
-                                </span><span class="kw">if </span>value_typeref.typeref == Type::list(Type::unknown())
-                                    &amp;&amp; assign_typeref.typeref.is_unknown_list()
+                                </span><span class="kw">if </span>value_typeref.of_type == Type::list(Type::unknown())
+                                    &amp;&amp; assign_typeref.of_type.is_unknown_list()
                                 {
                                     errs.push((EgonTypeError::UknownListType.into(), span.clone()));
                                 }

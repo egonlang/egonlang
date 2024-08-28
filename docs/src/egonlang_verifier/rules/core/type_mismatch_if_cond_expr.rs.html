@@ -241,7 +241,7 @@
 
         <span class="kw">if let </span>ast::Expr::If(if_expr) = expr {
             <span class="kw">let </span>(cond_expr, cond_span) = <span class="kw-2">&amp;</span>if_expr.cond;
-            <span class="kw">let </span>cond_typeref = resolve_expr(cond_expr, cond_span).unwrap().typeref;
+            <span class="kw">let </span>cond_typeref = resolve_expr(cond_expr, cond_span).unwrap().of_type;
 
             <span class="kw">if </span>cond_typeref != Type::bool() {
                 errs.push((

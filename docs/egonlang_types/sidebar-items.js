@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":["egon_bool","egon_fn","egon_identifier","egon_list","egon_number","egon_range","egon_string","egon_tuple","egon_unit","egon_unknown"],"struct":["Type"]};
+window.SIDEBAR_ITEMS = {"macro":["egon_bool","egon_fn","egon_identifier","egon_list","egon_number","egon_range","egon_string","egon_tuple","egon_unit","egon_unknown"],"mod":["type_env"],"struct":["Type"]};

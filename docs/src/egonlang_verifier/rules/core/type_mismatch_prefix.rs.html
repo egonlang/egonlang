@@ -142,11 +142,11 @@
                     <span class="kw">let </span>(value_expr, value_span) = <span class="kw-2">&amp;</span>prefix_expr.rt;
                     <span class="kw">let </span>value_typeref = resolve_expr(value_expr, value_span).unwrap();
 
-                    <span class="kw">if </span>value_typeref.typeref != Type::number() {
+                    <span class="kw">if </span>value_typeref.of_type != Type::number() {
                         errs.push((
                             EgonTypeError::MismatchType {
                                 expected: Type::number().to_string(),
-                                actual: value_typeref.typeref.to_string(),
+                                actual: value_typeref.of_type.to_string(),
                             }
                             .into(),
                             value_span.clone(),
@@ -157,11 +157,11 @@
                     <span class="kw">let </span>(value_expr, value_span) = <span class="kw-2">&amp;</span>prefix_expr.rt;
                     <span class="kw">let </span>value_typeref = resolve_expr(value_expr, value_span).unwrap();
 
-                    <span class="kw">if </span>value_typeref.typeref != Type::bool() {
+                    <span class="kw">if </span>value_typeref.of_type != Type::bool() {
                         errs.push((
                             EgonTypeError::MismatchType {
                                 expected: Type::bool().to_string(),
-                                actual: value_typeref.typeref.to_string(),
+                                actual: value_typeref.of_type.to_string(),
                             }
                             .into(),
                             value_span.clone(),

@@ -321,10 +321,10 @@
     <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
 
     <span class="kw">let </span>(lt_expr, lt_span) = <span class="kw-2">&amp;</span>infix.lt;
-    <span class="kw">let </span>lt_type = resolve_expr(lt_expr, lt_span).unwrap().typeref;
+    <span class="kw">let </span>lt_type = resolve_expr(lt_expr, lt_span).unwrap().of_type;
 
     <span class="kw">let </span>(rt_expr, rt_span) = <span class="kw-2">&amp;</span>infix.rt;
-    <span class="kw">let </span>rt_type = resolve_expr(rt_expr, rt_span).unwrap().typeref;
+    <span class="kw">let </span>rt_type = resolve_expr(rt_expr, rt_span).unwrap().of_type;
 
     <span class="kw">if </span>lt_type != expected_type {
         errs.push((

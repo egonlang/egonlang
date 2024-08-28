@@ -266,17 +266,23 @@
 <a href="#266" id="266">266</a>
 <a href="#267" id="267">267</a>
 <a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>egonlang_errors::EgonResultMultiSpannedErr;
 
-<span class="kw">pub trait </span>ResolveIdent: Fn(<span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::TypeEnvValue&gt; {}
+<span class="kw">pub trait </span>ResolveIdent: Fn(<span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;egonlang_types::type_env::TypeEnvValue&gt; {}
 <span class="kw">pub trait </span>ResolveExpr:
-    Fn(<span class="kw-2">&amp;</span>::egonlang_core::ast::Expr, <span class="kw-2">&amp;</span>::span::Span) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::TypeEnvValue&gt;
+    Fn(<span class="kw-2">&amp;</span>::egonlang_core::ast::Expr, <span class="kw-2">&amp;</span>::span::Span) -&gt; <span class="prelude-ty">Option</span>&lt;egonlang_types::type_env::TypeEnvValue&gt;
 {
 }
 
-<span class="kw">impl</span>&lt;F&gt; ResolveIdent <span class="kw">for </span>F <span class="kw">where </span>F: Fn(<span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::TypeEnvValue&gt; {}
+<span class="kw">impl</span>&lt;F&gt; ResolveIdent <span class="kw">for </span>F <span class="kw">where </span>F: Fn(<span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;egonlang_types::type_env::TypeEnvValue&gt; {}
 <span class="kw">impl</span>&lt;F&gt; ResolveExpr <span class="kw">for </span>F <span class="kw">where
-    </span>F: Fn(<span class="kw-2">&amp;</span>::egonlang_core::ast::Expr, <span class="kw-2">&amp;</span>::span::Span) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::TypeEnvValue&gt;
+    </span>F: Fn(
+        <span class="kw-2">&amp;</span>::egonlang_core::ast::Expr,
+        <span class="kw-2">&amp;</span>::span::Span,
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;egonlang_types::type_env::TypeEnvValue&gt;
 {
 }
 

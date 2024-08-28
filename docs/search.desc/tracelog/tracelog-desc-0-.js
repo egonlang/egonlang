@@ -1,1 +1,1 @@
-searchState.loadedDescShard("tracelog", 0, "")
+searchState.loadedDescShard("tracelog", 0, "Log a message with tracing info attached")

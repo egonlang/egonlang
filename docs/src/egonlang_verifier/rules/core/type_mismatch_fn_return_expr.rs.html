@@ -141,11 +141,11 @@
                 <span class="prelude-val">Some</span>(body_typeref) =&gt; {
                     <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
 
-                    <span class="kw">if </span>body_typeref.typeref != <span class="kw-2">*</span>fn_return_type_typeref {
+                    <span class="kw">if </span>body_typeref.of_type != <span class="kw-2">*</span>fn_return_type_typeref {
                         errs.push((
                             EgonTypeError::MismatchType {
                                 expected: fn_return_type_typeref.to_string(),
-                                actual: body_typeref.typeref.to_string(),
+                                actual: body_typeref.of_type.to_string(),
                             }
                             .into(),
                             body_span.clone(),

@@ -2152,106 +2152,25 @@
 <a href="#2152" id="2152">2152</a>
 <a href="#2153" id="2153">2153</a>
 <a href="#2154" id="2154">2154</a>
-<a href="#2155" id="2155">2155</a>
-<a href="#2156" id="2156">2156</a>
-<a href="#2157" id="2157">2157</a>
-<a href="#2158" id="2158">2158</a>
-<a href="#2159" id="2159">2159</a>
-<a href="#2160" id="2160">2160</a>
-<a href="#2161" id="2161">2161</a>
-<a href="#2162" id="2162">2162</a>
-<a href="#2163" id="2163">2163</a>
-<a href="#2164" id="2164">2164</a>
-<a href="#2165" id="2165">2165</a>
-<a href="#2166" id="2166">2166</a>
-<a href="#2167" id="2167">2167</a>
-<a href="#2168" id="2168">2168</a>
-<a href="#2169" id="2169">2169</a>
-<a href="#2170" id="2170">2170</a>
-<a href="#2171" id="2171">2171</a>
-<a href="#2172" id="2172">2172</a>
-<a href="#2173" id="2173">2173</a>
-<a href="#2174" id="2174">2174</a>
-<a href="#2175" id="2175">2175</a>
-<a href="#2176" id="2176">2176</a>
-<a href="#2177" id="2177">2177</a>
-<a href="#2178" id="2178">2178</a>
-<a href="#2179" id="2179">2179</a>
-<a href="#2180" id="2180">2180</a>
-<a href="#2181" id="2181">2181</a>
-<a href="#2182" id="2182">2182</a>
-<a href="#2183" id="2183">2183</a>
-<a href="#2184" id="2184">2184</a>
-<a href="#2185" id="2185">2185</a>
-<a href="#2186" id="2186">2186</a>
-<a href="#2187" id="2187">2187</a>
-<a href="#2188" id="2188">2188</a>
-<a href="#2189" id="2189">2189</a>
-<a href="#2190" id="2190">2190</a>
-<a href="#2191" id="2191">2191</a>
-<a href="#2192" id="2192">2192</a>
-<a href="#2193" id="2193">2193</a>
-<a href="#2194" id="2194">2194</a>
-<a href="#2195" id="2195">2195</a>
-<a href="#2196" id="2196">2196</a>
-<a href="#2197" id="2197">2197</a>
-<a href="#2198" id="2198">2198</a>
-<a href="#2199" id="2199">2199</a>
-<a href="#2200" id="2200">2200</a>
-<a href="#2201" id="2201">2201</a>
-<a href="#2202" id="2202">2202</a>
-<a href="#2203" id="2203">2203</a>
-<a href="#2204" id="2204">2204</a>
-<a href="#2205" id="2205">2205</a>
-<a href="#2206" id="2206">2206</a>
-<a href="#2207" id="2207">2207</a>
-<a href="#2208" id="2208">2208</a>
-<a href="#2209" id="2209">2209</a>
-<a href="#2210" id="2210">2210</a>
-<a href="#2211" id="2211">2211</a>
-<a href="#2212" id="2212">2212</a>
-<a href="#2213" id="2213">2213</a>
-<a href="#2214" id="2214">2214</a>
-<a href="#2215" id="2215">2215</a>
-<a href="#2216" id="2216">2216</a>
-<a href="#2217" id="2217">2217</a>
-<a href="#2218" id="2218">2218</a>
-<a href="#2219" id="2219">2219</a>
-<a href="#2220" id="2220">2220</a>
-<a href="#2221" id="2221">2221</a>
-<a href="#2222" id="2222">2222</a>
-<a href="#2223" id="2223">2223</a>
-<a href="#2224" id="2224">2224</a>
-<a href="#2225" id="2225">2225</a>
-<a href="#2226" id="2226">2226</a>
-<a href="#2227" id="2227">2227</a>
-<a href="#2228" id="2228">2228</a>
-<a href="#2229" id="2229">2229</a>
-<a href="#2230" id="2230">2230</a>
-<a href="#2231" id="2231">2231</a>
-<a href="#2232" id="2232">2232</a>
-<a href="#2233" id="2233">2233</a>
-<a href="#2234" id="2234">2234</a>
-<a href="#2235" id="2235">2235</a>
-<a href="#2236" id="2236">2236</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>colored::Colorize;
 <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_errors::{EgonErrorS, EgonResultMultiSpannedErr, EgonTypeError};
-<span class="kw">use </span>egonlang_types::Type;
+<span class="kw">use </span>egonlang_types::{
+    type_env::{TypeEnv, TypeEnvValue},
+    Type,
+};
 <span class="kw">use </span>span::Span;
 
-<span class="kw">use crate</span>::{
-    rules::{<span class="self">self</span>, ResolveExpr, ResolveIdent},
-    TypeEnv, TypeEnvValue,
-};
+<span class="kw">use </span><span class="kw">crate</span>::rules::{<span class="self">self</span>, ResolveExpr, ResolveIdent};
 
-<span class="doccomment">/// Verify an AST [`Module`] using the registered [`Rule`] set
+<span class="doccomment">/// Verify an AST [`Module`](egonlang_core::ast::Module) using the registered
+/// [`Rule`](crate::rules::Rule) set
 ///
 /// ```
 /// use egonlang_core::prelude::*;
 /// use egonlang_verifier::prelude::*;
 ///
-/// /// Verifier with the default [`Rule`] set
+/// // Verifier with the default rule set
 /// let verifier = Verifier::default();
 ///
 /// let mut module = parse("let a = 123;", 0).expect("Unable to parse");
@@ -2262,33 +2181,26 @@
 /// ```
 </span><span class="kw">pub struct </span>Verifier&lt;<span class="lifetime">'a</span>&gt; {
     rules: Vec&lt;Box&lt;<span class="kw">dyn </span>rules::Rule&lt;<span class="lifetime">'a</span>&gt;&gt;&gt;,
-    <span class="doccomment">/// Type environments in a stack to support scopes
-    </span>type_envs: Vec&lt;TypeEnv&gt;,
+    type_env: TypeEnv,
 }
 
 <span class="kw">impl </span>Default <span class="kw">for </span>Verifier&lt;<span class="lifetime">'_</span>&gt; {
-    <span class="doccomment">/// Create a [`Verifier`] with the [`Rule`] set
+    <span class="doccomment">/// Create a [`Verifier`] with the [`Rule`](crate::rules::Rule) set
     </span><span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::new().with_default_rules()
     }
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Verifier&lt;<span class="lifetime">'a</span>&gt; {
-    <span class="doccomment">/// Create a [`Verifier`] with no default [`Rule`] set
+    <span class="doccomment">/// Create a [`Verifier`] with no default [`Rule`](crate::rules::Rule) set
     </span><span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
         Verifier {
             rules: Default::default(),
-            type_envs: <span class="macro">vec!</span>[TypeEnv::new(<span class="number">0</span>)],
+            type_env: TypeEnv::new(),
         }
     }
 
-    <span class="kw">fn </span>current_type_env_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>TypeEnv {
-        <span class="self">self</span>.type_envs
-            .last_mut()
-            .expect(<span class="string">"Verifier setup without a type environment"</span>)
-    }
-
-    <span class="doccomment">/// Register a [`Rule`]
+    <span class="doccomment">/// Register a [`Rule`](crate::rules::Rule)
     ///
     /// ```ignore
     /// use egonlang_verifier::prelude::*;
@@ -2299,7 +2211,7 @@
         <span class="self">self</span>.rules.push(Box::new(rule));
     }
 
-    <span class="doccomment">/// Register the core language [`Rule`] set
+    <span class="doccomment">/// Register the core language [`Rule`](crate::rules::Rule) set
     ///
     /// ```
     /// use egonlang_verifier::prelude::*;
@@ -2329,7 +2241,7 @@
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Verify an AST [`Module`] using the registered [`Rule`] set
+    <span class="doccomment">/// Verify an AST [`Module`](egonlang_core::ast::Module) using the registered [`Rule`](crate::rules::Rule) set
     </span><span class="kw">pub fn </span>verify(<span class="kw-2">&amp;mut </span><span class="self">self</span>, module: <span class="kw-2">&amp;mut </span>ast::Module) -&gt; EgonResultMultiSpannedErr&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>all_errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
 
@@ -2362,16 +2274,11 @@
             identifier.to_string().cyan()
         );
 
-        <span class="kw">for </span>type_env <span class="kw">in </span><span class="self">self</span>.type_envs.iter().rev() {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(value) = type_env.get(identifier) {
-                <span class="kw">return </span><span class="prelude-val">Some</span>(value);
-            }
-        }
-
-        <span class="prelude-val">None
-    </span>}
+        <span class="self">self</span>.type_env.get(identifier)
+    }
 
     <span class="doccomment">/// Resolve an expression's type recursively.
+    ///
     /// This will resolve value identifiers types as well.
     ///
     /// Example
@@ -2395,27 +2302,27 @@
             }
             ast::Expr::List(list_expr) =&gt; {
                 <span class="kw">if </span>list_expr.items.is_empty() {
-                    <span class="kw">return </span><span class="prelude-val">Some</span>(TypeEnvValue::new(Type::unknown_list()));
+                    <span class="kw">return </span><span class="prelude-val">Some</span>(Type::unknown_list().into());
                 }
 
                 <span class="kw">let </span>(first_item_expr, <span class="kw">_</span>) = list_expr.items.first().unwrap().clone();
-                <span class="kw">let </span>first_item_type = <span class="self">self</span>.resolve_expr_type(<span class="kw-2">&amp;</span>first_item_expr)<span class="question-mark">?</span>.typeref;
+                <span class="kw">let </span>first_item_type = <span class="self">self</span>.resolve_expr_type(<span class="kw-2">&amp;</span>first_item_expr)<span class="question-mark">?</span>.of_type;
 
-                <span class="prelude-val">Some</span>(TypeEnvValue::new(Type::list(first_item_type)))
+                <span class="prelude-val">Some</span>(Type::list(first_item_type).into())
             }
             ast::Expr::Tuple(tuple_expr) =&gt; {
                 <span class="kw">if </span>tuple_expr.items.is_empty() {
-                    <span class="kw">return </span><span class="prelude-val">Some</span>(TypeEnvValue::new(Type::tuple(<span class="macro">vec!</span>[])));
+                    <span class="kw">return </span><span class="prelude-val">Some</span>(Type::tuple(<span class="macro">vec!</span>[]).into());
                 }
 
                 <span class="kw">let </span>item_types: Vec&lt;Type&gt; = tuple_expr
                     .items
                     .clone()
                     .into_iter()
-                    .map(|(x_expr, <span class="kw">_</span>)| <span class="self">self</span>.resolve_expr_type(<span class="kw-2">&amp;</span>x_expr).unwrap().typeref)
+                    .map(|(x_expr, <span class="kw">_</span>)| <span class="self">self</span>.resolve_expr_type(<span class="kw-2">&amp;</span>x_expr).unwrap().of_type)
                     .collect();
 
-                <span class="prelude-val">Some</span>(TypeEnvValue::new(Type::tuple(item_types)))
+                <span class="prelude-val">Some</span>(Type::tuple(item_types).into())
             }
             ast::Expr::Block(block_expr) =&gt; {
                 <span class="macro">tracelog::tracelog!</span>(
@@ -2427,7 +2334,7 @@
 
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(block_typeref) = <span class="kw-2">&amp;</span>block_expr.typeref {
                     <span class="kw">return </span><span class="prelude-val">Some</span>(TypeEnvValue {
-                        typeref: block_typeref.clone(),
+                        of_type: block_typeref.clone(),
                         is_const: <span class="bool-val">true</span>,
                     });
                 }
@@ -2443,7 +2350,7 @@
                         Type::unit().to_string().italic().yellow()
                     );
 
-                    <span class="kw">return </span><span class="prelude-val">Some</span>(TypeEnvValue::new(Type::unit()));
+                    <span class="kw">return </span><span class="prelude-val">Some</span>(Type::unit().into());
                 }
             }
             ast::Expr::Type(type_expr) =&gt; {
@@ -2463,7 +2370,7 @@
                         type_expr.to_string().italic().yellow()
                     );
 
-                    <span class="kw">return </span><span class="prelude-val">Some</span>(TypeEnvValue::new(type_expr.<span class="number">0</span>.clone()));
+                    <span class="kw">return </span><span class="prelude-val">Some</span>(type_expr.<span class="number">0</span>.clone().into());
                 }
 
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(type_env_value) =
@@ -2474,7 +2381,7 @@
                         <span class="string">"(level: {}) Resolved type expression {} to type {}"</span>,
                         <span class="self">self</span>.current_type_env_level(),
                         type_expr.to_string().cyan(),
-                        type_env_value.typeref.to_string().italic().yellow()
+                        type_env_value.of_type.to_string().italic().yellow()
                     );
 
                     <span class="kw">return </span><span class="prelude-val">Some</span>(type_env_value.clone());
@@ -2504,46 +2411,58 @@
 
                 <span class="prelude-val">Some</span>(then_typeref)
             }
-            ast::Expr::Unit =&gt; <span class="prelude-val">Some</span>(TypeEnvValue::new(Type::unit())),
-            ast::Expr::Literal(literal) =&gt; <span class="prelude-val">Some</span>(TypeEnvValue::new(<span class="kw">match </span>literal {
-                ast::ExprLiteral::Bool(<span class="kw">_</span>) =&gt; Type::bool(),
-                ast::ExprLiteral::Number(<span class="kw">_</span>) =&gt; Type::number(),
-                ast::ExprLiteral::String(<span class="kw">_</span>) =&gt; Type::string(),
-            })),
-            ast::Expr::Infix(infix) =&gt; <span class="prelude-val">Some</span>(TypeEnvValue::new(<span class="kw">match </span>infix.op {
-                ast::OpInfix::Add =&gt; Type::number(),
-                ast::OpInfix::Subtract =&gt; Type::number(),
-                ast::OpInfix::Multiply =&gt; Type::number(),
-                ast::OpInfix::Divide =&gt; Type::number(),
-                ast::OpInfix::Modulus =&gt; Type::number(),
-                ast::OpInfix::Less =&gt; Type::bool(),
-                ast::OpInfix::LessEqual =&gt; Type::bool(),
-                ast::OpInfix::Greater =&gt; Type::bool(),
-                ast::OpInfix::GreaterEqual =&gt; Type::bool(),
-                ast::OpInfix::Equal =&gt; Type::bool(),
-                ast::OpInfix::NotEqual =&gt; Type::bool(),
-                ast::OpInfix::LogicAnd =&gt; Type::bool(),
-                ast::OpInfix::LogicOr =&gt; Type::bool(),
-            })),
-            ast::Expr::Prefix(prefix) =&gt; <span class="prelude-val">Some</span>(TypeEnvValue::new(<span class="kw">match </span>prefix.op {
-                ast::OpPrefix::Negate =&gt; Type::number(),
-                ast::OpPrefix::Not =&gt; Type::bool(),
-            })),
-            ast::Expr::Fn(fn_) =&gt; <span class="prelude-val">Some</span>(TypeEnvValue::new(Type::function(
-                Type::tuple(
-                    fn_.params
-                        .clone()
-                        .into_iter()
-                        .map(|((<span class="kw">_</span>, typeref), <span class="kw">_</span>)| typeref)
-                        .collect(),
-                ),
-                fn_.return_type.clone().<span class="number">0</span>,
-            ))),
-            ast::Expr::Range(<span class="kw">_</span>) =&gt; <span class="prelude-val">Some</span>(TypeEnvValue::new(Type::range())),
+            ast::Expr::Unit =&gt; <span class="prelude-val">Some</span>(Type::unit().into()),
+            ast::Expr::Literal(literal) =&gt; <span class="prelude-val">Some</span>(
+                <span class="kw">match </span>literal {
+                    ast::ExprLiteral::Bool(<span class="kw">_</span>) =&gt; Type::bool(),
+                    ast::ExprLiteral::Number(<span class="kw">_</span>) =&gt; Type::number(),
+                    ast::ExprLiteral::String(<span class="kw">_</span>) =&gt; Type::string(),
+                }
+                .into(),
+            ),
+            ast::Expr::Infix(infix) =&gt; <span class="prelude-val">Some</span>(
+                <span class="kw">match </span>infix.op {
+                    ast::OpInfix::Add =&gt; Type::number(),
+                    ast::OpInfix::Subtract =&gt; Type::number(),
+                    ast::OpInfix::Multiply =&gt; Type::number(),
+                    ast::OpInfix::Divide =&gt; Type::number(),
+                    ast::OpInfix::Modulus =&gt; Type::number(),
+                    ast::OpInfix::Less =&gt; Type::bool(),
+                    ast::OpInfix::LessEqual =&gt; Type::bool(),
+                    ast::OpInfix::Greater =&gt; Type::bool(),
+                    ast::OpInfix::GreaterEqual =&gt; Type::bool(),
+                    ast::OpInfix::Equal =&gt; Type::bool(),
+                    ast::OpInfix::NotEqual =&gt; Type::bool(),
+                    ast::OpInfix::LogicAnd =&gt; Type::bool(),
+                    ast::OpInfix::LogicOr =&gt; Type::bool(),
+                }
+                .into(),
+            ),
+            ast::Expr::Prefix(prefix) =&gt; <span class="prelude-val">Some</span>(
+                <span class="kw">match </span>prefix.op {
+                    ast::OpPrefix::Negate =&gt; Type::number(),
+                    ast::OpPrefix::Not =&gt; Type::bool(),
+                }
+                .into(),
+            ),
+            ast::Expr::Fn(fn_) =&gt; <span class="prelude-val">Some</span>(
+                Type::function(
+                    Type::tuple(
+                        fn_.params
+                            .clone()
+                            .into_iter()
+                            .map(|((<span class="kw">_</span>, typeref), <span class="kw">_</span>)| typeref)
+                            .collect(),
+                    ),
+                    fn_.return_type.clone().<span class="number">0</span>,
+                )
+                .into(),
+            ),
+            ast::Expr::Range(<span class="kw">_</span>) =&gt; <span class="prelude-val">Some</span>(Type::range().into()),
         };
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(resolved_type) = <span class="kw-2">&amp;</span>resolved_type {
-            <span class="kw">let </span>resolved_type_string = <span class="macro">format!</span>(<span class="string">"{}"</span>, resolved_type.typeref);
+            <span class="kw">let </span>resolved_type_string = <span class="macro">format!</span>(<span class="string">"{}"</span>, resolved_type.of_type);
 
             <span class="macro">tracelog::tracelog!</span>(
                 label = verifier,resolve_expr_type;
@@ -2606,10 +2525,10 @@
                     (<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>((value_expr, value_span))) =&gt; {
                         <span class="kw">let </span>value_typeref = <span class="self">self</span>.visit_expr(value_expr, value_span)<span class="question-mark">?</span>;
 
-                        <span class="self">self</span>.current_type_env_mut().set(
+                        <span class="self">self</span>.type_env.set(
                             <span class="kw-2">&amp;</span>stmt_assign.identifier.<span class="number">0</span>.name,
                             TypeEnvValue {
-                                typeref: value_typeref.typeref,
+                                of_type: value_typeref.of_type,
                                 is_const: stmt_assign.is_const,
                             },
                         );
@@ -2617,10 +2536,10 @@
                     (<span class="prelude-val">Some</span>((type_expr, type_span)), <span class="prelude-val">None</span>) =&gt; {
                         <span class="kw">match </span><span class="self">self</span>.visit_expr(type_expr, type_span) {
                             <span class="prelude-val">Ok</span>(type_typeref) =&gt; {
-                                <span class="self">self</span>.current_type_env_mut().set(
+                                <span class="self">self</span>.type_env.set(
                                     <span class="kw-2">&amp;</span>stmt_assign.identifier.<span class="number">0</span>.name,
                                     TypeEnvValue {
-                                        typeref: type_typeref.typeref,
+                                        of_type: type_typeref.of_type,
                                         is_const: stmt_assign.is_const,
                                     },
                                 );
@@ -2635,10 +2554,10 @@
                             <span class="prelude-val">Ok</span>(type_typeref) =&gt; {
                                 <span class="self">self</span>.visit_expr(value_expr, value_span)<span class="question-mark">?</span>;
 
-                                <span class="self">self</span>.current_type_env_mut().set(
+                                <span class="self">self</span>.type_env.set(
                                     <span class="kw-2">&amp;</span>stmt_assign.identifier.<span class="number">0</span>.name,
                                     TypeEnvValue {
-                                        typeref: type_typeref.typeref,
+                                        of_type: type_typeref.of_type,
                                         is_const: stmt_assign.is_const,
                                     },
                                 );
@@ -2662,12 +2581,9 @@
                 <span class="kw">let </span>alias = <span class="kw-2">&amp;</span>stmt_type_alias.alias;
                 <span class="kw">let </span>value = <span class="self">self
                     </span>.resolve_identifier(<span class="kw-2">&amp;</span>stmt_type_alias.value.<span class="number">0</span>.to_string())
-                    .unwrap_or(TypeEnvValue {
-                        typeref: stmt_type_alias.value.<span class="number">0</span>.clone(),
-                        is_const: <span class="bool-val">true</span>,
-                    });
+                    .unwrap_or(stmt_type_alias.value.<span class="number">0</span>.clone().into());
 
-                <span class="self">self</span>.current_type_env_mut().set(<span class="kw-2">&amp;</span>alias.<span class="number">0</span>.name, value);
+                <span class="self">self</span>.type_env.set(<span class="kw-2">&amp;</span>alias.<span class="number">0</span>.name, value);
 
                 <span class="prelude-val">Ok</span>(())
             }
@@ -2874,10 +2790,10 @@
                             <span class="macro">tracelog::tracelog!</span>(
                                 label = verifier,visit_expr,block,return_stmt;
                                 <span class="string">"caching return value: {}"</span>,
-                                v.typeref.to_string().yellow().italic()
+                                v.of_type.to_string().yellow().italic()
                             );
 
-                            return_stmt_type = <span class="prelude-val">Some</span>(v.typeref);
+                            return_stmt_type = <span class="prelude-val">Some</span>(v.of_type);
                         }
                     }
 
@@ -2910,7 +2826,7 @@
                                     label = verifier,visit_expr,block;
                                     <span class="string">"{} resolved to type of {}"</span>,
                                     expr_string,
-                                    return_type.typeref.to_string().yellow().italic()
+                                    return_type.of_type.to_string().yellow().italic()
                                 );
 
                                 <span class="comment">// Record the block's returning expression
@@ -2923,7 +2839,7 @@
                                 //   b
                                 // };
                                 // ```
-                                </span>block_expr.typeref = <span class="prelude-val">Some</span>(return_type.typeref.clone());
+                                </span>block_expr.typeref = <span class="prelude-val">Some</span>(return_type.of_type.clone());
 
                                 <span class="prelude-val">Ok</span>(return_type)
                             }
@@ -2948,16 +2864,10 @@
                         }
 
                         <span class="kw">if let </span><span class="prelude-val">Some</span>(block_return_type) = <span class="kw-2">&amp;</span>block_expr.typeref {
-                            <span class="kw">return </span><span class="prelude-val">Ok</span>(TypeEnvValue {
-                                typeref: block_return_type.clone(),
-                                is_const: <span class="bool-val">true</span>,
-                            });
+                            <span class="kw">return </span><span class="prelude-val">Ok</span>(block_return_type.clone().into());
                         }
 
-                        <span class="prelude-val">Ok</span>(TypeEnvValue {
-                            typeref: Type::unit(),
-                            is_const: <span class="bool-val">true</span>,
-                        })
+                        <span class="prelude-val">Ok</span>(Type::unit().into())
                     }
                 }
             }
@@ -3039,58 +2949,19 @@
                 }
 
                 <span class="prelude-val">Ok</span>(<span class="kw">match </span>infix_expr.op {
-                    ast::OpInfix::Add =&gt; TypeEnvValue {
-                        typeref: Type::number(),
-                        is_const: <span class="bool-val">true</span>,
-                    },
-                    ast::OpInfix::Subtract =&gt; TypeEnvValue {
-                        typeref: Type::number(),
-                        is_const: <span class="bool-val">true</span>,
-                    },
-                    ast::OpInfix::Multiply =&gt; TypeEnvValue {
-                        typeref: Type::number(),
-                        is_const: <span class="bool-val">true</span>,
-                    },
-                    ast::OpInfix::Divide =&gt; TypeEnvValue {
-                        typeref: Type::number(),
-                        is_const: <span class="bool-val">true</span>,
-                    },
-                    ast::OpInfix::Modulus =&gt; TypeEnvValue {
-                        typeref: Type::number(),
-                        is_const: <span class="bool-val">true</span>,
-                    },
-                    ast::OpInfix::Less =&gt; TypeEnvValue {
-                        typeref: Type::bool(),
-                        is_const: <span class="bool-val">true</span>,
-                    },
-                    ast::OpInfix::LessEqual =&gt; TypeEnvValue {
-                        typeref: Type::bool(),
-                        is_const: <span class="bool-val">true</span>,
-                    },
-                    ast::OpInfix::Greater =&gt; TypeEnvValue {
-                        typeref: Type::bool(),
-                        is_const: <span class="bool-val">true</span>,
-                    },
-                    ast::OpInfix::GreaterEqual =&gt; TypeEnvValue {
-                        typeref: Type::bool(),
-                        is_const: <span class="bool-val">true</span>,
-                    },
-                    ast::OpInfix::Equal =&gt; TypeEnvValue {
-                        typeref: Type::bool(),
-                        is_const: <span class="bool-val">true</span>,
-                    },
-                    ast::OpInfix::NotEqual =&gt; TypeEnvValue {
-                        typeref: Type::bool(),
-                        is_const: <span class="bool-val">true</span>,
-                    },
-                    ast::OpInfix::LogicAnd =&gt; TypeEnvValue {
-                        typeref: Type::bool(),
-                        is_const: <span class="bool-val">true</span>,
-                    },
-                    ast::OpInfix::LogicOr =&gt; TypeEnvValue {
-                        typeref: Type::bool(),
-                        is_const: <span class="bool-val">true</span>,
-                    },
+                    ast::OpInfix::Add =&gt; Type::number().into(),
+                    ast::OpInfix::Subtract =&gt; Type::number().into(),
+                    ast::OpInfix::Multiply =&gt; Type::number().into(),
+                    ast::OpInfix::Divide =&gt; Type::number().into(),
+                    ast::OpInfix::Modulus =&gt; Type::number().into(),
+                    ast::OpInfix::Less =&gt; Type::bool().into(),
+                    ast::OpInfix::LessEqual =&gt; Type::bool().into(),
+                    ast::OpInfix::Greater =&gt; Type::bool().into(),
+                    ast::OpInfix::GreaterEqual =&gt; Type::bool().into(),
+                    ast::OpInfix::Equal =&gt; Type::bool().into(),
+                    ast::OpInfix::NotEqual =&gt; Type::bool().into(),
+                    ast::OpInfix::LogicAnd =&gt; Type::bool().into(),
+                    ast::OpInfix::LogicOr =&gt; Type::bool().into(),
                 })
             }
             ast::Expr::Prefix(prefix_expr) =&gt; {
@@ -3134,10 +3005,10 @@
 
                     param_types.push(type_ref.clone());
 
-                    <span class="self">self</span>.current_type_env_mut().set(
+                    <span class="self">self</span>.type_env.set(
                         name,
                         TypeEnvValue {
-                            typeref: type_ref.clone(),
+                            of_type: type_ref.clone(),
                             is_const: <span class="bool-val">true</span>,
                         },
                     );
@@ -3158,10 +3029,7 @@
                             <span class="kw">return </span><span class="prelude-val">Err</span>(errs);
                         }
 
-                        <span class="prelude-val">Ok</span>(TypeEnvValue {
-                            typeref: Type::function(Type::tuple(param_types), body_type.typeref),
-                            is_const: <span class="bool-val">true</span>,
-                        })
+                        <span class="prelude-val">Ok</span>(Type::function(Type::tuple(param_types), body_type.of_type).into())
                     }
                     <span class="prelude-val">Err</span>(body_errs) =&gt; {
                         <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
@@ -3229,23 +3097,11 @@
                     <span class="prelude-val">Err</span>(cond_errs) =&gt; <span class="prelude-val">Err</span>(cond_errs),
                 }
             }
-            ast::Expr::Unit =&gt; <span class="prelude-val">Ok</span>(TypeEnvValue {
-                typeref: Type::unit(),
-                is_const: <span class="bool-val">true</span>,
-            }),
+            ast::Expr::Unit =&gt; <span class="prelude-val">Ok</span>(Type::unit().into()),
             ast::Expr::Literal(literal_expr) =&gt; <span class="prelude-val">Ok</span>(<span class="kw">match </span>literal_expr {
-                ast::ExprLiteral::Bool(<span class="kw">_</span>) =&gt; TypeEnvValue {
-                    typeref: Type::bool(),
-                    is_const: <span class="bool-val">true</span>,
-                },
-                ast::ExprLiteral::Number(<span class="kw">_</span>) =&gt; TypeEnvValue {
-                    typeref: Type::number(),
-                    is_const: <span class="bool-val">true</span>,
-                },
-                ast::ExprLiteral::String(<span class="kw">_</span>) =&gt; TypeEnvValue {
-                    typeref: Type::string(),
-                    is_const: <span class="bool-val">true</span>,
-                },
+                ast::ExprLiteral::Bool(<span class="kw">_</span>) =&gt; Type::bool().into(),
+                ast::ExprLiteral::Number(<span class="kw">_</span>) =&gt; Type::number().into(),
+                ast::ExprLiteral::String(<span class="kw">_</span>) =&gt; Type::string().into(),
             }),
             ast::Expr::Identifier(ident_expr) =&gt; {
                 <span class="comment">//
@@ -3265,17 +3121,11 @@
                 );
 
                 <span class="kw">if </span>list_expr.items.is_empty() {
-                    <span class="kw">return </span><span class="prelude-val">Ok</span>(TypeEnvValue {
-                        typeref: Type::list(Type::unknown()),
-                        is_const: <span class="bool-val">true</span>,
-                    });
+                    <span class="kw">return </span><span class="prelude-val">Ok</span>(Type::list(Type::unknown()).into());
                 }
 
                 <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
-                <span class="kw">let </span><span class="kw-2">mut </span>first_item_type = TypeEnvValue {
-                    typeref: Type::unknown(),
-                    is_const: <span class="bool-val">true</span>,
-                };
+                <span class="kw">let </span><span class="kw-2">mut </span>first_item_type = Type::unknown().into();
 
                 <span class="kw">for </span>(i, (item_expr, item_span)) <span class="kw">in </span>list_expr.items.iter_mut().enumerate() {
                     <span class="kw">match </span><span class="self">self</span>.visit_expr(item_expr, item_span) {
@@ -3299,10 +3149,7 @@
                     <span class="kw">return </span><span class="prelude-val">Err</span>(errs);
                 }
 
-                <span class="kw">let </span>t = TypeEnvValue {
-                    typeref: Type::list(first_item_type.typeref),
-                    is_const: <span class="bool-val">false</span>,
-                };
+                <span class="kw">let </span>t = Type::list(first_item_type.of_type).into();
 
                 <span class="prelude-val">Ok</span>(t)
             }
@@ -3313,7 +3160,7 @@
                 <span class="kw">for </span>(item_expr, item_span) <span class="kw">in </span><span class="kw-2">&amp;mut </span>tuple_expr.items {
                     <span class="kw">match </span><span class="self">self</span>.visit_expr(item_expr, item_span) {
                         <span class="prelude-val">Ok</span>(item_type) =&gt; {
-                            item_types.push(item_type.typeref.clone());
+                            item_types.push(item_type.of_type.clone());
                         }
                         <span class="prelude-val">Err</span>(item_errs) =&gt; {
                             item_types.push(Type::unknown());
@@ -3329,10 +3176,7 @@
                     <span class="kw">return </span><span class="prelude-val">Err</span>(errs);
                 }
 
-                <span class="prelude-val">Ok</span>(TypeEnvValue {
-                    typeref: Type::tuple(item_types.clone()),
-                    is_const: <span class="bool-val">false</span>,
-                })
+                <span class="prelude-val">Ok</span>(Type::tuple(item_types.clone()).into())
             }
             ast::Expr::Range(<span class="kw">_</span>) =&gt; {
                 <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
@@ -3344,10 +3188,7 @@
                     <span class="kw">return </span><span class="prelude-val">Err</span>(errs);
                 }
 
-                <span class="prelude-val">Ok</span>(TypeEnvValue {
-                    typeref: Type::range(),
-                    is_const: <span class="bool-val">false</span>,
-                })
+                <span class="prelude-val">Ok</span>(Type::range().into())
             }
             ast::Expr::Type(type_expr) =&gt; {
                 <span class="macro">tracelog::tracelog!</span>(
@@ -3376,10 +3217,7 @@
                     }
                     <span class="prelude-val">None </span>=&gt; {
                         <span class="kw">if </span>typeref.is_builtin() {
-                            <span class="prelude-val">Ok</span>(TypeEnvValue {
-                                typeref: typeref.clone(),
-                                is_const: <span class="bool-val">true</span>,
-                            })
+                            <span class="prelude-val">Ok</span>(typeref.clone().into())
                         } <span class="kw">else </span>{
                             <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[(
                                 EgonTypeError::Undefined(typeref_ident.to_string()).into(),
@@ -3394,9 +3232,7 @@
 
     <span class="doccomment">/// Start new type environment scope
     </span><span class="kw">fn </span>start_new_type_env(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="self">self</span>.type_envs.push(TypeEnv::new(<span class="self">self</span>.type_envs.len()));
-
-        <span class="kw">let </span>level = <span class="self">self</span>.current_type_env_level();
+        <span class="kw">let </span>level = <span class="self">self</span>.type_env.start_scope();
 
         <span class="macro">tracelog::tracelog!</span>(
             label = verifier,start_new_type_env;
@@ -3413,12 +3249,12 @@
             <span class="string">"Ending type environment (new level: {level})"
         </span>);
 
-        <span class="self">self</span>.type_envs.pop();
+        <span class="kw">let _ </span>= <span class="self">self</span>.type_env.end_scope();
     }
 
     <span class="kw">fn </span>current_type_env_level(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
-        <span class="self">self</span>.type_envs.len() - <span class="number">1
-    </span>}
+        <span class="self">self</span>.type_env.get_scope_depth()
+    }
 }
 
 <span class="attr">#[cfg(test)]
