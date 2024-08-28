@@ -7,10 +7,11 @@ use crate::parser::parse;
 
 use span::Spanned;
 
-use super::{Expr, ExprS, Identifier};
+use super::{ExprS, Identifier};
 
 /// A tuple containing a statement and it's span e.g. (stmt, span)
 pub type StmtS = Spanned<Stmt>;
+
 /// A statement (e.g. that does not produce a value)
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub enum Stmt {
@@ -154,37 +155,20 @@ impl Display for StmtAssign {
         let decl = if self.is_const { "const" } else { "let" };
         let name = &self.identifier.0.name;
 
-        let is_type_alias = self
+        let typing = self
+            .type_expr
+            .clone()
+            .map(|f| f.0)
+            .map(|f| format!(": {f}"))
+            .unwrap_or_default();
+        let value = self
             .value
-            .as_ref()
-            .map(|(type_expr, _)| matches!(type_expr, Expr::Type(_)))
-            .unwrap_or(false);
+            .clone()
+            .map(|f| f.0)
+            .map(|v| format!(" = {v}"))
+            .unwrap_or_default();
 
-        if is_type_alias {
-            let typing = self
-                .type_expr
-                .clone()
-                .map(|f| f.0)
-                .map(|f| format!("{f}"))
-                .unwrap_or_default();
-
-            f.write_fmt(format_args!("type {} = {};", name, typing))
-        } else {
-            let typing = self
-                .type_expr
-                .clone()
-                .map(|f| f.0)
-                .map(|f| format!(": {f}"))
-                .unwrap_or_default();
-            let value = self
-                .value
-                .clone()
-                .map(|f| f.0)
-                .map(|v| format!(" = {v}"))
-                .unwrap_or_default();
-
-            f.write_fmt(format_args!("{} {}{}{};", decl, name, typing, value))
-        }
+        f.write_fmt(format_args!("{} {}{}{};", decl, name, typing, value))
     }
 }
 
