@@ -80,6 +80,12 @@ impl From<StmtAssertType> for Stmt {
     }
 }
 
+impl From<StmtTypeAlias> for Stmt {
+    fn from(value: StmtTypeAlias) -> Self {
+        Stmt::TypeAlias(value)
+    }
+}
+
 impl TryFrom<&str> for Stmt {
     type Error = egonlang_errors::EgonError;
 

@@ -9,67 +9,63 @@ grammar<'err>(
     errors: &'err mut Vec<ParseError<usize, lexer::Token, EgonErrorS>>
 );
 
-pub Module: ast::Module = <stmts:Spanned<Decl>*> => ast::Module { <> };
-
-Decl = {
-    DeclVar,
-    DeclTypeAlias,
-    DeclFn,
-    Stmt,
-}
-
-DeclFn: ast::Stmt = {
-    "fn" <name:Spanned<Identifier>> <fn_expr:Spanned<ExprFn>> =>
-        ast::Stmt::Fn(Box::new(ast::StmtFn { 
-            name,
-            fn_expr
-         })),
-}
-
-DeclVar: ast::Stmt = <assign:StmtAssign> =>
-    ast::Stmt::Assign(<>);
-
-DeclTypeAlias: ast::Stmt = <type_alias:StmtTypeAlias> =>
-    ast::Stmt::TypeAlias(<>);
-
-StmtAssign: ast::StmtAssign = {
-    "let" <identifier:Spanned<Identifier>> <type_expr:(":" <Spanned<Type>>)?> <value:("=" <ExprS>)?> ";" => ast::StmtAssign {
-        identifier,
-        type_expr: type_expr.map(|(ty, ty_span)|
-            (ast::Expr::Type(ast::ExprType(ty)), ty_span)),
-        is_const: false,
-        value,
-    },
-    "const" <identifier:Spanned<Identifier>> <type_expr:(":" <Spanned<Type>>)?> <value:("=" <ExprS>)?> ";" => ast::StmtAssign {
-        identifier,
-        type_expr: type_expr.map(|(ty, ty_span)|
-            (ast::Expr::Type(ast::ExprType(ty)), ty_span)),
-        is_const: true,
-        value,
-    },
-}
-
-StmtTypeAlias: ast::StmtTypeAlias = {
-    "type" <alias:Spanned<Identifier>> <value:("=" <Spanned<Type>>)> ";" =>
-        ast::StmtTypeAlias { <> },
-}
-
-StmtS = Spanned<Stmt>;
+pub Module: ast::Module = <stmts:StmtS*> => ast::Module { <> };
 
 // Statements
+StmtS = Spanned<Stmt>;
+
 Stmt: ast::Stmt = {
-    <expr:ExprS> ";" =>
-        ast::Stmt::Expr(ast::StmtExpr { <> }),
-    "assert_type" <value:ExprS> "," <expected_type:Spanned<Type>> ";" => ast::Stmt::AssertType(ast::StmtAssertType { 
-        value,
-        expected_type: (ast::Expr::Type(ast::ExprType(expected_type.0)), expected_type.1)
-     }),
-     "return" <value:ExprS> ";" => ast::Stmt::Return(ast::StmtReturn::new(<>)),
+    StmtExpr,
+    StmtAssertType,
+    StmtReturn,
+    StmtAssignVariable,
+    StmtAssignConst,
+    StmtTypeAlias,
+    StmtFn,
     <e:!> => {
         errors.push(e.error);
         ast::Stmt::Error
     },
-}
+};
+
+StmtExpr: ast::Stmt = <expr:ExprS> ";" =>
+        ast::Stmt::Expr(ast::StmtExpr { <> });
+
+StmtAssertType: ast::Stmt = "assert_type" <value:ExprS> "," <expected_type:Spanned<Type>> ";" =>
+        ast::Stmt::AssertType(ast::StmtAssertType { 
+            value,
+            expected_type: (ast::Expr::Type(ast::ExprType(expected_type.0)), expected_type.1)
+        });
+
+StmtReturn: ast::Stmt = "return" <value:ExprS> ";" =>
+        ast::Stmt::Return(ast::StmtReturn::new(<>));
+
+StmtAssignVariable: ast::Stmt = "let" <identifier:Spanned<Identifier>> <type_expr:(":" <Spanned<Type>>)?> <value:("=" <ExprS>)?> ";" =>
+        ast::StmtAssign {
+            identifier,
+            type_expr: type_expr.map(|(ty, ty_span)|
+                (ast::Expr::Type(ast::ExprType(ty)), ty_span)),
+            is_const: false,
+            value,
+        }.into();
+
+StmtAssignConst: ast::Stmt = "const" <identifier:Spanned<Identifier>> <type_expr:(":" <Spanned<Type>>)?> <value:("=" <ExprS>)?> ";" =>
+        ast::StmtAssign {
+            identifier,
+            type_expr: type_expr.map(|(ty, ty_span)|
+                (ast::Expr::Type(ast::ExprType(ty)), ty_span)),
+            is_const: true,
+            value,
+        }.into();
+
+StmtTypeAlias: ast::Stmt = "type" <alias:Spanned<Identifier>> <value:("=" <Spanned<Type>>)> ";" =>
+        ast::StmtTypeAlias { <> }.into();
+
+StmtFn: ast::Stmt = "fn" <name:Spanned<Identifier>> <fn_expr:Spanned<ExprFn>> =>
+    ast::Stmt::Fn(Box::new(ast::StmtFn { 
+        name,
+        fn_expr
+    }));
 
 // Expressions
 ExprS = Spanned<Expr>;
@@ -228,7 +224,7 @@ ExprRange: ast::Expr = {
 }
 
 ExprBlock: ast::Expr = {
-    "{" <stmts:(<Spanned<Decl>>)*> <return_expr:(ExprS)?> "}" =>
+    "{" <stmts:(<StmtS>)*> <return_expr:(ExprS)?> "}" =>
     ast::Expr::Block(Box::new(
         ast::ExprBlock {
             stmts,
