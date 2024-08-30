@@ -14,7 +14,8 @@ expr_rule!(
     |expr, span, resolve_ident, _resolve_expr| {
         let mut errs = vec![];
 
-        if let ast::Expr::Identifier(ast::ExprIdentifier { identifier }) = expr {
+        if let ast::Expr::Identifier(boxed) = expr {
+            let identifier = &boxed.identifier;
             let name = &identifier.name;
 
             if resolve_ident(name).is_none() {

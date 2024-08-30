@@ -159,13 +159,13 @@ ExprSimple: ast::Expr = {
 
 ExprList: ast::Expr = {
     "[" <items:Seperated<Spanned<Expr>, ",">> "]" =>
-        ast::Expr::List(ast::ExprList {<>}),
+        ast::Expr::List(Box::new(ast::ExprList {<>})),
         ExprTuple
 }
 
 ExprTuple: ast::Expr = {
     "(" <items:SeperatedTrailing<Spanned<Expr>, ",">> ")" => 
-        ast::Expr::Tuple(ast::ExprTuple {<>}),
+        ast::Expr::Tuple(Box::new(ast::ExprTuple {<>})),
         ExprPrimary,
 }
 

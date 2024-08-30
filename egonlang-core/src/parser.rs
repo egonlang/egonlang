@@ -675,7 +675,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    expr: (Expr::List(ExprList { items: vec![] }), 0..2)
+                    expr: (Expr::List(ExprList { items: vec![] }.into()), 0..2)
                 }),
                 0..3
             )]
@@ -715,34 +715,37 @@ mod parser_tests {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
                     expr: (
-                        Expr::List(ExprList {
-                            items: vec![
-                                (
-                                    Expr::Identifier(ExprIdentifier {
-                                        identifier: Identifier {
-                                            name: "a".to_string()
-                                        }
-                                    }),
-                                    1..2
-                                ),
-                                (
-                                    Expr::Identifier(ExprIdentifier {
-                                        identifier: Identifier {
-                                            name: "b".to_string()
-                                        }
-                                    }),
-                                    4..5
-                                ),
-                                (
-                                    Expr::Identifier(ExprIdentifier {
-                                        identifier: Identifier {
-                                            name: "c".to_string()
-                                        }
-                                    }),
-                                    7..8
-                                )
-                            ]
-                        }),
+                        Expr::List(
+                            ExprList {
+                                items: vec![
+                                    (
+                                        Expr::Identifier(ExprIdentifier {
+                                            identifier: Identifier {
+                                                name: "a".to_string()
+                                            }
+                                        }),
+                                        1..2
+                                    ),
+                                    (
+                                        Expr::Identifier(ExprIdentifier {
+                                            identifier: Identifier {
+                                                name: "b".to_string()
+                                            }
+                                        }),
+                                        4..5
+                                    ),
+                                    (
+                                        Expr::Identifier(ExprIdentifier {
+                                            identifier: Identifier {
+                                                name: "c".to_string()
+                                            }
+                                        }),
+                                        7..8
+                                    )
+                                ]
+                            }
+                            .into()
+                        ),
                         0..9
                     )
                 }),
@@ -783,39 +786,45 @@ mod parser_tests {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
                     expr: (
-                        Expr::List(ExprList {
-                            items: vec![
-                                (
-                                    Expr::Identifier(ExprIdentifier {
-                                        identifier: Identifier {
-                                            name: "a".to_string()
-                                        }
-                                    }),
-                                    1..2
-                                ),
-                                (
-                                    Expr::List(ExprList {
-                                        items: vec![(
-                                            Expr::Identifier(ExprIdentifier {
-                                                identifier: Identifier {
-                                                    name: "b".to_string()
-                                                }
-                                            }),
-                                            5..6
-                                        )]
-                                    }),
-                                    4..7
-                                ),
-                                (
-                                    Expr::Identifier(ExprIdentifier {
-                                        identifier: Identifier {
-                                            name: "c".to_string()
-                                        }
-                                    }),
-                                    9..10
-                                )
-                            ]
-                        }),
+                        Expr::List(
+                            ExprList {
+                                items: vec![
+                                    (
+                                        Expr::Identifier(ExprIdentifier {
+                                            identifier: Identifier {
+                                                name: "a".to_string()
+                                            }
+                                        }),
+                                        1..2
+                                    ),
+                                    (
+                                        Expr::List(
+                                            ExprList {
+                                                items: vec![(
+                                                    Expr::Identifier(ExprIdentifier {
+                                                        identifier: Identifier {
+                                                            name: "b".to_string()
+                                                        }
+                                                    }),
+                                                    5..6
+                                                )]
+                                            }
+                                            .into()
+                                        ),
+                                        4..7
+                                    ),
+                                    (
+                                        Expr::Identifier(ExprIdentifier {
+                                            identifier: Identifier {
+                                                name: "c".to_string()
+                                            }
+                                        }),
+                                        9..10
+                                    )
+                                ]
+                            }
+                            .into()
+                        ),
                         0..11
                     )
                 }),
@@ -870,9 +879,12 @@ mod parser_tests {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
                     expr: (
-                        Expr::Tuple(ExprTuple {
-                            items: vec![(Expr::Literal(ExprLiteral::Number(1f64)), 1..2)]
-                        }),
+                        Expr::Tuple(
+                            ExprTuple {
+                                items: vec![(Expr::Literal(ExprLiteral::Number(1f64)), 1..2)]
+                            }
+                            .into()
+                        ),
                         0..4
                     )
                 }),
@@ -888,12 +900,15 @@ mod parser_tests {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
                     expr: (
-                        Expr::Tuple(ExprTuple {
-                            items: vec![
-                                (Expr::Literal(ExprLiteral::Number(1f64)), 1..2),
-                                (Expr::Literal(ExprLiteral::Number(2f64)), 4..5)
-                            ]
-                        }),
+                        Expr::Tuple(
+                            ExprTuple {
+                                items: vec![
+                                    (Expr::Literal(ExprLiteral::Number(1f64)), 1..2),
+                                    (Expr::Literal(ExprLiteral::Number(2f64)), 4..5)
+                                ]
+                            }
+                            .into()
+                        ),
                         0..7
                     )
                 }),
@@ -926,20 +941,26 @@ mod parser_tests {
                             expr: (
                                 Expr::Infix(Box::new(ExprInfix {
                                     lt: (
-                                        Expr::Identifier(ExprIdentifier {
-                                            identifier: Identifier {
-                                                name: "a".to_string()
+                                        Expr::Identifier(
+                                            ExprIdentifier {
+                                                identifier: Identifier {
+                                                    name: "a".to_string()
+                                                }
                                             }
-                                        }),
+                                            .into()
+                                        ),
                                         0..1
                                     ),
                                     op: $expected,
                                     rt: (
-                                        Expr::Identifier(ExprIdentifier {
-                                            identifier: Identifier {
-                                                name: "b".to_string()
+                                        Expr::Identifier(
+                                            ExprIdentifier {
+                                                identifier: Identifier {
+                                                    name: "b".to_string()
+                                                }
                                             }
-                                        }),
+                                            .into()
+                                        ),
                                         4..5
                                     )
                                 })),
@@ -1876,12 +1897,15 @@ mod parser_tests {
                         )),
                         is_const: false,
                         value: Some((
-                            Expr::List(ExprList {
-                                items: vec![
-                                    (Expr::Literal(ExprLiteral::Number(1f64)), 70..71),
-                                    (Expr::Literal(ExprLiteral::Number(2f64)), 73..74)
-                                ]
-                            }),
+                            Expr::List(
+                                ExprList {
+                                    items: vec![
+                                        (Expr::Literal(ExprLiteral::Number(1f64)), 70..71),
+                                        (Expr::Literal(ExprLiteral::Number(2f64)), 73..74)
+                                    ]
+                                }
+                                .into()
+                            ),
                             69..75
                         ))
                     }),

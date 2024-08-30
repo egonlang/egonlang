@@ -52,14 +52,14 @@ pub enum Expr {
     /// [];
     /// [1, 2, 3];
     /// ```
-    List(ExprList),
+    List(Box<ExprList>),
     /// Expression creating a fixed sized collection of mixed typed values
     ///
     /// ```egon
     /// (1,);
     /// (1, 2, 3,);
     /// ```
-    Tuple(ExprTuple),
+    Tuple(Box<ExprTuple>),
     /// Expression preforming an infix operation
     ///
     /// ```egon
@@ -178,13 +178,13 @@ impl From<ExprBlock> for Expr {
 
 impl From<ExprList> for Expr {
     fn from(value: ExprList) -> Self {
-        Expr::List(value)
+        Expr::List(value.into())
     }
 }
 
 impl From<ExprTuple> for Expr {
     fn from(value: ExprTuple) -> Self {
-        Expr::Tuple(value)
+        Expr::Tuple(value.into())
     }
 }
 
@@ -315,7 +315,7 @@ impl TryFrom<Expr> for String {
                     actual: Type::bool().to_string(),
                 }
                 .into()]),
-                ExprLiteral::String(string) => Ok(string),
+                ExprLiteral::String(string) => Ok(string.to_string()),
             },
             _ => Err(vec![egonlang_errors::EgonTypeError::MismatchType {
                 expected: Type::string().to_string(),
@@ -1117,31 +1117,37 @@ mod display_tests {
 
     expr_display_test!(
         test_expr_empty_list,
-        Expr::List(ExprList { items: vec![] }),
+        Expr::List(ExprList { items: vec![] }.into()),
         "[]"
     );
 
     expr_display_test!(
         test_expr_list,
-        Expr::List(ExprList {
-            items: vec![
-                (ExprLiteral::Number(1f64).into(), 0..0),
-                (ExprLiteral::Number(2f64).into(), 0..0),
-                (ExprLiteral::Number(3f64).into(), 0..0)
-            ]
-        }),
+        Expr::List(
+            ExprList {
+                items: vec![
+                    (ExprLiteral::Number(1f64).into(), 0..0),
+                    (ExprLiteral::Number(2f64).into(), 0..0),
+                    (ExprLiteral::Number(3f64).into(), 0..0)
+                ]
+            }
+            .into()
+        ),
         "[1, 2, 3]"
     );
 
     expr_display_test!(
         test_expr_tuple,
-        Expr::Tuple(ExprTuple {
-            items: vec![
-                (ExprLiteral::Number(1f64).into(), 0..0),
-                (ExprLiteral::Number(2f64).into(), 0..0),
-                (ExprLiteral::Number(3f64).into(), 0..0)
-            ]
-        }),
+        Expr::Tuple(
+            ExprTuple {
+                items: vec![
+                    (ExprLiteral::Number(1f64).into(), 0..0),
+                    (ExprLiteral::Number(2f64).into(), 0..0),
+                    (ExprLiteral::Number(3f64).into(), 0..0)
+                ]
+            }
+            .into()
+        ),
         "(1, 2, 3,)"
     );
 

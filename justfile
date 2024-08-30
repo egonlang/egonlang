@@ -32,6 +32,9 @@ cli-trace *args:
 lsp:
     cargo run --bin egonlang-lsp
 
+fix:
+    cargo fix --allow-staged
+
 format:
     cargo fmt --all
     cargo clippy --fix --all-targets --no-deps --workspace
