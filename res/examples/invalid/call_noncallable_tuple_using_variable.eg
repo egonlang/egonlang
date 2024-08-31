@@ -1,0 +1,5 @@
+let t = (1, false, [1, 2, 3],);
+
+t();
+
+// out: TypeError: tuple<number, bool, list<number>> is not callable

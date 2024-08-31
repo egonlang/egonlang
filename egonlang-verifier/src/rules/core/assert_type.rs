@@ -6,8 +6,8 @@ stmt_rule!(AssertType, |stmt, span, _resolve_ident, resolve_expr| {
     let mut errs: Vec<EgonErrorS> = vec![];
 
     if let Stmt::AssertType(x) = stmt {
-        if let Some(value_type) = resolve_expr(&x.value.0, &x.value.1) {
-            if let Some(expected_type_type) = resolve_expr(&x.expected_type.0, &x.expected_type.1) {
+        if let Ok(value_type) = resolve_expr(&x.value.0, &x.value.1) {
+            if let Ok(expected_type_type) = resolve_expr(&x.expected_type.0, &x.expected_type.1) {
                 if value_type.of_type != expected_type_type.of_type {
                     errs.push((
                         EgonTypeError::MismatchType {

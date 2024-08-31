@@ -1,0 +1,10 @@
+let t = true;
+
+t();
+
+let f = false;
+
+f();
+
+// out: TypeError: bool is not callable
+// out: TypeError: bool is not callable

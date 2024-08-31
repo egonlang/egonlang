@@ -1,0 +1,10 @@
+let e: list<string> = [];
+
+e();
+
+let l = [1, 2, 3];
+
+l();
+
+// out: TypeError: list<string> is not callable
+// out: TypeError: list<number> is not callable

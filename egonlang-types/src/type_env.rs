@@ -1,6 +1,6 @@
 use std::{collections::HashMap, fmt};
 
-use crate::Type;
+use crate::{egon_bool, egon_number, egon_range, egon_string, Type};
 
 /// Store and retreive type information for string identifiers
 #[derive(Default)]
@@ -15,6 +15,11 @@ impl TypeEnv {
         };
 
         type_env.start_scope();
+
+        type_env.set("number", egon_number!().into());
+        type_env.set("bool", egon_bool!().into());
+        type_env.set("string", egon_string!().into());
+        type_env.set("range", egon_range!().into());
 
         type_env
     }
@@ -165,7 +170,14 @@ impl TypeEnv {
         let new_scope = HashMap::new();
         self.scopes.push(new_scope);
 
-        self.get_scope_depth()
+        let new_depth = self.get_scope_depth();
+
+        tracelog::tracelog!(
+            label = type_env,start_scope;
+            "Starting new scope (new level: {new_depth})"
+        );
+
+        new_depth
     }
 
     /// End the current scope
@@ -183,7 +195,14 @@ impl TypeEnv {
 
         self.scopes.pop();
 
-        Ok(self.get_scope_depth())
+        let new_depth = self.get_scope_depth();
+
+        tracelog::tracelog!(
+            label = type_env,start_scope;
+            "Starting new scope (new level: {new_depth})"
+        );
+
+        Ok(new_depth)
     }
 
     /// Get the depth of current scope

@@ -119,6 +119,7 @@ mod parser_tests {
         Err(vec![(
             EgonError::SyntaxError(EgonSyntaxError::UnrecognizedEOF {
                 expected: vec![
+                    "\"(\"".to_string(),
                     "\";\"".to_string(),
                     "\"..\"".to_string(),
                     "\"-\"".to_string(),
@@ -146,6 +147,7 @@ mod parser_tests {
         Err(vec![(
             EgonError::SyntaxError(EgonSyntaxError::UnrecognizedEOF {
                 expected: vec![
+                    "\"(\"".to_string(),
                     "\";\"".to_string(),
                     "\"-\"".to_string(),
                     "\"+\"".to_string(),
@@ -172,6 +174,7 @@ mod parser_tests {
         Err(vec![(
             EgonError::SyntaxError(EgonSyntaxError::UnrecognizedEOF {
                 expected: vec![
+                    "\"(\"".to_string(),
                     "\";\"".to_string(),
                     "\"-\"".to_string(),
                     "\"+\"".to_string(),
@@ -199,6 +202,7 @@ mod parser_tests {
         Err(vec![(
             EgonError::SyntaxError(EgonSyntaxError::UnrecognizedEOF {
                 expected: vec![
+                    "\"(\"".to_string(),
                     "\";\"".to_string(),
                     "\"-\"".to_string(),
                     "\"+\"".to_string(),
@@ -225,6 +229,7 @@ mod parser_tests {
         Err(vec![(
             EgonError::SyntaxError(EgonSyntaxError::UnrecognizedEOF {
                 expected: vec![
+                    "\"(\"".to_string(),
                     "\";\"".to_string(),
                     "\"-\"".to_string(),
                     "\"+\"".to_string(),
@@ -262,6 +267,7 @@ mod parser_tests {
         Err(vec![(
             EgonError::SyntaxError(EgonSyntaxError::UnrecognizedEOF {
                 expected: vec![
+                    "\"(\"".to_string(),
                     "\";\"".to_string(),
                     "\"-\"".to_string(),
                     "\"+\"".to_string(),
@@ -1471,6 +1477,7 @@ mod parser_tests {
                     token: "123".to_string(),
                     expected: vec![
                         "\"{\"".to_string(),
+                        "\"(\"".to_string(),
                         "\"-\"".to_string(),
                         "\"+\"".to_string(),
                         "\"/\"".to_string(),
@@ -1492,6 +1499,7 @@ mod parser_tests {
                 EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
                     token: "else".to_string(),
                     expected: vec![
+                        "\"(\"".to_string(),
                         "\";\"".to_string(),
                         "\"..\"".to_string(),
                         "\"-\"".to_string(),
@@ -1516,6 +1524,7 @@ mod parser_tests {
                     token: "456".to_string(),
                     expected: vec![
                         "\"{\"".to_string(),
+                        "\"(\"".to_string(),
                         "\"-\"".to_string(),
                         "\"+\"".to_string(),
                         "\"/\"".to_string(),
@@ -1537,6 +1546,7 @@ mod parser_tests {
                 EgonError::SyntaxError(EgonSyntaxError::UnrecognizedToken {
                     token: "else".to_string(),
                     expected: vec![
+                        "\"(\"".to_string(),
                         "\";\"".to_string(),
                         "\"..\"".to_string(),
                         "\"-\"".to_string(),
@@ -1559,6 +1569,7 @@ mod parser_tests {
             (
                 EgonError::SyntaxError(EgonSyntaxError::UnrecognizedEOF {
                     expected: vec![
+                        "\"(\"".to_string(),
                         "\";\"".to_string(),
                         "\"..\"".to_string(),
                         "\"-\"".to_string(),

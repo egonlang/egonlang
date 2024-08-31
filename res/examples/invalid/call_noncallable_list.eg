@@ -1,0 +1,5 @@
+[]();
+[1, 2, 3]();
+
+// out: TypeError: list<unknown> is not callable
+// out: TypeError: list<number> is not callable

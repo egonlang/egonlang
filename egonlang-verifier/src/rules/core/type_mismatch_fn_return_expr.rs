@@ -21,25 +21,24 @@ expr_rule!(
             let (fn_return_type_typeref, _) = &fn_expr.return_type;
             let (body_expr, body_span) = &fn_expr.body;
 
-            return match resolve_expr(body_expr, body_span) {
-                Some(body_typeref) => {
-                    let mut errs = vec![];
+            if let Ok(body_typeref) = resolve_expr(body_expr, body_span) {
+                let mut errs = vec![];
 
-                    if body_typeref.of_type != *fn_return_type_typeref {
-                        errs.push((
-                            EgonTypeError::MismatchType {
-                                expected: fn_return_type_typeref.to_string(),
-                                actual: body_typeref.of_type.to_string(),
-                            }
-                            .into(),
-                            body_span.clone(),
-                        ));
-                    }
-
-                    errs
+                if body_typeref.of_type != *fn_return_type_typeref {
+                    errs.push((
+                        EgonTypeError::MismatchType {
+                            expected: fn_return_type_typeref.to_string(),
+                            actual: body_typeref.of_type.to_string(),
+                        }
+                        .into(),
+                        body_span.clone(),
+                    ));
                 }
-                None => vec![],
-            };
+
+                errs
+            } else {
+                vec![]
+            }
         } else {
             vec![]
         }

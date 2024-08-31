@@ -210,6 +210,16 @@ impl Module {
             Expr::Type(expr_type) => {
                 nodes.push(AstNode::Type((expr_type.0.clone(), span.clone())));
             }
+            Expr::Call(expr_call) => {
+                let callee_nodes =
+                    self.get_nodes_from_expr(&expr_call.callee.0, &expr_call.callee.1, index);
+                nodes.extend(callee_nodes);
+
+                for arg in &expr_call.args {
+                    let arg_nodes = self.get_nodes_from_expr(&arg.0, &arg.1, index);
+                    nodes.extend(arg_nodes);
+                }
+            }
         };
 
         nodes
@@ -925,6 +935,265 @@ mod tests {
                 )),
                 AstNode::Expr((Expr::Type(ExprType(Type::bool())), 15..19)),
                 AstNode::Type((Type::bool(), 15..19)),
+            ],
+            nodes
+        );
+    }
+
+    #[test]
+    fn module_get_ast_nodes_by_index_call_expr_callee() {
+        let source = "foo(1, 2, 3);";
+        let module = parse(source, 0).unwrap();
+
+        let nodes = module.get_by_index(2);
+
+        assert_eq!(
+            vec![
+                AstNode::Stmt((
+                    StmtExpr {
+                        expr: (
+                            Expr::Call(
+                                ExprCall {
+                                    callee: (
+                                        Expr::Identifier(ExprIdentifier {
+                                            identifier: Identifier {
+                                                name: "foo".to_string()
+                                            }
+                                        }),
+                                        0..3
+                                    ),
+                                    args: vec![
+                                        (1f64.into(), 4..5),
+                                        (2f64.into(), 7..8),
+                                        (3f64.into(), 10..11)
+                                    ]
+                                }
+                                .into()
+                            ),
+                            0..12
+                        )
+                    }
+                    .into(),
+                    0..13
+                )),
+                AstNode::Expr((
+                    Expr::Call(
+                        ExprCall {
+                            callee: (
+                                Expr::Identifier(ExprIdentifier {
+                                    identifier: Identifier {
+                                        name: "foo".to_string()
+                                    }
+                                }),
+                                0..3
+                            ),
+                            args: vec![
+                                (1f64.into(), 4..5),
+                                (2f64.into(), 7..8),
+                                (3f64.into(), 10..11)
+                            ]
+                        }
+                        .into()
+                    ),
+                    0..12
+                )),
+                AstNode::Expr((
+                    Expr::Identifier(ExprIdentifier {
+                        identifier: Identifier {
+                            name: "foo".to_string()
+                        }
+                    }),
+                    0..3
+                ))
+            ],
+            nodes
+        );
+    }
+
+    #[test]
+    fn module_get_ast_nodes_by_index_call_expr_arg0() {
+        let source = "foo(1, 2, 3);";
+        let module = parse(source, 0).unwrap();
+
+        let nodes = module.get_by_index(4);
+
+        assert_eq!(
+            vec![
+                AstNode::Stmt((
+                    StmtExpr {
+                        expr: (
+                            Expr::Call(
+                                ExprCall {
+                                    callee: (
+                                        Expr::Identifier(ExprIdentifier {
+                                            identifier: Identifier {
+                                                name: "foo".to_string()
+                                            }
+                                        }),
+                                        0..3
+                                    ),
+                                    args: vec![
+                                        (1f64.into(), 4..5),
+                                        (2f64.into(), 7..8),
+                                        (3f64.into(), 10..11)
+                                    ]
+                                }
+                                .into()
+                            ),
+                            0..12
+                        )
+                    }
+                    .into(),
+                    0..13
+                )),
+                AstNode::Expr((
+                    Expr::Call(
+                        ExprCall {
+                            callee: (
+                                Expr::Identifier(ExprIdentifier {
+                                    identifier: Identifier {
+                                        name: "foo".to_string()
+                                    }
+                                }),
+                                0..3
+                            ),
+                            args: vec![
+                                (1f64.into(), 4..5),
+                                (2f64.into(), 7..8),
+                                (3f64.into(), 10..11)
+                            ]
+                        }
+                        .into()
+                    ),
+                    0..12
+                )),
+                AstNode::Expr((1f64.into(), 4..5))
+            ],
+            nodes
+        );
+    }
+
+    #[test]
+    fn module_get_ast_nodes_by_index_call_expr_arg1() {
+        let source = "foo(1, 2, 3);";
+        let module = parse(source, 0).unwrap();
+
+        let nodes = module.get_by_index(7);
+
+        assert_eq!(
+            vec![
+                AstNode::Stmt((
+                    StmtExpr {
+                        expr: (
+                            Expr::Call(
+                                ExprCall {
+                                    callee: (
+                                        Expr::Identifier(ExprIdentifier {
+                                            identifier: Identifier {
+                                                name: "foo".to_string()
+                                            }
+                                        }),
+                                        0..3
+                                    ),
+                                    args: vec![
+                                        (1f64.into(), 4..5),
+                                        (2f64.into(), 7..8),
+                                        (3f64.into(), 10..11)
+                                    ]
+                                }
+                                .into()
+                            ),
+                            0..12
+                        )
+                    }
+                    .into(),
+                    0..13
+                )),
+                AstNode::Expr((
+                    Expr::Call(
+                        ExprCall {
+                            callee: (
+                                Expr::Identifier(ExprIdentifier {
+                                    identifier: Identifier {
+                                        name: "foo".to_string()
+                                    }
+                                }),
+                                0..3
+                            ),
+                            args: vec![
+                                (1f64.into(), 4..5),
+                                (2f64.into(), 7..8),
+                                (3f64.into(), 10..11)
+                            ]
+                        }
+                        .into()
+                    ),
+                    0..12
+                )),
+                AstNode::Expr((2f64.into(), 7..8))
+            ],
+            nodes
+        );
+    }
+
+    #[test]
+    fn module_get_ast_nodes_by_index_call_expr_arg2() {
+        let source = "foo(1, 2, 3);";
+        let module = parse(source, 0).unwrap();
+
+        let nodes = module.get_by_index(10);
+
+        assert_eq!(
+            vec![
+                AstNode::Stmt((
+                    StmtExpr {
+                        expr: (
+                            Expr::Call(
+                                ExprCall {
+                                    callee: (
+                                        Expr::Identifier(ExprIdentifier {
+                                            identifier: Identifier {
+                                                name: "foo".to_string()
+                                            }
+                                        }),
+                                        0..3
+                                    ),
+                                    args: vec![
+                                        (1f64.into(), 4..5),
+                                        (2f64.into(), 7..8),
+                                        (3f64.into(), 10..11)
+                                    ]
+                                }
+                                .into()
+                            ),
+                            0..12
+                        )
+                    }
+                    .into(),
+                    0..13
+                )),
+                AstNode::Expr((
+                    Expr::Call(
+                        ExprCall {
+                            callee: (
+                                Expr::Identifier(ExprIdentifier {
+                                    identifier: Identifier {
+                                        name: "foo".to_string()
+                                    }
+                                }),
+                                0..3
+                            ),
+                            args: vec![
+                                (1f64.into(), 4..5),
+                                (2f64.into(), 7..8),
+                                (3f64.into(), 10..11)
+                            ]
+                        }
+                        .into()
+                    ),
+                    0..12
+                )),
+                AstNode::Expr((3f64.into(), 10..11))
             ],
             nodes
         );

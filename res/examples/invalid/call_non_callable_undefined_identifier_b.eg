@@ -1,0 +1,7 @@
+fn sum (a: number, b: number): number => {
+    a + b
+}
+
+sums(1, 2);
+
+// out: TypeError: `sums` is not defined

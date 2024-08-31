@@ -1,0 +1,3 @@
+sum(1, 2);
+
+// out: TypeError: `sum` is not defined

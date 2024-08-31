@@ -19,13 +19,13 @@ expr_rule!(
     /// c = true;
     /// ```
     TypeMismatchReassigningLetValues,
-    |expr, _span, resolve_ident, resolve_expr| {
+    |expr, span, resolve_ident, resolve_expr| {
         let mut errs = vec![];
 
         if let ast::Expr::Assign(expr_assign) = expr {
             let identifier = &expr_assign.identifier.0.name;
 
-            if let Some(type_env_value) = resolve_ident(identifier) {
+            if let Ok(type_env_value) = resolve_ident(identifier, span) {
                 let type_env_typeref = &type_env_value.of_type;
                 let is_const = &type_env_value.is_const;
 

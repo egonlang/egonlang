@@ -1,22 +1,31 @@
 use egonlang_errors::EgonResultMultiSpannedErr;
 
-pub trait ResolveIdent: Fn(&str) -> Option<egonlang_types::type_env::TypeEnvValue> {}
+pub trait ResolveIdent:
+    Fn(&str, &::span::Span) -> EgonResultMultiSpannedErr<egonlang_types::type_env::TypeEnvValue>
+{
+}
 pub trait ResolveExpr:
-    Fn(&::egonlang_core::ast::Expr, &::span::Span) -> Option<egonlang_types::type_env::TypeEnvValue>
+    Fn(
+    &::egonlang_core::ast::Expr,
+    &::span::Span,
+) -> EgonResultMultiSpannedErr<egonlang_types::type_env::TypeEnvValue>
 {
 }
 
-impl<F> ResolveIdent for F where F: Fn(&str) -> Option<egonlang_types::type_env::TypeEnvValue> {}
+impl<F> ResolveIdent for F where
+    F: Fn(&str, &::span::Span) -> EgonResultMultiSpannedErr<egonlang_types::type_env::TypeEnvValue>
+{
+}
 impl<F> ResolveExpr for F where
     F: Fn(
         &::egonlang_core::ast::Expr,
         &::span::Span,
-    ) -> Option<egonlang_types::type_env::TypeEnvValue>
+    ) -> EgonResultMultiSpannedErr<egonlang_types::type_env::TypeEnvValue>
 {
 }
 
 /// Rule for verifying statements and expressions
-pub trait Rule<'a> {
+pub trait Rule<'a>: std::fmt::Display {
     fn visit_stmt(
         &self,
         stmt: &::egonlang_core::ast::Stmt,
@@ -75,6 +84,15 @@ macro_rules! expr_rule {
 
                     Ok(())
                 }
+            }
+
+            impl ::std::fmt::Display for [<$name Rule>] {
+                fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> Result<(), ::std::fmt::Error> {
+                    f.write_fmt(format_args!(
+                        "{}",
+                        stringify!([<$name Rule>])
+                    ))
+                 }
             }
         }
     };
@@ -160,6 +178,15 @@ macro_rules! expr_rule {
                     Ok(())
                 }
             }
+
+            impl ::std::fmt::Display for [<$name Rule>] {
+                fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> Result<(), ::std::fmt::Error> {
+                    f.write_fmt(format_args!(
+                        "{}",
+                        stringify!([<$name Rule>])
+                    ))
+                 }
+            }
         }
     };
 }
@@ -206,6 +233,15 @@ macro_rules! stmt_rule {
                 ) -> ::egonlang_errors::EgonResultMultiSpannedErr<()> {
                     Ok(())
                 }
+            }
+
+            impl ::std::fmt::Display for [<$name Rule>] {
+                fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> Result<(), ::std::fmt::Error> {
+                    f.write_fmt(format_args!(
+                        "{}",
+                        stringify!([<$name Rule>])
+                    ))
+                 }
             }
         }
     };
