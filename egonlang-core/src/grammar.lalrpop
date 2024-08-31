@@ -84,6 +84,11 @@ ExprAssign: ast::Expr = {
 
 ExprIf: ast::Expr = {
     // if .. else ..
+    // The condition expression is `ExprLogicOr` to limit expression types allowed
+    // 
+    // Not Allowed:
+    // - Assignment Expressions
+    // - If Expressions
     "if" <cond:Spanned<ExprLogicOr>> <then:Spanned<ExprBlock>> 
     <else_:("else" <Spanned<ExprBlock>>)?>
     => {
@@ -102,6 +107,10 @@ ExprIf: ast::Expr = {
     },
     ExprLogicOr
 }
+
+// The following make up the majority of expression types
+//
+// They are chained together like this to implement syntax 
 
 ExprLogicOr = ExprInfix<ExprLogicOr, OpLogicOr, ExprLogicAnd>;
 OpLogicOr: ast::OpInfix = "or" => ast::OpInfix::LogicOr;
