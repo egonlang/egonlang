@@ -322,6 +322,12 @@
 <a href="#322" id="322">322</a>
 <a href="#323" id="323">323</a>
 <a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>egonlang_diagnostics::Diagnosable;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>thiserror::Error;
@@ -453,6 +459,8 @@
     </span>Undefined(String),
     <span class="attr">#[error(<span class="string">"{0} is not callable"</span>)]
     </span>NotCallable(String),
+    <span class="attr">#[error(<span class="string">"expects {expected} arguments but received {actual}"</span>)]
+    </span>WrongNumberOfArgs { expected: usize, actual: usize },
 }
 
 <span class="kw">impl </span>ErrorCode <span class="kw">for </span>EgonTypeError {
@@ -466,6 +474,10 @@
             EgonTypeError::UnknownType =&gt; <span class="string">"UnknownType"</span>,
             EgonTypeError::Undefined(<span class="kw">_</span>) =&gt; <span class="string">"Undefined"</span>,
             EgonTypeError::NotCallable(<span class="kw">_</span>) =&gt; <span class="string">"NotCallable"</span>,
+            EgonTypeError::WrongNumberOfArgs {
+                expected: <span class="kw">_</span>,
+                actual: <span class="kw">_</span>,
+            } =&gt; <span class="string">"WrongNumberOfArgs"</span>,
         }
         .to_string();
 
