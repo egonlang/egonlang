@@ -59,6 +59,7 @@
 <a href="#59" id="59">59</a>
 <a href="#60" id="60">60</a>
 <a href="#61" id="61">61</a>
+<a href="#62" id="62">62</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_errors::EgonTypeError;
@@ -75,10 +76,11 @@
     |expr, span, resolve_ident, _resolve_expr| {
         <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
 
-        <span class="kw">if let </span>ast::Expr::Identifier(ast::ExprIdentifier { identifier }) = expr {
+        <span class="kw">if let </span>ast::Expr::Identifier(boxed) = expr {
+            <span class="kw">let </span>identifier = <span class="kw-2">&amp;</span>boxed.identifier;
             <span class="kw">let </span>name = <span class="kw-2">&amp;</span>identifier.name;
 
-            <span class="kw">if </span>resolve_ident(name).is_none() {
+            <span class="kw">if </span>resolve_ident(name, span).is_err() {
                 errs.push((EgonTypeError::Undefined(name.to_string()).into(), span.clone()));
             }
         }

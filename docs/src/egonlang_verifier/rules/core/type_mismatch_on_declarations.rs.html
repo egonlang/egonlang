@@ -155,9 +155,6 @@
 <a href="#155" id="155">155</a>
 <a href="#156" id="156">156</a>
 <a href="#157" id="157">157</a>
-<a href="#158" id="158">158</a>
-<a href="#159" id="159">159</a>
-<a href="#160" id="160">160</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_errors::EgonTypeError;
@@ -183,7 +180,7 @@
                 }
                 <span class="comment">// let a = 123;
                 </span>(<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>((value_expr, value_span))) =&gt; {
-                    <span class="kw">if let </span><span class="prelude-val">Some</span>(value_typeref) = resolve_expr(value_expr, value_span) {
+                    <span class="kw">if let </span><span class="prelude-val">Ok</span>(value_typeref) = resolve_expr(value_expr, value_span) {
                         <span class="comment">// Check for empty list assignment
                         // Example:
                         // let a = [];
@@ -196,7 +193,7 @@
                 <span class="comment">// let a: number;
                 </span>(<span class="prelude-val">Some</span>((assign_type_expr, assign_type_span)), <span class="prelude-val">None</span>) =&gt; {
                     <span class="kw">match </span>resolve_expr(assign_type_expr, assign_type_span) {
-                        <span class="prelude-val">Some</span>(assign_type) =&gt; {
+                        <span class="prelude-val">Ok</span>(assign_type) =&gt; {
                             <span class="comment">// Check for empty list assignment
                             // Example:
                             // let a: unknown;
@@ -207,18 +204,15 @@
                                 ));
                             }
                         },
-                        <span class="prelude-val">None </span>=&gt; {
-                            errs.push((
-                                EgonTypeError::Undefined(assign_type_expr.to_string()).into(),
-                                assign_type_span.clone()
-                            ));
+                        <span class="prelude-val">Err</span>(e) =&gt; {
+                            errs.extend(e)
                         },
                     };
 
                 }
                 <span class="comment">// let a: number = 123;
                 </span>(<span class="prelude-val">Some</span>((assign_type_expr, assign_type_span)), <span class="prelude-val">Some</span>((value_expr, value_span))) =&gt; {
-                    <span class="kw">if let </span><span class="prelude-val">Some</span>(assign_typeref) = resolve_expr(assign_type_expr, assign_type_span) {
+                    <span class="kw">if let </span><span class="prelude-val">Ok</span>(assign_typeref) = resolve_expr(assign_type_expr, assign_type_span) {
                         <span class="comment">// Check for empty list assignment
                         // Example:
                         // let a: unknown;
@@ -227,7 +221,7 @@
                                 EgonTypeError::UnknownType.into(),
                                 assign_type_span.clone()
                             ));
-                        } <span class="kw">else if let </span><span class="prelude-val">Some</span>(value_typeref) = resolve_expr(value_expr, value_span) {
+                        } <span class="kw">else if let </span><span class="prelude-val">Ok</span>(value_typeref) = resolve_expr(value_expr, value_span) {
                             <span class="comment">// Types mismatched
                             </span><span class="kw">if </span>assign_typeref.of_type != value_typeref.of_type {
                                 <span class="comment">// Check for empty list assignment
@@ -242,7 +236,7 @@
                                 <span class="kw">if </span>value_typeref.of_type.is_identifier() {
                                     <span class="kw">let </span>identifier = <span class="kw-2">&amp;</span>stmt_assign.identifier.<span class="number">0</span>.name;
 
-                                    <span class="kw">if let </span><span class="prelude-val">Some</span>(identifier_type) = resolve_ident(identifier) {
+                                    <span class="kw">if let </span><span class="prelude-val">Ok</span>(identifier_type) = resolve_ident(identifier,  <span class="kw-2">&amp;</span>stmt_assign.identifier.<span class="number">1</span>) {
                                         <span class="kw">if </span>assign_typeref.of_type == identifier_type.of_type {
                                             <span class="kw">return </span><span class="macro">vec!</span>[];
                                         }

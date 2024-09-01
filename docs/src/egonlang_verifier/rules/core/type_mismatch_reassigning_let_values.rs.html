@@ -109,13 +109,13 @@
     /// c = true;
     /// ```
     </span>TypeMismatchReassigningLetValues,
-    |expr, _span, resolve_ident, resolve_expr| {
+    |expr, span, resolve_ident, resolve_expr| {
         <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
 
         <span class="kw">if let </span>ast::Expr::Assign(expr_assign) = expr {
             <span class="kw">let </span>identifier = <span class="kw-2">&amp;</span>expr_assign.identifier.<span class="number">0</span>.name;
 
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(type_env_value) = resolve_ident(identifier) {
+            <span class="kw">if let </span><span class="prelude-val">Ok</span>(type_env_value) = resolve_ident(identifier, span) {
                 <span class="kw">let </span>type_env_typeref = <span class="kw-2">&amp;</span>type_env_value.of_type;
                 <span class="kw">let </span>is_const = <span class="kw-2">&amp;</span>type_env_value.is_const;
 

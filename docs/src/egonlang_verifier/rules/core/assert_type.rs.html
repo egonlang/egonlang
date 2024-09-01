@@ -32,8 +32,8 @@
     <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
 
     <span class="kw">if let </span>Stmt::AssertType(x) = stmt {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(value_type) = resolve_expr(<span class="kw-2">&amp;</span>x.value.<span class="number">0</span>, <span class="kw-2">&amp;</span>x.value.<span class="number">1</span>) {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(expected_type_type) = resolve_expr(<span class="kw-2">&amp;</span>x.expected_type.<span class="number">0</span>, <span class="kw-2">&amp;</span>x.expected_type.<span class="number">1</span>) {
+        <span class="kw">if let </span><span class="prelude-val">Ok</span>(value_type) = resolve_expr(<span class="kw-2">&amp;</span>x.value.<span class="number">0</span>, <span class="kw-2">&amp;</span>x.value.<span class="number">1</span>) {
+            <span class="kw">if let </span><span class="prelude-val">Ok</span>(expected_type_type) = resolve_expr(<span class="kw-2">&amp;</span>x.expected_type.<span class="number">0</span>, <span class="kw-2">&amp;</span>x.expected_type.<span class="number">1</span>) {
                 <span class="kw">if </span>value_type.of_type != expected_type_type.of_type {
                     errs.push((
                         EgonTypeError::MismatchType {

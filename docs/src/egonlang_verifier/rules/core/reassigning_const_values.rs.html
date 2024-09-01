@@ -75,7 +75,7 @@
 
         <span class="kw">if let </span>ast::Expr::Assign(expr_assign) = expr {
             <span class="kw">let </span>identifier = <span class="kw-2">&amp;</span>expr_assign.identifier.<span class="number">0</span>.name;
-            <span class="kw">let </span>type_env_value = resolve_ident(identifier);
+            <span class="kw">let </span>type_env_value = resolve_ident(identifier, <span class="kw-2">&amp;</span>expr_assign.identifier.<span class="number">1</span>);
             <span class="kw">let </span>is_const = type_env_value.map(|x| x.is_const).unwrap_or(<span class="bool-val">false</span>);
 
             <span class="kw">if </span>is_const {

@@ -319,6 +319,9 @@
 <a href="#319" id="319">319</a>
 <a href="#320" id="320">320</a>
 <a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>egonlang_diagnostics::Diagnosable;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>thiserror::Error;
@@ -448,6 +451,8 @@
     </span>UnknownType,
     <span class="attr">#[error(<span class="string">"`{0}` is not defined"</span>)]
     </span>Undefined(String),
+    <span class="attr">#[error(<span class="string">"{0} is not callable"</span>)]
+    </span>NotCallable(String),
 }
 
 <span class="kw">impl </span>ErrorCode <span class="kw">for </span>EgonTypeError {
@@ -460,6 +465,7 @@
             EgonTypeError::UknownListType =&gt; <span class="string">"UnknownListType"</span>,
             EgonTypeError::UnknownType =&gt; <span class="string">"UnknownType"</span>,
             EgonTypeError::Undefined(<span class="kw">_</span>) =&gt; <span class="string">"Undefined"</span>,
+            EgonTypeError::NotCallable(<span class="kw">_</span>) =&gt; <span class="string">"NotCallable"</span>,
         }
         .to_string();
 
