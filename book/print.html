@@ -388,6 +388,22 @@ Explicit return types are required at this time!
 </code></pre>
 <h3 id="type-expression"><a class="header" href="#type-expression">Type Expression</a></h3>
 <p>TODO</p>
+<h3 id="call-expressions"><a class="header" href="#call-expressions">Call Expressions</a></h3>
+<p>Call a callable expressions (e.g. function) with arguments.</p>
+<pre><code class="language-egon">fn sum (a: number, b: number): number =&gt; {
+    a + b
+}
+
+let result = sum(5, 5);
+
+assert_type result, number;
+</code></pre>
+<h4 id="non-callables"><a class="header" href="#non-callables">Non-Callables</a></h4>
+<p>Calling non-callables will result in an error.</p>
+<pre><code class="language-egon">123();
+
+// TypeError: number is not callable
+</code></pre>
 <h2 id="statements"><a class="header" href="#statements">Statements</a></h2>
 <p>A statement is code that executes but doesn't generate a value. Statements are often postfixed with a semicolon but not always.</p>
 <h3 id="expression-statement"><a class="header" href="#expression-statement">Expression Statement</a></h3>
