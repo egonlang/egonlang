@@ -10,3 +10,4 @@
   - [CLI](./tooling/cli.md)
   - [Language Server](./tooling/lsp.md)
   - [VS Code Extension](./tooling/vsc.md)
+- [EBNF](./ebnf.md)
