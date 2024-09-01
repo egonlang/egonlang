@@ -1,0 +1,10 @@
+fn sum (a: number, b: number): number => {
+    a + b
+}
+
+fn empty_string (): string => { "" }
+
+sum(empty_string(), empty_string());
+
+// out: TypeError: mismatched types: expected type `number` but received `string`
+// out: TypeError: mismatched types: expected type `number` but received `string`

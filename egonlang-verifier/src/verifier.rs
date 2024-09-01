@@ -85,6 +85,8 @@ impl<'a> Verifier<'a> {
         self.add_rule(NoReturnOutsideBlockRule);
         self.add_rule(NoStmtsAfterReturnStmtRule);
         self.add_rule(NoNonCallableCalledRule);
+        self.add_rule(TypeMismatchArgsInCallExprRule);
+        self.add_rule(WrongNumberOfArgsCallingFnRule);
 
         self
     }

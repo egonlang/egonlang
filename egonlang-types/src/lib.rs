@@ -110,6 +110,14 @@ impl Type {
         "function" == self.type_name()
     }
 
+    pub fn get_function_params(&self) -> Vec<Type> {
+        if !self.is_function() {
+            panic!("Type {} is not a function", self);
+        }
+
+        self.type_args().first().unwrap().1.clone()
+    }
+
     pub fn get_function_return(&self) -> Type {
         if !self.is_function() {
             panic!("Type {} is not a function", self);

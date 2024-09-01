@@ -129,6 +129,8 @@ pub enum EgonTypeError {
     Undefined(String),
     #[error("{0} is not callable")]
     NotCallable(String),
+    #[error("expects {expected} arguments but received {actual}")]
+    WrongNumberOfArgs { expected: usize, actual: usize },
 }
 
 impl ErrorCode for EgonTypeError {
@@ -142,6 +144,10 @@ impl ErrorCode for EgonTypeError {
             EgonTypeError::UnknownType => "UnknownType",
             EgonTypeError::Undefined(_) => "Undefined",
             EgonTypeError::NotCallable(_) => "NotCallable",
+            EgonTypeError::WrongNumberOfArgs {
+                expected: _,
+                actual: _,
+            } => "WrongNumberOfArgs",
         }
         .to_string();
 

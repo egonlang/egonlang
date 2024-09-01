@@ -1,0 +1,6 @@
+let sum = (a: number, b: number): number => { a + b };
+
+sum(false, "10");
+
+// out: TypeError: mismatched types: expected type `number` but received `bool`
+// out: TypeError: mismatched types: expected type `number` but received `string`

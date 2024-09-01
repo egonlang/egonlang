@@ -1,0 +1,5 @@
+fn sum (a: number, b: number): number => {
+    a + b
+}
+
+sum(sum(5, 5), sum(10, 50));

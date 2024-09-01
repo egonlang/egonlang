@@ -1,0 +1,7 @@
+let value: string;
+
+let sum = (a: number, b: number): number => { a + b };
+
+value = sum(10, 20);
+
+// out: TypeError: mismatched types: expected type `string` but received `number`
