@@ -1,11 +1,5 @@
 # Egon Language Development Guide
 
-[![Publish Book](https://github.com/egonlang/egonlang/actions/workflows/book-to-gh-pages.yml/badge.svg)](https://github.com/egonlang/egonlang/actions/workflows/book-to-gh-pages.yml)
-
-[![Publish Docs](https://github.com/egonlang/egonlang/actions/workflows/docs-to-gh-pages.yml/badge.svg)](https://github.com/egonlang/egonlang/actions/workflows/docs-to-gh-pages.yml)
-
-[![pages-build-deployment](https://github.com/egonlang/egonlang/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/egonlang/egonlang/actions/workflows/pages/pages-build-deployment)
-
 ## Getting Started
 
 1. Clone/copy down https://github.com/egonlang/egonlang
@@ -38,6 +32,12 @@
 - [cli](./egonlang-cli/): Command line tool to lex and parse egon code files 
 - [vsc](./vsc/): VS Code language extension
 - [book](./egon-book/) The egon book documenting the language
+
+[![Publish Book](https://github.com/egonlang/egonlang/actions/workflows/book-to-gh-pages.yml/badge.svg)](https://github.com/egonlang/egonlang/actions/workflows/book-to-gh-pages.yml)
+
+[![Publish Docs](https://github.com/egonlang/egonlang/actions/workflows/docs-to-gh-pages.yml/badge.svg)](https://github.com/egonlang/egonlang/actions/workflows/docs-to-gh-pages.yml)
+
+[![pages-build-deployment](https://github.com/egonlang/egonlang/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/egonlang/egonlang/actions/workflows/pages/pages-build-deployment)
 
 ### Support/Utils
 
