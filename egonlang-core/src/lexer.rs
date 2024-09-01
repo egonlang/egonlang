@@ -882,13 +882,17 @@ mod lexer_tests {
 
     lexer_test!(
         lex_assert_type,
-        "assert_type 123, number;",
+        r#"fn_name(true, "foo", 100);"#,
         vec![
-            Ok((0, Token::AssertType, 11)),
-            Ok((12, Token::Number(123f64), 15)),
-            Ok((15, Token::Comma, 16)),
-            Ok((17, Token::Identifier("number".to_string()), 23)),
-            Ok((23, Token::Semicolon, 24)),
+            Ok((0, Token::Identifier("fn_name".to_string()), 7)),
+            Ok((7, Token::ParanOpen, 8)),
+            Ok((8, Token::True, 12)),
+            Ok((12, Token::Comma, 13)),
+            Ok((14, Token::String("foo".to_string()), 19)),
+            Ok((19, Token::Comma, 20)),
+            Ok((21, Token::Number(100f64), 24)),
+            Ok((24, Token::ParanClose, 25)),
+            Ok((25, Token::Semicolon, 26)),
         ]
     );
 }

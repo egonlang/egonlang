@@ -95,8 +95,8 @@ mod parser_tests {
     use pretty_assertions::assert_eq;
 
     use crate::ast::{
-        self, Expr, ExprAssign, ExprBlock, ExprFn, ExprIdentifier, ExprIf, ExprInfix, ExprList,
-        ExprLiteral, ExprRange, ExprTuple, ExprType, Identifier, Module, OpInfix, Stmt,
+        self, Expr, ExprAssign, ExprBlock, ExprCall, ExprFn, ExprIdentifier, ExprIf, ExprInfix,
+        ExprList, ExprLiteral, ExprRange, ExprTuple, ExprType, Identifier, Module, OpInfix, Stmt,
         StmtAssertType, StmtAssign, StmtExpr, StmtTypeAlias,
     };
 
@@ -2120,6 +2120,56 @@ mod parser_tests {
                 }
                 .into(),
                 0..24
+            )]
+        })
+    );
+
+    parser_test!(
+        parse_call_fn_expr,
+        "(a: number): number => { a }(100);",
+        Ok(Module {
+            stmts: vec![(
+                StmtExpr {
+                    expr: (
+                        Expr::Call(Box::new(ExprCall {
+                            callee: (
+                                Expr::Fn(Box::new(ExprFn {
+                                    name: None,
+                                    params: vec![(
+                                        (
+                                            Identifier {
+                                                name: "a".to_string()
+                                            },
+                                            Type::number()
+                                        ),
+                                        1..10
+                                    )],
+                                    return_type: (Type::number(), 13..19),
+                                    body: (
+                                        Expr::Block(Box::new(ExprBlock {
+                                            stmts: vec![],
+                                            return_expr: Some((
+                                                Expr::Identifier(ExprIdentifier {
+                                                    identifier: Identifier {
+                                                        name: "a".to_string()
+                                                    }
+                                                }),
+                                                25..26
+                                            )),
+                                            typeref: None
+                                        })),
+                                        23..28
+                                    )
+                                })),
+                                0..28
+                            ),
+                            args: vec![(Expr::Literal(ExprLiteral::Number(100f64)), 29..32)]
+                        })),
+                        0..33
+                    )
+                }
+                .into(),
+                0..34
             )]
         })
     );
