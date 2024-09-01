@@ -892,6 +892,10 @@
 <a href="#892" id="892">892</a>
 <a href="#893" id="893">893</a>
 <a href="#894" id="894">894</a>
+<a href="#895" id="895">895</a>
+<a href="#896" id="896">896</a>
+<a href="#897" id="897">897</a>
+<a href="#898" id="898">898</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::num::ParseFloatError;
 
 <span class="kw">use </span>logos::Logos;
@@ -1776,13 +1780,17 @@
 
     <span class="macro">lexer_test!</span>(
         lex_assert_type,
-        <span class="string">"assert_type 123, number;"</span>,
+        <span class="string">r#"fn_name(true, "foo", 100);"#</span>,
         <span class="macro">vec!</span>[
-            <span class="prelude-val">Ok</span>((<span class="number">0</span>, Token::AssertType, <span class="number">11</span>)),
-            <span class="prelude-val">Ok</span>((<span class="number">12</span>, Token::Number(<span class="number">123f64</span>), <span class="number">15</span>)),
-            <span class="prelude-val">Ok</span>((<span class="number">15</span>, Token::Comma, <span class="number">16</span>)),
-            <span class="prelude-val">Ok</span>((<span class="number">17</span>, Token::Identifier(<span class="string">"number"</span>.to_string()), <span class="number">23</span>)),
-            <span class="prelude-val">Ok</span>((<span class="number">23</span>, Token::Semicolon, <span class="number">24</span>)),
+            <span class="prelude-val">Ok</span>((<span class="number">0</span>, Token::Identifier(<span class="string">"fn_name"</span>.to_string()), <span class="number">7</span>)),
+            <span class="prelude-val">Ok</span>((<span class="number">7</span>, Token::ParanOpen, <span class="number">8</span>)),
+            <span class="prelude-val">Ok</span>((<span class="number">8</span>, Token::True, <span class="number">12</span>)),
+            <span class="prelude-val">Ok</span>((<span class="number">12</span>, Token::Comma, <span class="number">13</span>)),
+            <span class="prelude-val">Ok</span>((<span class="number">14</span>, Token::String(<span class="string">"foo"</span>.to_string()), <span class="number">19</span>)),
+            <span class="prelude-val">Ok</span>((<span class="number">19</span>, Token::Comma, <span class="number">20</span>)),
+            <span class="prelude-val">Ok</span>((<span class="number">21</span>, Token::Number(<span class="number">100f64</span>), <span class="number">24</span>)),
+            <span class="prelude-val">Ok</span>((<span class="number">24</span>, Token::ParanClose, <span class="number">25</span>)),
+            <span class="prelude-val">Ok</span>((<span class="number">25</span>, Token::Semicolon, <span class="number">26</span>)),
         ]
     );
 }
