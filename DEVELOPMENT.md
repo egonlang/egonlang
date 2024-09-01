@@ -1,5 +1,11 @@
 # Egon Language Development Guide
 
+[![Publish Book](https://github.com/egonlang/egonlang/actions/workflows/book-to-gh-pages.yml/badge.svg)](https://github.com/egonlang/egonlang/actions/workflows/book-to-gh-pages.yml)
+
+[![Publish Docs](https://github.com/egonlang/egonlang/actions/workflows/docs-to-gh-pages.yml/badge.svg)](https://github.com/egonlang/egonlang/actions/workflows/docs-to-gh-pages.yml)
+
+[![pages-build-deployment](https://github.com/egonlang/egonlang/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/egonlang/egonlang/actions/workflows/pages/pages-build-deployment)
+
 ## Getting Started
 
 1. Clone/copy down https://github.com/egonlang/egonlang
