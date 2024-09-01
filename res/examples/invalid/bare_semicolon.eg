@@ -1,0 +1,3 @@
+;
+
+// out: SyntaxError: unexpected ";"; expected: ["\"{\"", "\"[\"", "\"(\"", "\"..\"", "\"-\"", "\"!\"", "\"true\"", "\"false\"", "\"if\"", "\"fn\"", "\"let\"", "\"const\"", "\"type\"", "\"assert_type\"", "\"return\"", "identifier", "string", "number"]

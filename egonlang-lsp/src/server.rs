@@ -7,7 +7,6 @@ use egonlang_diagnostics::{
     Diagnosable, EgonDiagnosis, EgonDiagnosisPosition, EgonDiagnosisRange, EgonDiagnosisSeverity,
 };
 use egonlang_verifier::prelude::*;
-use span::Span;
 use str_idxpos::position_to_index;
 use tokio::sync::Mutex;
 use tower_lsp::jsonrpc::Result;
@@ -121,29 +120,49 @@ impl LanguageServer for EgonLanguageServerBackend {
         documents.insert(uri.clone(), source.to_string());
 
         let version = Some(params.text_document.version);
-        let mut module = parse(source, 0).unwrap();
-        let errs = verify_module(&mut module).err().unwrap_or_default();
 
-        let diagnostics: Vec<(&(dyn Diagnosable + Sync), &Span)> = errs
-            .iter()
-            .map(|e| {
-                let e2: &(dyn Diagnosable + Sync) = &e.0 as &(dyn Diagnosable + Sync);
-                (e2, &e.1)
-            })
-            .collect();
-        self.client
-            .publish_diagnostics(
-                uri,
-                diagnostics
+        let module = parse(source, 0);
+
+        match module {
+            Ok(mut module) => {
+                let errs = verify_module(&mut module).err().unwrap_or_default();
+
+                // Map errors to
+                let diagnostics: Vec<LspDiagnosis> = errs
                     .iter()
-                    .map(|x| {
-                        let d = x.0.to_diagnosis(source, x.1.clone());
-                        LspDiagnosis(d).into()
+                    .map(|(e, e_span)| {
+                        let diagnosable: &(dyn Diagnosable + Sync) = e as &(dyn Diagnosable + Sync);
+                        LspDiagnosis(diagnosable.to_diagnosis(source, e_span.clone()))
                     })
-                    .collect(),
-                version,
-            )
-            .await;
+                    .collect();
+
+                self.client
+                    .publish_diagnostics(
+                        uri,
+                        diagnostics.iter().map(|x| x.clone().into()).collect(),
+                        version,
+                    )
+                    .await;
+            }
+            Err(errs) => {
+                // Map errors to
+                let diagnostics: Vec<LspDiagnosis> = errs
+                    .iter()
+                    .map(|(e, e_span)| {
+                        let diagnosable: &(dyn Diagnosable + Sync) = e as &(dyn Diagnosable + Sync);
+                        LspDiagnosis(diagnosable.to_diagnosis(source, e_span.clone()))
+                    })
+                    .collect();
+
+                self.client
+                    .publish_diagnostics(
+                        uri,
+                        diagnostics.iter().map(|x| x.clone().into()).collect(),
+                        version,
+                    )
+                    .await;
+            }
+        }
     }
 
     async fn hover(&self, params: HoverParams) -> Result<Option<Hover>> {
