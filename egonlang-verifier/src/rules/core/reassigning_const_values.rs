@@ -15,7 +15,7 @@ expr_rule!(
 
         if let ast::Expr::Assign(expr_assign) = expr {
             let identifier = &expr_assign.identifier.0.name;
-            let type_env_value = resolve_ident(identifier);
+            let type_env_value = resolve_ident(identifier, &expr_assign.identifier.1);
             let is_const = type_env_value.map(|x| x.is_const).unwrap_or(false);
 
             if is_const {

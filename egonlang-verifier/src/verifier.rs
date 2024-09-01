@@ -2,12 +2,13 @@ use colored::Colorize;
 use egonlang_core::prelude::*;
 use egonlang_errors::{EgonErrorS, EgonResultMultiSpannedErr, EgonTypeError};
 use egonlang_types::{
+    egon_unknown,
     type_env::{TypeEnv, TypeEnvValue},
     Type,
 };
 use span::Span;
 
-use crate::rules::{self, ResolveExpr, ResolveIdent};
+use crate::rules::{core::*, Rule};
 
 /// Verify an AST [`Module`](egonlang_core::ast::Module) using the registered
 /// [`Rule`](crate::rules::Rule) set
@@ -26,12 +27,12 @@ use crate::rules::{self, ResolveExpr, ResolveIdent};
 /// matches!(result, Ok(()));
 /// ```
 pub struct Verifier<'a> {
-    rules: Vec<Box<dyn rules::Rule<'a>>>,
+    rules: Vec<Box<dyn Rule<'a>>>,
     type_env: TypeEnv,
 }
 
 impl Default for Verifier<'_> {
-    /// Create a [`Verifier`] with the [`Rule`](crate::rules::Rule) set
+    /// Create a [`Verifier`] with the [`Rule`] set
     fn default() -> Self {
         Self::new().with_default_rules()
     }
@@ -53,7 +54,7 @@ impl<'a> Verifier<'a> {
     ///
     /// let verifier = Verifier::new().with_rule(TypeMismatchInfixRule);
     /// ```
-    pub fn add_rule<R: rules::Rule<'a> + 'static>(&mut self, rule: R) {
+    pub fn add_rule<R: Rule<'a> + 'static>(&mut self, rule: R) {
         self.rules.push(Box::new(rule));
     }
 
@@ -67,22 +68,23 @@ impl<'a> Verifier<'a> {
     /// let verifier = Verifier::default();
     /// ```
     pub fn with_default_rules(mut self) -> Self {
-        self.add_rule(rules::core::TypeMismatchInfixRule);
-        self.add_rule(rules::core::TypeMismatchPrefixRule);
-        self.add_rule(rules::core::TypeMisMatchListItemsRule);
-        self.add_rule(rules::core::TypeMismatchOnDeclarationsRule);
-        self.add_rule(rules::core::DeclareConstWithoutValueRule);
-        self.add_rule(rules::core::ReassigningConstValueRule);
-        self.add_rule(rules::core::ReferencingUndefinedIdentifierRule);
-        self.add_rule(rules::core::DivideByZeroRule);
-        self.add_rule(rules::core::TypeMismatchFnReturnExprRule);
-        self.add_rule(rules::core::TypeMismatchIfCondExprRule);
-        self.add_rule(rules::core::TypeMismatchReassigningLetValuesRule);
-        self.add_rule(rules::core::TypeMismatchIfthenElseExprRule);
-        self.add_rule(rules::core::InvalidTypeAliasNameRule);
-        self.add_rule(rules::core::AssertTypeRule);
-        self.add_rule(rules::core::NoReturnOutsideBlockRule);
-        self.add_rule(rules::core::NoStmtsAfterReturnStmtRule);
+        self.add_rule(TypeMismatchInfixRule);
+        self.add_rule(TypeMismatchPrefixRule);
+        self.add_rule(TypeMisMatchListItemsRule);
+        self.add_rule(TypeMismatchOnDeclarationsRule);
+        self.add_rule(DeclareConstWithoutValueRule);
+        self.add_rule(ReassigningConstValueRule);
+        self.add_rule(ReferencingUndefinedIdentifierRule);
+        self.add_rule(DivideByZeroRule);
+        self.add_rule(TypeMismatchFnReturnExprRule);
+        self.add_rule(TypeMismatchIfCondExprRule);
+        self.add_rule(TypeMismatchReassigningLetValuesRule);
+        self.add_rule(TypeMismatchIfthenElseExprRule);
+        self.add_rule(InvalidTypeAliasNameRule);
+        self.add_rule(AssertTypeRule);
+        self.add_rule(NoReturnOutsideBlockRule);
+        self.add_rule(NoStmtsAfterReturnStmtRule);
+        self.add_rule(NoNonCallableCalledRule);
 
         self
     }
@@ -112,15 +114,46 @@ impl<'a> Verifier<'a> {
 
 impl<'a> Verifier<'a> {
     /// Resolves an identifier through all type environment scopes
-    fn resolve_identifier(&self, identifier: &str) -> Option<TypeEnvValue> {
+    fn resolve_identifier(
+        &self,
+        identifier: &str,
+        span: &Span,
+    ) -> EgonResultMultiSpannedErr<TypeEnvValue> {
         tracelog::tracelog!(
-            label = verifier,resolve_expr_type;
+            label = verifier, resolve_identifier;
             "(level: {}) Resolving identifier type: {}",
             self.current_type_env_level(),
             identifier.to_string().cyan()
         );
 
-        self.type_env.get(identifier)
+        let resolved_to = self.type_env.get(identifier);
+
+        match &resolved_to {
+            Some(resolved_to) => {
+                let resolved_to_string = format!("{:?}", resolved_to);
+
+                tracelog::tracelog!(
+                    label = verifier, resolve_identifier;
+                    "(level: {}) Resolved identifier: {} to type: {}",
+                    self.current_type_env_level(),
+                    identifier.to_string().cyan(),
+                    resolved_to_string.cyan()
+                );
+            }
+            None => {
+                tracelog::tracelog!(
+                    label = verifier, resolve_identifier;
+                    "(level: {}) Unable to resolve identifier: {}. Generating undefined error.",
+                    self.current_type_env_level(),
+                    identifier.to_string().cyan()
+                );
+            }
+        }
+
+        resolved_to.ok_or(vec![(
+            EgonTypeError::Undefined(identifier.to_string()).into(),
+            span.clone(),
+        )])
     }
 
     /// Resolve an expression's type recursively.
@@ -134,7 +167,11 @@ impl<'a> Verifier<'a> {
     /// let b = false;
     ///
     /// (a, b,); // This expression's type resolves to (number, bool,)
-    fn resolve_expr_type(&self, expr: &ast::Expr) -> Option<TypeEnvValue> {
+    fn resolve_expr_type(
+        &self,
+        expr: &ast::Expr,
+        span: &Span,
+    ) -> EgonResultMultiSpannedErr<TypeEnvValue> {
         tracelog::tracelog!(
             label = verifier,resolve_expr_type;
             "(level: {}) Resolving type for expression {}",
@@ -143,131 +180,212 @@ impl<'a> Verifier<'a> {
         );
 
         let resolved_type = match expr {
+            ast::Expr::Call(expr_call) => {
+                tracelog::tracelog!(
+                    label = verifier,resolve_expr_type,expr_call;
+                    "(level: {}) {} is a call expression",
+                    self.current_type_env_level(),
+                    expr.to_string().cyan()
+                );
+
+                match self.resolve_expr_type(&expr_call.callee.0, span) {
+                    Ok(callee_type) => {
+                        if callee_type.of_type.is_function() {
+                            tracelog::tracelog!(
+                                label = verifier,resolve_expr_type,expr_call,resolve_callee;
+                                "(level: {}) callee {} in call expression {} is a function",
+                                self.current_type_env_level(),
+                                expr_call.callee.0.to_string().cyan(),
+                                expr.to_string().cyan()
+                            );
+
+                            Ok(callee_type.of_type.get_function_return().into())
+                        } else {
+                            tracelog::tracelog!(
+                                label = verifier,resolve_expr_type,expr_call,resolve_callee;
+                                "(level: {}) callee {} in call expression {} is not a function",
+                                self.current_type_env_level(),
+                                expr_call.callee.0.to_string().cyan(),
+                                expr.to_string().cyan()
+                            );
+
+                            Ok(egon_unknown!().into())
+                        }
+                    }
+                    Err(errs) => Err(errs),
+                }
+            }
             ast::Expr::Identifier(ident_expr) => {
-                self.resolve_identifier(&ident_expr.identifier.name)
+                tracelog::tracelog!(
+                    label = verifier,resolve_expr_type,expr_identifier;
+                    "(level: {}) {} is an identifier expression",
+                    self.current_type_env_level(),
+                    expr.to_string().cyan()
+                );
+
+                self.resolve_identifier(&ident_expr.identifier.name, span)
             }
             ast::Expr::List(list_expr) => {
+                tracelog::tracelog!(
+                    label = verifier,resolve_expr_type,expr_list;
+                    "(level: {}) {} is a list expression",
+                    self.current_type_env_level(),
+                    expr.to_string().cyan()
+                );
+
                 if list_expr.items.is_empty() {
-                    return Some(Type::unknown_list().into());
+                    return Ok(Type::unknown_list().into());
                 }
 
                 let (first_item_expr, _) = list_expr.items.first().unwrap().clone();
-                let first_item_type = self.resolve_expr_type(&first_item_expr)?.of_type;
+                let first_item_type = self.resolve_expr_type(&first_item_expr, span)?.of_type;
 
-                Some(Type::list(first_item_type).into())
+                Ok(Type::list(first_item_type).into())
             }
             ast::Expr::Tuple(tuple_expr) => {
+                tracelog::tracelog!(
+                    label = verifier,resolve_expr_type,expr_tuple;
+                    "(level: {}) {} is a tuple expression",
+                    self.current_type_env_level(),
+                    expr.to_string().cyan()
+                );
+
                 if tuple_expr.items.is_empty() {
-                    return Some(Type::tuple(vec![]).into());
+                    return Ok(Type::tuple(vec![]).into());
                 }
 
                 let item_types: Vec<Type> = tuple_expr
                     .items
                     .clone()
                     .into_iter()
-                    .map(|(x_expr, _)| self.resolve_expr_type(&x_expr).unwrap().of_type)
+                    .map(|(x_expr, _)| self.resolve_expr_type(&x_expr, span).unwrap().of_type)
                     .collect();
 
-                Some(Type::tuple(item_types).into())
+                Ok(Type::tuple(item_types).into())
             }
             ast::Expr::Block(block_expr) => {
                 tracelog::tracelog!(
-                    label = verifier,resolve_expr_type;
-                    "(level: {}) Resolving type for block {}",
+                    label = verifier,resolve_expr_type,expr_block;
+                    "(level: {}) {} is a block expression",
                     self.current_type_env_level(),
-                    block_expr.to_string().cyan()
+                    expr.to_string().cyan()
                 );
 
                 if let Some(block_typeref) = &block_expr.typeref {
-                    return Some(TypeEnvValue {
+                    return Ok(TypeEnvValue {
                         of_type: block_typeref.clone(),
                         is_const: true,
                     });
                 }
 
                 if let Some((block_expr_return_expr, _)) = &block_expr.return_expr {
-                    self.resolve_expr_type(block_expr_return_expr)
+                    self.resolve_expr_type(block_expr_return_expr, span)
                 } else {
                     tracelog::tracelog!(
-                        label = verifier,resolve_expr_type,block;
+                        label = verifier,resolve_expr_type,expr_identifier;
                         "(level: {}) Resolved block expression {} to type {}",
                         self.current_type_env_level(),
                         block_expr.to_string().cyan(),
                         Type::unit().to_string().italic().yellow()
                     );
 
-                    return Some(Type::unit().into());
+                    return Ok(Type::unit().into());
                 }
             }
             ast::Expr::Type(type_expr) => {
                 tracelog::tracelog!(
-                    label = verifier,resolve_expr_type,type_expr;
-                    "(level: {}) Resolving type for type expression {}",
+                    label = verifier,resolve_expr_type,expr_type;
+                    "(level: {}) {} is a type expression",
                     self.current_type_env_level(),
-                    type_expr.to_string().cyan()
+                    expr.to_string().cyan()
                 );
 
                 if type_expr.0.is_builtin() {
                     tracelog::tracelog!(
-                        label = verifier,resolve_expr_type,type_expr;
+                        label = verifier,resolve_expr_type,expr_type;
                         "(level: {}) Resolved type expression {} to builtin type {}",
                         self.current_type_env_level(),
                         type_expr.to_string().cyan(),
                         type_expr.to_string().italic().yellow()
                     );
 
-                    return Some(type_expr.0.clone().into());
+                    return Ok(type_expr.0.clone().into());
                 }
 
-                if let Some(type_env_value) =
-                    &self.resolve_identifier(type_expr.0.to_string().as_str())
-                {
-                    tracelog::tracelog!(
-                        label = verifier,resolve_expr_type,type_expr;
-                        "(level: {}) Resolved type expression {} to type {}",
-                        self.current_type_env_level(),
-                        type_expr.to_string().cyan(),
-                        type_env_value.of_type.to_string().italic().yellow()
-                    );
+                match self.resolve_identifier(type_expr.0.to_string().as_str(), span) {
+                    Ok(type_env_value) => {
+                        tracelog::tracelog!(
+                            label = verifier,resolve_expr_type,expr_type;
+                            "(level: {}) Resolved type expression {} to type {}",
+                            self.current_type_env_level(),
+                            type_expr.to_string().cyan(),
+                            type_env_value.of_type.to_string().italic().yellow()
+                        );
 
-                    return Some(type_env_value.clone());
+                        Ok(type_env_value.clone())
+                    }
+                    Err(errs) => Err(errs),
                 }
-
-                tracelog::tracelog!(
-                    label = verifier,resolve_expr_type,type_expr;
-                    "(level: {}) Resolved type expression {} to type NONE",
-                    self.current_type_env_level(),
-                    type_expr.to_string().cyan()
-                );
-
-                None
             }
             ast::Expr::Assign(assign_expr) => {
+                tracelog::tracelog!(
+                    label = verifier,resolve_expr_type,expr_assign;
+                    "(level: {}) {} is an assign expression",
+                    self.current_type_env_level(),
+                    expr.to_string().cyan()
+                );
+
                 let name = &assign_expr.identifier.0.name;
 
-                Some(self.resolve_identifier(name).unwrap_or_else(|| {
-                    let (value_expr, _) = &assign_expr.value;
-
-                    self.resolve_expr_type(value_expr).unwrap()
-                }))
+                self.resolve_identifier(name, span)
             }
             ast::Expr::If(if_expr) => {
-                let (then_expr, _) = &if_expr.then;
-                let then_typeref = self.resolve_expr_type(then_expr)?;
+                tracelog::tracelog!(
+                    label = verifier,resolve_expr_type,expr_if;
+                    "(level: {}) {} is an if expression",
+                    self.current_type_env_level(),
+                    expr.to_string().cyan()
+                );
 
-                Some(then_typeref)
+                let (then_expr, _) = &if_expr.then;
+                let then_typeref = self.resolve_expr_type(then_expr, span)?;
+
+                Ok(then_typeref)
             }
-            ast::Expr::Unit => Some(Type::unit().into()),
-            ast::Expr::Literal(literal) => Some(
-                match literal {
+            ast::Expr::Unit => {
+                tracelog::tracelog!(
+                    label = verifier,resolve_expr_type,expr_unit;
+                    "(level: {}) {} is an unit expression",
+                    self.current_type_env_level(),
+                    expr.to_string().cyan()
+                );
+
+                Ok(Type::unit().into())
+            }
+            ast::Expr::Literal(literal) => {
+                tracelog::tracelog!(
+                    label = verifier,resolve_expr_type,expr_literal;
+                    "(level: {}) {} is a literal expression",
+                    self.current_type_env_level(),
+                    expr.to_string().cyan()
+                );
+
+                Ok(match literal {
                     ast::ExprLiteral::Bool(_) => Type::bool(),
                     ast::ExprLiteral::Number(_) => Type::number(),
                     ast::ExprLiteral::String(_) => Type::string(),
                 }
-                .into(),
-            ),
-            ast::Expr::Infix(infix) => Some(
-                match infix.op {
+                .into())
+            }
+            ast::Expr::Infix(infix) => {
+                tracelog::tracelog!(
+                    label = verifier,resolve_expr_type,expr_infix;
+                    "(level: {}) {} is an infix expression",
+                    self.current_type_env_level(),
+                    expr.to_string().cyan()
+                );
+
+                Ok(match infix.op {
                     ast::OpInfix::Add => Type::number(),
                     ast::OpInfix::Subtract => Type::number(),
                     ast::OpInfix::Multiply => Type::number(),
@@ -282,17 +400,31 @@ impl<'a> Verifier<'a> {
                     ast::OpInfix::LogicAnd => Type::bool(),
                     ast::OpInfix::LogicOr => Type::bool(),
                 }
-                .into(),
-            ),
-            ast::Expr::Prefix(prefix) => Some(
-                match prefix.op {
+                .into())
+            }
+            ast::Expr::Prefix(prefix) => {
+                tracelog::tracelog!(
+                    label = verifier,resolve_expr_type,expr_prefix;
+                    "(level: {}) {} is an prefix expression",
+                    self.current_type_env_level(),
+                    expr.to_string().cyan()
+                );
+
+                Ok(match prefix.op {
                     ast::OpPrefix::Negate => Type::number(),
                     ast::OpPrefix::Not => Type::bool(),
                 }
-                .into(),
-            ),
-            ast::Expr::Fn(fn_) => Some(
-                Type::function(
+                .into())
+            }
+            ast::Expr::Fn(fn_) => {
+                tracelog::tracelog!(
+                    label = verifier,resolve_expr_type,expr_fn;
+                    "(level: {}) {} is a function expression",
+                    self.current_type_env_level(),
+                    expr.to_string().cyan()
+                );
+
+                Ok(Type::function(
                     Type::tuple(
                         fn_.params
                             .clone()
@@ -302,12 +434,21 @@ impl<'a> Verifier<'a> {
                     ),
                     fn_.return_type.clone().0,
                 )
-                .into(),
-            ),
-            ast::Expr::Range(_) => Some(Type::range().into()),
+                .into())
+            }
+            ast::Expr::Range(_) => {
+                tracelog::tracelog!(
+                    label = verifier,resolve_expr_type,expr_range;
+                    "(level: {}) {} is a range expression",
+                    self.current_type_env_level(),
+                    expr.to_string().cyan()
+                );
+
+                Ok(Type::range().into())
+            }
         };
 
-        if let Some(resolved_type) = &resolved_type {
+        if let Ok(resolved_type) = &resolved_type {
             let resolved_type_string = format!("{}", resolved_type.of_type);
 
             tracelog::tracelog!(
@@ -331,12 +472,12 @@ impl<'a> Verifier<'a> {
 
         let result = match stmt {
             ast::Stmt::Expr(stmt_expr) => {
-                tracelog::tracelog!(label = verifier,visit_stmt,expr; "{} is an expression statement", stmt_string);
+                tracelog::tracelog!(label = verifier,visit_stmt,stmt_expr; "{} is an expression statement", stmt_string);
 
                 let (expr, expr_span) = &mut stmt_expr.expr;
 
                 tracelog::tracelog!(
-                    label = verifier,visit_stmt,expr;
+                    label = verifier,visit_stmt,stmt_expr;
                     "Checking expression {} from stmt {}",
                     expr.to_string().cyan(),
                     stmt_string
@@ -345,9 +486,10 @@ impl<'a> Verifier<'a> {
                 let expr_errs = self.visit_expr(expr, expr_span).err().unwrap_or_default();
 
                 tracelog::tracelog!(
-                    label = verifier,visit_stmt,expr,error;
-                    "Value expression {} had {} errors",
+                    label = verifier,visit_stmt,stmt_expr,error;
+                    "Expression {} from statement {} had {} errors",
                     expr.to_string().cyan(),
+                    stmt.to_string().cyan(),
                     expr_errs.len()
                 );
 
@@ -361,7 +503,7 @@ impl<'a> Verifier<'a> {
             }
             ast::Stmt::Assign(stmt_assign) => {
                 tracelog::tracelog!(
-                    label = verifier,visit_stmt,assign;
+                    label = verifier,visit_stmt,stmt_assign;
                     "{} is an assignment statement",
                     stmt_string
                 );
@@ -419,14 +561,17 @@ impl<'a> Verifier<'a> {
             }
             ast::Stmt::TypeAlias(stmt_type_alias) => {
                 tracelog::tracelog!(
-                    label = verifier,visit_stmt,type_alias;
+                    label = verifier,visit_stmt,stmt_type_alias;
                     "{} is a type alias statement",
                     stmt_string
                 );
 
                 let alias = &stmt_type_alias.alias;
                 let value = self
-                    .resolve_identifier(&stmt_type_alias.value.0.to_string())
+                    .resolve_identifier(
+                        &stmt_type_alias.value.0.to_string(),
+                        &stmt_type_alias.value.1.clone(),
+                    )
                     .unwrap_or(stmt_type_alias.value.0.clone().into());
 
                 self.type_env.set(&alias.0.name, value);
@@ -435,7 +580,7 @@ impl<'a> Verifier<'a> {
             }
             ast::Stmt::Fn(stmt_fn) => {
                 tracelog::tracelog!(
-                    label = verifier,visit_stmt,function;
+                    label = verifier,visit_stmt,stmt_function;
                     "{} is an function statement",
                     stmt_string
                 );
@@ -443,33 +588,28 @@ impl<'a> Verifier<'a> {
                 let (fn_expr, fn_expr_span) = &mut stmt_fn.fn_expr;
 
                 tracelog::tracelog!(
-                    label = verifier,visit_stmt,function;
+                    label = verifier,visit_stmt,stmt_function;
                     "Checking function statement's function expression {}",
                     fn_expr.to_string().cyan()
                 );
 
-                let fn_expr_errs = self
-                    .visit_expr(fn_expr, fn_expr_span)
-                    .err()
-                    .unwrap_or_default();
+                match self.visit_expr(fn_expr, fn_expr_span) {
+                    Ok(fn_expr_type) => {
+                        self.type_env.set(&stmt_fn.name.0.name, fn_expr_type);
 
-                if !fn_expr_errs.is_empty() {
-                    tracelog::tracelog!(
-                        label = verifier,visit_stmt,function,error;
-                        "Function expression {} had {} errors",
-                        fn_expr.to_string().cyan(),
-                        fn_expr_errs.len()
-                    );
+                        Ok(())
+                    }
+                    Err(fn_expr_errs) => {
+                        tracelog::tracelog!(
+                            label = verifier,visit_stmt,stmt_function,error;
+                            "Function expression {} had {} errors",
+                            fn_expr.to_string().cyan(),
+                            fn_expr_errs.len()
+                        );
+
+                        Err(fn_expr_errs)
+                    }
                 }
-
-                errs.extend(fn_expr_errs);
-
-                if !errs.is_empty() {
-                    return Err(errs);
-                }
-
-                //
-                Ok(())
             }
             ast::Stmt::AssertType(stmt_assert_type) => {
                 let mut errs: Vec<EgonErrorS> = vec![];
@@ -526,22 +666,8 @@ impl<'a> Verifier<'a> {
             stmt_string
         );
 
-        for rule in &self.rules {
-            let resolve_ident: Box<dyn ResolveIdent> =
-                Box::new(|id: &str| self.resolve_identifier(id));
-
-            let resolve_expr: Box<dyn ResolveExpr> =
-                Box::new(|expr: &::egonlang_core::ast::Expr, _span: &::span::Span| {
-                    self.resolve_expr_type(expr)
-                });
-
-            let rule_errs = rule
-                .visit_stmt(stmt, span, resolve_ident.as_ref(), resolve_expr.as_ref())
-                .err()
-                .unwrap_or_default();
-
-            errs.extend(rule_errs);
-        }
+        let rule_errs = self.run_stmt_rules(stmt, span);
+        errs.extend(rule_errs);
 
         tracelog::tracelog!(
             label = verifier,visit_stmt;
@@ -564,18 +690,43 @@ impl<'a> Verifier<'a> {
     }
 
     fn run_stmt_rules(&self, stmt: &ast::Stmt, span: &Span) -> Vec<EgonErrorS> {
+        tracelog::tracelog!(
+            label = verifier,run_stmt_rules;
+            "Run rules against statement {}",
+            stmt.to_string().cyan()
+        );
+
         let mut errs: Vec<EgonErrorS> = vec![];
 
         for rule in &self.rules {
+            let rule_string = rule.to_string();
+
+            // tracelog::tracelog!(
+            //     label = verifier,run_stmt_rules;
+            //     "Running {} against statement {}",
+            //     rule_string.italic(),
+            //     stmt.to_string().cyan()
+            // );
+
             let rule_errs = rule
                 .visit_stmt(
                     stmt,
                     span,
-                    &|id: &str| self.resolve_identifier(id),
-                    &|expr: &ast::Expr, _span: &Span| self.resolve_expr_type(expr),
+                    &|id: &str, span: &Span| self.resolve_identifier(id, span),
+                    &|expr: &ast::Expr, span: &Span| self.resolve_expr_type(expr, span),
                 )
                 .err()
                 .unwrap_or_default();
+
+            if !rule_errs.is_empty() {
+                tracelog::tracelog!(
+                    label = verifier,run_stmt_rules;
+                    "{} generated {} errors against statement {}",
+                    rule_string.italic(),
+                    rule_errs.len(),
+                    stmt.to_string().cyan()
+                );
+            }
 
             errs.extend(rule_errs);
         }
@@ -586,16 +737,41 @@ impl<'a> Verifier<'a> {
     fn run_expr_rules(&self, expr: &ast::Expr, span: &Span) -> Vec<EgonErrorS> {
         let mut errs: Vec<EgonErrorS> = vec![];
 
+        tracelog::tracelog!(
+            label = verifier,run_expr_rules;
+            "Run rules against expression {}",
+            expr.to_string().cyan()
+        );
+
         for rule in &self.rules {
+            let rule_string = rule.to_string();
+
+            // tracelog::tracelog!(
+            //     label = verifier,run_expr_rules;
+            //     "Running {} against expression {}",
+            //     rule_string.italic(),
+            //     expr.to_string().cyan()
+            // );
+
             let rule_errs = rule
                 .visit_expr(
                     expr,
                     span,
-                    &|id: &str| self.resolve_identifier(id),
-                    &|expr: &ast::Expr, _span: &Span| self.resolve_expr_type(expr),
+                    &|id: &str, span: &Span| self.resolve_identifier(id, span),
+                    &|expr: &ast::Expr, span: &Span| self.resolve_expr_type(expr, span),
                 )
                 .err()
                 .unwrap_or_default();
+
+            if !rule_errs.is_empty() {
+                tracelog::tracelog!(
+                    label = verifier,run_expr_rules;
+                    "{} generated {} errors against expr {}",
+                    rule_string.italic(),
+                    rule_errs.len(),
+                    expr.to_string().cyan()
+                );
+            }
 
             errs.extend(rule_errs);
         }
@@ -615,7 +791,7 @@ impl<'a> Verifier<'a> {
 
         match expr {
             ast::Expr::Block(block_expr) => {
-                tracelog::tracelog!(label = verifier,visit_expr,block; "{} is a block expression", expr_string);
+                tracelog::tracelog!(label = verifier,visit_expr,expr_block; "{} is a block expression", expr_string);
 
                 let mut errs: Vec<EgonErrorS> = vec![];
 
@@ -628,18 +804,23 @@ impl<'a> Verifier<'a> {
 
                 for (stmt, stmt_span) in &mut block_expr.stmts {
                     if let ast::Stmt::Return(stmt_return) = stmt {
-                        tracelog::tracelog!(label = verifier,visit_expr,block,return_stmt; "{} has a return statement", expr_string);
+                        tracelog::tracelog!(label = verifier,visit_expr,expr_block,return_stmt; "{} has a return statement", expr_string);
 
                         stmt_return.set_used_in_block();
 
-                        if let Some(v) = self.resolve_expr_type(&stmt_return.value.0) {
-                            tracelog::tracelog!(
-                                label = verifier,visit_expr,block,return_stmt;
-                                "caching return value: {}",
-                                v.of_type.to_string().yellow().italic()
-                            );
+                        match self.resolve_expr_type(&stmt_return.value.0, &stmt_return.value.1) {
+                            Ok(v) => {
+                                tracelog::tracelog!(
+                                    label = verifier,visit_expr,expr_block,return_stmt;
+                                    "caching return value: {}",
+                                    v.of_type.to_string().yellow().italic()
+                                );
 
-                            return_stmt_type = Some(v.of_type);
+                                return_stmt_type = Some(v.of_type);
+                            }
+                            Err(stmt_return_errs) => {
+                                errs.extend(stmt_return_errs);
+                            }
                         }
                     }
 
@@ -651,7 +832,7 @@ impl<'a> Verifier<'a> {
                 match &mut block_expr.return_expr {
                     Some((return_expr, return_span)) => {
                         tracelog::tracelog!(
-                            label = verifier,visit_expr,block;
+                            label = verifier,visit_expr,expr_block;
                             "{} has a return expression {}",
                             expr_string,
                             return_expr.to_string().cyan()
@@ -669,7 +850,7 @@ impl<'a> Verifier<'a> {
                                 }
 
                                 tracelog::tracelog!(
-                                    label = verifier,visit_expr,block;
+                                    label = verifier,visit_expr,expr_block;
                                     "{} resolved to type of {}",
                                     expr_string,
                                     return_type.of_type.to_string().yellow().italic()
@@ -719,25 +900,19 @@ impl<'a> Verifier<'a> {
             }
             ast::Expr::Assign(assign_expr) => {
                 tracelog::tracelog!(
-                    label = visit_expr,assign;
+                    label = visit_expr,expr_assign;
                     "{} is an assign expression",
                     expr_string
                 );
 
                 let mut errs: Vec<EgonErrorS> = vec![];
 
-                let ident_type = self.resolve_identifier(&assign_expr.identifier.0.name);
+                let ident_errs = self
+                    .resolve_identifier(&assign_expr.identifier.0.name, &assign_expr.identifier.1)
+                    .err()
+                    .unwrap_or_default();
 
-                match ident_type {
-                    Some(_) => {}
-                    None => {
-                        errs.push((
-                            EgonTypeError::Undefined(assign_expr.identifier.0.name.to_string())
-                                .into(),
-                            span.clone(),
-                        ));
-                    }
-                };
+                errs.extend(ident_errs);
 
                 let (value_expr, value_span) = &mut assign_expr.value;
                 let value_type = self.visit_expr(value_expr, value_span);
@@ -768,7 +943,7 @@ impl<'a> Verifier<'a> {
             }
             ast::Expr::Infix(infix_expr) => {
                 tracelog::tracelog!(
-                    label = visit_expr,infix;
+                    label = visit_expr,expr_infix;
                     "{} is an infix expression",
                     expr_string
                 );
@@ -812,7 +987,7 @@ impl<'a> Verifier<'a> {
             }
             ast::Expr::Prefix(prefix_expr) => {
                 tracelog::tracelog!(
-                    label = visit_expr,infix;
+                    label = visit_expr,expr_infix;
                     "{} is an prefix expression",
                     expr_string
                 );
@@ -830,14 +1005,14 @@ impl<'a> Verifier<'a> {
                             return Err(errs);
                         }
 
-                        Ok(self.resolve_expr_type(expr).unwrap())
+                        Ok(self.resolve_expr_type(expr, span).unwrap())
                     }
                     Err(rt_errs) => Err(rt_errs),
                 }
             }
             ast::Expr::Fn(fn_expr) => {
                 tracelog::tracelog!(
-                    label = visit_expr,function;
+                    label = verifier,visit_expr,expr_function;
                     "{} is a function expression",
                     expr_string
                 );
@@ -872,6 +1047,13 @@ impl<'a> Verifier<'a> {
                         self.end_current_type_env();
 
                         if !errs.is_empty() {
+                            tracelog::tracelog!(
+                                label = visit_expr,expr_function,body;
+                                "Expression function {} had {} errors",
+                                expr_string,
+                                errs.len()
+                            );
+
                             return Err(errs);
                         }
 
@@ -887,13 +1069,20 @@ impl<'a> Verifier<'a> {
 
                         self.end_current_type_env();
 
+                        tracelog::tracelog!(
+                            label = verifier,visit_expr,expr_function,body;
+                            "Expression function {} had {} errors",
+                            expr_string,
+                            errs.len()
+                        );
+
                         Err(errs)
                     }
                 }
             }
             ast::Expr::If(if_expr) => {
                 tracelog::tracelog!(
-                    label = visit_expr,if_expr;
+                    label = visit_expr,expr_if;
                     "{} is an if expression",
                     expr_string
                 );
@@ -949,19 +1138,10 @@ impl<'a> Verifier<'a> {
                 ast::ExprLiteral::Number(_) => Type::number().into(),
                 ast::ExprLiteral::String(_) => Type::string().into(),
             }),
-            ast::Expr::Identifier(ident_expr) => {
-                //
-                match self.resolve_expr_type(&expr_clone) {
-                    Some(t) => Ok(t),
-                    None => Err(vec![(
-                        EgonTypeError::Undefined(ident_expr.identifier.name.clone()).into(),
-                        span.clone(),
-                    )]),
-                }
-            }
+            ast::Expr::Identifier(_ident_expr) => self.resolve_expr_type(&expr_clone, span),
             ast::Expr::List(list_expr) => {
                 tracelog::tracelog!(
-                    label = visit_expr,infix;
+                    label = visit_expr,expr_infix;
                     "{} is an list expression",
                     expr_string
                 );
@@ -1038,7 +1218,7 @@ impl<'a> Verifier<'a> {
             }
             ast::Expr::Type(type_expr) => {
                 tracelog::tracelog!(
-                    label = verifier,visit_expr,type_expr;
+                    label = verifier,visit_expr,expr_type;
                     "{} is an type expression",
                     expr_string
                 );
@@ -1048,10 +1228,10 @@ impl<'a> Verifier<'a> {
                 let typeref = &type_expr.0;
                 let typeref_ident = &typeref.to_string();
 
-                let type_type = self.resolve_identifier(typeref_ident);
+                let type_type = self.resolve_identifier(typeref_ident, span);
 
                 match type_type {
-                    Some(t) => {
+                    Ok(t) => {
                         let rule_errs = self.run_expr_rules(&expr_clone, span);
                         errs.extend(rule_errs);
 
@@ -1061,29 +1241,54 @@ impl<'a> Verifier<'a> {
 
                         Ok(t)
                     }
-                    None => {
+                    Err(e) => {
                         if typeref.is_builtin() {
                             Ok(typeref.clone().into())
                         } else {
-                            Err(vec![(
-                                EgonTypeError::Undefined(typeref_ident.to_string()).into(),
-                                span.clone(),
-                            )])
+                            Err(e)
                         }
                     }
                 }
+            }
+            ast::Expr::Call(expr_call) => {
+                let mut errs: Vec<EgonErrorS> = vec![];
+
+                let (callee_expr, callee_span) = &mut expr_call.callee;
+                let callee_type = self.visit_expr(callee_expr, callee_span);
+
+                if let Err(callee_errs) = &callee_type {
+                    errs.extend(callee_errs.clone());
+                };
+
+                for (arg_expr, arg_span) in &mut expr_call.args {
+                    let arg_errs = self
+                        .visit_expr(arg_expr, arg_span)
+                        .err()
+                        .unwrap_or_default();
+
+                    errs.extend(arg_errs);
+                }
+
+                let rule_errs = self.run_expr_rules(&expr_clone, span);
+                errs.extend(rule_errs);
+
+                if !errs.is_empty() {
+                    return Err(errs);
+                }
+
+                Ok(callee_type.unwrap())
             }
         }
     }
 
     /// Start new type environment scope
     fn start_new_type_env(&mut self) {
-        let level = self.type_env.start_scope();
-
         tracelog::tracelog!(
-            label = verifier,start_new_type_env;
-            "Starting new type environment (new level: {level})"
+            label = verifier,scope_start;
+            "Starting new scope"
         );
+
+        self.type_env.start_scope();
     }
 
     /// End tne current type environment scope
@@ -1091,8 +1296,9 @@ impl<'a> Verifier<'a> {
         let level = self.current_type_env_level();
 
         tracelog::tracelog!(
-            label = verifier,end_new_type_env;
-            "Ending type environment (new level: {level})"
+            label = verifier,scope_end;
+            "Ending current scope (current level: {level}, new level: {})",
+            level - 1
         );
 
         let _ = self.type_env.end_scope();
@@ -1400,7 +1606,7 @@ mod verifier_tests {
         "let a: () = b = 123;",
         Err(vec![(
             EgonTypeError::Undefined("b".to_string()).into(),
-            12..19
+            12..13
         )])
     );
 
@@ -1409,7 +1615,7 @@ mod verifier_tests {
         "let a: number = b = 123;",
         Err(vec![(
             EgonTypeError::Undefined("b".to_string()).into(),
-            16..23
+            16..17
         )])
     );
 
@@ -1557,7 +1763,7 @@ mod verifier_tests {
         validate_assign_mixed_type_list,
         "a = [1, \"a\"];",
         Err(vec![
-            (EgonTypeError::Undefined("a".to_string()).into(), 0..12),
+            (EgonTypeError::Undefined("a".to_string()).into(), 0..1),
             (
                 EgonTypeError::MismatchType {
                     expected: "number".to_string(),
@@ -1983,7 +2189,7 @@ mod verifier_tests {
 a = b;"#,
         Err(vec![(
             EgonTypeError::Undefined("a".to_string()).into(),
-            22..27
+            22..23
         )])
     );
 
@@ -2103,7 +2309,7 @@ a = b;"#,
 
         assert_eq!(
             Err(vec![
-                (EgonTypeError::Undefined("a".to_string()).into(), 0..15),
+                (EgonTypeError::Undefined("a".to_string()).into(), 0..1),
                 (
                     EgonTypeError::MismatchType {
                         expected: Type::number().to_string(),
@@ -2149,6 +2355,19 @@ a = b;"#,
                 )]
             },
             module
+        );
+    }
+
+    #[test]
+    fn errors_when_calling_number() {
+        let results = parse("123456();", 0).and_then(|mut module| verify_module(&mut module));
+
+        assert_eq!(
+            Err(vec![(
+                EgonTypeError::NotCallable("number".to_string()).into(),
+                0..6
+            )]),
+            results
         );
     }
 }

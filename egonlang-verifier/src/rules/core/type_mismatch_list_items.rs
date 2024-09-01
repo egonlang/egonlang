@@ -25,7 +25,7 @@ expr_rule!(
                 let remaining_items: Vec<span::Spanned<ast::Expr>> = items.clone().into_iter().skip(1).collect();
 
                 for (item, item_span) in &remaining_items {
-                    if let Some(item_typeref) = resolve_expr(item, item_span) {
+                    if let Ok(item_typeref) = resolve_expr(item, item_span) {
                         if item_typeref.of_type != first_item_typeref.of_type {
                             errs.push((
                                 EgonTypeError::MismatchType {

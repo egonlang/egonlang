@@ -114,6 +114,12 @@ pub enum Expr {
     /// type Int = number; // `number` is a type expression
     /// ```
     Type(ExprType),
+    /// Expression to call the lvalue
+    ///
+    /// ```egon
+    /// a(1, 2, 3);
+    /// ```
+    Call(Box<ExprCall>),
 }
 
 impl TryFrom<&str> for Expr {
@@ -228,6 +234,7 @@ impl Display for Expr {
             Expr::Fn(expr) => f.write_fmt(format_args!("{}", expr)),
             Expr::Range(expr) => f.write_fmt(format_args!("{}", expr)),
             Expr::Type(expr) => f.write_fmt(format_args!("{}", expr)),
+            Expr::Call(expr) => f.write_fmt(format_args!("{}", expr)),
         }
     }
 }
@@ -717,6 +724,26 @@ pub struct ExprType(pub Type);
 impl Display for ExprType {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.write_fmt(format_args!("{}", self.0))
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct ExprCall {
+    pub callee: ExprS,
+    pub args: Vec<ExprS>,
+}
+
+impl Display for ExprCall {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.write_fmt(format_args!(
+            "{}({})",
+            self.callee.0,
+            self.args
+                .iter()
+                .map(|x| x.0.to_string())
+                .collect::<Vec<String>>()
+                .join(", ")
+        ))
     }
 }
 
@@ -1328,5 +1355,28 @@ mod display_tests {
             )
         })),
         "(a: number, b: number): number => { a + b }"
+    );
+
+    expr_display_test!(
+        test_call,
+        Expr::Call(
+            ExprCall {
+                callee: (
+                    Expr::Identifier(ExprIdentifier {
+                        identifier: Identifier {
+                            name: "foo".to_string()
+                        }
+                    }),
+                    0..3
+                ),
+                args: vec![
+                    (Expr::Literal(ExprLiteral::Number(1f64)), 4..5),
+                    (Expr::Literal(ExprLiteral::Number(2f64)), 7..8),
+                    (Expr::Literal(ExprLiteral::Number(3f64)), 10..11)
+                ]
+            }
+            .into()
+        ),
+        "foo(1, 2, 3)"
     );
 }

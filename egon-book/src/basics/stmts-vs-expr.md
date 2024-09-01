@@ -183,6 +183,30 @@ Range expressions can also use inclusive `end` values but prepending `=`;
 
 TODO
 
+### Call Expressions
+
+Call a callable expressions (e.g. function) with arguments.
+
+```egon
+fn sum (a: number, b: number): number => {
+    a + b
+}
+
+let result = sum(5, 5);
+
+assert_type result, number;
+```
+
+#### Non-Callables
+
+Calling non-callables will result in an error.
+
+```egon
+123();
+
+// TypeError: number is not callable
+```
+
 ## Statements
 
 A statement is code that executes but doesn't generate a value. Statements are often postfixed with a semicolon but not always.

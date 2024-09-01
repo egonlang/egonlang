@@ -68,25 +68,49 @@ impl LanguageServer for EgonLanguageServerBackend {
         let version = Some(params.text_document.version);
 
         // Parse and verify egon code
-        let mut module = parse(source, 0).unwrap();
-        let errs = verify_module(&mut module).err().unwrap_or_default();
 
-        // Map errors to
-        let diagnostics: Vec<LspDiagnosis> = errs
-            .iter()
-            .map(|(e, e_span)| {
-                let diagnosable: &(dyn Diagnosable + Sync) = e as &(dyn Diagnosable + Sync);
-                LspDiagnosis(diagnosable.to_diagnosis(source, e_span.clone()))
-            })
-            .collect();
+        let module = parse(source, 0);
 
-        self.client
-            .publish_diagnostics(
-                uri,
-                diagnostics.iter().map(|x| x.clone().into()).collect(),
-                version,
-            )
-            .await;
+        match module {
+            Ok(mut module) => {
+                let errs = verify_module(&mut module).err().unwrap_or_default();
+
+                // Map errors to
+                let diagnostics: Vec<LspDiagnosis> = errs
+                    .iter()
+                    .map(|(e, e_span)| {
+                        let diagnosable: &(dyn Diagnosable + Sync) = e as &(dyn Diagnosable + Sync);
+                        LspDiagnosis(diagnosable.to_diagnosis(source, e_span.clone()))
+                    })
+                    .collect();
+
+                self.client
+                    .publish_diagnostics(
+                        uri,
+                        diagnostics.iter().map(|x| x.clone().into()).collect(),
+                        version,
+                    )
+                    .await;
+            }
+            Err(errs) => {
+                // Map errors to
+                let diagnostics: Vec<LspDiagnosis> = errs
+                    .iter()
+                    .map(|(e, e_span)| {
+                        let diagnosable: &(dyn Diagnosable + Sync) = e as &(dyn Diagnosable + Sync);
+                        LspDiagnosis(diagnosable.to_diagnosis(source, e_span.clone()))
+                    })
+                    .collect();
+
+                self.client
+                    .publish_diagnostics(
+                        uri,
+                        diagnostics.iter().map(|x| x.clone().into()).collect(),
+                        version,
+                    )
+                    .await;
+            }
+        };
     }
 
     async fn did_change(&self, params: DidChangeTextDocumentParams) {

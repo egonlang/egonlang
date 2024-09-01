@@ -73,7 +73,6 @@ ExprS = Spanned<Expr>;
 Expr: ast::Expr = {
     ExprAssign,
     ExprBlock,
-    
 };
 
 ExprAssign: ast::Expr = {
@@ -89,14 +88,14 @@ ExprIf: ast::Expr = {
     // Not Allowed:
     // - Assignment Expressions
     // - If Expressions
-    "if" <cond:Spanned<ExprLogicOr>> <then:Spanned<ExprBlock>> 
+    "if" <cond:Spanned<ExprCall>> <then:Spanned<ExprBlock>> 
     <else_:("else" <Spanned<ExprBlock>>)?>
     => {
         ast::Expr::If(Box::new(ast::ExprIf { <> }))
     },
 
     // if .. else if ..
-    "if" <cond:Spanned<ExprLogicOr>> <then:Spanned<ExprBlock>> 
+    "if" <cond:Spanned<ExprCall>> <then:Spanned<ExprBlock>> 
     <else_:("else" <Spanned<ExprIf>>)>
     => {
         ast::Expr::If(Box::new(ast::ExprIf { 
@@ -105,12 +104,21 @@ ExprIf: ast::Expr = {
             else_: Some(else_)
          }))
     },
-    ExprLogicOr
+    ExprCall
 }
 
 // The following make up the majority of expression types
 //
 // They are chained together like this to implement syntax 
+
+ExprCall: ast::Expr = {
+    <callee:Spanned<ExprCall>> "(" <args:Seperated<ExprS, ",">> ")" => 
+        ast::Expr::Call(ast::ExprCall {
+            callee,
+            args
+        }.into()),
+    ExprLogicOr
+};
 
 ExprLogicOr = ExprInfix<ExprLogicOr, OpLogicOr, ExprLogicAnd>;
 OpLogicOr: ast::OpInfix = "or" => ast::OpInfix::LogicOr;
@@ -154,17 +162,15 @@ ExprInfix<Lt, Op, Rt>: ast::Expr = {
 ExprPrefix: ast::Expr = {
     <op:OpPrefix> <rt:Spanned<ExprPrefix>> =>
         ast::Expr::Prefix(Box::new(ast::ExprPrefix { <> })),
-    ExprSimple
+    ExprList
 }
+
 OpPrefix: ast::OpPrefix = {
     "-" => ast::OpPrefix::Negate,
     "!" => ast::OpPrefix::Not,
 }
 
-ExprSimple: ast::Expr = {
-    ExprList,
-    
-};
+
 
 ExprList: ast::Expr = {
     "[" <items:Seperated<Spanned<Expr>, ",">> "]" =>
@@ -261,6 +267,8 @@ ExprFn: ast::Expr = {
             body,
          })),
 }
+
+
 
 /// Utilities
 

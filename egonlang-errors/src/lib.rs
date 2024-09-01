@@ -127,6 +127,8 @@ pub enum EgonTypeError {
     UnknownType,
     #[error("`{0}` is not defined")]
     Undefined(String),
+    #[error("{0} is not callable")]
+    NotCallable(String),
 }
 
 impl ErrorCode for EgonTypeError {
@@ -139,6 +141,7 @@ impl ErrorCode for EgonTypeError {
             EgonTypeError::UknownListType => "UnknownListType",
             EgonTypeError::UnknownType => "UnknownType",
             EgonTypeError::Undefined(_) => "Undefined",
+            EgonTypeError::NotCallable(_) => "NotCallable",
         }
         .to_string();
 

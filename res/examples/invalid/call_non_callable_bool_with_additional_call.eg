@@ -1,0 +1,4 @@
+true()();
+
+// out: TypeError: bool is not callable
+// out: TypeError: unknown is not callable

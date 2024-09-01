@@ -23,7 +23,7 @@ stmt_rule!(
                 }
                 // let a = 123;
                 (None, Some((value_expr, value_span))) => {
-                    if let Some(value_typeref) = resolve_expr(value_expr, value_span) {
+                    if let Ok(value_typeref) = resolve_expr(value_expr, value_span) {
                         // Check for empty list assignment
                         // Example:
                         // let a = [];
@@ -36,7 +36,7 @@ stmt_rule!(
                 // let a: number;
                 (Some((assign_type_expr, assign_type_span)), None) => {
                     match resolve_expr(assign_type_expr, assign_type_span) {
-                        Some(assign_type) => {
+                        Ok(assign_type) => {
                             // Check for empty list assignment
                             // Example:
                             // let a: unknown;
@@ -47,18 +47,15 @@ stmt_rule!(
                                 ));
                             }
                         },
-                        None => {
-                            errs.push((
-                                EgonTypeError::Undefined(assign_type_expr.to_string()).into(),
-                                assign_type_span.clone()
-                            ));
+                        Err(e) => {
+                            errs.extend(e)
                         },
                     };
 
                 }
                 // let a: number = 123;
                 (Some((assign_type_expr, assign_type_span)), Some((value_expr, value_span))) => {
-                    if let Some(assign_typeref) = resolve_expr(assign_type_expr, assign_type_span) {
+                    if let Ok(assign_typeref) = resolve_expr(assign_type_expr, assign_type_span) {
                         // Check for empty list assignment
                         // Example:
                         // let a: unknown;
@@ -67,7 +64,7 @@ stmt_rule!(
                                 EgonTypeError::UnknownType.into(),
                                 assign_type_span.clone()
                             ));
-                        } else if let Some(value_typeref) = resolve_expr(value_expr, value_span) {
+                        } else if let Ok(value_typeref) = resolve_expr(value_expr, value_span) {
                             // Types mismatched
                             if assign_typeref.of_type != value_typeref.of_type {
                                 // Check for empty list assignment
@@ -82,7 +79,7 @@ stmt_rule!(
                                 if value_typeref.of_type.is_identifier() {
                                     let identifier = &stmt_assign.identifier.0.name;
 
-                                    if let Some(identifier_type) = resolve_ident(identifier) {
+                                    if let Ok(identifier_type) = resolve_ident(identifier,  &stmt_assign.identifier.1) {
                                         if assign_typeref.of_type == identifier_type.of_type {
                                             return vec![];
                                         }

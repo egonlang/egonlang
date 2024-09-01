@@ -18,7 +18,7 @@ expr_rule!(
             let identifier = &boxed.identifier;
             let name = &identifier.name;
 
-            if resolve_ident(name).is_none() {
+            if resolve_ident(name, span).is_err() {
                 errs.push((EgonTypeError::Undefined(name.to_string()).into(), span.clone()));
             }
         }

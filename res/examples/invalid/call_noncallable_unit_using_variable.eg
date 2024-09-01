@@ -1,0 +1,5 @@
+let u = ();
+
+u();
+
+// out: TypeError: () is not callable

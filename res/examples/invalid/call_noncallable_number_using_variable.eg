@@ -1,0 +1,5 @@
+let n = 12345;
+
+n();
+
+// out: TypeError: number is not callable

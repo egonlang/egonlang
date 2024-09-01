@@ -110,6 +110,14 @@ impl Type {
         "function" == self.type_name()
     }
 
+    pub fn get_function_return(&self) -> Type {
+        if !self.is_function() {
+            panic!("Type {} is not a function", self);
+        }
+
+        self.type_args().get(1).cloned().unwrap_or(Type::unit())
+    }
+
     /// Is this type the unit type?
     pub fn is_unit(&self) -> bool {
         "()" == self.type_name()
@@ -571,4 +579,11 @@ mod is_tests {
         is_function,
         is_builtin
     );
+
+    #[test]
+    fn test_get_return_type_from_function() {
+        let fn_type = Type::function(Type::tuple(vec![Type::number()]), Type::number());
+
+        assert_eq!(Type::number(), fn_type.get_function_return());
+    }
 }
