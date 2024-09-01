@@ -3,8 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Page not found - The Egon Programming Language</title>
-        <base href="/">
+        <title>EBNF - The Egon Programming Language</title>
 
 
         <!-- Custom HTML head -->
@@ -89,7 +88,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="basics/index.html"><strong aria-hidden="true">2.</strong> Basics</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="basics/variables.html"><strong aria-hidden="true">2.1.</strong> Variables</a></li><li class="chapter-item expanded "><a href="basics/constants.html"><strong aria-hidden="true">2.2.</strong> Constants</a></li><li class="chapter-item expanded "><a href="basics/types.html"><strong aria-hidden="true">2.3.</strong> Types</a></li><li class="chapter-item expanded "><a href="basics/stmts-vs-expr.html"><strong aria-hidden="true">2.4.</strong> Statements vs Expressions</a></li></ol></li><li class="chapter-item expanded "><a href="tooling/index.html"><strong aria-hidden="true">3.</strong> Tooling</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="tooling/cli.html"><strong aria-hidden="true">3.1.</strong> CLI</a></li><li class="chapter-item expanded "><a href="tooling/lsp.html"><strong aria-hidden="true">3.2.</strong> Language Server</a></li><li class="chapter-item expanded "><a href="tooling/vsc.html"><strong aria-hidden="true">3.3.</strong> VS Code Extension</a></li></ol></li><li class="chapter-item expanded "><a href="ebnf.html"><strong aria-hidden="true">4.</strong> EBNF</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="basics/index.html"><strong aria-hidden="true">2.</strong> Basics</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="basics/variables.html"><strong aria-hidden="true">2.1.</strong> Variables</a></li><li class="chapter-item expanded "><a href="basics/constants.html"><strong aria-hidden="true">2.2.</strong> Constants</a></li><li class="chapter-item expanded "><a href="basics/types.html"><strong aria-hidden="true">2.3.</strong> Types</a></li><li class="chapter-item expanded "><a href="basics/stmts-vs-expr.html"><strong aria-hidden="true">2.4.</strong> Statements vs Expressions</a></li></ol></li><li class="chapter-item expanded "><a href="tooling/index.html"><strong aria-hidden="true">3.</strong> Tooling</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="tooling/cli.html"><strong aria-hidden="true">3.1.</strong> CLI</a></li><li class="chapter-item expanded "><a href="tooling/lsp.html"><strong aria-hidden="true">3.2.</strong> Language Server</a></li><li class="chapter-item expanded "><a href="tooling/vsc.html"><strong aria-hidden="true">3.3.</strong> VS Code Extension</a></li></ol></li><li class="chapter-item expanded "><a href="ebnf.html" class="active"><strong aria-hidden="true">4.</strong> EBNF</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -174,13 +173,92 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="document-not-found-404"><a class="header" href="#document-not-found-404">Document not found (404)</a></h1>
-<p>This URL is invalid, sorry. Please use the navigation bar or search to continue.</p>
+                        <h1 id="ebnf"><a class="header" href="#ebnf">EBNF</a></h1>
+<p>This is a rough translation of the current grammar. It may be incorrect. Please refer to the <a href="https://github.com/egonlang/egonlang/blob/main/egonlang-core/src/grammar.lalrpop">grammar file</a> (LALRPOP).</p>
+<pre><code class="language-ebnf">Module = Stmt+
+
+Stmt =
+    | StmtExpr
+    | StmtAssertType
+    | StmtReturn
+    | StmtAssignVariable
+    | StmtAssignConst
+    | StmtTypeAlias
+    | TypeDefStmt
+    | StmtFn
+
+ExprStmt = Expr ";"
+AssertTypeStmt = "assert_type" Expr "," Expr ";"
+ReturnStmt = "return" Expr ";"
+StmtAssignVariable =
+    | "let" Identifier ":" Type Expr ";"
+    | "let" Identifier ":" Type Expr "=" Expr ";"
+    | "let" Identifier "=" Expr ";"
+StmtAssignConst =
+    | "const" Identifier ":" Type "=" Expr ";"
+    | "const" Identifier "=" Expr ";"
+StmtTypeAlias = "type" Identifier "=" Type ";"
+StmtFn = "fn" Identifier "(" ParamList ")" ":" Type "=&gt;" Block
+
+Expr =
+    | ExprUnit
+    | ExprLiteral
+    | ExprAssign
+    | ExprIf
+    | ExprCall
+    | ExprInfix
+    | ExprPrefix
+    | ExprList
+    | ExprTuple
+    | ExprRange
+    | ExprBlock
+    | "(" Expr ")"
+
+ExprUnit = "(" ")"
+
+ExprLiteral = Bool | Number | String;
+
+ExprAssign = Identifier = Expr
+
+ExprIf =
+    | "if" Expr Block
+    | "if" Expr Block else Block
+    | "if" Expr Block else ExprIf
+
+ExprCall = |
+    Expr "(" ")"
+    Expr "(" Expr ("," Expr)* ")"
+
+ExprInfix = Expr InfixOp Expr
+InfixOp = 
+    |"+" | "-" | "*" | "/" | "%"
+    | "and" | "or"
+    | "&lt;" | "&gt;" | "&lt;=" | "&gt;=" | "==" | "!="
+
+ExprPrefix = "-" | "!" Expr
+
+ExprList = "[" Expr ("," Expr)* "]"
+ExprTuple = "(" Expr ("," Expr)* "," ")"
+ExprRange = Expr ".." Expr
+ExprBlock = "{" Stmt* (Expr)? "}"
+
+ParamList = Param ("," Param)*
+Param = Identifier ":" Type
+
+Type = Identifier (&lt;"," Type&gt;*)?
+Identifier = &lt;identifier&gt;
+String = &lt;string&gt;
+Number = &lt;number&gt;
+Bool = "true" | "false"
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="tooling/vsc.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
 
 
                         <div style="clear: both"></div>
@@ -189,6 +267,9 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="tooling/vsc.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
 
             </nav>
 
