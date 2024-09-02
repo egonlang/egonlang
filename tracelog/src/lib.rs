@@ -1,3 +1,7 @@
+use std::fmt::Display;
+
+use colored::Colorize;
+
 /// Log a message with tracing info attached
 ///
 /// Logs are gated behind the `tracelog` feature
@@ -47,4 +51,36 @@ macro_rules! tracelog {
             );
         }
     };
+}
+
+/// Format value to be logged as a statement
+pub fn log_stmt<T>(value: &T) -> String
+where
+    T: Display + Sized,
+{
+    value.to_string().cyan().to_string()
+}
+
+/// Format value to be logged as an identifier
+pub fn log_identifier<T>(value: &T) -> String
+where
+    T: Display + ?Sized,
+{
+    value.to_string().cyan().to_string()
+}
+
+/// Format value to be logged as an expression
+pub fn log_expr<T>(value: &T) -> String
+where
+    T: Display + Sized,
+{
+    value.to_string().cyan().to_string()
+}
+
+/// Format value to be logged as a type
+pub fn log_type<T>(value: &T) -> String
+where
+    T: Display + Sized,
+{
+    value.to_string().yellow().italic().to_string()
 }

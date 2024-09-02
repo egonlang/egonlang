@@ -1,5 +1,7 @@
 use std::{collections::HashMap, fmt};
 
+use tracelog::{log_identifier, log_type};
+
 use crate::{egon_bool, egon_number, egon_range, egon_string, Type};
 
 /// Store and retreive type information for string identifiers
@@ -30,7 +32,7 @@ impl TypeEnv {
             label = type_env,get;
             "(level: {}) Looking up identifier {}",
             self.get_scope_depth(),
-            identifier.cyan()
+            log_identifier(identifier)
         );
 
         let mut result: Option<&TypeEnvValue> = None;
@@ -50,8 +52,8 @@ impl TypeEnv {
                     label = type_env,get;
                     "(level:{}) Got type alias {} for {}",
                     self.get_scope_depth(),
-                    result.of_type.to_string().italic().yellow(),
-                    identifier.cyan()
+                    log_type(&result.of_type),
+                    log_identifier(identifier)
                 );
 
                 return Some(result.map(result.of_type.type_args().first().unwrap()));
@@ -64,8 +66,8 @@ impl TypeEnv {
                     label = type_env,get;
                     "(level:{}) Got type {} for {}",
                     self.get_scope_depth(),
-                    result.of_type.to_string().italic().yellow(),
-                    identifier.cyan()
+                    log_type(&result.of_type),
+                    log_identifier(identifier)
                 );
             }
             None => {
@@ -73,7 +75,7 @@ impl TypeEnv {
                     label = type_env,get,error;
                     "(level: {}) Unable to find type for {} in type env",
                     self.get_scope_depth(),
-                    identifier.cyan()
+                    log_identifier(identifier)
                 );
             }
         }
@@ -108,8 +110,8 @@ impl TypeEnv {
                         label = type_env,set,type_alias;
                         "(level:{}) Setting {} to type alias {}",
                         self.get_scope_depth(),
-                        identifier.cyan(),
-                        aliased_type.of_type.to_string().italic().yellow()
+                        log_identifier(identifier),
+                        log_type(&aliased_type.of_type)
                     );
 
                     // Set the name to the flattened resolved type in the type env
@@ -128,8 +130,8 @@ impl TypeEnv {
                         label = type_env,set;
                         "(level: {}) Setting {} to the type alias {}",
                         self.get_scope_depth(),
-                        identifier.cyan(),
-                        new_typeref.to_string().italic().yellow()
+                        log_identifier(identifier),
+                        log_type(&new_typeref)
                     );
                     // Set the name to the type
                     //
@@ -153,8 +155,8 @@ impl TypeEnv {
             label = type_env,set;
             "(level: {}) Setting {} to the type {}",
             self.get_scope_depth(),
-            identifier.cyan(),
-            type_env_value.of_type.to_string().italic().yellow()
+            log_identifier(identifier),
+            log_type(&type_env_value.of_type)
         );
 
         // Type isn't aliased, set name to the value's type

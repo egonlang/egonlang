@@ -10,5 +10,6 @@
         "rust"
     ],
     "egon.binPath": "./target/debug/egon",
-    "editor.renderWhitespace": "all"
+    "editor.renderWhitespace": "all",
+    "terminal.integrated.scrollback": 2500
 }
