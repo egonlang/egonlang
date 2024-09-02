@@ -14,12 +14,12 @@ build-release:
     cd egon-book && just build
 
 # Generate docs for cargo crates
-docs:
-    cargo doc --no-deps --workspace
+docs *args:
+    cargo doc --no-deps --workspace {{args}}
 
 # Generate docs for cargo crates and open it in the browser
 docs-open:
-    cargo doc --no-deps --workspace --open
+    just docs --open
 
 # Clean all build artifacts
 clean:
