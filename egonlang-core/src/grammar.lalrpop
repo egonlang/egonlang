@@ -272,7 +272,7 @@ ExprFn: ast::Expr = {
 
 Type: Type = {
     <base:identifier> <args:("<" <Seperated<Type, ",">> ">")?> => {
-        Type(base, args.unwrap_or_default())
+        Type::new_with_args(&base, args.unwrap_or_default())
     },
 
     "(" ")" => Type::unit()

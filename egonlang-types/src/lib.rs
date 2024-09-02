@@ -7,7 +7,10 @@ use type_env::TypeEnvValue;
 
 /// Type in the Egon language
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct Type(pub String, pub Vec<Type>);
+pub struct Type {
+    name: String,
+    params: Vec<Type>,
+}
 
 impl From<Type> for TypeEnvValue {
     fn from(value: Type) -> Self {
@@ -19,28 +22,39 @@ impl From<Type> for TypeEnvValue {
 }
 
 impl Type {
-    pub fn type_name(&self) -> &str {
-        &self.0
+    pub fn new(type_name: &str) -> Self {
+        Self::new_with_args(type_name, vec![])
     }
 
-    pub fn type_args(&self) -> &Vec<Type> {
-        &self.1
+    pub fn new_with_args(name: &str, params: Vec<Type>) -> Self {
+        Self {
+            name: name.to_string(),
+            params,
+        }
+    }
+
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    pub fn params(&self) -> &Vec<Type> {
+        &self.params
     }
 
     /// Is this type a type?
     pub fn is_type(&self) -> bool {
-        self.type_name() == "type"
+        self.name() == "type"
     }
 
     /// Is this type a list?
     pub fn is_list(&self) -> bool {
-        self.type_name() == "list"
+        self.name() == "list"
     }
 
     /// Is this type a list with a known value type?
     pub fn is_known_list(&self) -> bool {
         if self.is_list() {
-            Type::unknown() != *self.type_args().first().unwrap()
+            Type::unknown() != *self.params().first().unwrap()
         } else {
             false
         }
@@ -48,7 +62,7 @@ impl Type {
 
     /// Is this type unknown?
     pub fn is_unknown(&self) -> bool {
-        self.type_name() == "unknown"
+        self.name() == "unknown"
     }
 
     /// Is this type a list with a unknown value type?
@@ -82,32 +96,32 @@ impl Type {
 
     /// Is this type a bool type?
     pub fn is_bool(&self) -> bool {
-        "bool" == self.type_name()
+        "bool" == self.name
     }
 
     /// Is this type a number type?
     pub fn is_number(&self) -> bool {
-        "number" == self.type_name()
+        "number" == self.name
     }
 
     /// Is this type a string type?
     pub fn is_string(&self) -> bool {
-        "string" == self.type_name()
+        "string" == self.name
     }
 
     /// Is this type a tuple type?
     pub fn is_tuple(&self) -> bool {
-        "tuple" == self.type_name()
+        "tuple" == self.name
     }
 
     /// Is this type a range type?
     pub fn is_range(&self) -> bool {
-        "range" == self.type_name()
+        "range" == self.name
     }
 
     /// Is this type a function type?
     pub fn is_function(&self) -> bool {
-        "function" == self.type_name()
+        "function" == self.name
     }
 
     pub fn get_function_params(&self) -> Vec<Type> {
@@ -115,7 +129,7 @@ impl Type {
             panic!("Type {} is not a function", self);
         }
 
-        self.type_args().first().unwrap().1.clone()
+        self.params().first().unwrap().params().clone()
     }
 
     pub fn get_function_return(&self) -> Type {
@@ -123,47 +137,47 @@ impl Type {
             panic!("Type {} is not a function", self);
         }
 
-        self.type_args().get(1).cloned().unwrap_or(Type::unit())
+        self.params().get(1).cloned().unwrap_or(Type::unit())
     }
 
     /// Is this type the unit type?
     pub fn is_unit(&self) -> bool {
-        "()" == self.type_name()
+        "()" == self.name()
     }
 
     /// Is this type an identifier type?
     pub fn is_identifier(&self) -> bool {
-        "identifier" == self.type_name()
+        "identifier" == self.name()
     }
 
     /// Create a `string` type instance
     pub fn string() -> Type {
-        Type("string".to_string(), vec![])
+        Type::new("string")
     }
 
     /// Create a `number` type instance
     pub fn number() -> Type {
-        Type("number".to_string(), vec![])
+        Type::new("number")
     }
 
     /// Create a `bool` type instance
     pub fn bool() -> Type {
-        Type("bool".to_string(), vec![])
+        Type::new("bool")
     }
 
     /// Create a `()` type instance
     pub fn unit() -> Type {
-        Type("()".to_string(), vec![])
+        Type::new("()")
     }
 
     /// Create a `range` type instance
     pub fn range() -> Type {
-        Type("range".to_string(), vec![])
+        Type::new("range")
     }
 
     /// Create a `list<T>` type instance
     pub fn list(item_type: Type) -> Type {
-        Type("list".to_string(), vec![item_type])
+        Type::new_with_args("list", vec![item_type])
     }
 
     /// Create a `list<unknown>` type instance
@@ -173,41 +187,51 @@ impl Type {
 
     /// Create a `tuple<T, U...>` type instance
     pub fn tuple(item_types: Vec<Type>) -> Type {
-        Type("tuple".to_string(), item_types)
+        Type::new_with_args("tuple", item_types)
+    }
+
+    /// Create a `tuple<T, U>` type instance
+    pub fn tuple2(first: Type, second: Type) -> Type {
+        Type::tuple(vec![first, second])
+    }
+
+    /// Create a `tuple<T, U, V>` type instance
+    pub fn tuple3(first: Type, second: Type, third: Type) -> Type {
+        Type::tuple(vec![first, second, third])
     }
 
     /// Create an `identifier` type instance
     pub fn identifier() -> Type {
-        Type("identifier".to_string(), vec![])
+        Type::new("identifier")
     }
 
     /// Create an `unknown` type instance
     pub fn unknown() -> Type {
-        Type("unknown".to_string(), vec![])
+        Type::new("unknown")
     }
 
     /// Create a `function` type instance
     pub fn function(params_types: Type, return_type: Type) -> Type {
-        Type("function".to_string(), vec![params_types, return_type])
+        Type::new_with_args("function", vec![params_types, return_type])
     }
 
     /// Create a `type` type instance
     pub fn typed(value: Type) -> Type {
-        Type("type".to_string(), vec![value])
+        Type::new_with_args("type", vec![value])
     }
 }
 
 impl Display for Type {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let base = if self.type_args().is_empty() {
-            self.type_name().to_string()
+        let base = if self.params().is_empty() {
+            self.name().to_string()
         } else if self.is_type() {
-            self.type_args().clone().first().unwrap().to_string()
+            self.params().clone().first().unwrap().to_string()
         } else {
             format!(
                 "{}<{}>",
-                self.type_name(),
-                self.type_args()
+                self.name(),
+                self.params()
                     .iter()
                     .map(|typeref| typeref.to_string())
                     .collect::<Vec<String>>()
@@ -487,7 +511,7 @@ mod is_tests {
 
     type_is_test!(
         test_tuple_typeref,
-        Type::tuple(vec![Type::string(), Type::number()]),
+        Type::tuple2(Type::string(), Type::number()),
         is_tuple,
         is_builtin
     );
@@ -547,7 +571,7 @@ mod is_tests {
     type_is_test!(
         test_function_typeref_with_multiple_params_but_no_return_value,
         Type::function(
-            Type::tuple(vec![Type::number(), Type::string(), Type::bool()]),
+            Type::tuple3(Type::number(), Type::string(), Type::bool()),
             Type::unit()
         ),
         is_function,
@@ -563,10 +587,7 @@ mod is_tests {
 
     type_is_test!(
         test_function_typeref_with_multiple_params_and_return_value,
-        Type::function(
-            Type::tuple(vec![Type::number(), Type::number()]),
-            Type::number()
-        ),
+        Type::function(egon_tuple!(Type::number(), Type::number()), Type::number()),
         is_function,
         is_builtin
     );
@@ -581,8 +602,8 @@ mod is_tests {
     type_is_test!(
         test_function_typeref_curried,
         Type::function(
-            Type::tuple(vec![Type::number()]),
-            Type::function(Type::tuple(vec![Type::number()]), Type::number())
+            egon_tuple!(Type::number()),
+            Type::function(egon_tuple!(Type::number()), Type::number())
         ),
         is_function,
         is_builtin
@@ -590,7 +611,7 @@ mod is_tests {
 
     #[test]
     fn test_get_return_type_from_function() {
-        let fn_type = Type::function(Type::tuple(vec![Type::number()]), Type::number());
+        let fn_type = Type::function(egon_tuple!(Type::number()), Type::number());
 
         assert_eq!(Type::number(), fn_type.get_function_return());
     }

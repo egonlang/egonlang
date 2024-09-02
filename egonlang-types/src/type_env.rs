@@ -56,7 +56,7 @@ impl TypeEnv {
                     log_identifier(identifier)
                 );
 
-                return Some(result.map(result.of_type.type_args().first().unwrap()));
+                return Some(result.map(result.of_type.params().first().unwrap()));
             }
         }
 
@@ -94,7 +94,7 @@ impl TypeEnv {
             //
             // This grabs the type `number` from the assigment value
             // new_type = Type::number()
-            let new_typeref = type_env_value.of_type.type_args().first().unwrap().clone();
+            let new_typeref = type_env_value.of_type.params().first().unwrap().clone();
 
             // Look up the new typeref (as a string) in the type environment
             // This flattens out type aliases aliasing type aliases
@@ -339,7 +339,7 @@ mod tests {
         env.set("Int", Type::typed(Type::number()).into());
 
         // Alias type `Int2` to type `Int`
-        env.set("Int2", Type::typed(Type("Int".to_string(), vec![])).into());
+        env.set("Int2", Type::typed(Type::new("Int")).into());
 
         // Alias type `Int2` resolves to the root type of `number`
         // `Int2` -> `Int` -> `number`

@@ -1902,10 +1902,7 @@ mod parser_tests {
                             },
                             53..54
                         ),
-                        type_expr: Some((
-                            Expr::Type(ExprType(Type("NumberList".to_string(), vec![]))),
-                            56..66
-                        )),
+                        type_expr: Some((Expr::Type(ExprType(Type::new("NumberList"))), 56..66)),
                         is_const: false,
                         value: Some((
                             Expr::List(
@@ -1988,10 +1985,7 @@ mod parser_tests {
                                                     99..100
                                                 ),
                                                 type_expr: Some((
-                                                    Expr::Type(ExprType(Type(
-                                                        "Int".to_string(),
-                                                        vec![]
-                                                    ))),
+                                                    Expr::Type(ExprType(Type::new("Int"))),
                                                     102..105
                                                 )),
                                                 is_const: false,
