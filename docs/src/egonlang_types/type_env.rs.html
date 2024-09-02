@@ -426,7 +426,7 @@
                     log_identifier(identifier)
                 );
 
-                <span class="kw">return </span><span class="prelude-val">Some</span>(result.map(result.of_type.type_args().first().unwrap()));
+                <span class="kw">return </span><span class="prelude-val">Some</span>(result.map(result.of_type.params().first().unwrap()));
             }
         }
 
@@ -464,7 +464,7 @@
             //
             // This grabs the type `number` from the assigment value
             // new_type = Type::number()
-            </span><span class="kw">let </span>new_typeref = type_env_value.of_type.type_args().first().unwrap().clone();
+            </span><span class="kw">let </span>new_typeref = type_env_value.of_type.params().first().unwrap().clone();
 
             <span class="comment">// Look up the new typeref (as a string) in the type environment
             // This flattens out type aliases aliasing type aliases
@@ -709,7 +709,7 @@
         </span>env.set(<span class="string">"Int"</span>, Type::typed(Type::number()).into());
 
         <span class="comment">// Alias type `Int2` to type `Int`
-        </span>env.set(<span class="string">"Int2"</span>, Type::typed(Type(<span class="string">"Int"</span>.to_string(), <span class="macro">vec!</span>[])).into());
+        </span>env.set(<span class="string">"Int2"</span>, Type::typed(Type::new(<span class="string">"Int"</span>)).into());
 
         <span class="comment">// Alias type `Int2` resolves to the root type of `number`
         // `Int2` -&gt; `Int` -&gt; `number`

@@ -2168,12 +2168,6 @@
 <a href="#2168" id="2168">2168</a>
 <a href="#2169" id="2169">2169</a>
 <a href="#2170" id="2170">2170</a>
-<a href="#2171" id="2171">2171</a>
-<a href="#2172" id="2172">2172</a>
-<a href="#2173" id="2173">2173</a>
-<a href="#2174" id="2174">2174</a>
-<a href="#2175" id="2175">2175</a>
-<a href="#2176" id="2176">2176</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>lalrpop_util::lalrpop_mod;
 
 <span class="kw">use </span><span class="kw">crate</span>::lexer::Lexer;
@@ -4078,10 +4072,7 @@
                             },
                             <span class="number">53</span>..<span class="number">54
                         </span>),
-                        type_expr: <span class="prelude-val">Some</span>((
-                            Expr::Type(ExprType(Type(<span class="string">"NumberList"</span>.to_string(), <span class="macro">vec!</span>[]))),
-                            <span class="number">56</span>..<span class="number">66
-                        </span>)),
+                        type_expr: <span class="prelude-val">Some</span>((Expr::Type(ExprType(Type::new(<span class="string">"NumberList"</span>))), <span class="number">56</span>..<span class="number">66</span>)),
                         is_const: <span class="bool-val">false</span>,
                         value: <span class="prelude-val">Some</span>((
                             Expr::List(
@@ -4164,10 +4155,7 @@
                                                     <span class="number">99</span>..<span class="number">100
                                                 </span>),
                                                 type_expr: <span class="prelude-val">Some</span>((
-                                                    Expr::Type(ExprType(Type(
-                                                        <span class="string">"Int"</span>.to_string(),
-                                                        <span class="macro">vec!</span>[]
-                                                    ))),
+                                                    Expr::Type(ExprType(Type::new(<span class="string">"Int"</span>))),
                                                     <span class="number">102</span>..<span class="number">105
                                                 </span>)),
                                                 is_const: <span class="bool-val">false</span>,

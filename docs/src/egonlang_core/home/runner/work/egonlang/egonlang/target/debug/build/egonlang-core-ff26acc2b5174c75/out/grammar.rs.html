@@ -12817,7 +12817,7 @@
 <a href="#12817" id="12817">12817</a>
 <a href="#12818" id="12818">12818</a>
 </pre></div><pre class="rust"><code><span class="comment">// auto-generated: "lalrpop 0.21.0"
-// sha3: 2e82278d7cf33170782ab3f7292c9048d187fe4fe842b1bb9335726162a8ff8c
+// sha3: d3f56460159d8a189f11ebc4a8e92efd03add2a6dd19029dd47dc6c7cff89f4a
 </span><span class="kw">use </span>lalrpop_util::ParseError;
 <span class="kw">use </span>egonlang_errors::EgonErrorS;
 <span class="kw">use crate</span>::{ast, lexer};
@@ -21207,7 +21207,7 @@
 ) -&gt; Type
 {
     {
-        Type(base, args.unwrap_or_default())
+        Type::new_with_args(<span class="kw-2">&amp;</span>base, args.unwrap_or_default())
     }
 }
 
