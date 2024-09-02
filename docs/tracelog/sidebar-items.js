@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":["tracelog"]};
+window.SIDEBAR_ITEMS = {"fn":["log_expr","log_identifier","log_stmt","log_type"],"macro":["tracelog"]};

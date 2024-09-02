@@ -366,7 +366,11 @@
 <a href="#366" id="366">366</a>
 <a href="#367" id="367">367</a>
 <a href="#368" id="368">368</a>
+<a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::{collections::HashMap, fmt};
+
+<span class="kw">use </span>tracelog::{log_identifier, log_type};
 
 <span class="kw">use crate</span>::{egon_bool, egon_number, egon_range, egon_string, Type};
 
@@ -398,7 +402,7 @@
             label = type_env,get;
             <span class="string">"(level: {}) Looking up identifier {}"</span>,
             <span class="self">self</span>.get_scope_depth(),
-            identifier.cyan()
+            log_identifier(identifier)
         );
 
         <span class="kw">let </span><span class="kw-2">mut </span>result: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>TypeEnvValue&gt; = <span class="prelude-val">None</span>;
@@ -418,8 +422,8 @@
                     label = type_env,get;
                     <span class="string">"(level:{}) Got type alias {} for {}"</span>,
                     <span class="self">self</span>.get_scope_depth(),
-                    result.of_type.to_string().italic().yellow(),
-                    identifier.cyan()
+                    log_type(<span class="kw-2">&amp;</span>result.of_type),
+                    log_identifier(identifier)
                 );
 
                 <span class="kw">return </span><span class="prelude-val">Some</span>(result.map(result.of_type.type_args().first().unwrap()));
@@ -432,8 +436,8 @@
                     label = type_env,get;
                     <span class="string">"(level:{}) Got type {} for {}"</span>,
                     <span class="self">self</span>.get_scope_depth(),
-                    result.of_type.to_string().italic().yellow(),
-                    identifier.cyan()
+                    log_type(<span class="kw-2">&amp;</span>result.of_type),
+                    log_identifier(identifier)
                 );
             }
             <span class="prelude-val">None </span>=&gt; {
@@ -441,7 +445,7 @@
                     label = type_env,get,error;
                     <span class="string">"(level: {}) Unable to find type for {} in type env"</span>,
                     <span class="self">self</span>.get_scope_depth(),
-                    identifier.cyan()
+                    log_identifier(identifier)
                 );
             }
         }
@@ -476,8 +480,8 @@
                         label = type_env,set,type_alias;
                         <span class="string">"(level:{}) Setting {} to type alias {}"</span>,
                         <span class="self">self</span>.get_scope_depth(),
-                        identifier.cyan(),
-                        aliased_type.of_type.to_string().italic().yellow()
+                        log_identifier(identifier),
+                        log_type(<span class="kw-2">&amp;</span>aliased_type.of_type)
                     );
 
                     <span class="comment">// Set the name to the flattened resolved type in the type env
@@ -496,8 +500,8 @@
                         label = type_env,set;
                         <span class="string">"(level: {}) Setting {} to the type alias {}"</span>,
                         <span class="self">self</span>.get_scope_depth(),
-                        identifier.cyan(),
-                        new_typeref.to_string().italic().yellow()
+                        log_identifier(identifier),
+                        log_type(<span class="kw-2">&amp;</span>new_typeref)
                     );
                     <span class="comment">// Set the name to the type
                     //
@@ -521,8 +525,8 @@
             label = type_env,set;
             <span class="string">"(level: {}) Setting {} to the type {}"</span>,
             <span class="self">self</span>.get_scope_depth(),
-            identifier.cyan(),
-            type_env_value.of_type.to_string().italic().yellow()
+            log_identifier(identifier),
+            log_type(<span class="kw-2">&amp;</span>type_env_value.of_type)
         );
 
         <span class="comment">// Type isn't aliased, set name to the value's type

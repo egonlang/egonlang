@@ -2357,24 +2357,7 @@
 <a href="#2357" id="2357">2357</a>
 <a href="#2358" id="2358">2358</a>
 <a href="#2359" id="2359">2359</a>
-<a href="#2360" id="2360">2360</a>
-<a href="#2361" id="2361">2361</a>
-<a href="#2362" id="2362">2362</a>
-<a href="#2363" id="2363">2363</a>
-<a href="#2364" id="2364">2364</a>
-<a href="#2365" id="2365">2365</a>
-<a href="#2366" id="2366">2366</a>
-<a href="#2367" id="2367">2367</a>
-<a href="#2368" id="2368">2368</a>
-<a href="#2369" id="2369">2369</a>
-<a href="#2370" id="2370">2370</a>
-<a href="#2371" id="2371">2371</a>
-<a href="#2372" id="2372">2372</a>
-<a href="#2373" id="2373">2373</a>
-<a href="#2374" id="2374">2374</a>
-<a href="#2375" id="2375">2375</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>colored::Colorize;
-<span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
+</pre></div><pre class="rust"><code><span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_errors::{EgonErrorS, EgonResultMultiSpannedErr, EgonTypeError};
 <span class="kw">use </span>egonlang_types::{
     egon_unknown,
@@ -2382,6 +2365,7 @@
     Type,
 };
 <span class="kw">use </span>span::Span;
+<span class="kw">use </span>tracelog::{log_expr, log_identifier, log_stmt, log_type};
 
 <span class="kw">use </span><span class="kw">crate</span>::rules::{core::<span class="kw-2">*</span>, Rule};
 
@@ -2498,23 +2482,21 @@
     ) -&gt; EgonResultMultiSpannedErr&lt;TypeEnvValue&gt; {
         <span class="macro">tracelog::tracelog!</span>(
             label = verifier, resolve_identifier;
-            <span class="string">"(level: {}) Resolving identifier type: {}"</span>,
+            <span class="string">"(level: {}) Resolving type for identifier: {}"</span>,
             <span class="self">self</span>.current_type_env_level(),
-            identifier.to_string().cyan()
+            log_identifier(<span class="kw-2">&amp;</span>identifier)
         );
 
         <span class="kw">let </span>resolved_to = <span class="self">self</span>.type_env.get(identifier);
 
         <span class="kw">match </span><span class="kw-2">&amp;</span>resolved_to {
             <span class="prelude-val">Some</span>(resolved_to) =&gt; {
-                <span class="kw">let </span>resolved_to_string = <span class="macro">format!</span>(<span class="string">"{:?}"</span>, resolved_to);
-
                 <span class="macro">tracelog::tracelog!</span>(
                     label = verifier, resolve_identifier;
                     <span class="string">"(level: {}) Resolved identifier: {} to type: {}"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    identifier.to_string().cyan(),
-                    resolved_to_string.cyan()
+                    log_identifier(<span class="kw-2">&amp;</span>identifier),
+                    log_type(<span class="kw-2">&amp;</span>resolved_to.of_type)
                 );
             }
             <span class="prelude-val">None </span>=&gt; {
@@ -2522,7 +2504,7 @@
                     label = verifier, resolve_identifier;
                     <span class="string">"(level: {}) Unable to resolve identifier: {}. Generating undefined error."</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    identifier.to_string().cyan()
+                    log_identifier(<span class="kw-2">&amp;</span>identifier)
                 );
             }
         }
@@ -2553,7 +2535,7 @@
             label = verifier,resolve_expr_type;
             <span class="string">"(level: {}) Resolving type for expression {}"</span>,
             <span class="self">self</span>.current_type_env_level(),
-            expr.to_string().cyan()
+            log_expr(expr)
         );
 
         <span class="kw">let </span>resolved_type = <span class="kw">match </span>expr {
@@ -2562,7 +2544,7 @@
                     label = verifier,resolve_expr_type,expr_call;
                     <span class="string">"(level: {}) {} is a call expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    expr.to_string().cyan()
+                    log_expr(expr)
                 );
 
                 <span class="kw">match </span><span class="self">self</span>.resolve_expr_type(<span class="kw-2">&amp;</span>expr_call.callee.<span class="number">0</span>, span) {
@@ -2572,8 +2554,8 @@
                                 label = verifier,resolve_expr_type,expr_call,resolve_callee;
                                 <span class="string">"(level: {}) callee {} in call expression {} is a function"</span>,
                                 <span class="self">self</span>.current_type_env_level(),
-                                expr_call.callee.<span class="number">0</span>.to_string().cyan(),
-                                expr.to_string().cyan()
+                                log_expr(<span class="kw-2">&amp;</span>expr_call.callee.<span class="number">0</span>),
+                                log_expr(expr)
                             );
 
                             <span class="prelude-val">Ok</span>(callee_type.of_type.get_function_return().into())
@@ -2582,8 +2564,8 @@
                                 label = verifier,resolve_expr_type,expr_call,resolve_callee;
                                 <span class="string">"(level: {}) callee {} in call expression {} is not a function"</span>,
                                 <span class="self">self</span>.current_type_env_level(),
-                                expr_call.callee.<span class="number">0</span>.to_string().cyan(),
-                                expr.to_string().cyan()
+                                log_expr(<span class="kw-2">&amp;</span>expr_call.callee.<span class="number">0</span>),
+                                log_expr(expr)
                             );
 
                             <span class="prelude-val">Ok</span>(<span class="macro">egon_unknown!</span>().into())
@@ -2597,7 +2579,7 @@
                     label = verifier,resolve_expr_type,expr_identifier;
                     <span class="string">"(level: {}) {} is an identifier expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    expr.to_string().cyan()
+                    log_expr(expr)
                 );
 
                 <span class="self">self</span>.resolve_identifier(<span class="kw-2">&amp;</span>ident_expr.identifier.name, span)
@@ -2607,7 +2589,7 @@
                     label = verifier,resolve_expr_type,expr_list;
                     <span class="string">"(level: {}) {} is a list expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    expr.to_string().cyan()
+                    log_expr(expr)
                 );
 
                 <span class="kw">if </span>list_expr.items.is_empty() {
@@ -2624,7 +2606,7 @@
                     label = verifier,resolve_expr_type,expr_tuple;
                     <span class="string">"(level: {}) {} is a tuple expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    expr.to_string().cyan()
+                    log_expr(expr)
                 );
 
                 <span class="kw">if </span>tuple_expr.items.is_empty() {
@@ -2645,7 +2627,7 @@
                     label = verifier,resolve_expr_type,expr_block;
                     <span class="string">"(level: {}) {} is a block expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    expr.to_string().cyan()
+                    log_expr(expr)
                 );
 
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(block_typeref) = <span class="kw-2">&amp;</span>block_expr.typeref {
@@ -2658,15 +2640,17 @@
                 <span class="kw">if let </span><span class="prelude-val">Some</span>((block_expr_return_expr, <span class="kw">_</span>)) = <span class="kw-2">&amp;</span>block_expr.return_expr {
                     <span class="self">self</span>.resolve_expr_type(block_expr_return_expr, span)
                 } <span class="kw">else </span>{
+                    <span class="kw">let </span>resolved_type = Type::unit();
+
                     <span class="macro">tracelog::tracelog!</span>(
                         label = verifier,resolve_expr_type,expr_identifier;
                         <span class="string">"(level: {}) Resolved block expression {} to type {}"</span>,
                         <span class="self">self</span>.current_type_env_level(),
-                        block_expr.to_string().cyan(),
-                        Type::unit().to_string().italic().yellow()
+                        log_expr(block_expr),
+                        log_type(<span class="kw-2">&amp;</span>resolved_type)
                     );
 
-                    <span class="kw">return </span><span class="prelude-val">Ok</span>(Type::unit().into());
+                    <span class="kw">return </span><span class="prelude-val">Ok</span>(resolved_type.into());
                 }
             }
             ast::Expr::Type(type_expr) =&gt; {
@@ -2674,7 +2658,7 @@
                     label = verifier,resolve_expr_type,expr_type;
                     <span class="string">"(level: {}) {} is a type expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    expr.to_string().cyan()
+                    log_expr(expr)
                 );
 
                 <span class="kw">if </span>type_expr.<span class="number">0</span>.is_builtin() {
@@ -2682,8 +2666,8 @@
                         label = verifier,resolve_expr_type,expr_type;
                         <span class="string">"(level: {}) Resolved type expression {} to builtin type {}"</span>,
                         <span class="self">self</span>.current_type_env_level(),
-                        type_expr.to_string().cyan(),
-                        type_expr.to_string().italic().yellow()
+                        log_expr(type_expr),
+                        log_type(type_expr)
                     );
 
                     <span class="kw">return </span><span class="prelude-val">Ok</span>(type_expr.<span class="number">0</span>.clone().into());
@@ -2695,8 +2679,8 @@
                             label = verifier,resolve_expr_type,expr_type;
                             <span class="string">"(level: {}) Resolved type expression {} to type {}"</span>,
                             <span class="self">self</span>.current_type_env_level(),
-                            type_expr.to_string().cyan(),
-                            type_env_value.of_type.to_string().italic().yellow()
+                            log_expr(type_expr),
+                            log_type(<span class="kw-2">&amp;</span>type_env_value.of_type)
                         );
 
                         <span class="prelude-val">Ok</span>(type_env_value.clone())
@@ -2709,7 +2693,7 @@
                     label = verifier,resolve_expr_type,expr_assign;
                     <span class="string">"(level: {}) {} is an assign expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    expr.to_string().cyan()
+                    log_expr(expr)
                 );
 
                 <span class="kw">let </span>name = <span class="kw-2">&amp;</span>assign_expr.identifier.<span class="number">0</span>.name;
@@ -2721,7 +2705,7 @@
                     label = verifier,resolve_expr_type,expr_if;
                     <span class="string">"(level: {}) {} is an if expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    expr.to_string().cyan()
+                    log_expr(expr)
                 );
 
                 <span class="kw">let </span>(then_expr, <span class="kw">_</span>) = <span class="kw-2">&amp;</span>if_expr.then;
@@ -2734,7 +2718,7 @@
                     label = verifier,resolve_expr_type,expr_unit;
                     <span class="string">"(level: {}) {} is an unit expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    expr.to_string().cyan()
+                    log_expr(expr)
                 );
 
                 <span class="prelude-val">Ok</span>(Type::unit().into())
@@ -2744,7 +2728,7 @@
                     label = verifier,resolve_expr_type,expr_literal;
                     <span class="string">"(level: {}) {} is a literal expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    expr.to_string().cyan()
+                    log_expr(expr)
                 );
 
                 <span class="prelude-val">Ok</span>(<span class="kw">match </span>literal {
@@ -2759,7 +2743,7 @@
                     label = verifier,resolve_expr_type,expr_infix;
                     <span class="string">"(level: {}) {} is an infix expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    expr.to_string().cyan()
+                    log_expr(expr)
                 );
 
                 <span class="prelude-val">Ok</span>(<span class="kw">match </span>infix.op {
@@ -2784,7 +2768,7 @@
                     label = verifier,resolve_expr_type,expr_prefix;
                     <span class="string">"(level: {}) {} is an prefix expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    expr.to_string().cyan()
+                    log_expr(expr)
                 );
 
                 <span class="prelude-val">Ok</span>(<span class="kw">match </span>prefix.op {
@@ -2798,7 +2782,7 @@
                     label = verifier,resolve_expr_type,expr_fn;
                     <span class="string">"(level: {}) {} is a function expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    expr.to_string().cyan()
+                    log_expr(expr)
                 );
 
                 <span class="prelude-val">Ok</span>(Type::function(
@@ -2818,7 +2802,7 @@
                     label = verifier,resolve_expr_type,expr_range;
                     <span class="string">"(level: {}) {} is a range expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    expr.to_string().cyan()
+                    log_expr(expr)
                 );
 
                 <span class="prelude-val">Ok</span>(Type::range().into())
@@ -2826,14 +2810,12 @@
         };
 
         <span class="kw">if let </span><span class="prelude-val">Ok</span>(resolved_type) = <span class="kw-2">&amp;</span>resolved_type {
-            <span class="kw">let </span>resolved_type_string = <span class="macro">format!</span>(<span class="string">"{}"</span>, resolved_type.of_type);
-
             <span class="macro">tracelog::tracelog!</span>(
                 label = verifier,resolve_expr_type;
                 <span class="string">"(level: {}) Resolved expression {} to the type {}"</span>,
                 <span class="self">self</span>.current_type_env_level(),
-                expr.to_string().cyan(),
-                resolved_type_string.italic().yellow()
+                log_expr(expr),
+                log_type(<span class="kw-2">&amp;</span>resolved_type.of_type)
             );
         };
 
@@ -2843,7 +2825,7 @@
     <span class="kw">fn </span>visit_stmt(<span class="kw-2">&amp;mut </span><span class="self">self</span>, stmt: <span class="kw-2">&amp;mut </span>ast::Stmt, span: <span class="kw-2">&amp;</span>Span) -&gt; EgonResultMultiSpannedErr&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
 
-        <span class="kw">let </span>stmt_string = stmt.clone().to_string().cyan();
+        <span class="kw">let </span>stmt_string = log_stmt(stmt);
 
         <span class="macro">tracelog::tracelog!</span>(label = verifier,visit_stmt; <span class="string">"{}"</span>, stmt_string);
 
@@ -2856,7 +2838,7 @@
                 <span class="macro">tracelog::tracelog!</span>(
                     label = verifier,visit_stmt,stmt_expr;
                     <span class="string">"Checking expression {} from stmt {}"</span>,
-                    expr.to_string().cyan(),
+                    log_expr(expr),
                     stmt_string
                 );
 
@@ -2865,8 +2847,8 @@
                 <span class="macro">tracelog::tracelog!</span>(
                     label = verifier,visit_stmt,stmt_expr,error;
                     <span class="string">"Expression {} from statement {} had {} errors"</span>,
-                    expr.to_string().cyan(),
-                    stmt.to_string().cyan(),
+                    log_expr(expr),
+                    stmt_string,
                     expr_errs.len()
                 );
 
@@ -2967,7 +2949,7 @@
                 <span class="macro">tracelog::tracelog!</span>(
                     label = verifier,visit_stmt,stmt_function;
                     <span class="string">"Checking function statement's function expression {}"</span>,
-                    fn_expr.to_string().cyan()
+                    log_expr(fn_expr)
                 );
 
                 <span class="kw">match </span><span class="self">self</span>.visit_expr(fn_expr, fn_expr_span) {
@@ -2980,7 +2962,7 @@
                         <span class="macro">tracelog::tracelog!</span>(
                             label = verifier,visit_stmt,stmt_function,error;
                             <span class="string">"Function expression {} had {} errors"</span>,
-                            fn_expr.to_string().cyan(),
+                            log_expr(fn_expr),
                             fn_expr_errs.len()
                         );
 
@@ -3070,7 +3052,7 @@
         <span class="macro">tracelog::tracelog!</span>(
             label = verifier,run_stmt_rules;
             <span class="string">"Run rules against statement {}"</span>,
-            stmt.to_string().cyan()
+            log_stmt(stmt)
         );
 
         <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
@@ -3078,14 +3060,7 @@
         <span class="kw">for </span>rule <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.rules {
             <span class="kw">let </span>rule_string = rule.to_string();
 
-            <span class="comment">// tracelog::tracelog!(
-            //     label = verifier,run_stmt_rules;
-            //     "Running {} against statement {}",
-            //     rule_string.italic(),
-            //     stmt.to_string().cyan()
-            // );
-
-            </span><span class="kw">let </span>rule_errs = rule
+            <span class="kw">let </span>rule_errs = rule
                 .visit_stmt(
                     stmt,
                     span,
@@ -3101,7 +3076,7 @@
                     <span class="string">"{} generated {} errors against statement {}"</span>,
                     rule_string.italic(),
                     rule_errs.len(),
-                    stmt.to_string().cyan()
+                    log_stmt(stmt)
                 );
             }
 
@@ -3117,20 +3092,13 @@
         <span class="macro">tracelog::tracelog!</span>(
             label = verifier,run_expr_rules;
             <span class="string">"Run rules against expression {}"</span>,
-            expr.to_string().cyan()
+            log_expr(expr)
         );
 
         <span class="kw">for </span>rule <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.rules {
             <span class="kw">let </span>rule_string = rule.to_string();
 
-            <span class="comment">// tracelog::tracelog!(
-            //     label = verifier,run_expr_rules;
-            //     "Running {} against expression {}",
-            //     rule_string.italic(),
-            //     expr.to_string().cyan()
-            // );
-
-            </span><span class="kw">let </span>rule_errs = rule
+            <span class="kw">let </span>rule_errs = rule
                 .visit_expr(
                     expr,
                     span,
@@ -3146,7 +3114,7 @@
                     <span class="string">"{} generated {} errors against expr {}"</span>,
                     rule_string.italic(),
                     rule_errs.len(),
-                    expr.to_string().cyan()
+                    log_expr(expr)
                 );
             }
 
@@ -3161,7 +3129,7 @@
         expr: <span class="kw-2">&amp;mut </span>ast::Expr,
         span: <span class="kw-2">&amp;</span>Span,
     ) -&gt; EgonResultMultiSpannedErr&lt;TypeEnvValue&gt; {
-        <span class="kw">let </span>expr_string = expr.to_string().cyan();
+        <span class="kw">let </span>expr_string = log_expr(expr);
         <span class="kw">let </span>expr_clone = expr.clone();
 
         <span class="macro">tracelog::tracelog!</span>(label = verifier,visit_expr; <span class="string">"{}"</span>, expr_string);
@@ -3190,7 +3158,7 @@
                                 <span class="macro">tracelog::tracelog!</span>(
                                     label = verifier,visit_expr,expr_block,return_stmt;
                                     <span class="string">"caching return value: {}"</span>,
-                                    v.of_type.to_string().yellow().italic()
+                                    log_type(<span class="kw-2">&amp;</span>v.of_type)
                                 );
 
                                 return_stmt_type = <span class="prelude-val">Some</span>(v.of_type);
@@ -3212,7 +3180,7 @@
                             label = verifier,visit_expr,expr_block;
                             <span class="string">"{} has a return expression {}"</span>,
                             expr_string,
-                            return_expr.to_string().cyan()
+                            log_expr(return_expr)
                         );
 
                         <span class="kw">match </span><span class="self">self</span>.visit_expr(return_expr, return_span) {
@@ -3230,7 +3198,7 @@
                                     label = verifier,visit_expr,expr_block;
                                     <span class="string">"{} resolved to type of {}"</span>,
                                     expr_string,
-                                    return_type.of_type.to_string().yellow().italic()
+                                    log_type(<span class="kw-2">&amp;</span>return_type.of_type)
                                 );
 
                                 <span class="comment">// Record the block's returning expression

@@ -1,1 +1,1 @@
-searchState.loadedDescShard("tracelog", 0, "Log a message with tracing info attached")
+searchState.loadedDescShard("tracelog", 0, "Format value to be logged as an expression\nFormat value to be logged as an identifier\nFormat value to be logged as a statement\nFormat value to be logged as a type\nLog a message with tracing info attached")
