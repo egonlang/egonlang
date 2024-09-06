@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-use egonlang_types::Type;
+use egonlang_types::EgonType;
 use serde::{Deserialize, Serialize};
 
 use span::{Span, Spanned};
@@ -65,9 +65,9 @@ impl Module {
                     nodes.push(AstNode::Type((value_typeref.clone(), value_span.clone())));
                 }
 
-                let (ident, ident_span) = &stmt_type_alias.alias;
-                if ident_span.contains(&index) {
-                    nodes.push(AstNode::Identifier((ident.clone(), ident_span.clone())));
+                let (alias_type, alias_span) = &stmt_type_alias.alias;
+                if alias_span.contains(&index) {
+                    nodes.push(AstNode::Type((alias_type.clone(), alias_span.clone())));
                 }
             }
             Stmt::Fn(stmt_fn) => {
@@ -244,7 +244,7 @@ pub enum AstNode {
     Stmt(super::StmtS),
     Expr(super::ExprS),
     Identifier(Spanned<super::Identifier>),
-    Type(Spanned<Type>),
+    Type(Spanned<EgonType>),
 }
 
 impl AstNode {
@@ -276,7 +276,7 @@ mod tests {
 
     use crate::prelude::*;
     use ast::*;
-    use egonlang_types::Type;
+    use egonlang_types::{EgonType, T};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -427,14 +427,14 @@ mod tests {
                             },
                             4..5
                         ),
-                        type_expr: Some((Expr::Type(ExprType(Type::number())), 7..13)),
+                        type_expr: Some((Expr::Type(ExprType(EgonType::number())), 7..13)),
                         is_const: false,
                         value: Some((123f64.into(), 16..19))
                     }),
                     0..20
                 )),
-                AstNode::Expr((Expr::Type(ExprType(Type::number())), 7..13)),
-                AstNode::Type((Type::number(), 7..13)),
+                AstNode::Expr((Expr::Type(ExprType(EgonType::number())), 7..13)),
+                AstNode::Type((EgonType::number(), 7..13)),
             ],
             nodes
         );
@@ -588,14 +588,14 @@ mod tests {
                             },
                             6..7
                         ),
-                        type_expr: Some((Expr::Type(ExprType(Type::number())), 9..15)),
+                        type_expr: Some((Expr::Type(ExprType(EgonType::number())), 9..15)),
                         is_const: true,
                         value: Some((123f64.into(), 18..21))
                     }),
                     0..22
                 )),
-                AstNode::Expr((Expr::Type(ExprType(Type::number())), 9..15)),
-                AstNode::Type((Type::number(), 9..15)),
+                AstNode::Expr((Expr::Type(ExprType(EgonType::number())), 9..15)),
+                AstNode::Type((EgonType::number(), 9..15)),
             ],
             nodes
         );
@@ -793,11 +793,11 @@ mod tests {
                                         Identifier {
                                             name: "a".to_string()
                                         },
-                                        Type::string()
+                                        EgonType::string()
                                     ),
                                     1..10
                                 )],
-                                return_type: (Type::bool(), 13..17),
+                                return_type: (EgonType::bool(), 13..17),
                                 body: (
                                     Expr::Block(Box::new(ExprBlock {
                                         stmts: vec![],
@@ -833,11 +833,11 @@ mod tests {
                                 Identifier {
                                     name: "a".to_string()
                                 },
-                                Type::string()
+                                EgonType::string()
                             ),
                             1..10
                         )],
-                        return_type: (Type::bool(), 13..17),
+                        return_type: (EgonType::bool(), 13..17),
                         body: (
                             Expr::Block(Box::new(ExprBlock {
                                 stmts: vec![],
@@ -929,12 +929,12 @@ mod tests {
                             }),
                             12..13
                         ),
-                        expected_type: (Expr::Type(ExprType(Type::bool())), 15..19)
+                        expected_type: (Expr::Type(ExprType(EgonType::bool())), 15..19)
                     }),
                     0..20
                 )),
-                AstNode::Expr((Expr::Type(ExprType(Type::bool())), 15..19)),
-                AstNode::Type((Type::bool(), 15..19)),
+                AstNode::Expr((Expr::Type(ExprType(EgonType::bool())), 15..19)),
+                AstNode::Type((EgonType::bool(), 15..19)),
             ],
             nodes
         );

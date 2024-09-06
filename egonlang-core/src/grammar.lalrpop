@@ -3,7 +3,7 @@ use egonlang_errors::EgonErrorS;
 
 use crate::{ast, lexer};
 use span;
-use egonlang_types::Type;
+use egonlang_types::{EgonType, BoundType, UnboundType, T};
 
 grammar<'err>(
     errors: &'err mut Vec<ParseError<usize, lexer::Token, EgonErrorS>>
@@ -31,7 +31,7 @@ Stmt: ast::Stmt = {
 StmtExpr: ast::Stmt = <expr:ExprS> ";" =>
         ast::Stmt::Expr(ast::StmtExpr { <> });
 
-StmtAssertType: ast::Stmt = "assert_type" <value:ExprS> "," <expected_type:Spanned<Type>> ";" =>
+StmtAssertType: ast::Stmt = "assert_type" <value:ExprS> "," <expected_type:Spanned<EgonType>> ";" =>
         ast::Stmt::AssertType(ast::StmtAssertType { 
             value,
             expected_type: (ast::Expr::Type(ast::ExprType(expected_type.0)), expected_type.1)
@@ -40,7 +40,7 @@ StmtAssertType: ast::Stmt = "assert_type" <value:ExprS> "," <expected_type:Spann
 StmtReturn: ast::Stmt = "return" <value:ExprS> ";" =>
         ast::Stmt::Return(ast::StmtReturn::new(<>));
 
-StmtAssignVariable: ast::Stmt = "let" <identifier:Spanned<Identifier>> <type_expr:(":" <Spanned<Type>>)?> <value:("=" <ExprS>)?> ";" =>
+StmtAssignVariable: ast::Stmt = "let" <identifier:Spanned<Identifier>> <type_expr:(":" <Spanned<EgonType>>)?> <value:("=" <ExprS>)?> ";" =>
         ast::StmtAssign {
             identifier,
             type_expr: type_expr.map(|(ty, ty_span)|
@@ -49,7 +49,7 @@ StmtAssignVariable: ast::Stmt = "let" <identifier:Spanned<Identifier>> <type_exp
             value,
         }.into();
 
-StmtAssignConst: ast::Stmt = "const" <identifier:Spanned<Identifier>> <type_expr:(":" <Spanned<Type>>)?> <value:("=" <ExprS>)?> ";" =>
+StmtAssignConst: ast::Stmt = "const" <identifier:Spanned<Identifier>> <type_expr:(":" <Spanned<EgonType>>)?> <value:("=" <ExprS>)?> ";" =>
         ast::StmtAssign {
             identifier,
             type_expr: type_expr.map(|(ty, ty_span)|
@@ -58,7 +58,7 @@ StmtAssignConst: ast::Stmt = "const" <identifier:Spanned<Identifier>> <type_expr
             value,
         }.into();
 
-StmtTypeAlias: ast::Stmt = "type" <alias:Spanned<Identifier>> <value:("=" <Spanned<Type>>)> ";" =>
+StmtTypeAlias: ast::Stmt = "type" <alias:Spanned<EgonType>> <value:("=" <Spanned<EgonType>>)> ";" =>
         ast::StmtTypeAlias { <> }.into();
 
 StmtFn: ast::Stmt = "fn" <name:Spanned<Identifier>> <fn_expr:Spanned<ExprFn>> =>
@@ -247,17 +247,17 @@ ExprBlock: ast::Expr = {
     )),
 }
 
-FnParam: (ast::Identifier, Type) = <name:identifier> ":" <typeref:Type> => (ast::Identifier { name }, typeref);
+FnParam: (ast::Identifier, EgonType) = <name:identifier> ":" <typeref:EgonType> => (ast::Identifier { name }, typeref);
 
 ExprFn: ast::Expr = {
-   "(" <params:Seperated<Spanned<FnParam>, ",">> ")" ":" <return_type:Spanned<Type>> "=>" <body:Spanned<ExprBlock>> =>
+   "(" <params:Seperated<Spanned<FnParam>, ",">> ")" ":" <return_type:Spanned<EgonType>> "=>" <body:Spanned<ExprBlock>> =>
         ast::Expr::Fn(Box::new(ast::ExprFn { 
             name: None,
             params,
             return_type,
             body,
          })),
-    "(" <params:Seperated<Spanned<FnParam>, ",">> ")" ":" <return_type:Spanned<Type>> "=>" <body:Spanned<ExprFn>> =>
+    "(" <params:Seperated<Spanned<FnParam>, ",">> ")" ":" <return_type:Spanned<EgonType>> "=>" <body:Spanned<ExprFn>> =>
         ast::Expr::Fn(Box::new(ast::ExprFn { 
             name: None,
             params,
@@ -270,12 +270,15 @@ ExprFn: ast::Expr = {
 
 /// Utilities
 
-Type: Type = {
-    <base:identifier> <args:("<" <Seperated<Type, ",">> ">")?> => {
-        Type::new_with_args(&base, args.unwrap_or_default())
-    },
+EgonType: EgonType = {
+    <unbound_type:UnboundType> => EgonType::Unbound(<>)
+}
 
-    "(" ")" => Type::unit()
+UnboundType: UnboundType = {
+    <base:identifier> <args:("<" <Seperated<identifier, ",">> ">")?> => {
+        UnboundType::new_with_args(&base, args.unwrap_or_default())
+    },
+    "(" ")" => UnboundType::unit()
 }
 
 Spanned<T>: span::Spanned<T> = <l:@L> <t:T> <r:@R> =>

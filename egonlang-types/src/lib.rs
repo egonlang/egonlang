@@ -1,237 +1,547 @@
 pub mod type_env;
 
-use std::fmt::{self, Display, Formatter};
+use std::{
+    fmt::{self, Display, Formatter},
+    rc::Rc,
+};
 
+use egonlang_errors::EgonResultMultiSpannedErr;
 use serde::{Deserialize, Serialize};
-use type_env::TypeEnvValue;
 
-/// Type in the Egon language
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct Type {
-    name: String,
-    params: Vec<Type>,
+pub trait T {
+    type Param;
+
+    fn name(&self) -> &str;
+
+    fn params(&self) -> Vec<Self::Param>;
+
+    /// Is this type a type?
+    fn is_type(&self) -> bool;
+
+    /// Is this type a list?
+    fn is_list(&self) -> bool;
+
+    /// Is this type a list with a known value type?
+    fn is_known_list(&self) -> bool;
+
+    /// Is this type unknown?
+    fn is_unknown(&self) -> bool;
+
+    /// Is this type a list with a unknown value type?
+    fn is_unknown_list(&self) -> bool;
+
+    fn is_builtin(&self) -> bool;
+
+    /// Is this type a bool type?
+    fn is_bool(&self) -> bool;
+
+    /// Is this type a number type?
+    fn is_number(&self) -> bool;
+
+    /// Is this type a string type?
+    fn is_string(&self) -> bool;
+
+    /// Is this type a tuple type?
+    fn is_tuple(&self) -> bool;
+
+    /// Is this type a range type?
+    fn is_range(&self) -> bool;
+
+    /// Is this type a function type?
+    fn is_function(&self) -> bool;
+
+    fn get_function_params(&self) -> Vec<Self::Param>;
+
+    fn get_function_return(&self) -> Self::Param;
+
+    /// Is this type the unit type?
+    fn is_unit(&self) -> bool;
+
+    /// Is this type an identifier type?
+    fn is_identifier(&self) -> bool;
+
+    fn new(type_name: &str) -> Self;
+
+    fn new_with_args(name: &str, params: Vec<Self::Param>) -> Self;
+
+    /// Create a `string` type instance
+    fn string() -> Self;
+
+    /// Create a `number` type instance
+    fn number() -> Self;
+
+    /// Create a `bool` type instance
+    fn bool() -> Self;
+
+    /// Create a `()` type instance
+    fn unit() -> Self;
+
+    /// Create a `range` type instance
+    fn range() -> Self;
+
+    /// Create a `list<T>` type instance
+    fn list(item_type: Self::Param) -> Self;
+
+    /// Create a `list<unknown>` type instance
+    fn unknown_list() -> Self;
+
+    /// Create a `tuple<T, U...>` type instance
+    fn tuple(item_types: Vec<Self::Param>) -> Self;
+
+    /// Create a `tuple<T, U>` type instance
+    fn tuple2(first: Self::Param, second: Self::Param) -> Self;
+
+    /// Create a `tuple<T, U, V>` type instance
+    fn tuple3(first: Self::Param, second: Self::Param, third: Self::Param) -> Self;
+
+    /// Create an `identifier` type instance
+    fn identifier() -> Self;
+
+    /// Create an `unknown` type instance
+    fn unknown() -> Self;
+
+    /// Create a `function` type instance
+    fn function(params_types: Self::Param, return_type: Self::Param) -> Self;
+
+    /// Create a `type` type instance
+    fn typed(value: Self::Param) -> Self;
 }
 
-impl From<Type> for TypeEnvValue {
-    fn from(value: Type) -> Self {
-        TypeEnvValue {
-            of_type: value,
-            is_const: true,
+/// In memory representation of a type in the Egon language
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Eq, Hash)]
+pub enum EgonType {
+    Unbound(UnboundType),
+    Bound(Box<BoundType>),
+}
+
+impl EgonType {
+    pub fn is_bound(&self) -> bool {
+        matches!(self, Self::Bound(_))
+    }
+
+    pub fn is_unbound(&self) -> bool {
+        matches!(self, Self::Unbound(_))
+    }
+
+    pub fn as_unbound(&self) -> EgonResultMultiSpannedErr<&UnboundType> {
+        match self {
+            Self::Unbound(t) => Ok(t),
+            Self::Bound(_) => todo!(),
+        }
+    }
+
+    pub fn as_bound(&self) -> EgonResultMultiSpannedErr<&BoundType> {
+        match self {
+            Self::Unbound(_) => todo!(),
+            Self::Bound(t) => Ok(t),
         }
     }
 }
 
-impl Type {
-    pub fn new(type_name: &str) -> Self {
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub enum EgonTypeParam {
+    Unbound(String),
+    Bound(BoundType),
+}
+
+impl From<EgonTypeParam> for EgonType {
+    fn from(value: EgonTypeParam) -> Self {
+        match value {
+            EgonTypeParam::Unbound(_) => todo!(),
+            EgonTypeParam::Bound(t) => EgonType::Bound(Box::new(t)),
+        }
+    }
+}
+
+impl T for EgonType {
+    type Param = EgonTypeParam;
+
+    fn name(&self) -> &str {
+        match self {
+            Self::Unbound(t) => t.name(),
+            Self::Bound(t) => t.name(),
+        }
+    }
+
+    fn params(&self) -> Vec<Self::Param> {
+        let r = match self {
+            Self::Unbound(t) => t
+                .params()
+                .iter()
+                .map(|param| EgonTypeParam::Unbound(param.to_string()))
+                .collect::<Vec<Self::Param>>(),
+            Self::Bound(t) => t
+                .params()
+                .iter()
+                .map(|param| EgonTypeParam::Bound(param.clone()))
+                .collect::<Vec<Self::Param>>(),
+        };
+
+        r
+    }
+
+    fn is_type(&self) -> bool {
+        match self {
+            Self::Unbound(t) => t.is_type(),
+            Self::Bound(t) => t.is_type(),
+        }
+    }
+
+    fn is_list(&self) -> bool {
+        match self {
+            Self::Unbound(t) => t.is_list(),
+            Self::Bound(t) => t.is_list(),
+        }
+    }
+
+    fn is_known_list(&self) -> bool {
+        match self {
+            Self::Unbound(t) => t.is_known_list(),
+            Self::Bound(t) => t.is_known_list(),
+        }
+    }
+
+    fn is_unknown(&self) -> bool {
+        match self {
+            Self::Unbound(t) => t.is_unknown(),
+            Self::Bound(t) => t.is_unknown(),
+        }
+    }
+
+    fn is_unknown_list(&self) -> bool {
+        match self {
+            Self::Unbound(t) => t.is_unknown_list(),
+            Self::Bound(t) => t.is_unknown_list(),
+        }
+    }
+
+    fn is_builtin(&self) -> bool {
+        match self {
+            Self::Unbound(t) => t.is_builtin(),
+            Self::Bound(t) => t.is_builtin(),
+        }
+    }
+
+    fn is_bool(&self) -> bool {
+        match self {
+            Self::Unbound(t) => t.is_bool(),
+            Self::Bound(t) => t.is_bool(),
+        }
+    }
+
+    fn is_number(&self) -> bool {
+        match self {
+            Self::Unbound(t) => t.is_number(),
+            Self::Bound(t) => t.is_number(),
+        }
+    }
+
+    fn is_string(&self) -> bool {
+        match self {
+            Self::Unbound(t) => t.is_string(),
+            Self::Bound(t) => t.is_string(),
+        }
+    }
+
+    fn is_tuple(&self) -> bool {
+        match self {
+            Self::Unbound(t) => t.is_tuple(),
+            Self::Bound(t) => t.is_tuple(),
+        }
+    }
+
+    fn is_range(&self) -> bool {
+        match self {
+            Self::Unbound(t) => t.is_range(),
+            Self::Bound(t) => t.is_range(),
+        }
+    }
+
+    fn is_function(&self) -> bool {
+        match self {
+            Self::Unbound(t) => t.is_function(),
+            Self::Bound(t) => t.is_function(),
+        }
+    }
+
+    fn get_function_params(&self) -> Vec<Self::Param> {
+        todo!()
+    }
+
+    fn get_function_return(&self) -> Self::Param {
+        todo!()
+    }
+
+    fn is_unit(&self) -> bool {
+        match self {
+            Self::Unbound(t) => t.is_unit(),
+            Self::Bound(t) => t.is_unit(),
+        }
+    }
+
+    fn is_identifier(&self) -> bool {
+        match self {
+            Self::Unbound(t) => t.is_identifier(),
+            Self::Bound(t) => t.is_identifier(),
+        }
+    }
+
+    fn new(type_name: &str) -> Self {
+        todo!()
+    }
+
+    fn new_with_args(name: &str, params: Vec<Self::Param>) -> Self {
+        todo!()
+    }
+
+    fn string() -> Self {
+        Self::Bound(Box::new(BoundType::string()))
+    }
+
+    fn number() -> Self {
+        Self::Bound(Box::new(BoundType::number()))
+    }
+
+    fn bool() -> Self {
+        Self::Bound(Box::new(BoundType::bool()))
+    }
+
+    fn unit() -> Self {
+        Self::Bound(Box::new(BoundType::unit()))
+    }
+
+    fn range() -> Self {
+        Self::Bound(Box::new(BoundType::range()))
+    }
+
+    fn list(item_type: Self::Param) -> Self {
+        match item_type {
+            EgonTypeParam::Unbound(param) => Self::Unbound(UnboundType::list(param)),
+            EgonTypeParam::Bound(param) => Self::Bound(Box::new(BoundType::list(param))),
+        }
+    }
+
+    fn unknown_list() -> Self {
+        Self::Bound(Box::new(BoundType::unknown_list()))
+    }
+
+    fn tuple(item_types: Vec<Self::Param>) -> Self {
+        todo!()
+    }
+
+    fn tuple2(first: Self::Param, second: Self::Param) -> Self {
+        todo!()
+    }
+
+    fn tuple3(first: Self::Param, second: Self::Param, third: Self::Param) -> Self {
+        todo!()
+    }
+
+    fn identifier() -> Self {
+        Self::Bound(Box::new(BoundType::identifier()))
+    }
+
+    fn unknown() -> Self {
+        Self::Bound(Box::new(BoundType::unknown()))
+    }
+
+    fn function(params_types: Self::Param, return_type: Self::Param) -> Self {
+        todo!()
+    }
+
+    fn typed(value: Self::Param) -> Self {
+        todo!()
+    }
+}
+
+impl Display for EgonType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Unbound(t) => f.write_fmt(format_args!("{}", t)),
+            Self::Bound(t) => f.write_fmt(format_args!("{}", t)),
+        }
+    }
+}
+
+/// A type with unbound parameters
+///
+/// Example: `list<T>`
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Eq, Hash)]
+pub struct UnboundType {
+    name: String,
+    params: Vec<String>,
+}
+
+impl T for UnboundType {
+    type Param = String;
+
+    fn name(&self) -> &str {
+        &self.name
+    }
+
+    fn params(&self) -> Vec<Self::Param> {
+        self.params.clone()
+    }
+
+    fn is_type(&self) -> bool {
+        self.name() == "type"
+    }
+
+    fn is_list(&self) -> bool {
+        self.name() == "list"
+    }
+
+    fn is_known_list(&self) -> bool {
+        self.is_list() && self.params().first().unwrap_or(&Self::unknown().name) != "unknown"
+    }
+
+    fn is_unknown(&self) -> bool {
+        self.name() == "unknown"
+    }
+
+    fn is_unknown_list(&self) -> bool {
+        self.is_list() && self.params().first().unwrap_or(&Self::unknown().name) != "unknown"
+    }
+
+    fn is_builtin(&self) -> bool {
+        todo!()
+    }
+
+    fn is_bool(&self) -> bool {
+        self.name() == "bool"
+    }
+
+    fn is_number(&self) -> bool {
+        self.name() == "number"
+    }
+
+    fn is_string(&self) -> bool {
+        self.name() == "string"
+    }
+
+    fn is_tuple(&self) -> bool {
+        self.name() == "tuple"
+    }
+
+    fn is_range(&self) -> bool {
+        self.name() == "range"
+    }
+
+    fn is_function(&self) -> bool {
+        self.name() == "function"
+    }
+
+    fn get_function_params(&self) -> Vec<Self::Param> {
+        let fn_params: Vec<Self::Param> = self
+            .params()
+            .iter()
+            .take(self.params().len() - 1)
+            .cloned()
+            .collect();
+
+        fn_params
+    }
+
+    fn get_function_return(&self) -> Self::Param {
+        let params = self.params();
+        let fn_return = params.get(1).unwrap();
+
+        fn_return.clone()
+    }
+
+    fn is_unit(&self) -> bool {
+        self.name() == "()"
+    }
+
+    fn is_identifier(&self) -> bool {
+        self.name() == "identifier"
+    }
+
+    fn new(type_name: &str) -> Self {
         Self::new_with_args(type_name, vec![])
     }
 
-    pub fn new_with_args(name: &str, params: Vec<Type>) -> Self {
+    fn new_with_args(name: &str, params: Vec<Self::Param>) -> Self {
         Self {
-            name: name.to_string(),
+            name: name.to_owned(),
             params,
         }
     }
 
-    pub fn name(&self) -> &str {
-        &self.name
-    }
-
-    pub fn params(&self) -> &Vec<Type> {
-        &self.params
-    }
-
-    /// Is this type a type?
-    pub fn is_type(&self) -> bool {
-        self.name() == "type"
-    }
-
-    /// Is this type a list?
-    pub fn is_list(&self) -> bool {
-        self.name() == "list"
-    }
-
-    /// Is this type a list with a known value type?
-    pub fn is_known_list(&self) -> bool {
-        if self.is_list() {
-            Type::unknown() != *self.params().first().unwrap()
-        } else {
-            false
-        }
-    }
-
-    /// Is this type unknown?
-    pub fn is_unknown(&self) -> bool {
-        self.name() == "unknown"
-    }
-
-    /// Is this type a list with a unknown value type?
-    pub fn is_unknown_list(&self) -> bool {
-        !self.is_known_list()
-    }
-
-    /// Is this type a builtin type?
-    ///
-    /// - `bool`
-    /// - `number`
-    /// - `string`
-    /// - `list<T>`
-    /// - `range`
-    /// - `()`
-    /// - `tuple<T, ...>`
-    /// - `unknown`
-    /// - `function<T>`
-    pub fn is_builtin(&self) -> bool {
-        self.is_bool()
-            || self.is_number()
-            || self.is_string()
-            || self.is_list()
-            || self.is_range()
-            || self.is_unit()
-            || self.is_tuple()
-            || self.is_unknown()
-            || self.is_function()
-            || self.is_identifier()
-    }
-
-    /// Is this type a bool type?
-    pub fn is_bool(&self) -> bool {
-        "bool" == self.name
-    }
-
-    /// Is this type a number type?
-    pub fn is_number(&self) -> bool {
-        "number" == self.name
-    }
-
-    /// Is this type a string type?
-    pub fn is_string(&self) -> bool {
-        "string" == self.name
-    }
-
-    /// Is this type a tuple type?
-    pub fn is_tuple(&self) -> bool {
-        "tuple" == self.name
-    }
-
-    /// Is this type a range type?
-    pub fn is_range(&self) -> bool {
-        "range" == self.name
-    }
-
-    /// Is this type a function type?
-    pub fn is_function(&self) -> bool {
-        "function" == self.name
-    }
-
-    pub fn get_function_params(&self) -> Vec<Type> {
-        if !self.is_function() {
-            panic!("Type {} is not a function", self);
-        }
-
-        self.params().first().unwrap().params().clone()
-    }
-
-    pub fn get_function_return(&self) -> Type {
-        if !self.is_function() {
-            panic!("Type {} is not a function", self);
-        }
-
-        self.params().get(1).cloned().unwrap_or(Type::unit())
-    }
-
-    /// Is this type the unit type?
-    pub fn is_unit(&self) -> bool {
-        "()" == self.name()
-    }
-
-    /// Is this type an identifier type?
-    pub fn is_identifier(&self) -> bool {
-        "identifier" == self.name()
-    }
-
-    /// Create a `string` type instance
-    pub fn string() -> Self {
+    fn string() -> Self {
         Self::new("string")
     }
 
-    /// Create a `number` type instance
-    pub fn number() -> Self {
+    fn number() -> Self {
         Self::new("number")
     }
 
-    /// Create a `bool` type instance
-    pub fn bool() -> Self {
+    fn bool() -> Self {
         Self::new("bool")
     }
 
-    /// Create a `()` type instance
-    pub fn unit() -> Self {
+    fn unit() -> Self {
         Self::new("()")
     }
 
-    /// Create a `range` type instance
-    pub fn range() -> Self {
+    fn range() -> Self {
         Self::new("range")
     }
 
-    /// Create a `list<T>` type instance
-    pub fn list(item_type: Type) -> Self {
+    fn list(item_type: Self::Param) -> Self {
         Self::new_with_args("list", vec![item_type])
     }
 
-    /// Create a `list<unknown>` type instance
-    pub fn unknown_list() -> Self {
-        Self::list(Type::unknown())
+    fn unknown_list() -> Self {
+        Self::list(Self::unknown().to_string())
     }
 
-    /// Create a `tuple<T, U...>` type instance
-    pub fn tuple(item_types: Vec<Type>) -> Self {
+    fn tuple(item_types: Vec<Self::Param>) -> Self {
         Self::new_with_args("tuple", item_types)
     }
 
-    /// Create a `tuple<T, U>` type instance
-    pub fn tuple2(first: Type, second: Type) -> Self {
+    fn tuple2(first: Self::Param, second: Self::Param) -> Self {
         Self::tuple(vec![first, second])
     }
 
-    /// Create a `tuple<T, U, V>` type instance
-    pub fn tuple3(first: Type, second: Type, third: Type) -> Self {
+    fn tuple3(first: Self::Param, second: Self::Param, third: Self::Param) -> Self {
         Self::tuple(vec![first, second, third])
     }
 
-    /// Create an `identifier` type instance
-    pub fn identifier() -> Self {
+    fn identifier() -> Self {
         Self::new("identifier")
     }
 
-    /// Create an `unknown` type instance
-    pub fn unknown() -> Self {
+    fn unknown() -> Self {
         Self::new("unknown")
     }
 
-    /// Create a `function` type instance
-    pub fn function(params_types: Type, return_type: Type) -> Self {
+    fn function(params_types: Self::Param, return_type: Self::Param) -> Self {
         Self::new_with_args("function", vec![params_types, return_type])
     }
 
-    /// Create a `type` type instance
-    pub fn typed(value: Type) -> Self {
+    fn typed(value: Self::Param) -> Self {
         Self::new_with_args("type", vec![value])
     }
 }
 
-impl Display for Type {
+impl From<UnboundType> for EgonType {
+    fn from(value: UnboundType) -> Self {
+        Self::Unbound(value)
+    }
+}
+
+impl Display for UnboundType {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let base = if self.params().is_empty() {
-            self.name().to_string()
+        let base = if self.params.is_empty() {
+            self.name.to_string()
         } else if self.is_type() {
-            self.params().clone().first().unwrap().to_string()
+            self.params.clone().first().unwrap().to_string()
         } else {
             format!(
                 "{}<{}>",
-                self.name(),
-                self.params()
+                self.name,
+                self.params
                     .iter()
                     .map(|typeref| typeref.to_string())
                     .collect::<Vec<String>>()
@@ -243,99 +553,217 @@ impl Display for Type {
     }
 }
 
-#[macro_export]
-macro_rules! egon_unit {
-    () => {
-        $crate::Type::unit()
-    };
+/// A type with all it's parameters bound to a bound type
+///
+/// Example: `list<list<string>>`
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Eq, Hash)]
+pub struct BoundType {
+    name: String,
+    params: Vec<BoundType>,
+    unbound: Option<Rc<UnboundType>>,
 }
 
-#[macro_export]
-macro_rules! egon_unknown {
-    () => {
-        $crate::Type::unknown()
-    };
+impl T for BoundType {
+    type Param = Self;
+
+    fn name(&self) -> &str {
+        &self.name
+    }
+
+    fn params(&self) -> Vec<Self::Param> {
+        self.params.clone()
+    }
+
+    fn is_type(&self) -> bool {
+        self.name() == "type"
+    }
+
+    fn is_list(&self) -> bool {
+        self.name() == "list"
+    }
+
+    fn is_known_list(&self) -> bool {
+        self.is_list()
+            && !self
+                .params()
+                .first()
+                .unwrap_or(&Self::unknown())
+                .is_unknown()
+    }
+
+    fn is_unknown(&self) -> bool {
+        self.name() == "unknown"
+    }
+
+    fn is_unknown_list(&self) -> bool {
+        self.is_list()
+            && self
+                .params()
+                .first()
+                .unwrap_or(&Self::unknown())
+                .is_unknown()
+    }
+
+    fn is_builtin(&self) -> bool {
+        todo!()
+    }
+
+    fn is_bool(&self) -> bool {
+        self.name() == "bool"
+    }
+
+    fn is_number(&self) -> bool {
+        self.name() == "number"
+    }
+
+    fn is_string(&self) -> bool {
+        self.name() == "string"
+    }
+
+    fn is_tuple(&self) -> bool {
+        self.name() == "tuple"
+    }
+
+    fn is_range(&self) -> bool {
+        self.name() == "range"
+    }
+
+    fn is_function(&self) -> bool {
+        self.name() == "function"
+    }
+
+    fn get_function_params(&self) -> Vec<Self::Param> {
+        let fn_params = self.params().first().unwrap().params();
+
+        fn_params.clone()
+    }
+
+    fn get_function_return(&self) -> Self::Param {
+        let binding = self.params();
+        let fn_return = binding.get(1).unwrap();
+
+        fn_return.clone()
+    }
+
+    fn is_unit(&self) -> bool {
+        self.name() == "()"
+    }
+
+    fn is_identifier(&self) -> bool {
+        self.name() == "identifier"
+    }
+
+    fn new(type_name: &str) -> Self {
+        Self::new_with_args(type_name, vec![])
+    }
+
+    fn new_with_args(name: &str, params: Vec<Self::Param>) -> Self {
+        Self {
+            name: name.to_owned(),
+            params,
+            unbound: None,
+        }
+    }
+
+    fn string() -> Self {
+        Self::new("string")
+    }
+
+    fn number() -> Self {
+        Self::new("number")
+    }
+
+    fn bool() -> Self {
+        Self::new("bool")
+    }
+
+    fn unit() -> Self {
+        Self::new("()")
+    }
+
+    fn range() -> Self {
+        Self::new("range")
+    }
+
+    fn list(item_type: Self::Param) -> Self {
+        Self::new_with_args("list", vec![item_type])
+    }
+
+    fn unknown_list() -> Self {
+        Self::list(Self::unknown())
+    }
+
+    fn tuple(item_types: Vec<Self::Param>) -> Self {
+        Self::new_with_args("tuple", item_types)
+    }
+
+    fn tuple2(first: Self::Param, second: Self::Param) -> Self {
+        Self::tuple(vec![first, second])
+    }
+
+    fn tuple3(first: Self::Param, second: Self::Param, third: Self::Param) -> Self {
+        Self::tuple(vec![first, second, third])
+    }
+
+    fn identifier() -> Self {
+        Self::new("identifier")
+    }
+
+    fn unknown() -> Self {
+        Self::new("unknown")
+    }
+
+    fn function(params_types: Self::Param, return_type: Self::Param) -> Self {
+        Self::new_with_args("function", vec![params_types, return_type])
+    }
+
+    fn typed(value: Self::Param) -> Self {
+        Self::new_with_args("type", vec![value])
+    }
 }
 
-#[macro_export]
-macro_rules! egon_string {
-    () => {
-        $crate::Type::string()
-    };
+impl From<BoundType> for EgonType {
+    fn from(value: BoundType) -> Self {
+        EgonType::Bound(value.into())
+    }
 }
 
-#[macro_export]
-macro_rules! egon_bool {
-    () => {
-        $crate::Type::bool()
-    };
-}
+impl Display for BoundType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        let base = if self.params.is_empty() {
+            self.name.to_string()
+        } else if self.is_type() {
+            self.params.clone().first().unwrap().to_string()
+        } else {
+            format!(
+                "{}<{}>",
+                self.name,
+                self.params
+                    .iter()
+                    .map(|typeref| typeref.to_string())
+                    .collect::<Vec<String>>()
+                    .join(", ")
+            )
+        };
 
-#[macro_export]
-macro_rules! egon_range {
-    () => {
-        $crate::Type::range()
-    };
-}
-
-#[macro_export]
-macro_rules! egon_identifier {
-    () => {
-        $crate::Type::identifier()
-    };
-}
-
-#[macro_export]
-macro_rules! egon_number {
-    () => {
-        $crate::Type::number()
-    };
-}
-
-#[macro_export]
-macro_rules! egon_list {
-    ($subtype:expr) => {
-        $crate::Type::list($subtype)
-    };
-}
-
-#[macro_export]
-macro_rules! egon_tuple {
-    () => {
-        $crate::Type::tuple(vec![])
-    };
-    ($($arg:expr),+) => {
-        $crate::Type::tuple(vec![$($arg),+])
-    };
-}
-
-#[macro_export]
-macro_rules! egon_fn {
-    () => {
-        $crate::egon_fn(vec![]; $crate::egon_unit!())
-    };
-    ($($arg:expr),+) => {
-        $crate::Type::function(vec![$($arg),+], $crate::Type::unit())
-    };
-    ($($arg:expr),+; $return:expr) => {
-        $crate::Type::function(egon_tuple!($($arg),+), $return)
-    };
+        f.write_fmt(format_args!("{}", base))
+    }
 }
 
 #[cfg(test)]
 mod is_tests {
     use pretty_assertions::assert_eq;
 
-    use crate::Type;
+    use crate::{BoundType, T};
 
-    macro_rules! type_is_test {
+    macro_rules! boundtype_is_test {
         ($test_name:ident, $typeref:expr, $($is_fn:ident),+ $(,)?) => {
             $(
                 ::paste::paste! {
                     #[test]
                     fn [<$test_name _ $is_fn>]() {
-                        let expr: $crate::Type = $typeref;
-                        let result: bool = $crate::Type::$is_fn(&expr);
+                        let expr: $crate::BoundType = $typeref;
+                        let result: bool = <$crate::BoundType as $crate::T>::$is_fn(&expr);
 
                         assert_eq!(true, result);
                     }
@@ -345,8 +773,8 @@ mod is_tests {
             ::paste::paste! {
                 #[test]
                 fn [<$test_name _ is_typed>]() {
-                    let expr: $crate::Type = $crate::Type::typed($typeref);
-                    let result: bool = $crate::Type::is_type(&expr);
+                    let expr: $crate::BoundType = <$crate::BoundType as $crate::T>::typed($typeref);
+                    let result: bool = <$crate::BoundType as $crate::T>::is_type(&expr);
 
                     assert_eq!(true, result);
                 }
@@ -354,14 +782,14 @@ mod is_tests {
         };
     }
 
-    macro_rules! type_is_not_test {
+    macro_rules! boundtype_is_not_test {
         ($test_name:ident, $typeref:expr, $($is_fn:ident),+ $(,)?) => {
             $(
                 ::paste::paste! {
                     #[test]
                     fn [<$test_name _not_ $is_fn>]() {
-                        let expr: $crate::Type = $typeref;
-                        let result: bool = $crate::Type::$is_fn(&expr);
+                        let expr: $crate::BoundType = $typeref;
+                        let result: bool = <$crate::BoundType as $crate::T>::$is_fn(&expr);
 
                         assert_eq!(false, result);
                     }
@@ -370,240 +798,134 @@ mod is_tests {
         };
     }
 
-    type_is_test!(test_unit_type_macro, egon_unit!(), is_unit, is_builtin);
+    boundtype_is_test!(test_unit_typeref, BoundType::unit(), is_unit, is_builtin);
 
-    type_is_test!(test_unit_typeref, Type::unit(), is_unit, is_builtin);
+    boundtype_is_not_test!(test_unknown_typeref, BoundType::unknown(), is_unit);
 
-    type_is_not_test!(test_unknown_type_macro, egon_unknown!(), is_unit);
-    type_is_not_test!(test_unknown_typeref, Type::unknown(), is_unit);
-
-    type_is_test!(
-        test_unknown_type_macro_is_builtin,
-        egon_unknown!(),
-        is_unknown,
-        is_builtin
-    );
-
-    type_is_test!(
+    boundtype_is_test!(
         test_unknown_typeref_is_builtin,
-        Type::unknown(),
+        BoundType::unknown(),
         is_unknown,
         is_builtin
     );
 
-    type_is_test!(
-        test_number_type_macro_is_number,
-        egon_number!(),
-        is_number,
-        is_builtin
-    );
-
-    type_is_test!(
+    boundtype_is_test!(
         test_number_typeref_is_number,
-        Type::number(),
+        BoundType::number(),
         is_number,
         is_builtin
     );
 
-    type_is_test!(
-        test_number_type_macro,
-        egon_string!(),
+    boundtype_is_test!(
+        test_number_typeref,
+        BoundType::string(),
         is_string,
         is_builtin
     );
 
-    type_is_test!(test_number_typeref, Type::string(), is_string, is_builtin);
-
-    type_is_test!(
-        test_unknown_list_type_macro,
-        egon_list!(egon_unknown!()),
+    boundtype_is_test!(
+        test_unknown_list_typeref,
+        BoundType::unknown_list(),
         is_list,
         is_unknown_list
     );
 
-    type_is_test!(
+    boundtype_is_not_test!(
         test_unknown_list_typeref,
-        Type::unknown_list(),
-        is_list,
-        is_unknown_list
-    );
-
-    type_is_not_test!(
-        test_unknown_list_type_macro,
-        egon_list![egon_unknown!()],
+        BoundType::unknown_list(),
         is_known_list
     );
 
-    type_is_not_test!(
-        test_unknown_list_typeref,
-        Type::unknown_list(),
-        is_known_list
-    );
-
-    type_is_test!(
-        test_number_list_type_macro,
-        egon_list!(egon_number!()),
+    boundtype_is_test!(
+        test_number_list_typeref,
+        BoundType::list(BoundType::number()),
         is_list,
         is_known_list,
         is_builtin
     );
 
-    type_is_test!(
+    boundtype_is_not_test!(
         test_number_list_typeref,
-        Type::list(Type::number()),
-        is_list,
-        is_known_list,
-        is_builtin
-    );
-
-    type_is_not_test!(
-        test_number_list_type_macro,
-        egon_list!(egon_number!()),
+        BoundType::list(BoundType::number()),
         is_unknown_list,
     );
 
-    type_is_not_test!(
-        test_number_list_typeref,
-        Type::list(Type::number()),
-        is_unknown_list,
-    );
-
-    type_is_not_test!(
-        test_typeof_number_type_macro,
-        egon_list!(egon_number!()),
-        is_number
-    );
-
-    type_is_not_test!(
+    boundtype_is_not_test!(
         test_typeof_number_typeref,
-        Type::typed(Type::number()),
+        BoundType::typed(BoundType::number()),
         is_number
     );
 
-    type_is_test!(test_bool_type_macro, egon_bool!(), is_bool, is_builtin);
+    boundtype_is_test!(test_bool_typeref, BoundType::bool(), is_bool, is_builtin);
 
-    type_is_test!(test_bool_typeref, Type::bool(), is_bool, is_builtin);
-
-    type_is_test!(
-        test_identifier_type_macro,
-        egon_identifier!(),
-        is_identifier,
-        is_builtin
-    );
-
-    type_is_test!(
+    boundtype_is_test!(
         test_identifier_typeref,
-        Type::identifier(),
+        BoundType::identifier(),
         is_identifier,
         is_builtin
     );
 
-    type_is_test!(test_range_type_macro, egon_range!(), is_range, is_builtin);
+    boundtype_is_test!(test_range_typeref, BoundType::range(), is_range, is_builtin);
 
-    type_is_test!(test_range_typeref, Type::range(), is_range, is_builtin);
-
-    type_is_test!(
-        test_tuple_type_macro,
-        egon_tuple!(egon_string!(), egon_number!()),
-        is_tuple,
-        is_builtin
-    );
-
-    type_is_test!(
+    boundtype_is_test!(
         test_tuple_typeref,
-        Type::tuple2(Type::string(), Type::number()),
+        BoundType::tuple2(BoundType::string(), BoundType::number()),
         is_tuple,
         is_builtin
     );
 
-    // //--------------
-
-    type_is_test!(
-        test_empty_tuple_type_macro,
-        egon_tuple!(),
-        is_tuple,
-        is_builtin
-    );
-    // //--------------
-
-    type_is_test!(
+    boundtype_is_test!(
         test_empty_tuple_typeref,
-        Type::tuple(vec![]),
+        BoundType::tuple(vec![]),
         is_tuple,
         is_builtin
     );
 
-    type_is_test!(
-        test_function_type_macro_with_no_params_or_return_value,
-        egon_fn!(egon_tuple!(); egon_unit!()),
-        is_function,
-        is_builtin
-    );
-
-    type_is_test!(
+    boundtype_is_test!(
         test_function_typeref_with_no_params_or_return_value,
-        Type::function(Type::tuple(vec![]), Type::unit()),
+        BoundType::function(BoundType::tuple(vec![]), BoundType::unit()),
         is_function,
         is_builtin
     );
 
-    type_is_test!(
-        test_function_type_macro_with_one_params_but_no_return_value,
-        egon_fn!(egon_tuple!(egon_number!()); egon_unit!()),
-        is_function,
-        is_builtin
-    );
-
-    type_is_test!(
+    boundtype_is_test!(
         test_function_typeref_with_one_params_but_no_return_value,
-        Type::function(Type::tuple(vec![Type::number()]), Type::unit()),
-        is_function,
-        is_builtin
-    );
-
-    type_is_test!(
-        test_function_type_macro_with_multiple_params_but_no_return_value,
-        egon_fn!(egon_tuple!(egon_number!(), egon_string!(), egon_bool!()); egon_unit!()),
-        is_function,
-        is_builtin
-    );
-
-    type_is_test!(
-        test_function_typeref_with_multiple_params_but_no_return_value,
-        Type::function(
-            Type::tuple3(Type::number(), Type::string(), Type::bool()),
-            Type::unit()
+        BoundType::function(
+            BoundType::tuple(vec![BoundType::number()]),
+            BoundType::unit()
         ),
         is_function,
         is_builtin
     );
 
-    type_is_test!(
-        test_function_type_macro_with_multiple_params_and_return_value,
-        egon_fn!(egon_tuple!(egon_number!(), egon_number!()); egon_number!()),
+    boundtype_is_test!(
+        test_function_typeref_with_multiple_params_but_no_return_value,
+        BoundType::function(
+            BoundType::tuple3(BoundType::number(), BoundType::string(), BoundType::bool()),
+            BoundType::unit()
+        ),
         is_function,
         is_builtin
     );
 
-    type_is_test!(
+    boundtype_is_test!(
         test_function_typeref_with_multiple_params_and_return_value,
-        Type::function(egon_tuple!(Type::number(), Type::number()), Type::number()),
+        BoundType::function(
+            BoundType::tuple2(BoundType::number(), BoundType::number()),
+            BoundType::number()
+        ),
         is_function,
         is_builtin
     );
 
-    type_is_test!(
-        test_function_type_macro_curried,
-        egon_fn!(egon_tuple!(egon_number!()); egon_fn!(egon_tuple!(egon_number!()); egon_number!())),
-        is_function,
-        is_builtin
-    );
-
-    type_is_test!(
+    boundtype_is_test!(
         test_function_typeref_curried,
-        Type::function(
-            egon_tuple!(Type::number()),
-            Type::function(egon_tuple!(Type::number()), Type::number())
+        BoundType::function(
+            BoundType::tuple(vec![BoundType::number()]),
+            BoundType::function(
+                BoundType::tuple(vec![BoundType::number()]),
+                BoundType::number()
+            )
         ),
         is_function,
         is_builtin
@@ -611,8 +933,11 @@ mod is_tests {
 
     #[test]
     fn test_get_return_type_from_function() {
-        let fn_type = Type::function(egon_tuple!(Type::number()), Type::number());
+        let fn_type = BoundType::function(
+            BoundType::tuple(vec![BoundType::number()]),
+            BoundType::number(),
+        );
 
-        assert_eq!(Type::number(), fn_type.get_function_return());
+        assert_eq!(BoundType::number(), fn_type.get_function_return());
     }
 }

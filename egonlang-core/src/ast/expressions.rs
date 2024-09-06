@@ -1,7 +1,7 @@
 use std::fmt::{self, Display, Formatter};
 
 use egonlang_errors::EgonTypeError;
-use egonlang_types::Type;
+use egonlang_types::{EgonType, T};
 use serde::{Deserialize, Serialize};
 
 use crate::parser::parse;
@@ -279,26 +279,26 @@ impl TryFrom<Expr> for f64 {
             Expr::Literal(literal) => match literal {
                 ExprLiteral::Number(number) => Ok(number),
                 ExprLiteral::Bool(_) => Err(vec![egonlang_errors::EgonTypeError::MismatchType {
-                    expected: Type::number().to_string(),
-                    actual: Type::bool().to_string(),
+                    expected: EgonType::number().to_string(),
+                    actual: EgonType::bool().to_string(),
                 }
                 .into()]),
                 ExprLiteral::String(_) => Err(vec![egonlang_errors::EgonTypeError::MismatchType {
-                    expected: Type::number().to_string(),
-                    actual: Type::string().to_string(),
+                    expected: EgonType::number().to_string(),
+                    actual: EgonType::string().to_string(),
                 }
                 .into()]),
             },
             Expr::Prefix(prefix) => match prefix.op {
                 OpPrefix::Negate => prefix.rt.0.try_into(),
                 OpPrefix::Not => Err(vec![egonlang_errors::EgonTypeError::MismatchType {
-                    expected: Type::number().to_string(),
-                    actual: Type::bool().to_string(),
+                    expected: EgonType::number().to_string(),
+                    actual: EgonType::bool().to_string(),
                 }
                 .into()]),
             },
             _ => Err(vec![egonlang_errors::EgonTypeError::MismatchType {
-                expected: Type::number().to_string(),
+                expected: EgonType::number().to_string(),
                 actual: value.to_string(),
             }
             .into()]),
@@ -313,19 +313,19 @@ impl TryFrom<Expr> for String {
         match value {
             Expr::Literal(literal) => match literal {
                 ExprLiteral::Number(_) => Err(vec![egonlang_errors::EgonTypeError::MismatchType {
-                    expected: Type::string().to_string(),
-                    actual: Type::number().to_string(),
+                    expected: EgonType::string().to_string(),
+                    actual: EgonType::number().to_string(),
                 }
                 .into()]),
                 ExprLiteral::Bool(_) => Err(vec![egonlang_errors::EgonTypeError::MismatchType {
-                    expected: Type::string().to_string(),
-                    actual: Type::bool().to_string(),
+                    expected: EgonType::string().to_string(),
+                    actual: EgonType::bool().to_string(),
                 }
                 .into()]),
                 ExprLiteral::String(string) => Ok(string.to_string()),
             },
             _ => Err(vec![egonlang_errors::EgonTypeError::MismatchType {
-                expected: Type::string().to_string(),
+                expected: EgonType::string().to_string(),
                 actual: value.to_string(),
             }
             .into()]),
@@ -340,19 +340,19 @@ impl TryFrom<Expr> for bool {
         match value {
             Expr::Literal(literal) => match literal {
                 ExprLiteral::Number(_) => Err(vec![EgonTypeError::MismatchType {
-                    expected: Type::bool().to_string(),
-                    actual: Type::number().to_string(),
+                    expected: EgonType::bool().to_string(),
+                    actual: EgonType::number().to_string(),
                 }
                 .into()]),
                 ExprLiteral::Bool(bool) => Ok(bool),
                 ExprLiteral::String(_) => Err(vec![EgonTypeError::MismatchType {
-                    expected: Type::bool().to_string(),
-                    actual: Type::string().to_string(),
+                    expected: EgonType::bool().to_string(),
+                    actual: EgonType::string().to_string(),
                 }
                 .into()]),
             },
             _ => Err(vec![EgonTypeError::MismatchType {
-                expected: Type::bool().to_string(),
+                expected: EgonType::bool().to_string(),
                 actual: value.to_string(),
             }
             .into()]),
@@ -424,7 +424,7 @@ pub struct ExprBlock {
     ///   b // The block's resolved type is `number`
     /// };
     /// ```
-    pub typeref: Option<Type>,
+    pub typeref: Option<EgonType>,
 }
 
 impl Display for ExprBlock {
@@ -666,8 +666,8 @@ impl Display for ExprIf {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ExprFn {
     pub name: Option<Identifier>,
-    pub params: Vec<Spanned<(Identifier, Type)>>,
-    pub return_type: Spanned<Type>,
+    pub params: Vec<Spanned<(Identifier, EgonType)>>,
+    pub return_type: Spanned<EgonType>,
     pub body: ExprS,
 }
 
@@ -719,7 +719,7 @@ impl Display for ExprRange {
 /// type Int = number; // `number` is a type expression
 /// ```
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct ExprType(pub Type);
+pub struct ExprType(pub EgonType);
 
 impl Display for ExprType {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
@@ -802,7 +802,7 @@ mod into_tests {
 mod display_tests {
     use std::vec;
 
-    use egonlang_types::Type;
+    use egonlang_types::{EgonType, T};
     use pretty_assertions::assert_eq;
 
     use crate::ast::*;
@@ -1183,7 +1183,7 @@ mod display_tests {
         Expr::Fn(Box::new(ExprFn {
             name: None,
             params: vec![],
-            return_type: (Type::unit(), 0..0),
+            return_type: (EgonType::unit(), 0..0),
             body: (
                 ExprBlock {
                     stmts: vec![],
@@ -1206,11 +1206,11 @@ mod display_tests {
                     Identifier {
                         name: "a".to_string()
                     },
-                    Type::number()
+                    EgonType::number()
                 ),
                 0..0
             )],
-            return_type: (Type::unit(), 0..0),
+            return_type: (EgonType::unit(), 0..0),
             body: (
                 ExprBlock {
                     stmts: vec![],
@@ -1234,7 +1234,7 @@ mod display_tests {
                         Identifier {
                             name: "a".to_string()
                         },
-                        Type::number()
+                        EgonType::number()
                     ),
                     0..0
                 ),
@@ -1243,12 +1243,12 @@ mod display_tests {
                         Identifier {
                             name: "b".to_string()
                         },
-                        Type::number()
+                        EgonType::number()
                     ),
                     0..0
                 )
             ],
-            return_type: (Type::unit(), 0..0),
+            return_type: (EgonType::unit(), 0..0),
             body: (
                 ExprBlock {
                     stmts: vec![],
@@ -1272,7 +1272,7 @@ mod display_tests {
                         Identifier {
                             name: "a".to_string()
                         },
-                        Type::number()
+                        EgonType::number()
                     ),
                     0..0
                 ),
@@ -1281,12 +1281,12 @@ mod display_tests {
                         Identifier {
                             name: "b".to_string()
                         },
-                        Type::number()
+                        EgonType::number()
                     ),
                     0..0
                 )
             ],
-            return_type: (Type::number(), 0..0),
+            return_type: (EgonType::number(), 0..0),
             body: (
                 ExprBlock {
                     stmts: vec![],
@@ -1310,7 +1310,7 @@ mod display_tests {
                         Identifier {
                             name: "a".to_string()
                         },
-                        Type::number()
+                        EgonType::number()
                     ),
                     0..0
                 ),
@@ -1319,12 +1319,12 @@ mod display_tests {
                         Identifier {
                             name: "b".to_string()
                         },
-                        Type::number()
+                        EgonType::number()
                     ),
                     0..0
                 )
             ],
-            return_type: (Type::number(), 0..0),
+            return_type: (EgonType::number(), 0..0),
             body: (
                 ExprBlock {
                     stmts: vec![],

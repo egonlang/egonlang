@@ -4,10 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-serde = { version = "1.0.195", features = ["derive"] }
+serde = { version = "1.0.195", features = ["derive", "rc"] }
 paste = "1.0.15"
 tracelog = { path = "../tracelog" }
 colored = "2"
+egonlang-errors = { path = "../egonlang-errors" }
 
 [dev-dependencies]
 pretty_assertions = "1.1.0"

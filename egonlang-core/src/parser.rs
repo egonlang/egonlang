@@ -91,7 +91,7 @@ pub fn parse(source: &str, offset: usize) -> EgonResultMultiSpannedErr<Module> {
 mod parser_tests {
     use std::vec;
 
-    use egonlang_types::Type;
+    use egonlang_types::{BoundType, EgonType, EgonTypeParam, T};
     use pretty_assertions::assert_eq;
 
     use crate::ast::{
@@ -1793,7 +1793,7 @@ mod parser_tests {
                         },
                         4..5
                     ),
-                    type_expr: Some((Expr::Type(ExprType(Type::number())), 7..13)),
+                    type_expr: Some((Expr::Type(ExprType(EgonType::number())), 7..13)),
                     is_const: false,
                     value: Some((
                         ast::Expr::Assign(Box::new(ExprAssign {
@@ -1825,7 +1825,7 @@ mod parser_tests {
                         },
                         4..5
                     ),
-                    type_expr: Some((Expr::Type(ExprType(Type::number())), 7..13)),
+                    type_expr: Some((Expr::Type(ExprType(EgonType::number())), 7..13)),
                     is_const: false,
                     value: Some((ast::Expr::Literal(ExprLiteral::Number(123f64)), 16..19))
                 }),
@@ -1861,13 +1861,11 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::TypeAlias(StmtTypeAlias {
-                    alias: (
-                        Identifier {
-                            name: "NumberList".to_string()
-                        },
-                        5..15
-                    ),
-                    value: (Type::list(Type::number()), 18..30)
+                    alias: (BoundType::new("NumberList").into(), 5..15),
+                    value: (
+                        EgonType::list(EgonTypeParam::Bound(BoundType::number())),
+                        18..30
+                    )
                 }),
                 0..31
             )]
@@ -1884,13 +1882,11 @@ mod parser_tests {
             stmts: vec![
                 (
                     Stmt::TypeAlias(StmtTypeAlias {
-                        alias: (
-                            Identifier {
-                                name: "NumberList".to_string()
-                            },
-                            14..24
-                        ),
-                        value: (Type::list(Type::number()), 27..39)
+                        alias: (BoundType::new("NumberList").into(), 14..24),
+                        value: (
+                            EgonType::list(EgonTypeParam::Bound(BoundType::number())),
+                            27..39
+                        )
                     }),
                     9..40
                 ),
@@ -1902,7 +1898,10 @@ mod parser_tests {
                             },
                             53..54
                         ),
-                        type_expr: Some((Expr::Type(ExprType(Type::new("NumberList"))), 56..66)),
+                        type_expr: Some((
+                            Expr::Type(ExprType(BoundType::new("NumberList").into())),
+                            56..66
+                        )),
                         is_const: false,
                         value: Some((
                             Expr::List(
@@ -1940,19 +1939,17 @@ mod parser_tests {
                         Expr::Fn(Box::new(ExprFn {
                             name: None,
                             params: vec![],
-                            return_type: (Type::unit(), 13..15),
+                            return_type: (EgonType::unit(), 13..15),
                             body: (
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: vec![
                                         (
                                             Stmt::TypeAlias(StmtTypeAlias {
                                                 alias: (
-                                                    Identifier {
-                                                        name: "Int".to_string()
-                                                    },
+                                                    EgonType::Bound(BoundType::new("Int").into()),
                                                     38..41
                                                 ),
-                                                value: (Type::number(), 44..50)
+                                                value: (EgonType::number(), 44..50)
                                             }),
                                             33..51
                                         ),
@@ -1965,7 +1962,7 @@ mod parser_tests {
                                                     68..69
                                                 ),
                                                 type_expr: Some((
-                                                    Expr::Type(ExprType(Type::number())),
+                                                    Expr::Type(ExprType(EgonType::number())),
                                                     71..77
                                                 )),
                                                 is_const: false,
@@ -1985,7 +1982,9 @@ mod parser_tests {
                                                     99..100
                                                 ),
                                                 type_expr: Some((
-                                                    Expr::Type(ExprType(Type::new("Int"))),
+                                                    Expr::Type(ExprType(
+                                                        BoundType::new("Int").into()
+                                                    )),
                                                     102..105
                                                 )),
                                                 is_const: false,
@@ -2046,7 +2045,7 @@ mod parser_tests {
                         },
                         4..5
                     ),
-                    type_expr: Some((Expr::Type(ExprType(Type::number())), 7..13)),
+                    type_expr: Some((Expr::Type(ExprType(EgonType::number())), 7..13)),
                     is_const: false,
                     value: None
                 }),
@@ -2110,7 +2109,7 @@ mod parser_tests {
             stmts: vec![(
                 StmtAssertType {
                     value: (123f64.into(), 12..15),
-                    expected_type: (ast::ExprType(Type::number()).into(), 17..23)
+                    expected_type: (ast::ExprType(EgonType::number()).into(), 17..23)
                 }
                 .into(),
                 0..24
@@ -2134,11 +2133,11 @@ mod parser_tests {
                                             Identifier {
                                                 name: "a".to_string()
                                             },
-                                            Type::number()
+                                            EgonType::number()
                                         ),
                                         1..10
                                     )],
-                                    return_type: (Type::number(), 13..19),
+                                    return_type: (EgonType::number(), 13..19),
                                     body: (
                                         Expr::Block(Box::new(ExprBlock {
                                             stmts: vec![],

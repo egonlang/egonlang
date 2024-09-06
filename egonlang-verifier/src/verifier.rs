@@ -3,7 +3,7 @@ use egonlang_errors::{EgonErrorS, EgonResultMultiSpannedErr, EgonTypeError};
 use egonlang_types::{
     egon_unknown,
     type_env::{TypeEnv, TypeEnvValue},
-    Type,
+    EgonType, T,
 };
 use span::Span;
 use tracelog::{log_expr, log_identifier, log_stmt, log_type};
