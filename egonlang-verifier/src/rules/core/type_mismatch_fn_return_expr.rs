@@ -18,22 +18,25 @@ expr_rule!(
     TypeMismatchFnReturnExpr,
     |expr, _span, _resolve_ident, resolve_expr| {
         if let ast::Expr::Fn(fn_expr) = expr {
-            let (fn_return_type_typeref, _) = &fn_expr.return_type;
+            let (fn_return_type_expr, fn_return_type_span) = &fn_expr.return_type;
             let (body_expr, body_span) = &fn_expr.body;
 
             if let Ok(body_typeref) = resolve_expr(body_expr, body_span) {
                 let mut errs = vec![];
 
-                if body_typeref.of_type != *fn_return_type_typeref {
-                    errs.push((
-                        EgonTypeError::MismatchType {
-                            expected: fn_return_type_typeref.to_string(),
-                            actual: body_typeref.of_type.to_string(),
-                        }
-                        .into(),
-                        body_span.clone(),
-                    ));
+                if let Ok(return_type_t) = resolve_expr(fn_return_type_expr, fn_return_type_span) {
+                    if body_typeref.of_type != return_type_t.of_type {
+                        errs.push((
+                            EgonTypeError::MismatchType {
+                                expected: return_type_t.of_type.to_string(),
+                                actual: body_typeref.of_type.to_string(),
+                            }
+                            .into(),
+                            body_span.clone(),
+                        ));
+                    }
                 }
+
 
                 errs
             } else {

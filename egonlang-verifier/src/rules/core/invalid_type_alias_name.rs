@@ -11,21 +11,22 @@ stmt_rule!(
     /// type invalidTypeAlias = string; // SyntaxError∂
     /// ```
     InvalidTypeAliasName,
-    | stmt, span, _resolve_ident, _resolve_expr | {
+    | stmt, span, _resolve_ident, resolve_expr | {
         let mut errs = vec![];
 
         if let ast::Stmt::TypeAlias(stmt_type_alias) = &stmt {
-            let name = &stmt_type_alias.alias.0.name;
-            let pattern = Regex::new("^[A-Z][A-Za-z0-9]*$").unwrap();
+            if let Ok(t) = resolve_expr(&stmt_type_alias.alias.0, &stmt_type_alias.alias.1.clone()) {
+                let pattern = Regex::new("^[A-Z][A-Za-z0-9]*$").unwrap();
 
-            if !pattern.is_match(name) {
-                errs.push((
-                    EgonSyntaxError::InvalidTypeAlias {
-                        name: name.to_string(),
-                    }
-                    .into(),
-                    span.clone(),
-                ));
+                if !pattern.is_match(t.of_type.name()) {
+                    errs.push((
+                        EgonSyntaxError::InvalidTypeAlias {
+                            name: t.of_type.name().to_string(),
+                        }
+                        .into(),
+                        span.clone(),
+                    ));
+                }
             }
         }
 

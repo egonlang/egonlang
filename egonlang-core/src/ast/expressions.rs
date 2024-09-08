@@ -666,8 +666,8 @@ impl Display for ExprIf {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ExprFn {
     pub name: Option<Identifier>,
-    pub params: Vec<Spanned<(Identifier, Type)>>,
-    pub return_type: Spanned<Type>,
+    pub params: Vec<Spanned<(Identifier, ExprS)>>,
+    pub return_type: ExprS,
     pub body: ExprS,
 }
 
@@ -677,7 +677,7 @@ impl Display for ExprFn {
             .params
             .clone()
             .into_iter()
-            .map(|(param, _)| format!("{}: {}", param.0.name, param.1))
+            .map(|(param, _)| format!("{}: {}", param.0.name, param.1 .0))
             .collect::<Vec<String>>()
             .join(", ");
 
@@ -719,11 +719,31 @@ impl Display for ExprRange {
 /// type Int = number; // `number` is a type expression
 /// ```
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct ExprType(pub Type);
+pub struct ExprType {
+    pub type_name: Spanned<Identifier>,
+    pub parameters: Vec<ExprS>,
+}
 
 impl Display for ExprType {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        f.write_fmt(format_args!("{}", self.0))
+        let type_name = &self.type_name.0.name;
+        let parameters = &self.parameters;
+
+        let base = if parameters.is_empty() {
+            type_name.to_string()
+        } else {
+            format!(
+                "{}<{}>",
+                type_name,
+                parameters
+                    .iter()
+                    .map(|(type_expr, _)| type_expr.to_string())
+                    .collect::<Vec<String>>()
+                    .join(", ")
+            )
+        };
+
+        f.write_fmt(format_args!("{}", base))
     }
 }
 
@@ -802,7 +822,6 @@ mod into_tests {
 mod display_tests {
     use std::vec;
 
-    use egonlang_types::Type;
     use pretty_assertions::assert_eq;
 
     use crate::ast::*;
@@ -1183,7 +1202,18 @@ mod display_tests {
         Expr::Fn(Box::new(ExprFn {
             name: None,
             params: vec![],
-            return_type: (Type::unit(), 0..0),
+            return_type: (
+                Expr::Type(ExprType {
+                    type_name: (
+                        Identifier {
+                            name: "()".to_string()
+                        },
+                        0..0
+                    ),
+                    parameters: vec![]
+                }),
+                0..0
+            ),
             body: (
                 ExprBlock {
                     stmts: vec![],
@@ -1206,11 +1236,33 @@ mod display_tests {
                     Identifier {
                         name: "a".to_string()
                     },
-                    Type::number()
+                    (
+                        Expr::Type(ExprType {
+                            type_name: (
+                                Identifier {
+                                    name: "number".to_string()
+                                },
+                                0..0
+                            ),
+                            parameters: vec![]
+                        }),
+                        0..0
+                    )
                 ),
                 0..0
             )],
-            return_type: (Type::unit(), 0..0),
+            return_type: (
+                Expr::Type(ExprType {
+                    type_name: (
+                        Identifier {
+                            name: "()".to_string()
+                        },
+                        0..0
+                    ),
+                    parameters: vec![]
+                }),
+                0..0
+            ),
             body: (
                 ExprBlock {
                     stmts: vec![],
@@ -1234,7 +1286,18 @@ mod display_tests {
                         Identifier {
                             name: "a".to_string()
                         },
-                        Type::number()
+                        (
+                            Expr::Type(ExprType {
+                                type_name: (
+                                    Identifier {
+                                        name: "number".to_string()
+                                    },
+                                    0..0
+                                ),
+                                parameters: vec![]
+                            }),
+                            0..0
+                        )
                     ),
                     0..0
                 ),
@@ -1243,12 +1306,34 @@ mod display_tests {
                         Identifier {
                             name: "b".to_string()
                         },
-                        Type::number()
+                        (
+                            Expr::Type(ExprType {
+                                type_name: (
+                                    Identifier {
+                                        name: "number".to_string()
+                                    },
+                                    0..0
+                                ),
+                                parameters: vec![]
+                            }),
+                            0..0
+                        )
                     ),
                     0..0
                 )
             ],
-            return_type: (Type::unit(), 0..0),
+            return_type: (
+                Expr::Type(ExprType {
+                    type_name: (
+                        Identifier {
+                            name: "()".to_string()
+                        },
+                        0..0
+                    ),
+                    parameters: vec![]
+                }),
+                0..0
+            ),
             body: (
                 ExprBlock {
                     stmts: vec![],
@@ -1272,7 +1357,18 @@ mod display_tests {
                         Identifier {
                             name: "a".to_string()
                         },
-                        Type::number()
+                        (
+                            Expr::Type(ExprType {
+                                type_name: (
+                                    Identifier {
+                                        name: "number".to_string()
+                                    },
+                                    0..0
+                                ),
+                                parameters: vec![]
+                            }),
+                            0..0
+                        )
                     ),
                     0..0
                 ),
@@ -1281,12 +1377,34 @@ mod display_tests {
                         Identifier {
                             name: "b".to_string()
                         },
-                        Type::number()
+                        (
+                            Expr::Type(ExprType {
+                                type_name: (
+                                    Identifier {
+                                        name: "number".to_string()
+                                    },
+                                    0..0
+                                ),
+                                parameters: vec![]
+                            }),
+                            0..0
+                        )
                     ),
                     0..0
                 )
             ],
-            return_type: (Type::number(), 0..0),
+            return_type: (
+                Expr::Type(ExprType {
+                    type_name: (
+                        Identifier {
+                            name: "number".to_string()
+                        },
+                        0..0
+                    ),
+                    parameters: vec![]
+                }),
+                0..0
+            ),
             body: (
                 ExprBlock {
                     stmts: vec![],
@@ -1310,7 +1428,18 @@ mod display_tests {
                         Identifier {
                             name: "a".to_string()
                         },
-                        Type::number()
+                        (
+                            Expr::Type(ExprType {
+                                type_name: (
+                                    Identifier {
+                                        name: "number".to_string()
+                                    },
+                                    0..0
+                                ),
+                                parameters: vec![]
+                            }),
+                            0..0
+                        )
                     ),
                     0..0
                 ),
@@ -1319,12 +1448,34 @@ mod display_tests {
                         Identifier {
                             name: "b".to_string()
                         },
-                        Type::number()
+                        (
+                            Expr::Type(ExprType {
+                                type_name: (
+                                    Identifier {
+                                        name: "number".to_string()
+                                    },
+                                    0..0
+                                ),
+                                parameters: vec![]
+                            }),
+                            0..0
+                        )
                     ),
                     0..0
                 )
             ],
-            return_type: (Type::number(), 0..0),
+            return_type: (
+                Expr::Type(ExprType {
+                    type_name: (
+                        Identifier {
+                            name: "number".to_string()
+                        },
+                        0..0
+                    ),
+                    parameters: vec![]
+                }),
+                0..0
+            ),
             body: (
                 ExprBlock {
                     stmts: vec![],

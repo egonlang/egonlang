@@ -1,6 +1,5 @@
 use std::fmt::{self, Debug, Display, Formatter};
 
-use egonlang_types::Type;
 use serde::{Deserialize, Serialize};
 
 use crate::parser::parse;
@@ -186,13 +185,13 @@ impl Display for StmtAssign {
 /// ```
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct StmtTypeAlias {
-    pub alias: Spanned<Identifier>,
-    pub value: Spanned<Type>,
+    pub alias: ExprS,
+    pub value: ExprS,
 }
 
 impl Display for StmtTypeAlias {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let alias = &self.alias.0.name;
+        let alias = &self.alias.0.to_string();
         let value = &self.value.0.to_string();
 
         f.write_fmt(format_args!("type {} = {};", alias, value))

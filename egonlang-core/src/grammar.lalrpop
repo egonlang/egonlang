@@ -3,7 +3,6 @@ use egonlang_errors::EgonErrorS;
 
 use crate::{ast, lexer};
 use span;
-use egonlang_types::Type;
 
 grammar<'err>(
     errors: &'err mut Vec<ParseError<usize, lexer::Token, EgonErrorS>>
@@ -31,34 +30,32 @@ Stmt: ast::Stmt = {
 StmtExpr: ast::Stmt = <expr:ExprS> ";" =>
         ast::Stmt::Expr(ast::StmtExpr { <> });
 
-StmtAssertType: ast::Stmt = "assert_type" <value:ExprS> "," <expected_type:Spanned<Type>> ";" =>
+StmtAssertType: ast::Stmt = "assert_type" <value:ExprS> "," <expected_type:Spanned<ExprType>> ";" =>
         ast::Stmt::AssertType(ast::StmtAssertType { 
             value,
-            expected_type: (ast::Expr::Type(ast::ExprType(expected_type.0)), expected_type.1)
+            expected_type: (expected_type.0, expected_type.1)
         });
 
 StmtReturn: ast::Stmt = "return" <value:ExprS> ";" =>
         ast::Stmt::Return(ast::StmtReturn::new(<>));
 
-StmtAssignVariable: ast::Stmt = "let" <identifier:Spanned<Identifier>> <type_expr:(":" <Spanned<Type>>)?> <value:("=" <ExprS>)?> ";" =>
+StmtAssignVariable: ast::Stmt = "let" <identifier:Spanned<Identifier>> <type_expr:(":" <Spanned<ExprType>>)?> <value:("=" <ExprS>)?> ";" =>
         ast::StmtAssign {
             identifier,
-            type_expr: type_expr.map(|(ty, ty_span)|
-                (ast::Expr::Type(ast::ExprType(ty)), ty_span)),
+            type_expr,
             is_const: false,
             value,
         }.into();
 
-StmtAssignConst: ast::Stmt = "const" <identifier:Spanned<Identifier>> <type_expr:(":" <Spanned<Type>>)?> <value:("=" <ExprS>)?> ";" =>
+StmtAssignConst: ast::Stmt = "const" <identifier:Spanned<Identifier>> <type_expr:(":" <Spanned<ExprType>>)?> <value:("=" <ExprS>)?> ";" =>
         ast::StmtAssign {
             identifier,
-            type_expr: type_expr.map(|(ty, ty_span)|
-                (ast::Expr::Type(ast::ExprType(ty)), ty_span)),
+            type_expr,
             is_const: true,
             value,
         }.into();
 
-StmtTypeAlias: ast::Stmt = "type" <alias:Spanned<Identifier>> <value:("=" <Spanned<Type>>)> ";" =>
+StmtTypeAlias: ast::Stmt = "type" <alias:Spanned<ExprType>> <value:("=" <Spanned<ExprType>>)> ";" =>
         ast::StmtTypeAlias { <> }.into();
 
 StmtFn: ast::Stmt = "fn" <name:Spanned<Identifier>> <fn_expr:Spanned<ExprFn>> =>
@@ -73,7 +70,22 @@ ExprS = Spanned<Expr>;
 Expr: ast::Expr = {
     ExprAssign,
     ExprBlock,
+    // ExprType,
 };
+
+ExprType: ast::Expr = {
+    <type_name:Spanned<Identifier>> <parameters:("<" <Seperated<Spanned<ExprType>, ",">> ">")?> => {
+        ast::Expr::Type(ast::ExprType { 
+            type_name,
+            parameters: parameters.unwrap_or_default()
+         })
+    },
+
+    <l:@L> "(" ")" <r:@R> => ast::Expr::Type(ast::ExprType {
+        type_name: (ast::Identifier { name: "()".to_string() }, l..r),
+        parameters: vec![]
+    }),
+}
 
 ExprAssign: ast::Expr = {
     <identifier:Spanned<Identifier>> "=" <value:ExprS> =>
@@ -199,7 +211,6 @@ ExprPrimary: ast::Expr = {
 
     // Grouping
     "(" <Expr> ")",
-
 }
 
 Identifier: ast::Identifier = <name:identifier> =>
@@ -247,17 +258,17 @@ ExprBlock: ast::Expr = {
     )),
 }
 
-FnParam: (ast::Identifier, Type) = <name:identifier> ":" <typeref:Type> => (ast::Identifier { name }, typeref);
+FnParam: (ast::Identifier, ast::ExprS) = <name:identifier> ":" <param_type:Spanned<ExprType>> => (ast::Identifier { name }, param_type);
 
 ExprFn: ast::Expr = {
-   "(" <params:Seperated<Spanned<FnParam>, ",">> ")" ":" <return_type:Spanned<Type>> "=>" <body:Spanned<ExprBlock>> =>
+   "(" <params:Seperated<Spanned<FnParam>, ",">> ")" ":" <return_type:Spanned<ExprType>> "=>" <body:Spanned<ExprBlock>> =>
         ast::Expr::Fn(Box::new(ast::ExprFn { 
             name: None,
             params,
             return_type,
             body,
          })),
-    "(" <params:Seperated<Spanned<FnParam>, ",">> ")" ":" <return_type:Spanned<Type>> "=>" <body:Spanned<ExprFn>> =>
+    "(" <params:Seperated<Spanned<FnParam>, ",">> ")" ":" <return_type:Spanned<ExprType>> "=>" <body:Spanned<ExprFn>> =>
         ast::Expr::Fn(Box::new(ast::ExprFn { 
             name: None,
             params,
@@ -265,18 +276,8 @@ ExprFn: ast::Expr = {
             body,
          })),
 }
-
-
 
 /// Utilities
-
-Type: Type = {
-    <base:identifier> <args:("<" <Seperated<Type, ",">> ">")?> => {
-        Type::new_with_args(&base, args.unwrap_or_default())
-    },
-
-    "(" ")" => Type::unit()
-}
 
 Spanned<T>: span::Spanned<T> = <l:@L> <t:T> <r:@R> =>
     (t, l..r);

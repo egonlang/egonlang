@@ -56,6 +56,9 @@ stmt_rule!(
                 // let a: number = 123;
                 (Some((assign_type_expr, assign_type_span)), Some((value_expr, value_span))) => {
                     if let Ok(assign_typeref) = resolve_expr(assign_type_expr, assign_type_span) {
+                        let assign_typeref = resolve_ident(&assign_typeref.of_type.name(), span)
+                            .unwrap_or(assign_typeref.clone());
+
                         // Check for empty list assignment
                         // Example:
                         // let a: unknown;

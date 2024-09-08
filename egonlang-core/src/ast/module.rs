@@ -1,6 +1,5 @@
 use std::fmt::Debug;
 
-use egonlang_types::Type;
 use serde::{Deserialize, Serialize};
 
 use span::{Span, Spanned};
@@ -62,12 +61,12 @@ impl Module {
             Stmt::TypeAlias(stmt_type_alias) => {
                 let (value_typeref, value_span) = &stmt_type_alias.value;
                 if value_span.contains(&index) {
-                    nodes.push(AstNode::Type((value_typeref.clone(), value_span.clone())));
+                    nodes.push(AstNode::Expr((value_typeref.clone(), value_span.clone())));
                 }
 
                 let (ident, ident_span) = &stmt_type_alias.alias;
                 if ident_span.contains(&index) {
-                    nodes.push(AstNode::Identifier((ident.clone(), ident_span.clone())));
+                    nodes.push(AstNode::Expr((ident.clone(), ident_span.clone())));
                 }
             }
             Stmt::Fn(stmt_fn) => {
@@ -180,9 +179,14 @@ impl Module {
                 }
             }
             Expr::Fn(expr_fn) => {
-                for ((param_identifier, param_type), param_span) in &expr_fn.params {
+                for ((param_identifier, (param_type_expr, param_type_span)), param_span) in
+                    &expr_fn.params
+                {
                     if param_span.contains(&index) {
-                        nodes.push(AstNode::Type((param_type.clone(), param_span.clone())));
+                        nodes.push(AstNode::Expr((
+                            param_type_expr.clone(),
+                            param_type_span.clone(),
+                        )));
                         nodes.push(AstNode::Identifier((
                             param_identifier.clone(),
                             param_span.clone(),
@@ -192,7 +196,7 @@ impl Module {
 
                 let (return_type_type, return_type_span) = &expr_fn.return_type;
                 if return_type_span.contains(&index) {
-                    nodes.push(AstNode::Type((
+                    nodes.push(AstNode::Expr((
                         return_type_type.clone(),
                         return_type_span.clone(),
                     )));
@@ -207,9 +211,7 @@ impl Module {
                 }
             }
             Expr::Range(_) => {}
-            Expr::Type(expr_type) => {
-                nodes.push(AstNode::Type((expr_type.0.clone(), span.clone())));
-            }
+            Expr::Type(_) => {}
             Expr::Call(expr_call) => {
                 let callee_nodes =
                     self.get_nodes_from_expr(&expr_call.callee.0, &expr_call.callee.1, index);
@@ -244,7 +246,6 @@ pub enum AstNode {
     Stmt(super::StmtS),
     Expr(super::ExprS),
     Identifier(Spanned<super::Identifier>),
-    Type(Spanned<Type>),
 }
 
 impl AstNode {
@@ -253,7 +254,6 @@ impl AstNode {
             AstNode::Stmt(_) => "Statement",
             AstNode::Expr(_) => "Expression",
             AstNode::Identifier(_) => "Identifier",
-            AstNode::Type(_) => "Type",
         }
         .to_string()
     }
@@ -265,7 +265,6 @@ impl Debug for AstNode {
             Self::Stmt(arg0) => f.write_fmt(format_args!("{:#?}", arg0)),
             Self::Expr(arg0) => f.write_fmt(format_args!("{:#?}", arg0)),
             Self::Identifier(arg0) => f.write_fmt(format_args!("{:#?}", arg0)),
-            Self::Type(arg0) => f.write_fmt(format_args!("{:#?}", arg0)),
         }
     }
 }
@@ -276,7 +275,6 @@ mod tests {
 
     use crate::prelude::*;
     use ast::*;
-    use egonlang_types::Type;
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -427,14 +425,35 @@ mod tests {
                             },
                             4..5
                         ),
-                        type_expr: Some((Expr::Type(ExprType(Type::number())), 7..13)),
+                        type_expr: Some((
+                            Expr::Type(ExprType {
+                                type_name: (
+                                    Identifier {
+                                        name: "number".to_string()
+                                    },
+                                    7..13
+                                ),
+                                parameters: vec![]
+                            }),
+                            7..13
+                        )),
                         is_const: false,
                         value: Some((123f64.into(), 16..19))
                     }),
                     0..20
                 )),
-                AstNode::Expr((Expr::Type(ExprType(Type::number())), 7..13)),
-                AstNode::Type((Type::number(), 7..13)),
+                AstNode::Expr((
+                    Expr::Type(ExprType {
+                        type_name: (
+                            Identifier {
+                                name: "number".to_string()
+                            },
+                            7..13
+                        ),
+                        parameters: vec![]
+                    }),
+                    7..13
+                ))
             ],
             nodes
         );
@@ -588,14 +607,35 @@ mod tests {
                             },
                             6..7
                         ),
-                        type_expr: Some((Expr::Type(ExprType(Type::number())), 9..15)),
+                        type_expr: Some((
+                            Expr::Type(ExprType {
+                                type_name: (
+                                    Identifier {
+                                        name: "number".to_string()
+                                    },
+                                    9..15
+                                ),
+                                parameters: vec![]
+                            }),
+                            9..15
+                        )),
                         is_const: true,
                         value: Some((123f64.into(), 18..21))
                     }),
                     0..22
                 )),
-                AstNode::Expr((Expr::Type(ExprType(Type::number())), 9..15)),
-                AstNode::Type((Type::number(), 9..15)),
+                AstNode::Expr((
+                    Expr::Type(ExprType {
+                        type_name: (
+                            Identifier {
+                                name: "number".to_string()
+                            },
+                            9..15
+                        ),
+                        parameters: vec![]
+                    }),
+                    9..15
+                )),
             ],
             nodes
         );
@@ -793,11 +833,33 @@ mod tests {
                                         Identifier {
                                             name: "a".to_string()
                                         },
-                                        Type::string()
+                                        (
+                                            Expr::Type(ExprType {
+                                                type_name: (
+                                                    Identifier {
+                                                        name: "string".to_string()
+                                                    },
+                                                    4..10
+                                                ),
+                                                parameters: vec![]
+                                            }),
+                                            4..10
+                                        )
                                     ),
                                     1..10
                                 )],
-                                return_type: (Type::bool(), 13..17),
+                                return_type: (
+                                    Expr::Type(ExprType {
+                                        type_name: (
+                                            Identifier {
+                                                name: "bool".to_string()
+                                            },
+                                            13..17
+                                        ),
+                                        parameters: vec![]
+                                    }),
+                                    13..17
+                                ),
                                 body: (
                                     Expr::Block(Box::new(ExprBlock {
                                         stmts: vec![],
@@ -833,11 +895,33 @@ mod tests {
                                 Identifier {
                                     name: "a".to_string()
                                 },
-                                Type::string()
+                                (
+                                    Expr::Type(ExprType {
+                                        type_name: (
+                                            Identifier {
+                                                name: "string".to_string()
+                                            },
+                                            4..10
+                                        ),
+                                        parameters: vec![]
+                                    }),
+                                    4..10
+                                )
                             ),
                             1..10
                         )],
-                        return_type: (Type::bool(), 13..17),
+                        return_type: (
+                            Expr::Type(ExprType {
+                                type_name: (
+                                    Identifier {
+                                        name: "bool".to_string()
+                                    },
+                                    13..17
+                                ),
+                                parameters: vec![]
+                            }),
+                            13..17
+                        ),
                         body: (
                             Expr::Block(Box::new(ExprBlock {
                                 stmts: vec![],
@@ -929,12 +1013,33 @@ mod tests {
                             }),
                             12..13
                         ),
-                        expected_type: (Expr::Type(ExprType(Type::bool())), 15..19)
+                        expected_type: (
+                            Expr::Type(ExprType {
+                                type_name: (
+                                    Identifier {
+                                        name: "bool".to_string()
+                                    },
+                                    15..19
+                                ),
+                                parameters: vec![]
+                            }),
+                            15..19
+                        )
                     }),
                     0..20
                 )),
-                AstNode::Expr((Expr::Type(ExprType(Type::bool())), 15..19)),
-                AstNode::Type((Type::bool(), 15..19)),
+                AstNode::Expr((
+                    Expr::Type(ExprType {
+                        type_name: (
+                            Identifier {
+                                name: "bool".to_string()
+                            },
+                            15..19
+                        ),
+                        parameters: vec![]
+                    }),
+                    15..19
+                )),
             ],
             nodes
         );

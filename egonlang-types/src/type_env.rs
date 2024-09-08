@@ -22,6 +22,13 @@ impl TypeEnv {
         type_env.set("bool", egon_bool!().into());
         type_env.set("string", egon_string!().into());
         type_env.set("range", egon_range!().into());
+        type_env.set("()", Type::unit().into());
+        type_env.set("list", Type::unknown_list().into());
+        type_env.set("tuple", Type::tuple(vec![]).into());
+        type_env.set(
+            "function",
+            Type::function(Type::tuple(vec![]), Type::unit()).into(),
+        );
 
         type_env
     }

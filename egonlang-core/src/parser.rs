@@ -91,7 +91,6 @@ pub fn parse(source: &str, offset: usize) -> EgonResultMultiSpannedErr<Module> {
 mod parser_tests {
     use std::vec;
 
-    use egonlang_types::Type;
     use pretty_assertions::assert_eq;
 
     use crate::ast::{
@@ -1793,7 +1792,18 @@ mod parser_tests {
                         },
                         4..5
                     ),
-                    type_expr: Some((Expr::Type(ExprType(Type::number())), 7..13)),
+                    type_expr: Some((
+                        Expr::Type(ExprType {
+                            type_name: (
+                                Identifier {
+                                    name: "number".to_string()
+                                },
+                                7..13
+                            ),
+                            parameters: vec![]
+                        }),
+                        7..13
+                    )),
                     is_const: false,
                     value: Some((
                         ast::Expr::Assign(Box::new(ExprAssign {
@@ -1825,7 +1835,18 @@ mod parser_tests {
                         },
                         4..5
                     ),
-                    type_expr: Some((Expr::Type(ExprType(Type::number())), 7..13)),
+                    type_expr: Some((
+                        Expr::Type(ExprType {
+                            type_name: (
+                                Identifier {
+                                    name: "number".to_string()
+                                },
+                                7..13
+                            ),
+                            parameters: vec![]
+                        }),
+                        7..13
+                    )),
                     is_const: false,
                     value: Some((ast::Expr::Literal(ExprLiteral::Number(123f64)), 16..19))
                 }),
@@ -1862,12 +1883,40 @@ mod parser_tests {
             stmts: vec![(
                 Stmt::TypeAlias(StmtTypeAlias {
                     alias: (
-                        Identifier {
-                            name: "NumberList".to_string()
-                        },
+                        Expr::Type(ExprType {
+                            type_name: (
+                                Identifier {
+                                    name: "NumberList".to_string()
+                                },
+                                5..15
+                            ),
+                            parameters: vec![]
+                        }),
                         5..15
                     ),
-                    value: (Type::list(Type::number()), 18..30)
+                    value: (
+                        Expr::Type(ExprType {
+                            type_name: (
+                                Identifier {
+                                    name: "list".to_string()
+                                },
+                                18..22
+                            ),
+                            parameters: vec![(
+                                Expr::Type(ExprType {
+                                    type_name: (
+                                        Identifier {
+                                            name: "number".to_string()
+                                        },
+                                        23..29
+                                    ),
+                                    parameters: vec![]
+                                }),
+                                23..29
+                            )]
+                        }),
+                        18..30
+                    )
                 }),
                 0..31
             )]
@@ -1885,12 +1934,40 @@ mod parser_tests {
                 (
                     Stmt::TypeAlias(StmtTypeAlias {
                         alias: (
-                            Identifier {
-                                name: "NumberList".to_string()
-                            },
+                            Expr::Type(ExprType {
+                                type_name: (
+                                    Identifier {
+                                        name: "NumberList".to_string()
+                                    },
+                                    14..24
+                                ),
+                                parameters: vec![]
+                            }),
                             14..24
                         ),
-                        value: (Type::list(Type::number()), 27..39)
+                        value: (
+                            Expr::Type(ExprType {
+                                type_name: (
+                                    Identifier {
+                                        name: "list".to_string()
+                                    },
+                                    27..31
+                                ),
+                                parameters: vec![(
+                                    Expr::Type(ExprType {
+                                        type_name: (
+                                            Identifier {
+                                                name: "number".to_string()
+                                            },
+                                            32..38
+                                        ),
+                                        parameters: vec![]
+                                    }),
+                                    32..38
+                                )]
+                            }),
+                            27..39
+                        )
                     }),
                     9..40
                 ),
@@ -1902,7 +1979,18 @@ mod parser_tests {
                             },
                             53..54
                         ),
-                        type_expr: Some((Expr::Type(ExprType(Type::new("NumberList"))), 56..66)),
+                        type_expr: Some((
+                            Expr::Type(ExprType {
+                                type_name: (
+                                    Identifier {
+                                        name: "NumberList".to_string()
+                                    },
+                                    56..66
+                                ),
+                                parameters: vec![]
+                            }),
+                            56..66
+                        )),
                         is_const: false,
                         value: Some((
                             Expr::List(
@@ -1940,19 +2028,47 @@ mod parser_tests {
                         Expr::Fn(Box::new(ExprFn {
                             name: None,
                             params: vec![],
-                            return_type: (Type::unit(), 13..15),
+                            return_type: (
+                                Expr::Type(ExprType {
+                                    type_name: (
+                                        Identifier {
+                                            name: "()".to_string()
+                                        },
+                                        13..15
+                                    ),
+                                    parameters: vec![]
+                                }),
+                                13..15
+                            ),
                             body: (
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: vec![
                                         (
                                             Stmt::TypeAlias(StmtTypeAlias {
                                                 alias: (
-                                                    Identifier {
-                                                        name: "Int".to_string()
-                                                    },
+                                                    Expr::Type(ExprType {
+                                                        type_name: (
+                                                            Identifier {
+                                                                name: "Int".to_string()
+                                                            },
+                                                            38..41
+                                                        ),
+                                                        parameters: vec![]
+                                                    }),
                                                     38..41
                                                 ),
-                                                value: (Type::number(), 44..50)
+                                                value: (
+                                                    Expr::Type(ExprType {
+                                                        type_name: (
+                                                            Identifier {
+                                                                name: "number".to_string()
+                                                            },
+                                                            44..50
+                                                        ),
+                                                        parameters: vec![]
+                                                    }),
+                                                    44..50
+                                                )
                                             }),
                                             33..51
                                         ),
@@ -1965,7 +2081,15 @@ mod parser_tests {
                                                     68..69
                                                 ),
                                                 type_expr: Some((
-                                                    Expr::Type(ExprType(Type::number())),
+                                                    Expr::Type(ExprType {
+                                                        type_name: (
+                                                            Identifier {
+                                                                name: "number".to_string()
+                                                            },
+                                                            71..77
+                                                        ),
+                                                        parameters: vec![]
+                                                    }),
                                                     71..77
                                                 )),
                                                 is_const: false,
@@ -1985,7 +2109,15 @@ mod parser_tests {
                                                     99..100
                                                 ),
                                                 type_expr: Some((
-                                                    Expr::Type(ExprType(Type::new("Int"))),
+                                                    Expr::Type(ExprType {
+                                                        type_name: (
+                                                            Identifier {
+                                                                name: "Int".to_string()
+                                                            },
+                                                            102..105
+                                                        ),
+                                                        parameters: vec![]
+                                                    }),
                                                     102..105
                                                 )),
                                                 is_const: false,
@@ -2046,7 +2178,18 @@ mod parser_tests {
                         },
                         4..5
                     ),
-                    type_expr: Some((Expr::Type(ExprType(Type::number())), 7..13)),
+                    type_expr: Some((
+                        Expr::Type(ExprType {
+                            type_name: (
+                                Identifier {
+                                    name: "number".to_string()
+                                },
+                                7..13
+                            ),
+                            parameters: vec![]
+                        }),
+                        7..13
+                    )),
                     is_const: false,
                     value: None
                 }),
@@ -2110,7 +2253,18 @@ mod parser_tests {
             stmts: vec![(
                 StmtAssertType {
                     value: (123f64.into(), 12..15),
-                    expected_type: (ast::ExprType(Type::number()).into(), 17..23)
+                    expected_type: (
+                        Expr::Type(ExprType {
+                            type_name: (
+                                Identifier {
+                                    name: "number".to_string()
+                                },
+                                17..23
+                            ),
+                            parameters: vec![]
+                        }),
+                        17..23
+                    )
                 }
                 .into(),
                 0..24
@@ -2134,11 +2288,33 @@ mod parser_tests {
                                             Identifier {
                                                 name: "a".to_string()
                                             },
-                                            Type::number()
+                                            (
+                                                Expr::Type(ExprType {
+                                                    type_name: (
+                                                        Identifier {
+                                                            name: "number".to_string()
+                                                        },
+                                                        4..10
+                                                    ),
+                                                    parameters: vec![]
+                                                }),
+                                                4..10
+                                            )
                                         ),
                                         1..10
                                     )],
-                                    return_type: (Type::number(), 13..19),
+                                    return_type: (
+                                        Expr::Type(ExprType {
+                                            type_name: (
+                                                Identifier {
+                                                    name: "number".to_string()
+                                                },
+                                                13..19
+                                            ),
+                                            parameters: vec![]
+                                        }),
+                                        13..19
+                                    ),
                                     body: (
                                         Expr::Block(Box::new(ExprBlock {
                                             stmts: vec![],

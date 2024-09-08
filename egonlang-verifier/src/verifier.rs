@@ -150,10 +150,12 @@ impl<'a> Verifier<'a> {
             }
         }
 
-        resolved_to.ok_or(vec![(
-            EgonTypeError::Undefined(identifier.to_string()).into(),
-            span.clone(),
-        )])
+        resolved_to.ok_or_else(|| {
+            vec![(
+                EgonTypeError::Undefined(identifier.to_string()).into(),
+                span.clone(),
+            )]
+        })
     }
 
     /// Resolve an expression's type recursively.
@@ -302,7 +304,20 @@ impl<'a> Verifier<'a> {
                     log_expr(expr)
                 );
 
-                if type_expr.0.is_builtin() {
+                let name = &type_expr.type_name.0.name;
+                let params = type_expr
+                    .parameters
+                    .iter()
+                    .map(|(e, s)| {
+                        let et = self.resolve_expr_type(e, s);
+
+                        et.unwrap().of_type
+                    })
+                    .collect();
+
+                let t = Type::new_with_args(&name, params);
+
+                if t.is_builtin() {
                     tracelog::tracelog!(
                         label = verifier,resolve_expr_type,expr_type;
                         "(level: {}) Resolved type expression {} to builtin type {}",
@@ -311,23 +326,10 @@ impl<'a> Verifier<'a> {
                         log_type(type_expr)
                     );
 
-                    return Ok(type_expr.0.clone().into());
+                    return Ok(t.clone().into());
                 }
 
-                match self.resolve_identifier(type_expr.0.to_string().as_str(), span) {
-                    Ok(type_env_value) => {
-                        tracelog::tracelog!(
-                            label = verifier,resolve_expr_type,expr_type;
-                            "(level: {}) Resolved type expression {} to type {}",
-                            self.current_type_env_level(),
-                            log_expr(type_expr),
-                            log_type(&type_env_value.of_type)
-                        );
-
-                        Ok(type_env_value.clone())
-                    }
-                    Err(errs) => Err(errs),
-                }
+                Ok(t.clone().into())
             }
             ast::Expr::Assign(assign_expr) => {
                 tracelog::tracelog!(
@@ -426,17 +428,20 @@ impl<'a> Verifier<'a> {
                     log_expr(expr)
                 );
 
-                Ok(Type::function(
-                    Type::tuple(
-                        fn_.params
-                            .clone()
-                            .into_iter()
-                            .map(|((_, typeref), _)| typeref)
-                            .collect(),
-                    ),
-                    fn_.return_type.clone().0,
-                )
-                .into())
+                let fn_params = fn_
+                    .params
+                    .iter()
+                    .map(|param| {
+                        self.resolve_expr_type(&param.0 .1 .0, &param.0 .1 .1)
+                            .unwrap()
+                            .of_type
+                    })
+                    .collect();
+                let fn_return_type = self
+                    .resolve_expr_type(&fn_.return_type.0, &fn_.return_type.1)?
+                    .of_type;
+
+                Ok(Type::function(Type::tuple(fn_params), fn_return_type).into())
             }
             ast::Expr::Range(_) => {
                 tracelog::tracelog!(
@@ -511,6 +516,12 @@ impl<'a> Verifier<'a> {
                 match (&mut stmt_assign.type_expr, &mut stmt_assign.value) {
                     (None, None) => {}
                     (None, Some((value_expr, value_span))) => {
+                        tracelog::tracelog!(
+                            label = verifier,visit_stmt,stmt_assign;
+                            "{} has a value but no type",
+                            stmt_string
+                        );
+
                         let value_typeref = self.visit_expr(value_expr, value_span)?;
 
                         self.type_env.set(
@@ -522,6 +533,12 @@ impl<'a> Verifier<'a> {
                         );
                     }
                     (Some((type_expr, type_span)), None) => {
+                        tracelog::tracelog!(
+                            label = verifier,visit_stmt,stmt_assign;
+                            "{} has a type but no value",
+                            stmt_string
+                        );
+
                         match self.visit_expr(type_expr, type_span) {
                             Ok(type_typeref) => {
                                 self.type_env.set(
@@ -538,8 +555,16 @@ impl<'a> Verifier<'a> {
                         }
                     }
                     (Some((type_expr, type_span)), Some((value_expr, value_span))) => {
+                        tracelog::tracelog!(
+                            label = verifier,visit_stmt,stmt_assign;
+                            "{} has a type and value",
+                            stmt_string
+                        );
+
                         match self.visit_expr(type_expr, type_span) {
                             Ok(type_typeref) => {
+                                self.resolve_identifier(&type_typeref.of_type.name(), &type_span)?;
+
                                 self.visit_expr(value_expr, value_span)?;
 
                                 self.type_env.set(
@@ -566,15 +591,19 @@ impl<'a> Verifier<'a> {
                     stmt_string
                 );
 
-                let alias = &stmt_type_alias.alias;
-                let value = self
-                    .resolve_identifier(
-                        &stmt_type_alias.value.0.to_string(),
-                        &stmt_type_alias.value.1.clone(),
-                    )
-                    .unwrap_or(stmt_type_alias.value.0.clone().into());
+                let alias = self
+                    .resolve_expr_type(&stmt_type_alias.alias.0, &stmt_type_alias.alias.1)?
+                    .of_type;
 
-                self.type_env.set(&alias.0.name, value);
+                let value =
+                    self.resolve_expr_type(&stmt_type_alias.value.0, &stmt_type_alias.value.1)?;
+
+                let possible_alias = self
+                    .type_env
+                    .get(&value.of_type.to_string())
+                    .unwrap_or(value.clone());
+
+                self.type_env.set(&alias.to_string(), possible_alias);
 
                 Ok(())
             }
@@ -620,9 +649,15 @@ impl<'a> Verifier<'a> {
                 }
 
                 let (expected_type_expr, expected_type_span) = &mut stmt_assert_type.expected_type;
-                if let Err(x) = self.visit_expr(expected_type_expr, expected_type_span) {
-                    errs.extend(x);
-                }
+
+                match self.visit_expr(expected_type_expr, &expected_type_span) {
+                    Ok(t) => {
+                        self.resolve_identifier(&t.of_type.name(), &expected_type_span)?;
+                    }
+                    Err(x) => {
+                        errs.extend(x);
+                    }
+                };
 
                 let rule_errs = self.run_stmt_rules(stmt, span);
                 errs.extend(rule_errs);
@@ -1009,13 +1044,14 @@ impl<'a> Verifier<'a> {
 
                 for ((ident, type_ref), _) in &fn_expr.params {
                     let name = &ident.name;
+                    let t = self.resolve_expr_type(&type_ref.0, &type_ref.1)?.of_type;
 
-                    param_types.push(type_ref.clone());
+                    param_types.push(t.clone());
 
                     self.type_env.set(
                         name,
                         TypeEnvValue {
-                            of_type: type_ref.clone(),
+                            of_type: t,
                             is_const: true,
                         },
                     );
@@ -1205,36 +1241,59 @@ impl<'a> Verifier<'a> {
             ast::Expr::Type(type_expr) => {
                 tracelog::tracelog!(
                     label = verifier,visit_expr,expr_type;
-                    "{} is an type expression",
+                    "{} is a type expression",
                     expr_string
                 );
 
                 let mut errs: Vec<EgonErrorS> = vec![];
 
-                let typeref = &type_expr.0;
-                let typeref_ident = &typeref.to_string();
+                let type_name = &type_expr.type_name.0.name;
+                let type_params: Vec<Type> = type_expr
+                    .parameters
+                    .iter_mut()
+                    .map(|param| {
+                        let t = self.visit_expr(&mut param.0, &param.1);
 
-                let type_type = self.resolve_identifier(typeref_ident, span);
-
-                match type_type {
-                    Ok(t) => {
-                        let rule_errs = self.run_expr_rules(&expr_clone, span);
-                        errs.extend(rule_errs);
-
-                        if !errs.is_empty() {
-                            return Err(errs);
+                        if let Err(t_errs) = t {
+                            errs.extend(t_errs);
+                            return Type::unknown();
                         }
 
-                        Ok(t)
-                    }
-                    Err(e) => {
-                        if typeref.is_builtin() {
-                            Ok(typeref.clone().into())
-                        } else {
-                            Err(e)
-                        }
-                    }
+                        t.unwrap().of_type
+                    })
+                    .collect();
+
+                let rule_errs = self.run_expr_rules(&expr_clone, span);
+                errs.extend(rule_errs);
+
+                if !errs.is_empty() {
+                    return Err(errs);
                 }
+
+                Ok(TypeEnvValue {
+                    of_type: Type::new_with_args(&type_name, type_params),
+                    is_const: true,
+                })
+
+                // match type_type {
+                //     Ok(t) => {
+                //         let rule_errs = self.run_expr_rules(&expr_clone, span);
+                //         errs.extend(rule_errs);
+
+                //         if !errs.is_empty() {
+                //             return Err(errs);
+                //         }
+
+                //         Ok(t)
+                //     }
+                //     Err(e) => {
+                //         if typeref.is_builtin() {
+                //             Ok(typeref.clone().into())
+                //         } else {
+                //             Err(e)
+                //         }
+                //     }
+                // }
             }
             ast::Expr::Call(expr_call) => {
                 let mut errs: Vec<EgonErrorS> = vec![];
@@ -1954,7 +2013,7 @@ mod verifier_tests {
     );
 
     verifier_test!(
-        validate_type_alias,
+        validate_type_alias_not_nested,
         "
         type NumberList = list<number>;
 
@@ -2126,6 +2185,15 @@ mod verifier_tests {
         Err(vec![(
             EgonTypeError::Undefined("Integer".to_string()).into(),
             106..113
+        )])
+    );
+
+    verifier_test!(
+        validate_undefined_type_in_assign_stmt,
+        "let a: Integer = 5 + 20;",
+        Err(vec![(
+            EgonTypeError::Undefined("Integer".to_string()).into(),
+            7..14
         )])
     );
 
