@@ -2,7 +2,7 @@ use std::{collections::HashMap, fmt};
 
 use tracelog::{log_identifier, log_type};
 
-use crate::{egon_bool, egon_number, egon_range, egon_string, Type};
+use crate::Type;
 
 /// Store and retreive type information for string identifiers
 #[derive(Default)]
@@ -17,11 +17,6 @@ impl TypeEnv {
         };
 
         type_env.start_scope();
-
-        type_env.set("number", egon_number!().into());
-        type_env.set("bool", egon_bool!().into());
-        type_env.set("string", egon_string!().into());
-        type_env.set("range", egon_range!().into());
 
         type_env
     }
