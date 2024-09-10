@@ -64,7 +64,7 @@ impl Scope {
 }
 
 /// Store and retreive type information for string identifiers
-#[derive(Default)]
+#[derive(Default, Debug, PartialEq)]
 pub struct TypeEnv {
     scopes: Vec<Scope>,
 }

@@ -2,6 +2,7 @@ use crate::prelude::*;
 use egonlang_core::prelude::*;
 use egonlang_errors::EgonTypeError;
 use egonlang_types::Type;
+use rules::rule::RuleTarget;
 
 expr_rule!(
     /// Checks the condition expression of a if statement is a boolean
@@ -11,24 +12,26 @@ expr_rule!(
     /// if ("example") {} else {}; // TypeError
     /// ```
     TypeMismatchIfCondExpr,
-    |expr, _span, _resolve_ident, resolve_expr| {
+    |context| {
         let mut errs = vec![];
 
-        if let ast::Expr::If(if_expr) = expr {
-            let (cond_expr, cond_span) = &if_expr.cond;
-            let cond_typeref = resolve_expr(cond_expr, cond_span).unwrap();
+        if let RuleTarget::Expr(expr) = context.target() {
+            if let ast::Expr::If(if_expr) = expr {
+                let (cond_expr, cond_span) = &if_expr.cond;
+                let cond_typeref = context.resolve_expr(cond_expr, cond_span).unwrap();
 
-            if cond_typeref != Type::bool() {
-                errs.push((
-                    EgonTypeError::MismatchType {
-                        expected: Type::bool().to_string(),
-                        actual: cond_typeref.to_string(),
-                    }
-                    .into(),
-                    cond_span.clone(),
-                ));
-            }
-        };
+                if cond_typeref != Type::bool() {
+                    errs.push((
+                        EgonTypeError::MismatchType {
+                            expected: Type::bool().to_string(),
+                            actual: cond_typeref.to_string(),
+                        }
+                        .into(),
+                        cond_span.clone(),
+                    ));
+                }
+            };
+        }
 
         errs
     }

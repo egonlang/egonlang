@@ -1,6 +1,4 @@
 use crate::prelude::*;
-use egonlang_core::prelude::*;
-use egonlang_errors::EgonSyntaxError;
 
 expr_rule!(
     /// Check that consts can not be reassigned
@@ -10,7 +8,7 @@ expr_rule!(
     /// a = 456; // SyntaxError
     /// ```
     ReassigningConstValue,
-    |expr, span, resolve_ident, _resolve_expr| {
+    |_context| {
         let  errs = vec![];
 
         // if let ast::Expr::Assign(expr_assign) = expr {

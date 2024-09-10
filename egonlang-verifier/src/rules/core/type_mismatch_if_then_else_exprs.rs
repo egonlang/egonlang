@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
 use egonlang_errors::EgonTypeError;
+use rules::rule::RuleTarget;
 
 expr_rule!(
     /// Checks that both branches of an if/else expression/statement return the same type
@@ -11,19 +12,30 @@ expr_rule!(
     /// if (true) { 123 } else { 456 };
     /// ```
     TypeMismatchIfthenElseExpr,
-    |expr, _span, _resolve_ident, resolve_expr| {
+    |context| {
         let mut errs = vec![];
 
-        if let ast::Expr::If(if_expr) = expr {
-            let (then_expr, then_span) = &if_expr.then;
-            let then_typeref = resolve_expr(then_expr, then_span).unwrap();
+        if let RuleTarget::Expr(expr) = context.target() {
+            if let ast::Expr::If(if_expr) = expr {
+                let (then_expr, then_span) = &if_expr.then;
+                let then_typeref = context.resolve_expr(then_expr, then_span).unwrap();
 
-            if let Some((else_expr, else_span)) = &if_expr.else_ {
-                let else_typeref = resolve_expr(else_expr, else_span).unwrap();
+                if let Some((else_expr, else_span)) = &if_expr.else_ {
+                    let else_typeref = context.resolve_expr(else_expr, else_span).unwrap();
 
-                if then_typeref != else_typeref {
-                    if then_typeref.is_list() && else_typeref.is_list() {
-                        if then_typeref.is_known_list() && else_typeref.is_known_list() {
+                    if then_typeref != else_typeref {
+                        if then_typeref.is_list() && else_typeref.is_list() {
+                            if then_typeref.is_known_list() && else_typeref.is_known_list() {
+                                errs.push((
+                                    EgonTypeError::MismatchType {
+                                        expected: then_typeref.to_string(),
+                                        actual: else_typeref.to_string(),
+                                    }
+                                    .into(),
+                                    else_span.clone(),
+                                ));
+                            }
+                        } else {
                             errs.push((
                                 EgonTypeError::MismatchType {
                                     expected: then_typeref.to_string(),
@@ -33,20 +45,11 @@ expr_rule!(
                                 else_span.clone(),
                             ));
                         }
-                    } else {
-                        errs.push((
-                            EgonTypeError::MismatchType {
-                                expected: then_typeref.to_string(),
-                                actual: else_typeref.to_string(),
-                            }
-                            .into(),
-                            else_span.clone(),
-                        ));
-                    }
 
+                    }
                 }
-            }
-        };
+            };
+        }
 
         errs
     }

@@ -732,12 +732,7 @@ impl<'a> Verifier<'a> {
             let rule_string = rule.to_string();
 
             let rule_errs = rule
-                .visit_expr(
-                    expr,
-                    span,
-                    &|id: &str, span: &Span| self.resolve_identifier(id, span),
-                    &|expr: &ast::Expr, span: &Span| self.resolve_expr_type(expr, span),
-                )
+                .visit_expr(&self.type_env, expr, span)
                 .err()
                 .unwrap_or_default();
 

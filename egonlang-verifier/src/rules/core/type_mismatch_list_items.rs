@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
 use egonlang_errors::EgonTypeError;
+use rules::rule::RuleTarget;
 
 expr_rule!(
     /// Checks that all items of a list are of the same type
@@ -11,35 +12,39 @@ expr_rule!(
     /// ["a", "b", "c"];
     /// ```
     TypeMisMatchListItems,
-    |expr, _span, _resolve_ident, resolve_expr| {
+    |context| {
         let mut errs = vec![];
 
-        if let ast::Expr::List(expr_list) = expr {
-            let items = &expr_list.items;
+        if let RuleTarget::Expr(expr) = context.target() {
+            if let ast::Expr::List(expr_list) = expr {
+                let items = &expr_list.items;
 
-            if !items.is_empty() {
-                let (first_item_expr, first_item_span) = items.first().unwrap();
-                let first_item_typeref = resolve_expr(first_item_expr, first_item_span)
-                    .unwrap();
+                if !items.is_empty() {
+                    let (first_item_expr, first_item_span) = items.first().unwrap();
+                    let first_item_typeref = context.resolve_expr(first_item_expr, first_item_span)
+                        .unwrap();
 
-                let remaining_items: Vec<span::Spanned<ast::Expr>> = items.clone().into_iter().skip(1).collect();
+                    let remaining_items: Vec<span::Spanned<ast::Expr>> = items.clone().into_iter().skip(1).collect();
 
-                for (item, item_span) in &remaining_items {
-                    if let Ok(item_typeref) = resolve_expr(item, item_span) {
-                        if item_typeref != first_item_typeref {
-                            errs.push((
-                                EgonTypeError::MismatchType {
-                                    expected: first_item_typeref.to_string(),
-                                    actual: item_typeref.to_string(),
-                                }
-                                .into(),
-                                item_span.clone(),
-                            ));
+                    for (item, item_span) in &remaining_items {
+                        if let Some(item_typeref) = context.resolve_expr(item, item_span) {
+                            if item_typeref != first_item_typeref {
+                                errs.push((
+                                    EgonTypeError::MismatchType {
+                                        expected: first_item_typeref.to_string(),
+                                        actual: item_typeref.to_string(),
+                                    }
+                                    .into(),
+                                    item_span.clone(),
+                                ));
+                            }
                         }
                     }
                 }
-            }
-        };
+            };
+        }
+
+
 
         errs
     }

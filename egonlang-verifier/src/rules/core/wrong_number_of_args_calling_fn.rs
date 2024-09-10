@@ -2,20 +2,22 @@ use crate::prelude::*;
 use egonlang_core::prelude::*;
 use egonlang_errors::EgonTypeError;
 use egonlang_types::Type;
+use rules::rule::RuleTarget;
 use span::Span;
 
-expr_rule!(
-    WrongNumberOfArgsCallingFn,
-    |expr, span, _resolve_ident, resolve_expr| {
-        if let ast::Expr::Call(call_expr) = &expr {
-            let mut errs = vec![];
+expr_rule!(WrongNumberOfArgsCallingFn, |context| {
+    let mut errs = vec![];
 
-            if let Ok(callee_type) = resolve_expr(&call_expr.callee.0, &call_expr.callee.1) {
+    if let RuleTarget::Expr(expr) = context.target() {
+        if let ast::Expr::Call(call_expr) = &expr {
+            if let Some(callee_type) =
+                context.resolve_expr(&call_expr.callee.0, &call_expr.callee.1)
+            {
                 if callee_type.is_function() {
                     let fn_param_types: Vec<(Type, Span)> = callee_type
                         .get_function_params()
                         .iter()
-                        .map(|x| (x.clone(), span.clone()))
+                        .map(|x| (x.clone(), context.span().clone()))
                         .collect();
 
                     let call_arg_types: Vec<(Type, Span)> = call_expr
@@ -23,9 +25,9 @@ expr_rule!(
                         .args
                         .into_iter()
                         .map(|x| {
-                            let result = resolve_expr(&x.0, &x.1).expect("WHOOPS");
+                            let result = context.resolve_expr(&x.0, &x.1).expect("WHOOPS");
 
-                            (result, x.1.clone())
+                            (result.clone(), x.1.clone())
                         })
                         .collect();
 
@@ -36,18 +38,16 @@ expr_rule!(
                                 actual: call_arg_types.len(),
                             }
                             .into(),
-                            span.clone(),
+                            context.span().clone(),
                         ));
                     }
                 }
             }
-
-            errs
-        } else {
-            vec![]
         }
     }
-);
+
+    errs
+});
 
 #[cfg(test)]
 mod tests {

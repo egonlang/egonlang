@@ -1,4 +1,4 @@
-use crate::expr_rule;
+use crate::{expr_rule, rules::rule::RuleTarget};
 use egonlang_core::prelude::*;
 use egonlang_errors::EgonTypeError;
 
@@ -15,11 +15,13 @@ expr_rule!(
     /// 123(); // TypeError: number is not callable
     /// ```
     NoNonCallableCalled,
-    |expr, _span, _resolve_ident, resolve_expr| {
-        if let ast::Expr::Call(expr_call) = &expr {
-            if let Ok(callee_type) = resolve_expr(&expr_call.callee.0, &expr_call.callee.1) {
-                if !callee_type.is_function() {
-                    return vec![(EgonTypeError::NotCallable(callee_type.to_string()).into(), expr_call.callee.1.clone())];
+    |context| {
+        if let RuleTarget::Expr(expr) = context.target() {
+            if let ast::Expr::Call(expr_call) = &expr {
+                if let Some(callee_type) = context.resolve_expr(&expr_call.callee.0, &expr_call.callee.1) {
+                    if !callee_type.is_function() {
+                        return vec![(EgonTypeError::NotCallable(callee_type.to_string()).into(), expr_call.callee.1.clone())];
+                    }
                 }
             }
         }
