@@ -16,10 +16,10 @@ expr_rule!(
 
         if let ast::Expr::If(if_expr) = expr {
             let (then_expr, then_span) = &if_expr.then;
-            let then_typeref = resolve_expr(then_expr, then_span).unwrap().of_type;
+            let then_typeref = resolve_expr(then_expr, then_span).unwrap();
 
             if let Some((else_expr, else_span)) = &if_expr.else_ {
-                let else_typeref = resolve_expr(else_expr, else_span).unwrap().of_type;
+                let else_typeref = resolve_expr(else_expr, else_span).unwrap();
 
                 if then_typeref != else_typeref {
                     if then_typeref.is_list() && else_typeref.is_list() {

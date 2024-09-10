@@ -131,6 +131,8 @@ pub enum EgonTypeError {
     NotCallable(String),
     #[error("expects {expected} arguments but received {actual}")]
     WrongNumberOfArgs { expected: usize, actual: usize },
+    #[error("{0} is already defined")]
+    AlreadyDefined(String),
 }
 
 impl ErrorCode for EgonTypeError {
@@ -148,6 +150,7 @@ impl ErrorCode for EgonTypeError {
                 expected: _,
                 actual: _,
             } => "WrongNumberOfArgs",
+            EgonTypeError::AlreadyDefined(_) => "AlreadyDefined",
         }
         .to_string();
 

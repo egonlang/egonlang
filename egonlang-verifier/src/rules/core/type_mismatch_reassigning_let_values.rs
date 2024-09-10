@@ -26,17 +26,16 @@ expr_rule!(
             let identifier = &expr_assign.identifier.0.name;
 
             if let Ok(type_env_value) = resolve_ident(identifier, span) {
-                let type_env_typeref = &type_env_value.of_type;
-                let is_const = &type_env_value.is_const;
+                let type_env_typeref = &type_env_value;
 
                 let (value_expr, value_span) = &expr_assign.value;
                 let value_typeref = resolve_expr(value_expr, value_span).unwrap();
 
-                if !is_const && type_env_typeref != &value_typeref.of_type {
+                if type_env_typeref != &value_typeref {
                     errs.push((
                         EgonTypeError::MismatchType {
                             expected: type_env_typeref.to_string(),
-                            actual: value_typeref.of_type.to_string(),
+                            actual: value_typeref.to_string(),
                         }
                         .into(),
                         value_span.clone(),

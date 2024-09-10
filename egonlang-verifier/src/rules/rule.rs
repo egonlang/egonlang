@@ -1,26 +1,23 @@
 use egonlang_errors::EgonResultMultiSpannedErr;
 
 pub trait ResolveIdent:
-    Fn(&str, &::span::Span) -> EgonResultMultiSpannedErr<egonlang_types::type_env::TypeEnvValue>
+    Fn(&str, &::span::Span) -> EgonResultMultiSpannedErr<egonlang_types::Type>
 {
 }
 pub trait ResolveExpr:
-    Fn(
-    &::egonlang_core::ast::Expr,
-    &::span::Span,
-) -> EgonResultMultiSpannedErr<egonlang_types::type_env::TypeEnvValue>
+    Fn(&::egonlang_core::ast::Expr, &::span::Span) -> EgonResultMultiSpannedErr<egonlang_types::Type>
 {
 }
 
 impl<F> ResolveIdent for F where
-    F: Fn(&str, &::span::Span) -> EgonResultMultiSpannedErr<egonlang_types::type_env::TypeEnvValue>
+    F: Fn(&str, &::span::Span) -> EgonResultMultiSpannedErr<egonlang_types::Type>
 {
 }
 impl<F> ResolveExpr for F where
     F: Fn(
         &::egonlang_core::ast::Expr,
         &::span::Span,
-    ) -> EgonResultMultiSpannedErr<egonlang_types::type_env::TypeEnvValue>
+    ) -> EgonResultMultiSpannedErr<egonlang_types::Type>
 {
 }
 

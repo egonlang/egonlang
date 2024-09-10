@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use type_env::TypeEnvValue;
 
 /// Type in the Egon language
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Hash, Eq)]
 pub struct Type {
     name: String,
     params: Vec<Type>,

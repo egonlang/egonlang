@@ -11,9 +11,8 @@ expr_rule!(
             let mut errs = vec![];
 
             if let Ok(callee_type) = resolve_expr(&call_expr.callee.0, &call_expr.callee.1) {
-                if callee_type.of_type.is_function() {
+                if callee_type.is_function() {
                     let fn_param_types: Vec<(Type, Span)> = callee_type
-                        .of_type
                         .get_function_params()
                         .iter()
                         .map(|x| (x.clone(), span.clone()))
@@ -26,7 +25,7 @@ expr_rule!(
                         .map(|x| {
                             let result = resolve_expr(&x.0, &x.1).expect("WHOOPS");
 
-                            (result.of_type, x.1.clone())
+                            (result, x.1.clone())
                         })
                         .collect();
 

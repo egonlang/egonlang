@@ -24,11 +24,11 @@ expr_rule!(
             if let Ok(body_typeref) = resolve_expr(body_expr, body_span) {
                 let mut errs = vec![];
 
-                if body_typeref.of_type != *fn_return_type_typeref {
+                if body_typeref != *fn_return_type_typeref {
                     errs.push((
                         EgonTypeError::MismatchType {
                             expected: fn_return_type_typeref.to_string(),
-                            actual: body_typeref.of_type.to_string(),
+                            actual: body_typeref.to_string(),
                         }
                         .into(),
                         body_span.clone(),

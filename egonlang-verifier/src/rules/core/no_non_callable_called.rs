@@ -18,8 +18,8 @@ expr_rule!(
     |expr, _span, _resolve_ident, resolve_expr| {
         if let ast::Expr::Call(expr_call) = &expr {
             if let Ok(callee_type) = resolve_expr(&expr_call.callee.0, &expr_call.callee.1) {
-                if !callee_type.of_type.is_function() {
-                    return vec![(EgonTypeError::NotCallable(callee_type.of_type.to_string()).into(), expr_call.callee.1.clone())];
+                if !callee_type.is_function() {
+                    return vec![(EgonTypeError::NotCallable(callee_type.to_string()).into(), expr_call.callee.1.clone())];
                 }
             }
         }

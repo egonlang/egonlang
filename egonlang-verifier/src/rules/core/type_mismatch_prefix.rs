@@ -23,11 +23,11 @@ expr_rule!(
                     let (value_expr, value_span) = &prefix_expr.rt;
                     let value_typeref = resolve_expr(value_expr, value_span).unwrap();
 
-                    if value_typeref.of_type != Type::number() {
+                    if value_typeref != Type::number() {
                         errs.push((
                             EgonTypeError::MismatchType {
                                 expected: Type::number().to_string(),
-                                actual: value_typeref.of_type.to_string(),
+                                actual: value_typeref.to_string(),
                             }
                             .into(),
                             value_span.clone(),
@@ -38,11 +38,11 @@ expr_rule!(
                     let (value_expr, value_span) = &prefix_expr.rt;
                     let value_typeref = resolve_expr(value_expr, value_span).unwrap();
 
-                    if value_typeref.of_type != Type::bool() {
+                    if value_typeref != Type::bool() {
                         errs.push((
                             EgonTypeError::MismatchType {
                                 expected: Type::bool().to_string(),
-                                actual: value_typeref.of_type.to_string(),
+                                actual: value_typeref.to_string(),
                             }
                             .into(),
                             value_span.clone(),
