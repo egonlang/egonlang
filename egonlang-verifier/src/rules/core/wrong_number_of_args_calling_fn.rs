@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
 use egonlang_errors::EgonTypeError;
-use egonlang_types::Type;
+use egonlang_types::{Type, TypeParam};
 use span::Span;
 
 expr_rule!(
@@ -12,11 +12,11 @@ expr_rule!(
 
             if let Ok(callee_type) = resolve_expr(&call_expr.callee.0, &call_expr.callee.1) {
                 if callee_type.of_type.is_function() {
-                    let fn_param_types: Vec<(Type, Span)> = callee_type
+                    let fn_param_types: Vec<(TypeParam, Span)> = callee_type
                         .of_type
                         .get_function_params()
-                        .iter()
-                        .map(|x| (x.clone(), span.clone()))
+                        .into_iter()
+                        .map(|x| (x.clone().into(), span.clone()))
                         .collect();
 
                     let call_arg_types: Vec<(Type, Span)> = call_expr

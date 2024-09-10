@@ -11,5 +11,6 @@
     ],
     "egon.binPath": "./target/debug/egon",
     "editor.renderWhitespace": "all",
-    "terminal.integrated.scrollback": 2500
+    "terminal.integrated.scrollback": 2500,
+    "twinny.ollamaApiPort": 5000
 }

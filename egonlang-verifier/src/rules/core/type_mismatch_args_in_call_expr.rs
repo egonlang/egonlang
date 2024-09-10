@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
 use egonlang_errors::EgonTypeError;
-use egonlang_types::Type;
+use egonlang_types::{Type, TypeParam};
 use span::Span;
 
 expr_rule!(
@@ -22,11 +22,11 @@ expr_rule!(
         if let ast::Expr::Call(call_expr) = &expr {
             let mut errs = vec![];
 
-            let fn_param_types: Vec<(Type, Span)> = if let Ok(callee_type) = resolve_expr(&call_expr.callee.0, &call_expr.callee.1) {
+            let fn_param_types: Vec<(TypeParam, Span)> = if let Ok(callee_type) = resolve_expr(&call_expr.callee.0, &call_expr.callee.1) {
                 if !callee_type.of_type.is_function() {
                     vec![]
                 } else {
-                    callee_type.of_type.get_function_params().iter().map(|x| (x.clone(), span.clone())).collect()
+                    callee_type.of_type.get_function_params().into_iter().map(|x| (x.clone().into(), span.clone())).collect()
                 }
             } else {
                 vec![]
@@ -40,10 +40,13 @@ expr_rule!(
 
             for (i, (t, s)) in call_arg_types.iter().enumerate() {
                 if let Some((xt, _)) = fn_param_types.get(i) {
-                    if t != xt {
+                    let xt_type = xt.bound_type.as_ref().unwrap();
+
+
+                    if t != xt_type {
                         errs.push((
                             EgonTypeError::MismatchType {
-                                expected: xt.to_string(),
+                                expected: xt_type.to_string(),
                                 actual: t.to_string()
                             }.into(),
                             s.clone()

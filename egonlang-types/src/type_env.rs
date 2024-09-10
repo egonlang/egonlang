@@ -2,7 +2,7 @@ use std::{collections::HashMap, fmt};
 
 use tracelog::{log_identifier, log_type};
 
-use crate::{egon_bool, egon_number, egon_range, egon_string, Type};
+use crate::Type;
 
 /// Store and retreive type information for string identifiers
 #[derive(Default)]
@@ -17,18 +17,6 @@ impl TypeEnv {
         };
 
         type_env.start_scope();
-
-        type_env.set("number", egon_number!().into());
-        type_env.set("bool", egon_bool!().into());
-        type_env.set("string", egon_string!().into());
-        type_env.set("range", egon_range!().into());
-        type_env.set("()", Type::unit().into());
-        type_env.set("list", Type::unknown_list().into());
-        type_env.set("tuple", Type::tuple(vec![]).into());
-        type_env.set(
-            "function",
-            Type::function(Type::tuple(vec![]), Type::unit()).into(),
-        );
 
         type_env
     }
@@ -63,7 +51,18 @@ impl TypeEnv {
                     log_identifier(identifier)
                 );
 
-                return Some(result.map(result.of_type.params().first().unwrap()));
+                return Some(
+                    result.map(
+                        result
+                            .of_type
+                            .params()
+                            .first()
+                            .unwrap()
+                            .bound_type
+                            .as_ref()
+                            .unwrap(),
+                    ),
+                );
             }
         }
 
@@ -109,7 +108,13 @@ impl TypeEnv {
             // type A = number;
             // type B = A;
             // ---------^ Type::typed(Type::number())
-            let get = self.get(&new_typeref.to_string());
+            let get = self.get(
+                &new_typeref
+                    .bound_type
+                    .as_ref()
+                    .expect("This type should exist")
+                    .to_string(),
+            );
 
             return match get {
                 Some(aliased_type) => {
@@ -138,7 +143,7 @@ impl TypeEnv {
                         "(level: {}) Setting {} to the type alias {}",
                         self.get_scope_depth(),
                         log_identifier(identifier),
-                        log_type(&new_typeref)
+                        log_type(new_typeref.bound_type.as_ref().unwrap())
                     );
                     // Set the name to the type
                     //
@@ -150,7 +155,7 @@ impl TypeEnv {
                     scope.insert(
                         identifier.to_string(),
                         TypeEnvValue {
-                            of_type: new_typeref,
+                            of_type: new_typeref.bound_type.expect("This type should exist"),
                             is_const: true,
                         },
                     )
@@ -271,7 +276,6 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     use crate::{
-        egon_bool, egon_number,
         type_env::{RootScopeEndedError, TypeEnv, TypeEnvValue},
         Type,
     };
@@ -314,11 +318,11 @@ mod tests {
     fn get_returns_some_type_env_value_if_exists() {
         let mut env = TypeEnv::new();
 
-        env.set("a", TypeEnvValue::new_const(egon_number!()));
+        env.set("a", TypeEnvValue::new_const(Type::number()));
 
         let result = env.get("a");
 
-        assert_eq!(Some(TypeEnvValue::new_const(egon_number!())), result);
+        assert_eq!(Some(TypeEnvValue::new_const(Type::number())), result);
     }
 
     #[test]
@@ -335,7 +339,7 @@ mod tests {
         // Alias type `Int` to type `number`
         env.set("Int", Type::typed(Type::number()).into());
 
-        assert_eq!(Some(egon_number!().into()), env.get("Int"));
+        assert_eq!(Some(Type::number().into()), env.get("Int"));
     }
 
     #[test]
@@ -350,28 +354,28 @@ mod tests {
 
         // Alias type `Int2` resolves to the root type of `number`
         // `Int2` -> `Int` -> `number`
-        assert_eq!(Some(egon_number!().into()), env.get("Int2"));
+        assert_eq!(Some(Type::number().into()), env.get("Int2"));
     }
 
     #[test]
     fn override_type_in_new_scope() {
         let mut env = TypeEnv::new();
 
-        env.set("a", egon_number!().into());
+        env.set("a", Type::number().into());
 
         let t = env.get("a");
-        assert_eq!(Some(egon_number!().into()), t);
+        assert_eq!(Some(Type::number().into()), t);
 
         env.start_scope();
 
-        env.set("a", egon_bool!().into());
+        env.set("a", Type::bool().into());
 
         let t = env.get("a");
-        assert_eq!(Some(egon_bool!().into()), t);
+        assert_eq!(Some(Type::bool().into()), t);
 
         let _ = env.end_scope();
 
         let t = env.get("a");
-        assert_eq!(Some(egon_number!().into()), t);
+        assert_eq!(Some(Type::number().into()), t);
     }
 }

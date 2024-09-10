@@ -1,9 +1,8 @@
 use egonlang_core::prelude::*;
 use egonlang_errors::{EgonErrorS, EgonResultMultiSpannedErr, EgonTypeError};
 use egonlang_types::{
-    egon_unknown,
     type_env::{TypeEnv, TypeEnvValue},
-    Type,
+    Type, TypeParam,
 };
 use span::Span;
 use tracelog::{log_expr, log_identifier, log_stmt, log_type};
@@ -201,7 +200,15 @@ impl<'a> Verifier<'a> {
                                 log_expr(expr)
                             );
 
-                            Ok(callee_type.of_type.get_function_return().into())
+                            Ok(<egonlang_types::Type as Clone>::clone(
+                                &(*callee_type
+                                    .of_type
+                                    .get_function_return()
+                                    .bound_type
+                                    .as_ref()
+                                    .expect("TODO: SHOULD BE THERE")),
+                            )
+                            .into())
                         } else {
                             tracelog::tracelog!(
                                 label = verifier,resolve_expr_type,expr_call,resolve_callee;
@@ -211,7 +218,7 @@ impl<'a> Verifier<'a> {
                                 log_expr(expr)
                             );
 
-                            Ok(egon_unknown!().into())
+                            Ok(Type::unknown().into())
                         }
                     }
                     Err(errs) => Err(errs),
@@ -311,7 +318,7 @@ impl<'a> Verifier<'a> {
                     .map(|(e, s)| {
                         let et = self.resolve_expr_type(e, s);
 
-                        et.unwrap().of_type
+                        et.unwrap().of_type.into()
                     })
                     .collect();
 
@@ -441,7 +448,7 @@ impl<'a> Verifier<'a> {
                     .resolve_expr_type(&fn_.return_type.0, &fn_.return_type.1)?
                     .of_type;
 
-                Ok(Type::function(Type::tuple(fn_params), fn_return_type).into())
+                Ok(Type::function(fn_params, fn_return_type).into())
             }
             ast::Expr::Range(_) => {
                 tracelog::tracelog!(
@@ -1079,7 +1086,7 @@ impl<'a> Verifier<'a> {
                             return Err(errs);
                         }
 
-                        Ok(Type::function(Type::tuple(param_types), body_type.of_type).into())
+                        Ok(Type::function(param_types, body_type.of_type).into())
                     }
                     Err(body_errs) => {
                         let mut errs: Vec<EgonErrorS> = vec![];
@@ -1248,7 +1255,7 @@ impl<'a> Verifier<'a> {
                 let mut errs: Vec<EgonErrorS> = vec![];
 
                 let type_name = &type_expr.type_name.0.name;
-                let type_params: Vec<Type> = type_expr
+                let type_params: Vec<TypeParam> = type_expr
                     .parameters
                     .iter_mut()
                     .map(|param| {
@@ -1256,10 +1263,16 @@ impl<'a> Verifier<'a> {
 
                         if let Err(t_errs) = t {
                             errs.extend(t_errs);
-                            return Type::unknown();
+                            return TypeParam {
+                                name: "??".to_owned(),
+                                bound_type: Some(Type::unknown()),
+                            };
                         }
 
-                        t.unwrap().of_type
+                        TypeParam {
+                            name: "??".to_owned(),
+                            bound_type: Some(t.unwrap().of_type),
+                        }
                     })
                     .collect();
 
