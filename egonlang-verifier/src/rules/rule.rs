@@ -1,8 +1,6 @@
-use std::{collections::HashMap, sync::Arc};
+use std::sync::Arc;
 
-use egonlang_core::ast;
 use egonlang_errors::EgonResultMultiSpannedErr;
-use egonlang_types::Type;
 
 /// Rule for verifying statements and expressions
 pub trait Rule<'a>: std::fmt::Display {
@@ -11,7 +9,7 @@ pub trait Rule<'a>: std::fmt::Display {
         stmt: &::egonlang_core::ast::Stmt,
         span: &::span::Span,
         resolve_ident: &::egonlang_types::type_env::TypeEnv,
-        expr_types: &HashMap<span::Spanned<Arc<ast::Expr>>, Type>,
+        expr_types: &crate::verifier::VerifierExprTypeCache,
     ) -> EgonResultMultiSpannedErr<()>;
 
     fn visit_expr(
@@ -19,7 +17,7 @@ pub trait Rule<'a>: std::fmt::Display {
         expr: Arc<::egonlang_core::ast::Expr>,
         span: &::span::Span,
         resolve_ident: &::egonlang_types::type_env::TypeEnv,
-        expr_types: &HashMap<span::Spanned<Arc<ast::Expr>>, Type>,
+        expr_types: &crate::verifier::VerifierExprTypeCache,
     ) -> EgonResultMultiSpannedErr<()>;
 }
 
@@ -39,7 +37,7 @@ macro_rules! expr_rule {
                     _stmt: &::egonlang_core::ast::Stmt,
                     _span: &::span::Span,
                     _resolve_ident: &::egonlang_types::type_env::TypeEnv,
-                    _expr_types: &::std::collections::HashMap<::span::Spanned<::std::sync::Arc<ast::Expr>>, ::egonlang_types::Type>,
+                    _expr_types: &$crate::verifier::VerifierExprTypeCache,
                 ) -> ::egonlang_errors::EgonResultMultiSpannedErr<()> {
                     Ok(())
                 }
@@ -49,7 +47,7 @@ macro_rules! expr_rule {
                     expr: ::std::sync::Arc<::egonlang_core::ast::Expr>,
                     _span: &::span::Span,
                     _resolve_ident: &::egonlang_types::type_env::TypeEnv,
-                    _expr_types: &::std::collections::HashMap<::span::Spanned<::std::sync::Arc<ast::Expr>>, ::egonlang_types::Type>,
+                    _expr_types: &$crate::verifier::VerifierExprTypeCache,
                 ) -> ::egonlang_errors::EgonResultMultiSpannedErr<()> {
                     let internal = |$expr: ::std::sync::Arc<::egonlang_core::ast::Expr>| ->
                         Vec<::egonlang_errors::EgonErrorS> {
@@ -90,7 +88,7 @@ macro_rules! expr_rule {
                     _stmt: &::egonlang_core::ast::Stmt,
                     _span: &::egonlang_core::span::Span,
                     _resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
-                    _expr_types: ::std::collections::HashMap<::std::sync::Arc<ast::Expr>, ::egonlang_types::Type>,
+                    _expr_types: &$crate::verifier::VerifierExprTypeCache,
                 ) -> ::egonlang_errors::EgonResult<()> {
                     Ok(())
                 }
@@ -100,7 +98,7 @@ macro_rules! expr_rule {
                     expr: &::egonlang_core::ast::Expr,
                     span: &::egonlang_core::span::Span,
                     _resolve_ident: &dyn $crate::rules::rule::ResolveIdent,
-                    _expr_types: ::std::collections::HashMap<::std::sync::Arc<ast::Expr>, ::egonlang_types::Type>,
+                    _expr_types: &$crate::verifier::VerifierExprTypeCache,
                 ) -> ::egonlang_errors::EgonResult<()> {
                     let internal = | $expr: &::egonlang_core::ast::Expr,
                                      $span: &::egonlang_core::span::Span |
@@ -131,7 +129,7 @@ macro_rules! expr_rule {
                     _stmt: &::egonlang_core::ast::Stmt,
                     _span: &::span::Span,
                     _resolve_ident: &::egonlang_types::type_env::TypeEnv,
-                    _expr_types: &::std::collections::HashMap<::span::Spanned<::std::sync::Arc<ast::Expr>>, ::egonlang_types::Type>,
+                    _expr_types: &$crate::verifier::VerifierExprTypeCache,
                 ) -> ::egonlang_errors::EgonResultMultiSpannedErr<()> {
                     Ok(())
                 }
@@ -141,12 +139,12 @@ macro_rules! expr_rule {
                     expr: ::std::sync::Arc<::egonlang_core::ast::Expr>,
                     span: &::span::Span,
                     resolve_ident: &::egonlang_types::type_env::TypeEnv,
-                    expr_types: &::std::collections::HashMap<::span::Spanned<::std::sync::Arc<ast::Expr>>, ::egonlang_types::Type>,
+                    expr_types: &$crate::verifier::VerifierExprTypeCache,
                 ) -> ::egonlang_errors::EgonResultMultiSpannedErr<()> {
                     let internal = | $expr: ::std::sync::Arc<::egonlang_core::ast::Expr>,
                                      $span: &::span::Span,
                                      $resolve_ident: &::egonlang_types::type_env::TypeEnv,
-                                     $resolve_expr: &::std::collections::HashMap<::span::Spanned<::std::sync::Arc<ast::Expr>>, ::egonlang_types::Type> |
+                                     $resolve_expr: &$crate::verifier::VerifierExprTypeCache |
                         { $body };
 
                     let errs = internal(expr, span, resolve_ident, expr_types);
@@ -187,12 +185,12 @@ macro_rules! stmt_rule {
                     stmt: &::egonlang_core::ast::Stmt,
                     span: &::span::Span,
                     resolve_ident: &::egonlang_types::type_env::TypeEnv,
-                    expr_types: &::std::collections::HashMap<::span::Spanned<::std::sync::Arc<::egonlang_core::ast::Expr>>, ::egonlang_types::Type>,
+                    expr_types: &$crate::verifier::VerifierExprTypeCache,
                 ) -> ::egonlang_errors::EgonResultMultiSpannedErr<()> {
                     let internal = | $stmt: &::egonlang_core::ast::Stmt,
                                      $span: &::span::Span,
                                      $resolve_ident: &::egonlang_types::type_env::TypeEnv,
-                                     $resolve_expr: &::std::collections::HashMap<::span::Spanned<::std::sync::Arc<::egonlang_core::ast::Expr>>, ::egonlang_types::Type> |
+                                     $resolve_expr: &$crate::verifier::VerifierExprTypeCache |
                         { $body };
 
                     let errs = internal(stmt, span, resolve_ident, expr_types);
@@ -209,7 +207,7 @@ macro_rules! stmt_rule {
                     _expr: ::std::sync::Arc<::egonlang_core::ast::Expr>,
                     _span: &::span::Span,
                     _resolve_ident: &::egonlang_types::type_env::TypeEnv,
-                    _expr_types: &::std::collections::HashMap<::span::Spanned<::std::sync::Arc<::egonlang_core::ast::Expr>>, ::egonlang_types::Type>,
+                    _expr_types: &$crate::verifier::VerifierExprTypeCache,
                 ) -> ::egonlang_errors::EgonResultMultiSpannedErr<()> {
                     Ok(())
                 }

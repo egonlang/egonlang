@@ -1,5 +1,6 @@
 use std::{collections::HashMap, sync::Arc};
 
+use ast::ExprS;
 use egonlang_core::prelude::*;
 use egonlang_errors::{EgonErrorS, EgonResultMultiSpannedErr, EgonTypeError};
 use egonlang_types::{
@@ -12,7 +13,7 @@ use tracelog::{log_expr, log_identifier, log_stmt, log_type};
 
 use crate::rules::{core::*, Rule};
 
-pub type VerifierExprTypeCache = HashMap<span::Spanned<Arc<ast::Expr>>, Type>;
+pub type VerifierExprTypeCache = HashMap<ExprS, Type>;
 
 /// Verify an AST [`Module`](egonlang_core::ast::Module) using the registered
 /// [`Rule`](crate::rules::Rule) set
