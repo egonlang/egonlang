@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/work/egonlang/egonlang/target/debug/build/egonlang-core-ff26acc2b5174c75/out/grammar.rs`."><title>grammar.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../../../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../../../../../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../../../../../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../../../../../../../../../" data-static-root-path="../../../../../../../../../../../../static.files/" data-current-crate="egonlang_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.1 (3f5fd8dd4 2024-08-06)" data-channel="1.80.1" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../../../../../../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../../../../../../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../../../../../../../../../src-files.js"></script><script defer src="../../../../../../../../../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../../../../../../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../../../../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../../../../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/work/egonlang/egonlang/target/debug/build/egonlang-core-a60d46d4b5ed0d15/out/grammar.rs`."><title>grammar.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../../../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../../../../../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../../../../../../../../static.files/rustdoc-c5d6553a23f1e5a6.css"><meta name="rustdoc-vars" data-root-path="../../../../../../../../../../../../" data-static-root-path="../../../../../../../../../../../../static.files/" data-current-crate="egonlang_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0 (eeb90cda1 2024-09-04)" data-channel="1.81.0" data-search-js="search-d234aafac6c221dd.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../../../../../../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../../../../../../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../../../../../../../../../src-files.js"></script><script defer src="../../../../../../../../../../../../static.files/main-d2fab2bf619172d3.js"></script><noscript><link rel="stylesheet" href="../../../../../../../../../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../../../../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../../../../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -12816,10 +12816,13 @@
 <a href="#12816" id="12816">12816</a>
 <a href="#12817" id="12817">12817</a>
 <a href="#12818" id="12818">12818</a>
+<a href="#12819" id="12819">12819</a>
+<a href="#12820" id="12820">12820</a>
 </pre></div><pre class="rust"><code><span class="comment">// auto-generated: "lalrpop 0.21.0"
-// sha3: d3f56460159d8a189f11ebc4a8e92efd03add2a6dd19029dd47dc6c7cff89f4a
+// sha3: 107ed872d274f8f99ea6d0d49345807c8ac8873c1c786ce4af1b5e6fb76e1725
 </span><span class="kw">use </span>lalrpop_util::ParseError;
 <span class="kw">use </span>egonlang_errors::EgonErrorS;
+<span class="kw">use </span>std::sync::Arc;
 <span class="kw">use crate</span>::{ast, lexer};
 <span class="kw">use </span>span;
 <span class="kw">use </span>egonlang_types::Type;
@@ -12836,6 +12839,7 @@
 
     <span class="kw">use </span>lalrpop_util::ParseError;
     <span class="kw">use </span>egonlang_errors::EgonErrorS;
+    <span class="kw">use </span>std::sync::Arc;
     <span class="kw">use crate</span>::{ast, lexer};
     <span class="kw">use </span>span;
     <span class="kw">use </span>egonlang_types::Type;
@@ -12854,8 +12858,8 @@
         Variant2(f64),
         Variant3(__lalrpop_util::ErrorRecovery&lt;usize, lexer::Token, EgonErrorS&gt;),
         Variant4(<span class="prelude-ty">Option</span>&lt;lexer::Token&gt;),
-        Variant5(span::Spanned&lt;ast::Expr&gt;),
-        Variant6(alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;),
+        Variant5(span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;),
+        Variant6(alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;),
         Variant7(span::Spanned&lt;(ast::Identifier, Type)&gt;),
         Variant8(alloc::vec::Vec&lt;span::Spanned&lt;(ast::Identifier, Type)&gt;&gt;),
         Variant9(Type),
@@ -12864,18 +12868,18 @@
         Variant12(<span class="prelude-ty">Option</span>&lt;span::Spanned&lt;Type&gt;&gt;),
         Variant13(Vec&lt;Type&gt;),
         Variant14(<span class="prelude-ty">Option</span>&lt;Vec&lt;Type&gt;&gt;),
-        Variant15(<span class="prelude-ty">Option</span>&lt;span::Spanned&lt;ast::Expr&gt;&gt;),
+        Variant15(<span class="prelude-ty">Option</span>&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;),
         Variant16(()),
         Variant17(span::Spanned&lt;ast::Stmt&gt;),
         Variant18(alloc::vec::Vec&lt;span::Spanned&lt;ast::Stmt&gt;&gt;),
         Variant19(usize),
-        Variant20(ast::Expr),
+        Variant20(Arc&lt;ast::Expr&gt;),
         Variant21((ast::Identifier, Type)),
         Variant22(ast::Identifier),
         Variant23(ast::Module),
         Variant24(ast::OpInfix),
         Variant25(ast::OpPrefix),
-        Variant26(Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;),
+        Variant26(Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;),
         Variant27(Vec&lt;span::Spanned&lt;(ast::Identifier, Type)&gt;&gt;),
         Variant28(Vec&lt;ast::ExprS&gt;),
         Variant29(span::Spanned&lt;ast::Identifier&gt;),
@@ -16207,6 +16211,16 @@
             <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
         }
     }
+    <span class="kw">fn </span>__pop_Variant20&lt;
+    &gt;(
+        __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
+    ) -&gt; (usize, Arc&lt;ast::Expr&gt;, usize)
+     {
+        <span class="kw">match </span>__symbols.pop() {
+            <span class="prelude-val">Some</span>((__l, __Symbol::Variant20(__v), __r)) =&gt; (__l, __v, __r),
+            <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
+        }
+    }
     <span class="kw">fn </span>__pop_Variant14&lt;
     &gt;(
         __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
@@ -16227,6 +16241,16 @@
             <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
         }
     }
+    <span class="kw">fn </span>__pop_Variant15&lt;
+    &gt;(
+        __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
+    ) -&gt; (usize, <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize)
+     {
+        <span class="kw">match </span>__symbols.pop() {
+            <span class="prelude-val">Some</span>((__l, __Symbol::Variant15(__v), __r)) =&gt; (__l, __v, __r),
+            <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
+        }
+    }
     <span class="kw">fn </span>__pop_Variant12&lt;
     &gt;(
         __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
@@ -16234,16 +16258,6 @@
      {
         <span class="kw">match </span>__symbols.pop() {
             <span class="prelude-val">Some</span>((__l, __Symbol::Variant12(__v), __r)) =&gt; (__l, __v, __r),
-            <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
-        }
-    }
-    <span class="kw">fn </span>__pop_Variant15&lt;
-    &gt;(
-        __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
-    ) -&gt; (usize, <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize)
-     {
-        <span class="kw">match </span>__symbols.pop() {
-            <span class="prelude-val">Some</span>((__l, __Symbol::Variant15(__v), __r)) =&gt; (__l, __v, __r),
             <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
         }
     }
@@ -16300,7 +16314,7 @@
     <span class="kw">fn </span>__pop_Variant26&lt;
     &gt;(
         __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
-    ) -&gt; (usize, Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize)
+    ) -&gt; (usize, Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize)
      {
         <span class="kw">match </span>__symbols.pop() {
             <span class="prelude-val">Some</span>((__l, __Symbol::Variant26(__v), __r)) =&gt; (__l, __v, __r),
@@ -16340,7 +16354,7 @@
     <span class="kw">fn </span>__pop_Variant6&lt;
     &gt;(
         __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
-    ) -&gt; (usize, alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize)
+    ) -&gt; (usize, alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize)
      {
         <span class="kw">match </span>__symbols.pop() {
             <span class="prelude-val">Some</span>((__l, __Symbol::Variant6(__v), __r)) =&gt; (__l, __v, __r),
@@ -16354,16 +16368,6 @@
      {
         <span class="kw">match </span>__symbols.pop() {
             <span class="prelude-val">Some</span>((__l, __Symbol::Variant18(__v), __r)) =&gt; (__l, __v, __r),
-            <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
-        }
-    }
-    <span class="kw">fn </span>__pop_Variant20&lt;
-    &gt;(
-        __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
-    ) -&gt; (usize, ast::Expr, usize)
-     {
-        <span class="kw">match </span>__symbols.pop() {
-            <span class="prelude-val">Some</span>((__l, __Symbol::Variant20(__v), __r)) =&gt; (__l, __v, __r),
             <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
         }
     }
@@ -16447,6 +16451,16 @@
             <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
         }
     }
+    <span class="kw">fn </span>__pop_Variant5&lt;
+    &gt;(
+        __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
+    ) -&gt; (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize)
+     {
+        <span class="kw">match </span>__symbols.pop() {
+            <span class="prelude-val">Some</span>((__l, __Symbol::Variant5(__v), __r)) =&gt; (__l, __v, __r),
+            <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
+        }
+    }
     <span class="kw">fn </span>__pop_Variant11&lt;
     &gt;(
         __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
@@ -16454,16 +16468,6 @@
      {
         <span class="kw">match </span>__symbols.pop() {
             <span class="prelude-val">Some</span>((__l, __Symbol::Variant11(__v), __r)) =&gt; (__l, __v, __r),
-            <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
-        }
-    }
-    <span class="kw">fn </span>__pop_Variant5&lt;
-    &gt;(
-        __symbols: <span class="kw-2">&amp;mut </span>alloc::vec::Vec&lt;(usize,__Symbol&lt;&gt;,usize)&gt;
-    ) -&gt; (usize, span::Spanned&lt;ast::Expr&gt;, usize)
-     {
-        <span class="kw">match </span>__symbols.pop() {
-            <span class="prelude-val">Some</span>((__l, __Symbol::Variant5(__v), __r)) =&gt; (__l, __v, __r),
             <span class="kw">_ </span>=&gt; __symbol_type_mismatch()
         }
     }
@@ -20333,7 +20337,7 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, expr, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
+    (<span class="kw">_</span>, expr, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
 ) -&gt; ast::Stmt
 {
@@ -20347,7 +20351,7 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-    (<span class="kw">_</span>, value, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
+    (<span class="kw">_</span>, value, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
     (<span class="kw">_</span>, expected_type, <span class="kw">_</span>): (usize, span::Spanned&lt;Type&gt;, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
@@ -20355,7 +20359,7 @@
 {
     ast::Stmt::AssertType(ast::StmtAssertType { 
             value,
-            expected_type: (ast::Expr::Type(ast::ExprType(expected_type.<span class="number">0</span>)), expected_type.<span class="number">1</span>)
+            expected_type: (ast::Expr::Type(ast::ExprType(expected_type.<span class="number">0</span>)).into(), expected_type.<span class="number">1</span>)
         })
 }
 
@@ -20366,7 +20370,7 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-    (<span class="kw">_</span>, value, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
+    (<span class="kw">_</span>, value, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
 ) -&gt; ast::Stmt
 {
@@ -20382,14 +20386,14 @@
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
     (<span class="kw">_</span>, identifier, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Identifier&gt;, usize),
     (<span class="kw">_</span>, type_expr, <span class="kw">_</span>): (usize, <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;Type&gt;&gt;, usize),
-    (<span class="kw">_</span>, value, <span class="kw">_</span>): (usize, <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
+    (<span class="kw">_</span>, value, <span class="kw">_</span>): (usize, <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
 ) -&gt; ast::Stmt
 {
     ast::StmtAssign {
             identifier,
             type_expr: type_expr.map(|(ty, ty_span)|
-                (ast::Expr::Type(ast::ExprType(ty)), ty_span)),
+                (ast::Expr::Type(ast::ExprType(ty)).into(), ty_span)),
             is_const: <span class="bool-val">false</span>,
             value,
         }.into()
@@ -20404,14 +20408,14 @@
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
     (<span class="kw">_</span>, identifier, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Identifier&gt;, usize),
     (<span class="kw">_</span>, type_expr, <span class="kw">_</span>): (usize, <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;Type&gt;&gt;, usize),
-    (<span class="kw">_</span>, value, <span class="kw">_</span>): (usize, <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
+    (<span class="kw">_</span>, value, <span class="kw">_</span>): (usize, <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
 ) -&gt; ast::Stmt
 {
     ast::StmtAssign {
             identifier,
             type_expr: type_expr.map(|(ty, ty_span)|
-                (ast::Expr::Type(ast::ExprType(ty)), ty_span)),
+                (ast::Expr::Type(ast::ExprType(ty)).into(), ty_span)),
             is_const: <span class="bool-val">true</span>,
             value,
         }.into()
@@ -20440,7 +20444,7 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
     (<span class="kw">_</span>, name, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Identifier&gt;, usize),
-    (<span class="kw">_</span>, fn_expr, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
+    (<span class="kw">_</span>, fn_expr, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
 ) -&gt; ast::Stmt
 {
     ast::Stmt::Fn(Box::new(ast::StmtFn { 
@@ -20455,8 +20459,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     __0
 }
@@ -20467,8 +20471,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, ast::Expr, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     __0
 }
@@ -20479,8 +20483,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, ast::Expr, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     __0
 }
@@ -20493,10 +20497,10 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, identifier, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Identifier&gt;, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-    (<span class="kw">_</span>, value, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, value, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
-    ast::Expr::Assign(Box::new(ast::ExprAssign { identifier, value }))
+    ast::Expr::Assign(Box::new(ast::ExprAssign { identifier, value })).into()
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -20505,8 +20509,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, ast::Expr, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     __0
 }
@@ -20518,13 +20522,13 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-    (<span class="kw">_</span>, cond, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-    (<span class="kw">_</span>, then, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-    (<span class="kw">_</span>, else_, <span class="kw">_</span>): (usize, <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, cond, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+    (<span class="kw">_</span>, then, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+    (<span class="kw">_</span>, else_, <span class="kw">_</span>): (usize, <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     {
-        ast::Expr::If(Box::new(ast::ExprIf { cond, then, else_ }))
+        ast::Expr::If(Box::new(ast::ExprIf { cond, then, else_ })).into()
     }
 }
 
@@ -20535,17 +20539,17 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-    (<span class="kw">_</span>, cond, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-    (<span class="kw">_</span>, then, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-    (<span class="kw">_</span>, else_, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, cond, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+    (<span class="kw">_</span>, then, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+    (<span class="kw">_</span>, else_, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     {
         ast::Expr::If(Box::new(ast::ExprIf { 
             cond,
             then,
             else_: <span class="prelude-val">Some</span>(else_)
-         }))
+         })).into()
     }
 }
 
@@ -20555,8 +20559,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, ast::Expr, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     __0
 }
@@ -20567,16 +20571,16 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, callee, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
+    (<span class="kw">_</span>, callee, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-    (<span class="kw">_</span>, args, <span class="kw">_</span>): (usize, Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
+    (<span class="kw">_</span>, args, <span class="kw">_</span>): (usize, Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     ast::Expr::Call(ast::ExprCall {
             callee,
             args
-        }.into())
+        }.into()).into()
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -20585,8 +20589,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, ast::Expr, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     __0
 }
@@ -20597,8 +20601,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, ast::Expr, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     __0
 }
@@ -20621,8 +20625,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, ast::Expr, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     __0
 }
@@ -20645,8 +20649,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, ast::Expr, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     __0
 }
@@ -20681,8 +20685,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, ast::Expr, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     __0
 }
@@ -20741,8 +20745,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, ast::Expr, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     __0
 }
@@ -20777,8 +20781,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, ast::Expr, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     __0
 }
@@ -20826,10 +20830,10 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, op, <span class="kw">_</span>): (usize, ast::OpPrefix, usize),
-    (<span class="kw">_</span>, rt, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, rt, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
-    ast::Expr::Prefix(Box::new(ast::ExprPrefix { op, rt }))
+    ast::Expr::Prefix(Box::new(ast::ExprPrefix { op, rt })).into()
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -20838,8 +20842,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, ast::Expr, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     __0
 }
@@ -20875,11 +20879,11 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-    (<span class="kw">_</span>, items, <span class="kw">_</span>): (usize, Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
+    (<span class="kw">_</span>, items, <span class="kw">_</span>): (usize, Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
-    ast::Expr::List(Box::new(ast::ExprList {items}))
+    ast::Expr::List(Box::new(ast::ExprList {items})).into()
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -20888,8 +20892,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, ast::Expr, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     __0
 }
@@ -20903,9 +20907,9 @@
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
     (<span class="kw">_</span>, items, <span class="kw">_</span>): (usize, Vec&lt;ast::ExprS&gt;, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
-    ast::Expr::Tuple(Box::new(ast::ExprTuple {items}))
+    ast::Expr::Tuple(Box::new(ast::ExprTuple {items})).into()
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -20914,8 +20918,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, ast::Expr, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     __0
 }
@@ -20927,9 +20931,9 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, String, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
-    ast::Expr::Literal(ast::ExprLiteral::String(__0))
+    ast::Expr::Literal(ast::ExprLiteral::String(__0)).into()
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -20939,9 +20943,9 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, f64, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
-    ast::Expr::Literal(ast::ExprLiteral::Number(__0))
+    ast::Expr::Literal(ast::ExprLiteral::Number(__0)).into()
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -20952,9 +20956,9 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, lexer::Token, usize),
     (<span class="kw">_</span>, __1, <span class="kw">_</span>): (usize, lexer::Token, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
-    ast::Expr::Unit
+    ast::Expr::Unit.into()
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -20964,9 +20968,9 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, lexer::Token, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
-    ast::Expr::Literal(ast::ExprLiteral::Bool(<span class="bool-val">true</span>))
+    ast::Expr::Literal(ast::ExprLiteral::Bool(<span class="bool-val">true</span>)).into()
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -20976,9 +20980,9 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, lexer::Token, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
-    ast::Expr::Literal(ast::ExprLiteral::Bool(<span class="bool-val">false</span>))
+    ast::Expr::Literal(ast::ExprLiteral::Bool(<span class="bool-val">false</span>)).into()
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -20987,8 +20991,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, ast::Expr, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     __0
 }
@@ -20999,8 +21003,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, ast::Expr, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     __0
 }
@@ -21011,8 +21015,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, ast::Expr, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     __0
 }
@@ -21024,9 +21028,9 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, ast::Expr, usize),
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     __0
 }
@@ -21052,13 +21056,13 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, name, <span class="kw">_</span>): (usize, String, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     ast::Expr::Identifier(ast::ExprIdentifier {
         identifier: ast::Identifier {
             name
         }
-    })
+    }).into()
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -21071,13 +21075,13 @@
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
     (<span class="kw">_</span>, inclusive_end, <span class="kw">_</span>): (usize, <span class="prelude-ty">Option</span>&lt;lexer::Token&gt;, usize),
     (<span class="kw">_</span>, end, <span class="kw">_</span>): (usize, span::Spanned&lt;f64&gt;, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     ast::Expr::Range(ast::ExprRange {
             start: <span class="prelude-val">Some</span>((ast::ExprLiteral::Number(start.<span class="number">0</span>), start.<span class="number">1</span>)),
             end: <span class="prelude-val">Some</span>((ast::ExprLiteral::Number(end.<span class="number">0</span>), end.<span class="number">1</span>)),
             inclusive_end: inclusive_end.is_some()
-        })
+        }).into()
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -21088,13 +21092,13 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, start, <span class="kw">_</span>): (usize, span::Spanned&lt;f64&gt;, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     ast::Expr::Range(ast::ExprRange {
             start: <span class="prelude-val">Some</span>((ast::ExprLiteral::Number(start.<span class="number">0</span>), start.<span class="number">1</span>)),
             end: <span class="prelude-val">None</span>,
             inclusive_end: <span class="bool-val">false
-        </span>})
+        </span>}).into()
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -21106,13 +21110,13 @@
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
     (<span class="kw">_</span>, inclusive_end, <span class="kw">_</span>): (usize, <span class="prelude-ty">Option</span>&lt;lexer::Token&gt;, usize),
     (<span class="kw">_</span>, end, <span class="kw">_</span>): (usize, span::Spanned&lt;f64&gt;, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     ast::Expr::Range(ast::ExprRange {
             start: <span class="prelude-val">None</span>,
             end: <span class="prelude-val">Some</span>((ast::ExprLiteral::Number(end.<span class="number">0</span>), end.<span class="number">1</span>)),
             inclusive_end: inclusive_end.is_some()
-        })
+        }).into()
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -21123,9 +21127,9 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
     (<span class="kw">_</span>, stmts, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;span::Spanned&lt;ast::Stmt&gt;&gt;, usize),
-    (<span class="kw">_</span>, return_expr, <span class="kw">_</span>): (usize, <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
+    (<span class="kw">_</span>, return_expr, <span class="kw">_</span>): (usize, <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     ast::Expr::Block(Box::new(
         ast::ExprBlock {
@@ -21133,7 +21137,7 @@
             return_expr,
             typeref: <span class="prelude-val">None
         </span>}
-    ))
+    )).into()
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -21162,15 +21166,15 @@
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
     (<span class="kw">_</span>, return_type, <span class="kw">_</span>): (usize, span::Spanned&lt;Type&gt;, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-    (<span class="kw">_</span>, body, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, body, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     ast::Expr::Fn(Box::new(ast::ExprFn { 
             name: <span class="prelude-val">None</span>,
             params,
             return_type,
             body,
-         }))
+         })).into()
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -21185,15 +21189,15 @@
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
     (<span class="kw">_</span>, return_type, <span class="kw">_</span>): (usize, span::Spanned&lt;Type&gt;, usize),
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-    (<span class="kw">_</span>, body, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, body, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     ast::Expr::Fn(Box::new(ast::ExprFn { 
             name: <span class="prelude-val">None</span>,
             params,
             return_type,
             body,
-         }))
+         })).into()
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -21339,8 +21343,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     <span class="prelude-val">Some</span>(__0)
 }
@@ -21353,7 +21357,7 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __lookbehind: <span class="kw-2">&amp;</span>usize,
     __lookahead: <span class="kw-2">&amp;</span>usize,
-) -&gt; <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+) -&gt; <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     <span class="prelude-val">None
 </span>}
@@ -21364,8 +21368,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     __0
 }
@@ -21452,8 +21456,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, first, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-    (<span class="kw">_</span>, <span class="kw-2">mut </span>args, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
+    (<span class="kw">_</span>, first, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+    (<span class="kw">_</span>, <span class="kw-2">mut </span>args, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize),
     (<span class="kw">_</span>, trailing_seperator, <span class="kw">_</span>): (usize, lexer::Token, usize),
 ) -&gt; Vec&lt;ast::ExprS&gt;
 {
@@ -21469,9 +21473,9 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, first, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-    (<span class="kw">_</span>, <span class="kw-2">mut </span>args, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
-) -&gt; Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+    (<span class="kw">_</span>, first, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+    (<span class="kw">_</span>, <span class="kw-2">mut </span>args, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize),
+) -&gt; Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     {
         args.insert(<span class="number">0</span>, first);
@@ -21486,7 +21490,7 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, (), usize),
-) -&gt; Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+) -&gt; Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     Vec::new()
 }
@@ -21498,9 +21502,9 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, l, <span class="kw">_</span>): (usize, usize, usize),
-    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, ast::Expr, usize),
+    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
     (<span class="kw">_</span>, r, <span class="kw">_</span>): (usize, usize, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     (t, l..r)
 }
@@ -21511,12 +21515,12 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, lt, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
+    (<span class="kw">_</span>, lt, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
     (<span class="kw">_</span>, op, <span class="kw">_</span>): (usize, ast::OpInfix, usize),
-    (<span class="kw">_</span>, rt, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, rt, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
-    ast::Expr::Infix(Box::new(ast::ExprInfix { lt, op, rt }))
+    ast::Expr::Infix(Box::new(ast::ExprInfix { lt, op, rt })).into()
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -21525,8 +21529,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, ast::Expr, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     __0
 }
@@ -21537,12 +21541,12 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, lt, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
+    (<span class="kw">_</span>, lt, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
     (<span class="kw">_</span>, op, <span class="kw">_</span>): (usize, ast::OpInfix, usize),
-    (<span class="kw">_</span>, rt, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, rt, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
-    ast::Expr::Infix(Box::new(ast::ExprInfix { lt, op, rt }))
+    ast::Expr::Infix(Box::new(ast::ExprInfix { lt, op, rt })).into()
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -21551,8 +21555,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, ast::Expr, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     __0
 }
@@ -21563,12 +21567,12 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, lt, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
+    (<span class="kw">_</span>, lt, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
     (<span class="kw">_</span>, op, <span class="kw">_</span>): (usize, ast::OpInfix, usize),
-    (<span class="kw">_</span>, rt, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, rt, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
-    ast::Expr::Infix(Box::new(ast::ExprInfix { lt, op, rt }))
+    ast::Expr::Infix(Box::new(ast::ExprInfix { lt, op, rt })).into()
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -21577,8 +21581,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, ast::Expr, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     __0
 }
@@ -21589,12 +21593,12 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, lt, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
+    (<span class="kw">_</span>, lt, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
     (<span class="kw">_</span>, op, <span class="kw">_</span>): (usize, ast::OpInfix, usize),
-    (<span class="kw">_</span>, rt, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, rt, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
-    ast::Expr::Infix(Box::new(ast::ExprInfix { lt, op, rt }))
+    ast::Expr::Infix(Box::new(ast::ExprInfix { lt, op, rt })).into()
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -21603,8 +21607,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, ast::Expr, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     __0
 }
@@ -21615,12 +21619,12 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, lt, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
+    (<span class="kw">_</span>, lt, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
     (<span class="kw">_</span>, op, <span class="kw">_</span>): (usize, ast::OpInfix, usize),
-    (<span class="kw">_</span>, rt, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, rt, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
-    ast::Expr::Infix(Box::new(ast::ExprInfix { lt, op, rt }))
+    ast::Expr::Infix(Box::new(ast::ExprInfix { lt, op, rt })).into()
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -21629,8 +21633,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, ast::Expr, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     __0
 }
@@ -21641,12 +21645,12 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, lt, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
+    (<span class="kw">_</span>, lt, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
     (<span class="kw">_</span>, op, <span class="kw">_</span>): (usize, ast::OpInfix, usize),
-    (<span class="kw">_</span>, rt, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, rt, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
-    ast::Expr::Infix(Box::new(ast::ExprInfix { lt, op, rt }))
+    ast::Expr::Infix(Box::new(ast::ExprInfix { lt, op, rt })).into()
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -21655,8 +21659,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, ast::Expr, usize),
-) -&gt; ast::Expr
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     __0
 }
@@ -21667,9 +21671,9 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, first, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-    (<span class="kw">_</span>, <span class="kw-2">mut </span>args, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
-) -&gt; Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+    (<span class="kw">_</span>, first, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+    (<span class="kw">_</span>, <span class="kw-2">mut </span>args, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize),
+) -&gt; Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     {
         args.insert(<span class="number">0</span>, first);
@@ -21684,7 +21688,7 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, (), usize),
-) -&gt; Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+) -&gt; Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     Vec::new()
 }
@@ -21696,8 +21700,8 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     __0
 }
@@ -21709,9 +21713,9 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, l, <span class="kw">_</span>): (usize, usize, usize),
-    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, ast::Expr, usize),
+    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
     (<span class="kw">_</span>, r, <span class="kw">_</span>): (usize, usize, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     (t, l..r)
 }
@@ -21722,8 +21726,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     <span class="prelude-val">Some</span>(__0)
 }
@@ -21736,7 +21740,7 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __lookbehind: <span class="kw-2">&amp;</span>usize,
     __lookahead: <span class="kw-2">&amp;</span>usize,
-) -&gt; <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+) -&gt; <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     <span class="prelude-val">None
 </span>}
@@ -21748,8 +21752,8 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     __0
 }
@@ -21761,9 +21765,9 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, l, <span class="kw">_</span>): (usize, usize, usize),
-    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, ast::Expr, usize),
+    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
     (<span class="kw">_</span>, r, <span class="kw">_</span>): (usize, usize, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     (t, l..r)
 }
@@ -21775,9 +21779,9 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, l, <span class="kw">_</span>): (usize, usize, usize),
-    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, ast::Expr, usize),
+    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
     (<span class="kw">_</span>, r, <span class="kw">_</span>): (usize, usize, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     (t, l..r)
 }
@@ -21789,9 +21793,9 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, l, <span class="kw">_</span>): (usize, usize, usize),
-    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, ast::Expr, usize),
+    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
     (<span class="kw">_</span>, r, <span class="kw">_</span>): (usize, usize, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     (t, l..r)
 }
@@ -21803,9 +21807,9 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, l, <span class="kw">_</span>): (usize, usize, usize),
-    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, ast::Expr, usize),
+    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
     (<span class="kw">_</span>, r, <span class="kw">_</span>): (usize, usize, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     (t, l..r)
 }
@@ -21829,8 +21833,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     <span class="prelude-val">Some</span>(__0)
 }
@@ -21843,7 +21847,7 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __lookbehind: <span class="kw-2">&amp;</span>usize,
     __lookahead: <span class="kw-2">&amp;</span>usize,
-) -&gt; <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+) -&gt; <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     <span class="prelude-val">None
 </span>}
@@ -21855,8 +21859,8 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     __0
 }
@@ -21999,7 +22003,7 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __lookbehind: <span class="kw-2">&amp;</span>usize,
     __lookahead: <span class="kw-2">&amp;</span>usize,
-) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     <span class="macro">alloc::vec!</span>[]
 }
@@ -22010,8 +22014,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, v, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
-) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+    (<span class="kw">_</span>, v, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize),
+) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     v
 }
@@ -22023,8 +22027,8 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     __0
 }
@@ -22036,9 +22040,9 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, l, <span class="kw">_</span>): (usize, usize, usize),
-    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, ast::Expr, usize),
+    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
     (<span class="kw">_</span>, r, <span class="kw">_</span>): (usize, usize, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     (t, l..r)
 }
@@ -22050,9 +22054,9 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, l, <span class="kw">_</span>): (usize, usize, usize),
-    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, ast::Expr, usize),
+    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
     (<span class="kw">_</span>, r, <span class="kw">_</span>): (usize, usize, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     (t, l..r)
 }
@@ -22064,9 +22068,9 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, l, <span class="kw">_</span>): (usize, usize, usize),
-    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, ast::Expr, usize),
+    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
     (<span class="kw">_</span>, r, <span class="kw">_</span>): (usize, usize, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     (t, l..r)
 }
@@ -22078,9 +22082,9 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, l, <span class="kw">_</span>): (usize, usize, usize),
-    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, ast::Expr, usize),
+    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
     (<span class="kw">_</span>, r, <span class="kw">_</span>): (usize, usize, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     (t, l..r)
 }
@@ -22092,9 +22096,9 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, l, <span class="kw">_</span>): (usize, usize, usize),
-    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, ast::Expr, usize),
+    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
     (<span class="kw">_</span>, r, <span class="kw">_</span>): (usize, usize, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     (t, l..r)
 }
@@ -22106,9 +22110,9 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, l, <span class="kw">_</span>): (usize, usize, usize),
-    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, ast::Expr, usize),
+    (<span class="kw">_</span>, t, <span class="kw">_</span>): (usize, Arc&lt;ast::Expr&gt;, usize),
     (<span class="kw">_</span>, r, <span class="kw">_</span>): (usize, usize, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     (t, l..r)
 }
@@ -22121,7 +22125,7 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __lookbehind: <span class="kw-2">&amp;</span>usize,
     __lookahead: <span class="kw-2">&amp;</span>usize,
-) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     <span class="macro">alloc::vec!</span>[]
 }
@@ -22132,8 +22136,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, v, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
-) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+    (<span class="kw">_</span>, v, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize),
+) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     v
 }
@@ -22145,8 +22149,8 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     __0
 }
@@ -22346,8 +22350,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     <span class="macro">alloc::vec!</span>[__0]
 }
@@ -22358,9 +22362,9 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, v, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
-    (<span class="kw">_</span>, e, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+    (<span class="kw">_</span>, v, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize),
+    (<span class="kw">_</span>, e, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     { <span class="kw">let </span><span class="kw-2">mut </span>v = v; v.push(e); v }
 }
@@ -22371,8 +22375,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+    (<span class="kw">_</span>, __0, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     <span class="macro">alloc::vec!</span>[__0]
 }
@@ -22383,9 +22387,9 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    (<span class="kw">_</span>, v, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
-    (<span class="kw">_</span>, e, <span class="kw">_</span>): (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+    (<span class="kw">_</span>, v, <span class="kw">_</span>): (usize, alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize),
+    (<span class="kw">_</span>, e, <span class="kw">_</span>): (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     { <span class="kw">let </span><span class="kw-2">mut </span>v = v; v.push(e); v }
 }
@@ -22401,7 +22405,7 @@
     __1: (usize, lexer::Token, usize),
     __2: (usize, lexer::Token, usize),
     __3: (usize, span::Spanned&lt;f64&gt;, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __2.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __2.<span class="number">2</span>;
@@ -22429,7 +22433,7 @@
     __0: (usize, span::Spanned&lt;f64&gt;, usize),
     __1: (usize, lexer::Token, usize),
     __2: (usize, span::Spanned&lt;f64&gt;, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __1.<span class="number">2</span>;
     <span class="kw">let </span>__end0 = __2.<span class="number">0</span>;
@@ -22458,7 +22462,7 @@
     __0: (usize, lexer::Token, usize),
     __1: (usize, lexer::Token, usize),
     __2: (usize, span::Spanned&lt;f64&gt;, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __1.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __1.<span class="number">2</span>;
@@ -22484,7 +22488,7 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
     __1: (usize, span::Spanned&lt;f64&gt;, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">2</span>;
     <span class="kw">let </span>__end0 = __1.<span class="number">0</span>;
@@ -22510,8 +22514,8 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
-    __1: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+    __1: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __1.<span class="number">2</span>;
@@ -22534,10 +22538,10 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
+    __0: (usize, alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize),
     __1: (usize, lexer::Token, usize),
-    __2: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+    __2: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __1.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __2.<span class="number">2</span>;
@@ -22561,8 +22565,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+    __0: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">2</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">2</span>;
@@ -22586,9 +22590,9 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-    __1: (usize, alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
-) -&gt; Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+    __0: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+    __1: (usize, alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize),
+) -&gt; Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __1.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __1.<span class="number">2</span>;
@@ -22612,8 +22616,8 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
-    __1: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+    __1: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __1.<span class="number">2</span>;
@@ -22636,10 +22640,10 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
+    __0: (usize, alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize),
     __1: (usize, lexer::Token, usize),
-    __2: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+    __2: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __1.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __2.<span class="number">2</span>;
@@ -22663,8 +22667,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+    __0: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">2</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">2</span>;
@@ -22688,9 +22692,9 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-    __1: (usize, alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
-) -&gt; Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+    __0: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+    __1: (usize, alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize),
+) -&gt; Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __1.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __1.<span class="number">2</span>;
@@ -22713,7 +22717,7 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
+    __0: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
     __1: (usize, lexer::Token, usize),
 ) -&gt; Vec&lt;ast::ExprS&gt;
 {
@@ -22740,8 +22744,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-    __1: (usize, alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
+    __0: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+    __1: (usize, alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize),
     __2: (usize, lexer::Token, usize),
 ) -&gt; Vec&lt;ast::ExprS&gt;
 {
@@ -23000,7 +23004,7 @@
     __1: (usize, span::Spanned&lt;ast::Identifier&gt;, usize),
     __2: (usize, lexer::Token, usize),
     __3: (usize, span::Spanned&lt;Type&gt;, usize),
-    __4: (usize, <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
+    __4: (usize, <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize),
     __5: (usize, lexer::Token, usize),
 ) -&gt; ast::Stmt
 {
@@ -23031,7 +23035,7 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
     __1: (usize, span::Spanned&lt;ast::Identifier&gt;, usize),
-    __2: (usize, <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
+    __2: (usize, <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize),
     __3: (usize, lexer::Token, usize),
 ) -&gt; ast::Stmt
 {
@@ -23064,7 +23068,7 @@
     __1: (usize, span::Spanned&lt;ast::Identifier&gt;, usize),
     __2: (usize, lexer::Token, usize),
     __3: (usize, span::Spanned&lt;Type&gt;, usize),
-    __4: (usize, <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
+    __4: (usize, <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize),
     __5: (usize, lexer::Token, usize),
 ) -&gt; ast::Stmt
 {
@@ -23095,7 +23099,7 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
     __1: (usize, span::Spanned&lt;ast::Identifier&gt;, usize),
-    __2: (usize, <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
+    __2: (usize, <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize),
     __3: (usize, lexer::Token, usize),
 ) -&gt; ast::Stmt
 {
@@ -23126,7 +23130,7 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __lookbehind: <span class="kw-2">&amp;</span>usize,
     __lookahead: <span class="kw-2">&amp;</span>usize,
-) -&gt; Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+) -&gt; Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     <span class="kw">let </span>__start0 = <span class="kw-2">*</span>__lookbehind;
     <span class="kw">let </span>__end0 = <span class="kw-2">*</span>__lookahead;
@@ -23151,7 +23155,7 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __lookbehind: <span class="kw-2">&amp;</span>usize,
     __lookahead: <span class="kw-2">&amp;</span>usize,
-) -&gt; Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+) -&gt; Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     <span class="kw">let </span>__start0 = <span class="kw-2">*</span>__lookbehind;
     <span class="kw">let </span>__end0 = <span class="kw-2">*</span>__lookahead;
@@ -23501,8 +23505,8 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
-    __1: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+    __1: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __1.<span class="number">2</span>;
@@ -23530,7 +23534,7 @@
     __2: (usize, lexer::Token, usize),
     __3: (usize, span::Spanned&lt;Type&gt;, usize),
     __4: (usize, lexer::Token, usize),
-    __5: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
+    __5: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
     __6: (usize, lexer::Token, usize),
 ) -&gt; ast::Stmt
 {
@@ -23596,7 +23600,7 @@
     __0: (usize, lexer::Token, usize),
     __1: (usize, span::Spanned&lt;ast::Identifier&gt;, usize),
     __2: (usize, lexer::Token, usize),
-    __3: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
+    __3: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
     __4: (usize, lexer::Token, usize),
 ) -&gt; ast::Stmt
 {
@@ -23658,7 +23662,7 @@
     __2: (usize, lexer::Token, usize),
     __3: (usize, span::Spanned&lt;Type&gt;, usize),
     __4: (usize, lexer::Token, usize),
-    __5: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
+    __5: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
     __6: (usize, lexer::Token, usize),
 ) -&gt; ast::Stmt
 {
@@ -23724,7 +23728,7 @@
     __0: (usize, lexer::Token, usize),
     __1: (usize, span::Spanned&lt;ast::Identifier&gt;, usize),
     __2: (usize, lexer::Token, usize),
-    __3: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
+    __3: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
     __4: (usize, lexer::Token, usize),
 ) -&gt; ast::Stmt
 {
@@ -23813,8 +23817,8 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
-    __1: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+    __1: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __1.<span class="number">2</span>;
@@ -23838,11 +23842,11 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
-    __1: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-    __2: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
+    __1: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+    __2: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
     __3: (usize, lexer::Token, usize),
-    __4: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; ast::Expr
+    __4: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __3.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __4.<span class="number">2</span>;
@@ -23869,9 +23873,9 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
-    __1: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-    __2: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; ast::Expr
+    __1: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+    __2: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __2.<span class="number">2</span>;
     <span class="kw">let </span>__end0 = __2.<span class="number">2</span>;
@@ -23898,11 +23902,11 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
-    __1: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-    __2: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
+    __1: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+    __2: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
     __3: (usize, lexer::Token, usize),
-    __4: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; ast::Expr
+    __4: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __3.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __4.<span class="number">2</span>;
@@ -23977,9 +23981,9 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
-    __1: (usize, <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
+    __1: (usize, <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize),
     __2: (usize, lexer::Token, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">2</span>;
     <span class="kw">let </span>__end0 = __1.<span class="number">0</span>;
@@ -24007,9 +24011,9 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
     __1: (usize, alloc::vec::Vec&lt;span::Spanned&lt;ast::Stmt&gt;&gt;, usize),
-    __2: (usize, <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
+    __2: (usize, <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize),
     __3: (usize, lexer::Token, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __1.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __1.<span class="number">2</span>;
@@ -24034,8 +24038,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;ast::Expr&gt;&gt;
+    __0: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; <span class="prelude-ty">Option</span>&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">2</span>;
@@ -24058,9 +24062,9 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
-    __1: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
+    __1: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
     __2: (usize, lexer::Token, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __1.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __1.<span class="number">2</span>;
@@ -24086,7 +24090,7 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
     __1: (usize, lexer::Token, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">2</span>;
     <span class="kw">let </span>__end0 = __1.<span class="number">0</span>;
@@ -24113,9 +24117,9 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
     __1: (usize, alloc::vec::Vec&lt;span::Spanned&lt;ast::Stmt&gt;&gt;, usize),
-    __2: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
+    __2: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
     __3: (usize, lexer::Token, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __2.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __2.<span class="number">2</span>;
@@ -24143,7 +24147,7 @@
     __0: (usize, lexer::Token, usize),
     __1: (usize, alloc::vec::Vec&lt;span::Spanned&lt;ast::Stmt&gt;&gt;, usize),
     __2: (usize, lexer::Token, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __1.<span class="number">2</span>;
     <span class="kw">let </span>__end0 = __2.<span class="number">0</span>;
@@ -24169,9 +24173,9 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::Expr, usize),
+    __0: (usize, Arc&lt;ast::Expr&gt;, usize),
     __1: (usize, usize, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">0</span>;
@@ -24196,9 +24200,9 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::Expr, usize),
+    __0: (usize, Arc&lt;ast::Expr&gt;, usize),
     __1: (usize, usize, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">0</span>;
@@ -24223,9 +24227,9 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::Expr, usize),
+    __0: (usize, Arc&lt;ast::Expr&gt;, usize),
     __1: (usize, usize, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">0</span>;
@@ -24250,9 +24254,9 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::Expr, usize),
+    __0: (usize, Arc&lt;ast::Expr&gt;, usize),
     __1: (usize, usize, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">0</span>;
@@ -24277,9 +24281,9 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::Expr, usize),
+    __0: (usize, Arc&lt;ast::Expr&gt;, usize),
     __1: (usize, usize, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">0</span>;
@@ -24304,9 +24308,9 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::Expr, usize),
+    __0: (usize, Arc&lt;ast::Expr&gt;, usize),
     __1: (usize, usize, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">0</span>;
@@ -24331,9 +24335,9 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::Expr, usize),
+    __0: (usize, Arc&lt;ast::Expr&gt;, usize),
     __1: (usize, usize, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">0</span>;
@@ -24358,9 +24362,9 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::Expr, usize),
+    __0: (usize, Arc&lt;ast::Expr&gt;, usize),
     __1: (usize, usize, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">0</span>;
@@ -24385,9 +24389,9 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::Expr, usize),
+    __0: (usize, Arc&lt;ast::Expr&gt;, usize),
     __1: (usize, usize, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">0</span>;
@@ -24412,9 +24416,9 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::Expr, usize),
+    __0: (usize, Arc&lt;ast::Expr&gt;, usize),
     __1: (usize, usize, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">0</span>;
@@ -24439,9 +24443,9 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::Expr, usize),
+    __0: (usize, Arc&lt;ast::Expr&gt;, usize),
     __1: (usize, usize, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">0</span>;
@@ -24466,9 +24470,9 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::Expr, usize),
+    __0: (usize, Arc&lt;ast::Expr&gt;, usize),
     __1: (usize, usize, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">0</span>;
@@ -24628,8 +24632,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::Expr, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+    __0: (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">2</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">2</span>;
@@ -24653,8 +24657,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::Expr, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+    __0: (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">2</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">2</span>;
@@ -24678,8 +24682,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::Expr, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+    __0: (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">2</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">2</span>;
@@ -24703,8 +24707,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::Expr, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+    __0: (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">2</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">2</span>;
@@ -24728,8 +24732,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::Expr, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+    __0: (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">2</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">2</span>;
@@ -24753,8 +24757,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::Expr, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+    __0: (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">2</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">2</span>;
@@ -24778,8 +24782,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::Expr, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+    __0: (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">2</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">2</span>;
@@ -24803,8 +24807,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::Expr, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+    __0: (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">2</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">2</span>;
@@ -24828,8 +24832,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::Expr, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+    __0: (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">2</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">2</span>;
@@ -24853,8 +24857,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::Expr, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+    __0: (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">2</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">2</span>;
@@ -24878,8 +24882,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::Expr, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+    __0: (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">2</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">2</span>;
@@ -24903,8 +24907,8 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, ast::Expr, usize),
-) -&gt; span::Spanned&lt;ast::Expr&gt;
+    __0: (usize, Arc&lt;ast::Expr&gt;, usize),
+) -&gt; span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">2</span>;
     <span class="kw">let </span>__end0 = __0.<span class="number">2</span>;
@@ -25057,7 +25061,7 @@
     __1: (usize, lexer::Token, usize),
     __2: (usize, lexer::Token, usize),
     __3: (usize, span::Spanned&lt;f64&gt;, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __3.<span class="number">2</span>;
@@ -25085,7 +25089,7 @@
     __0: (usize, span::Spanned&lt;f64&gt;, usize),
     __1: (usize, lexer::Token, usize),
     __2: (usize, span::Spanned&lt;f64&gt;, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __2.<span class="number">2</span>;
@@ -25111,7 +25115,7 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, span::Spanned&lt;f64&gt;, usize),
     __1: (usize, lexer::Token, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __1.<span class="number">2</span>;
@@ -25137,7 +25141,7 @@
     __0: (usize, lexer::Token, usize),
     __1: (usize, lexer::Token, usize),
     __2: (usize, span::Spanned&lt;f64&gt;, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __2.<span class="number">2</span>;
@@ -25163,7 +25167,7 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
     __1: (usize, span::Spanned&lt;f64&gt;, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __1.<span class="number">2</span>;
@@ -25186,11 +25190,11 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
+    __0: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
     __1: (usize, lexer::Token, usize),
-    __2: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
+    __2: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
     __3: (usize, lexer::Token, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __2.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __2.<span class="number">2</span>;
@@ -25215,12 +25219,12 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
+    __0: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
     __1: (usize, lexer::Token, usize),
-    __2: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-    __3: (usize, alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
+    __2: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+    __3: (usize, alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize),
     __4: (usize, lexer::Token, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __2.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __3.<span class="number">2</span>;
@@ -25246,10 +25250,10 @@
     <span class="lifetime">'err</span>,
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
-    __0: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
+    __0: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
     __1: (usize, lexer::Token, usize),
     __2: (usize, lexer::Token, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __1.<span class="number">2</span>;
     <span class="kw">let </span>__end0 = __2.<span class="number">0</span>;
@@ -25276,9 +25280,9 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
-    __1: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
+    __1: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
     __2: (usize, lexer::Token, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __1.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __1.<span class="number">2</span>;
@@ -25303,10 +25307,10 @@
 &gt;(
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
-    __1: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-    __2: (usize, alloc::vec::Vec&lt;span::Spanned&lt;ast::Expr&gt;&gt;, usize),
+    __1: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+    __2: (usize, alloc::vec::Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt;, usize),
     __3: (usize, lexer::Token, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __1.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __2.<span class="number">2</span>;
@@ -25333,7 +25337,7 @@
     errors: <span class="kw-2">&amp;</span><span class="lifetime">'err </span><span class="kw-2">mut </span>Vec&lt;ParseError&lt;usize, lexer::Token, EgonErrorS&gt;&gt;,
     __0: (usize, lexer::Token, usize),
     __1: (usize, lexer::Token, usize),
-) -&gt; ast::Expr
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">2</span>;
     <span class="kw">let </span>__end0 = __1.<span class="number">0</span>;
@@ -25364,8 +25368,8 @@
     __3: (usize, lexer::Token, usize),
     __4: (usize, span::Spanned&lt;Type&gt;, usize),
     __5: (usize, lexer::Token, usize),
-    __6: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; ast::Expr
+    __6: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __1.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __1.<span class="number">2</span>;
@@ -25400,8 +25404,8 @@
     __4: (usize, lexer::Token, usize),
     __5: (usize, span::Spanned&lt;Type&gt;, usize),
     __6: (usize, lexer::Token, usize),
-    __7: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; ast::Expr
+    __7: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __1.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __2.<span class="number">2</span>;
@@ -25435,8 +25439,8 @@
     __2: (usize, lexer::Token, usize),
     __3: (usize, span::Spanned&lt;Type&gt;, usize),
     __4: (usize, lexer::Token, usize),
-    __5: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; ast::Expr
+    __5: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">2</span>;
     <span class="kw">let </span>__end0 = __1.<span class="number">0</span>;
@@ -25471,8 +25475,8 @@
     __3: (usize, lexer::Token, usize),
     __4: (usize, span::Spanned&lt;Type&gt;, usize),
     __5: (usize, lexer::Token, usize),
-    __6: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; ast::Expr
+    __6: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __1.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __1.<span class="number">2</span>;
@@ -25507,8 +25511,8 @@
     __4: (usize, lexer::Token, usize),
     __5: (usize, span::Spanned&lt;Type&gt;, usize),
     __6: (usize, lexer::Token, usize),
-    __7: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; ast::Expr
+    __7: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __1.<span class="number">0</span>;
     <span class="kw">let </span>__end0 = __2.<span class="number">2</span>;
@@ -25542,8 +25546,8 @@
     __2: (usize, lexer::Token, usize),
     __3: (usize, span::Spanned&lt;Type&gt;, usize),
     __4: (usize, lexer::Token, usize),
-    __5: (usize, span::Spanned&lt;ast::Expr&gt;, usize),
-) -&gt; ast::Expr
+    __5: (usize, span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;, usize),
+) -&gt; Arc&lt;ast::Expr&gt;
 {
     <span class="kw">let </span>__start0 = __0.<span class="number">2</span>;
     <span class="kw">let </span>__end0 = __1.<span class="number">0</span>;

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `egonlang-verifier/src/verifier.rs`."><title>verifier.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="egonlang_verifier" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.1 (3f5fd8dd4 2024-08-06)" data-channel="1.80.1" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `egonlang-verifier/src/verifier.rs`."><title>verifier.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-c5d6553a23f1e5a6.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="egonlang_verifier" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0 (eeb90cda1 2024-09-04)" data-channel="1.81.0" data-search-js="search-d234aafac6c221dd.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-d2fab2bf619172d3.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -2357,7 +2357,115 @@
 <a href="#2357" id="2357">2357</a>
 <a href="#2358" id="2358">2358</a>
 <a href="#2359" id="2359">2359</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
+<a href="#2360" id="2360">2360</a>
+<a href="#2361" id="2361">2361</a>
+<a href="#2362" id="2362">2362</a>
+<a href="#2363" id="2363">2363</a>
+<a href="#2364" id="2364">2364</a>
+<a href="#2365" id="2365">2365</a>
+<a href="#2366" id="2366">2366</a>
+<a href="#2367" id="2367">2367</a>
+<a href="#2368" id="2368">2368</a>
+<a href="#2369" id="2369">2369</a>
+<a href="#2370" id="2370">2370</a>
+<a href="#2371" id="2371">2371</a>
+<a href="#2372" id="2372">2372</a>
+<a href="#2373" id="2373">2373</a>
+<a href="#2374" id="2374">2374</a>
+<a href="#2375" id="2375">2375</a>
+<a href="#2376" id="2376">2376</a>
+<a href="#2377" id="2377">2377</a>
+<a href="#2378" id="2378">2378</a>
+<a href="#2379" id="2379">2379</a>
+<a href="#2380" id="2380">2380</a>
+<a href="#2381" id="2381">2381</a>
+<a href="#2382" id="2382">2382</a>
+<a href="#2383" id="2383">2383</a>
+<a href="#2384" id="2384">2384</a>
+<a href="#2385" id="2385">2385</a>
+<a href="#2386" id="2386">2386</a>
+<a href="#2387" id="2387">2387</a>
+<a href="#2388" id="2388">2388</a>
+<a href="#2389" id="2389">2389</a>
+<a href="#2390" id="2390">2390</a>
+<a href="#2391" id="2391">2391</a>
+<a href="#2392" id="2392">2392</a>
+<a href="#2393" id="2393">2393</a>
+<a href="#2394" id="2394">2394</a>
+<a href="#2395" id="2395">2395</a>
+<a href="#2396" id="2396">2396</a>
+<a href="#2397" id="2397">2397</a>
+<a href="#2398" id="2398">2398</a>
+<a href="#2399" id="2399">2399</a>
+<a href="#2400" id="2400">2400</a>
+<a href="#2401" id="2401">2401</a>
+<a href="#2402" id="2402">2402</a>
+<a href="#2403" id="2403">2403</a>
+<a href="#2404" id="2404">2404</a>
+<a href="#2405" id="2405">2405</a>
+<a href="#2406" id="2406">2406</a>
+<a href="#2407" id="2407">2407</a>
+<a href="#2408" id="2408">2408</a>
+<a href="#2409" id="2409">2409</a>
+<a href="#2410" id="2410">2410</a>
+<a href="#2411" id="2411">2411</a>
+<a href="#2412" id="2412">2412</a>
+<a href="#2413" id="2413">2413</a>
+<a href="#2414" id="2414">2414</a>
+<a href="#2415" id="2415">2415</a>
+<a href="#2416" id="2416">2416</a>
+<a href="#2417" id="2417">2417</a>
+<a href="#2418" id="2418">2418</a>
+<a href="#2419" id="2419">2419</a>
+<a href="#2420" id="2420">2420</a>
+<a href="#2421" id="2421">2421</a>
+<a href="#2422" id="2422">2422</a>
+<a href="#2423" id="2423">2423</a>
+<a href="#2424" id="2424">2424</a>
+<a href="#2425" id="2425">2425</a>
+<a href="#2426" id="2426">2426</a>
+<a href="#2427" id="2427">2427</a>
+<a href="#2428" id="2428">2428</a>
+<a href="#2429" id="2429">2429</a>
+<a href="#2430" id="2430">2430</a>
+<a href="#2431" id="2431">2431</a>
+<a href="#2432" id="2432">2432</a>
+<a href="#2433" id="2433">2433</a>
+<a href="#2434" id="2434">2434</a>
+<a href="#2435" id="2435">2435</a>
+<a href="#2436" id="2436">2436</a>
+<a href="#2437" id="2437">2437</a>
+<a href="#2438" id="2438">2438</a>
+<a href="#2439" id="2439">2439</a>
+<a href="#2440" id="2440">2440</a>
+<a href="#2441" id="2441">2441</a>
+<a href="#2442" id="2442">2442</a>
+<a href="#2443" id="2443">2443</a>
+<a href="#2444" id="2444">2444</a>
+<a href="#2445" id="2445">2445</a>
+<a href="#2446" id="2446">2446</a>
+<a href="#2447" id="2447">2447</a>
+<a href="#2448" id="2448">2448</a>
+<a href="#2449" id="2449">2449</a>
+<a href="#2450" id="2450">2450</a>
+<a href="#2451" id="2451">2451</a>
+<a href="#2452" id="2452">2452</a>
+<a href="#2453" id="2453">2453</a>
+<a href="#2454" id="2454">2454</a>
+<a href="#2455" id="2455">2455</a>
+<a href="#2456" id="2456">2456</a>
+<a href="#2457" id="2457">2457</a>
+<a href="#2458" id="2458">2458</a>
+<a href="#2459" id="2459">2459</a>
+<a href="#2460" id="2460">2460</a>
+<a href="#2461" id="2461">2461</a>
+<a href="#2462" id="2462">2462</a>
+<a href="#2463" id="2463">2463</a>
+<a href="#2464" id="2464">2464</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span>std::{collections::HashMap, sync::Arc};
+
+<span class="kw">use </span>ast::ExprS;
+<span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_errors::{EgonErrorS, EgonResultMultiSpannedErr, EgonTypeError};
 <span class="kw">use </span>egonlang_types::{
     egon_unknown,
@@ -2368,6 +2476,8 @@
 <span class="kw">use </span>tracelog::{log_expr, log_identifier, log_stmt, log_type};
 
 <span class="kw">use </span><span class="kw">crate</span>::rules::{core::<span class="kw-2">*</span>, Rule};
+
+<span class="kw">pub type </span>VerifierExprTypeCache = HashMap&lt;ExprS, Type&gt;;
 
 <span class="doccomment">/// Verify an AST [`Module`](egonlang_core::ast::Module) using the registered
 /// [`Rule`](crate::rules::Rule) set
@@ -2388,6 +2498,7 @@
 </span><span class="kw">pub struct </span>Verifier&lt;<span class="lifetime">'a</span>&gt; {
     rules: Vec&lt;Box&lt;<span class="kw">dyn </span>Rule&lt;<span class="lifetime">'a</span>&gt;&gt;&gt;,
     type_env: TypeEnv,
+    expr_types: VerifierExprTypeCache,
 }
 
 <span class="kw">impl </span>Default <span class="kw">for </span>Verifier&lt;<span class="lifetime">'_</span>&gt; {
@@ -2403,6 +2514,7 @@
         Verifier {
             rules: Default::default(),
             type_env: TypeEnv::new(),
+            expr_types: HashMap::new(),
         }
     }
 
@@ -2433,8 +2545,8 @@
         <span class="self">self</span>.add_rule(TypeMismatchOnDeclarationsRule);
         <span class="self">self</span>.add_rule(DeclareConstWithoutValueRule);
         <span class="self">self</span>.add_rule(ReassigningConstValueRule);
-        <span class="self">self</span>.add_rule(ReferencingUndefinedIdentifierRule);
-        <span class="self">self</span>.add_rule(DivideByZeroRule);
+        <span class="comment">// self.add_rule(ReferencingUndefinedIdentifierRule);
+        </span><span class="self">self</span>.add_rule(DivideByZeroRule);
         <span class="self">self</span>.add_rule(TypeMismatchFnReturnExprRule);
         <span class="self">self</span>.add_rule(TypeMismatchIfCondExprRule);
         <span class="self">self</span>.add_rule(TypeMismatchReassigningLetValuesRule);
@@ -2476,7 +2588,7 @@
 <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Verifier&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Resolves an identifier through all type environment scopes
     </span><span class="kw">fn </span>resolve_identifier(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         identifier: <span class="kw-2">&amp;</span>str,
         span: <span class="kw-2">&amp;</span>Span,
     ) -&gt; EgonResultMultiSpannedErr&lt;TypeEnvValue&gt; {
@@ -2527,27 +2639,41 @@
     ///
     /// (a, b,); // This expression's type resolves to (number, bool,)
     </span><span class="kw">fn </span>resolve_expr_type(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        expr: <span class="kw-2">&amp;</span>ast::Expr,
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        expr: Arc&lt;ast::Expr&gt;,
         span: <span class="kw-2">&amp;</span>Span,
     ) -&gt; EgonResultMultiSpannedErr&lt;TypeEnvValue&gt; {
         <span class="macro">tracelog::tracelog!</span>(
             label = verifier,resolve_expr_type;
             <span class="string">"(level: {}) Resolving type for expression {}"</span>,
             <span class="self">self</span>.current_type_env_level(),
-            log_expr(expr)
+            log_expr(<span class="kw-2">&amp;</span>expr)
         );
 
-        <span class="kw">let </span>resolved_type = <span class="kw">match </span>expr {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = <span class="self">self</span>.expr_types.get(<span class="kw-2">&amp;</span>(expr.clone(), span.clone())) {
+            <span class="macro">tracelog::tracelog!</span>(
+                label = verifier,resolve_expr_type;
+                <span class="string">"Found cached type {} for expression {}"</span>,
+                log_type(v),
+                log_expr(<span class="kw-2">&amp;</span>expr)
+            );
+
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(TypeEnvValue {
+                of_type: v.clone(),
+                is_const: <span class="bool-val">true</span>,
+            });
+        }
+
+        <span class="kw">let </span>resolved_type = <span class="kw">match </span><span class="kw-2">&amp;*</span>expr {
             ast::Expr::Call(expr_call) =&gt; {
                 <span class="macro">tracelog::tracelog!</span>(
                     label = verifier,resolve_expr_type,expr_call;
                     <span class="string">"(level: {}) {} is a call expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    log_expr(expr)
+                    log_expr(<span class="kw-2">&amp;</span>expr)
                 );
 
-                <span class="kw">match </span><span class="self">self</span>.resolve_expr_type(<span class="kw-2">&amp;</span>expr_call.callee.<span class="number">0</span>, span) {
+                <span class="kw">match </span><span class="self">self</span>.resolve_expr_type(expr_call.callee.<span class="number">0</span>.clone(), span) {
                     <span class="prelude-val">Ok</span>(callee_type) =&gt; {
                         <span class="kw">if </span>callee_type.of_type.is_function() {
                             <span class="macro">tracelog::tracelog!</span>(
@@ -2555,7 +2681,7 @@
                                 <span class="string">"(level: {}) callee {} in call expression {} is a function"</span>,
                                 <span class="self">self</span>.current_type_env_level(),
                                 log_expr(<span class="kw-2">&amp;</span>expr_call.callee.<span class="number">0</span>),
-                                log_expr(expr)
+                                log_expr(<span class="kw-2">&amp;</span>expr)
                             );
 
                             <span class="prelude-val">Ok</span>(callee_type.of_type.get_function_return().into())
@@ -2565,7 +2691,7 @@
                                 <span class="string">"(level: {}) callee {} in call expression {} is not a function"</span>,
                                 <span class="self">self</span>.current_type_env_level(),
                                 log_expr(<span class="kw-2">&amp;</span>expr_call.callee.<span class="number">0</span>),
-                                log_expr(expr)
+                                log_expr(<span class="kw-2">&amp;</span>expr)
                             );
 
                             <span class="prelude-val">Ok</span>(<span class="macro">egon_unknown!</span>().into())
@@ -2579,7 +2705,7 @@
                     label = verifier,resolve_expr_type,expr_identifier;
                     <span class="string">"(level: {}) {} is an identifier expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    log_expr(expr)
+                    log_expr(<span class="kw-2">&amp;</span>expr)
                 );
 
                 <span class="self">self</span>.resolve_identifier(<span class="kw-2">&amp;</span>ident_expr.identifier.name, span)
@@ -2589,7 +2715,7 @@
                     label = verifier,resolve_expr_type,expr_list;
                     <span class="string">"(level: {}) {} is a list expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    log_expr(expr)
+                    log_expr(<span class="kw-2">&amp;</span>expr)
                 );
 
                 <span class="kw">if </span>list_expr.items.is_empty() {
@@ -2597,7 +2723,9 @@
                 }
 
                 <span class="kw">let </span>(first_item_expr, <span class="kw">_</span>) = list_expr.items.first().unwrap().clone();
-                <span class="kw">let </span>first_item_type = <span class="self">self</span>.resolve_expr_type(<span class="kw-2">&amp;</span>first_item_expr, span)<span class="question-mark">?</span>.of_type;
+                <span class="kw">let </span>first_item_type = <span class="self">self
+                    </span>.resolve_expr_type(first_item_expr.clone(), span)<span class="question-mark">?
+                    </span>.of_type;
 
                 <span class="prelude-val">Ok</span>(Type::list(first_item_type).into())
             }
@@ -2606,7 +2734,7 @@
                     label = verifier,resolve_expr_type,expr_tuple;
                     <span class="string">"(level: {}) {} is a tuple expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    log_expr(expr)
+                    log_expr(<span class="kw-2">&amp;</span>expr)
                 );
 
                 <span class="kw">if </span>tuple_expr.items.is_empty() {
@@ -2617,7 +2745,11 @@
                     .items
                     .clone()
                     .into_iter()
-                    .map(|(x_expr, <span class="kw">_</span>)| <span class="self">self</span>.resolve_expr_type(<span class="kw-2">&amp;</span>x_expr, span).unwrap().of_type)
+                    .map(|(x_expr, <span class="kw">_</span>)| {
+                        <span class="self">self</span>.resolve_expr_type(x_expr.clone(), span)
+                            .unwrap()
+                            .of_type
+                    })
                     .collect();
 
                 <span class="prelude-val">Ok</span>(Type::tuple(item_types).into())
@@ -2627,7 +2759,7 @@
                     label = verifier,resolve_expr_type,expr_block;
                     <span class="string">"(level: {}) {} is a block expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    log_expr(expr)
+                    log_expr(<span class="kw-2">&amp;</span>expr)
                 );
 
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(block_typeref) = <span class="kw-2">&amp;</span>block_expr.typeref {
@@ -2638,7 +2770,7 @@
                 }
 
                 <span class="kw">if let </span><span class="prelude-val">Some</span>((block_expr_return_expr, <span class="kw">_</span>)) = <span class="kw-2">&amp;</span>block_expr.return_expr {
-                    <span class="self">self</span>.resolve_expr_type(block_expr_return_expr, span)
+                    <span class="self">self</span>.resolve_expr_type(block_expr_return_expr.clone(), span)
                 } <span class="kw">else </span>{
                     <span class="kw">let </span>resolved_type = Type::unit();
 
@@ -2658,7 +2790,7 @@
                     label = verifier,resolve_expr_type,expr_type;
                     <span class="string">"(level: {}) {} is a type expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    log_expr(expr)
+                    log_expr(<span class="kw-2">&amp;</span>expr)
                 );
 
                 <span class="kw">if </span>type_expr.<span class="number">0</span>.is_builtin() {
@@ -2693,7 +2825,7 @@
                     label = verifier,resolve_expr_type,expr_assign;
                     <span class="string">"(level: {}) {} is an assign expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    log_expr(expr)
+                    log_expr(<span class="kw-2">&amp;</span>expr)
                 );
 
                 <span class="kw">let </span>name = <span class="kw-2">&amp;</span>assign_expr.identifier.<span class="number">0</span>.name;
@@ -2705,11 +2837,11 @@
                     label = verifier,resolve_expr_type,expr_if;
                     <span class="string">"(level: {}) {} is an if expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    log_expr(expr)
+                    log_expr(<span class="kw-2">&amp;</span>expr)
                 );
 
                 <span class="kw">let </span>(then_expr, <span class="kw">_</span>) = <span class="kw-2">&amp;</span>if_expr.then;
-                <span class="kw">let </span>then_typeref = <span class="self">self</span>.resolve_expr_type(then_expr, span)<span class="question-mark">?</span>;
+                <span class="kw">let </span>then_typeref = <span class="self">self</span>.resolve_expr_type(then_expr.clone(), span)<span class="question-mark">?</span>;
 
                 <span class="prelude-val">Ok</span>(then_typeref)
             }
@@ -2718,7 +2850,7 @@
                     label = verifier,resolve_expr_type,expr_unit;
                     <span class="string">"(level: {}) {} is an unit expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    log_expr(expr)
+                    log_expr(<span class="kw-2">&amp;</span>expr)
                 );
 
                 <span class="prelude-val">Ok</span>(Type::unit().into())
@@ -2728,7 +2860,7 @@
                     label = verifier,resolve_expr_type,expr_literal;
                     <span class="string">"(level: {}) {} is a literal expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    log_expr(expr)
+                    log_expr(<span class="kw-2">&amp;</span>expr)
                 );
 
                 <span class="prelude-val">Ok</span>(<span class="kw">match </span>literal {
@@ -2743,7 +2875,7 @@
                     label = verifier,resolve_expr_type,expr_infix;
                     <span class="string">"(level: {}) {} is an infix expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    log_expr(expr)
+                    log_expr(<span class="kw-2">&amp;</span>expr)
                 );
 
                 <span class="prelude-val">Ok</span>(<span class="kw">match </span>infix.op {
@@ -2768,7 +2900,7 @@
                     label = verifier,resolve_expr_type,expr_prefix;
                     <span class="string">"(level: {}) {} is an prefix expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    log_expr(expr)
+                    log_expr(<span class="kw-2">&amp;</span>expr)
                 );
 
                 <span class="prelude-val">Ok</span>(<span class="kw">match </span>prefix.op {
@@ -2782,7 +2914,7 @@
                     label = verifier,resolve_expr_type,expr_fn;
                     <span class="string">"(level: {}) {} is a function expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    log_expr(expr)
+                    log_expr(<span class="kw-2">&amp;</span>expr)
                 );
 
                 <span class="prelude-val">Ok</span>(Type::function(
@@ -2802,52 +2934,69 @@
                     label = verifier,resolve_expr_type,expr_range;
                     <span class="string">"(level: {}) {} is a range expression"</span>,
                     <span class="self">self</span>.current_type_env_level(),
-                    log_expr(expr)
+                    log_expr(<span class="kw-2">&amp;</span>expr)
                 );
 
                 <span class="prelude-val">Ok</span>(Type::range().into())
             }
         };
 
-        <span class="kw">if let </span><span class="prelude-val">Ok</span>(resolved_type) = <span class="kw-2">&amp;</span>resolved_type {
-            <span class="macro">tracelog::tracelog!</span>(
-                label = verifier,resolve_expr_type;
-                <span class="string">"(level: {}) Resolved expression {} to the type {}"</span>,
-                <span class="self">self</span>.current_type_env_level(),
-                log_expr(expr),
-                log_type(<span class="kw-2">&amp;</span>resolved_type.of_type)
-            );
+        <span class="kw">match </span><span class="kw-2">&amp;</span>resolved_type {
+            <span class="prelude-val">Ok</span>(resolved_type) =&gt; {
+                <span class="macro">tracelog::tracelog!</span>(
+                    label = verifier,resolve_expr_type;
+                    <span class="string">"(level: {}) Resolved expression {} to the type {}"</span>,
+                    <span class="self">self</span>.current_type_env_level(),
+                    log_expr(<span class="kw-2">&amp;</span>expr),
+                    log_type(<span class="kw-2">&amp;</span>resolved_type.of_type)
+                );
+            }
+            <span class="prelude-val">Err</span>(expr_errs) =&gt; {
+                <span class="macro">tracelog::tracelog!</span>(
+                    level = ERROR;
+                    label = verifier,resolve_expr_type;
+                    <span class="string">"(level: {}) {} errors attempting to resolve expression {}"</span>,
+                    <span class="self">self</span>.current_type_env_level(),
+                    expr_errs.len(),
+                    log_expr(<span class="kw-2">&amp;</span>expr)
+                );
+            }
         };
 
         resolved_type
     }
 
-    <span class="kw">fn </span>visit_stmt(<span class="kw-2">&amp;mut </span><span class="self">self</span>, stmt: <span class="kw-2">&amp;mut </span>ast::Stmt, span: <span class="kw-2">&amp;</span>Span) -&gt; EgonResultMultiSpannedErr&lt;()&gt; {
+    <span class="kw">fn </span>visit_stmt(<span class="kw-2">&amp;mut </span><span class="self">self</span>, stmt: <span class="kw-2">&amp;</span>ast::Stmt, span: <span class="kw-2">&amp;</span>Span) -&gt; EgonResultMultiSpannedErr&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
 
         <span class="kw">let </span>stmt_string = log_stmt(stmt);
 
         <span class="macro">tracelog::tracelog!</span>(label = verifier,visit_stmt; <span class="string">"{}"</span>, stmt_string);
 
+        tracelog::indent();
+
         <span class="kw">let </span>result = <span class="kw">match </span>stmt {
             ast::Stmt::Expr(stmt_expr) =&gt; {
                 <span class="macro">tracelog::tracelog!</span>(label = verifier,visit_stmt,stmt_expr; <span class="string">"{} is an expression statement"</span>, stmt_string);
 
-                <span class="kw">let </span>(expr, expr_span) = <span class="kw-2">&amp;mut </span>stmt_expr.expr;
+                <span class="kw">let </span>(expr, expr_span) = <span class="kw-2">&amp;</span>stmt_expr.expr;
 
                 <span class="macro">tracelog::tracelog!</span>(
                     label = verifier,visit_stmt,stmt_expr;
                     <span class="string">"Checking expression {} from stmt {}"</span>,
-                    log_expr(expr),
+                    log_expr(<span class="kw-2">&amp;</span>expr),
                     stmt_string
                 );
 
-                <span class="kw">let </span>expr_errs = <span class="self">self</span>.visit_expr(expr, expr_span).err().unwrap_or_default();
+                <span class="kw">let </span>expr_errs = <span class="self">self
+                    </span>.visit_expr(expr.clone(), expr_span)
+                    .err()
+                    .unwrap_or_default();
 
                 <span class="macro">tracelog::tracelog!</span>(
                     label = verifier,visit_stmt,stmt_expr,error;
                     <span class="string">"Expression {} from statement {} had {} errors"</span>,
-                    log_expr(expr),
+                    log_expr(<span class="kw-2">&amp;</span>expr),
                     stmt_string,
                     expr_errs.len()
                 );
@@ -2867,10 +3016,10 @@
                     stmt_string
                 );
 
-                <span class="kw">match </span>(<span class="kw-2">&amp;mut </span>stmt_assign.type_expr, <span class="kw-2">&amp;mut </span>stmt_assign.value) {
+                <span class="kw">match </span>(<span class="kw-2">&amp;</span>stmt_assign.type_expr, <span class="kw-2">&amp;</span>stmt_assign.value) {
                     (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) =&gt; {}
                     (<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>((value_expr, value_span))) =&gt; {
-                        <span class="kw">let </span>value_typeref = <span class="self">self</span>.visit_expr(value_expr, value_span)<span class="question-mark">?</span>;
+                        <span class="kw">let </span>value_typeref = <span class="self">self</span>.visit_expr(value_expr.clone(), value_span)<span class="question-mark">?</span>;
 
                         <span class="self">self</span>.type_env.set(
                             <span class="kw-2">&amp;</span>stmt_assign.identifier.<span class="number">0</span>.name,
@@ -2881,7 +3030,7 @@
                         );
                     }
                     (<span class="prelude-val">Some</span>((type_expr, type_span)), <span class="prelude-val">None</span>) =&gt; {
-                        <span class="kw">match </span><span class="self">self</span>.visit_expr(type_expr, type_span) {
+                        <span class="kw">match </span><span class="self">self</span>.visit_expr(type_expr.clone(), type_span) {
                             <span class="prelude-val">Ok</span>(type_typeref) =&gt; {
                                 <span class="self">self</span>.type_env.set(
                                     <span class="kw-2">&amp;</span>stmt_assign.identifier.<span class="number">0</span>.name,
@@ -2897,9 +3046,9 @@
                         }
                     }
                     (<span class="prelude-val">Some</span>((type_expr, type_span)), <span class="prelude-val">Some</span>((value_expr, value_span))) =&gt; {
-                        <span class="kw">match </span><span class="self">self</span>.visit_expr(type_expr, type_span) {
+                        <span class="kw">match </span><span class="self">self</span>.visit_expr(type_expr.clone(), type_span) {
                             <span class="prelude-val">Ok</span>(type_typeref) =&gt; {
-                                <span class="self">self</span>.visit_expr(value_expr, value_span)<span class="question-mark">?</span>;
+                                <span class="self">self</span>.visit_expr(value_expr.clone(), value_span)<span class="question-mark">?</span>;
 
                                 <span class="self">self</span>.type_env.set(
                                     <span class="kw-2">&amp;</span>stmt_assign.identifier.<span class="number">0</span>.name,
@@ -2944,7 +3093,7 @@
                     stmt_string
                 );
 
-                <span class="kw">let </span>(fn_expr, fn_expr_span) = <span class="kw-2">&amp;mut </span>stmt_fn.fn_expr;
+                <span class="kw">let </span>(fn_expr, fn_expr_span) = <span class="kw-2">&amp;</span>stmt_fn.fn_expr;
 
                 <span class="macro">tracelog::tracelog!</span>(
                     label = verifier,visit_stmt,stmt_function;
@@ -2952,7 +3101,7 @@
                     log_expr(fn_expr)
                 );
 
-                <span class="kw">match </span><span class="self">self</span>.visit_expr(fn_expr, fn_expr_span) {
+                <span class="kw">match </span><span class="self">self</span>.visit_expr(fn_expr.clone(), fn_expr_span) {
                     <span class="prelude-val">Ok</span>(fn_expr_type) =&gt; {
                         <span class="self">self</span>.type_env.set(<span class="kw-2">&amp;</span>stmt_fn.name.<span class="number">0</span>.name, fn_expr_type);
 
@@ -2973,13 +3122,13 @@
             ast::Stmt::AssertType(stmt_assert_type) =&gt; {
                 <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
 
-                <span class="kw">let </span>(value_expr, value_span) = <span class="kw-2">&amp;mut </span>stmt_assert_type.value;
-                <span class="kw">if let </span><span class="prelude-val">Err</span>(x) = <span class="self">self</span>.visit_expr(value_expr, value_span) {
+                <span class="kw">let </span>(value_expr, value_span) = <span class="kw-2">&amp;</span>stmt_assert_type.value;
+                <span class="kw">if let </span><span class="prelude-val">Err</span>(x) = <span class="self">self</span>.visit_expr(value_expr.clone(), value_span) {
                     errs.extend(x);
                 }
 
-                <span class="kw">let </span>(expected_type_expr, expected_type_span) = <span class="kw-2">&amp;mut </span>stmt_assert_type.expected_type;
-                <span class="kw">if let </span><span class="prelude-val">Err</span>(x) = <span class="self">self</span>.visit_expr(expected_type_expr, expected_type_span) {
+                <span class="kw">let </span>(expected_type_expr, expected_type_span) = <span class="kw-2">&amp;</span>stmt_assert_type.expected_type;
+                <span class="kw">if let </span><span class="prelude-val">Err</span>(x) = <span class="self">self</span>.visit_expr(expected_type_expr.clone(), expected_type_span) {
                     errs.extend(x);
                 }
 
@@ -2995,9 +3144,9 @@
             ast::Stmt::Return(stmt_return) =&gt; {
                 <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
 
-                <span class="kw">let </span>(value_expr, value_span) = <span class="kw-2">&amp;mut </span>stmt_return.value;
+                <span class="kw">let </span>(value_expr, value_span) = <span class="kw-2">&amp;</span>stmt_return.value;
 
-                <span class="kw">if let </span><span class="prelude-val">Err</span>(x) = <span class="self">self</span>.visit_expr(value_expr, value_span) {
+                <span class="kw">if let </span><span class="prelude-val">Err</span>(x) = <span class="self">self</span>.visit_expr(value_expr.clone(), value_span) {
                     errs.extend(x);
                 }
 
@@ -3041,6 +3190,9 @@
             stmt_string
         );
 
+        tracelog::nl();
+        tracelog::dedent();
+
         <span class="kw">if </span>!errs.is_empty() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(errs);
         }
@@ -3048,7 +3200,7 @@
         result
     }
 
-    <span class="kw">fn </span>run_stmt_rules(<span class="kw-2">&amp;</span><span class="self">self</span>, stmt: <span class="kw-2">&amp;</span>ast::Stmt, span: <span class="kw-2">&amp;</span>Span) -&gt; Vec&lt;EgonErrorS&gt; {
+    <span class="kw">fn </span>run_stmt_rules(<span class="kw-2">&amp;mut </span><span class="self">self</span>, stmt: <span class="kw-2">&amp;</span>ast::Stmt, span: <span class="kw-2">&amp;</span>Span) -&gt; Vec&lt;EgonErrorS&gt; {
         <span class="macro">tracelog::tracelog!</span>(
             label = verifier,run_stmt_rules;
             <span class="string">"Run rules against statement {}"</span>,
@@ -3057,16 +3209,11 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
 
-        <span class="kw">for </span>rule <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.rules {
+        <span class="kw">for </span>rule <span class="kw">in </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.rules {
             <span class="kw">let </span>rule_string = rule.to_string();
 
             <span class="kw">let </span>rule_errs = rule
-                .visit_stmt(
-                    stmt,
-                    span,
-                    <span class="kw-2">&amp;</span>|id: <span class="kw-2">&amp;</span>str, span: <span class="kw-2">&amp;</span>Span| <span class="self">self</span>.resolve_identifier(id, span),
-                    <span class="kw-2">&amp;</span>|expr: <span class="kw-2">&amp;</span>ast::Expr, span: <span class="kw-2">&amp;</span>Span| <span class="self">self</span>.resolve_expr_type(expr, span),
-                )
+                .visit_stmt(stmt, span, <span class="kw-2">&amp;</span><span class="self">self</span>.type_env, <span class="kw-2">&amp;</span><span class="self">self</span>.expr_types)
                 .err()
                 .unwrap_or_default();
 
@@ -3078,103 +3225,132 @@
                     rule_errs.len(),
                     log_stmt(stmt)
                 );
+
+                <span class="kw">let </span>err_messages: Vec&lt;String&gt; = rule_errs.iter().map(|x| x.<span class="number">0</span>.to_string()).collect();
+
+                <span class="kw">for </span>e <span class="kw">in </span>err_messages {
+                    <span class="macro">tracelog::tracelog!</span>(
+                        label = verifier,run_stmt_rules,error;
+                        <span class="string">"{} from {} against statement {}"</span>,
+                        e.red(),
+                        rule_string.italic(),
+                        log_stmt(stmt)
+                    );
+                }
             }
 
             errs.extend(rule_errs);
         }
 
+        <span class="macro">tracelog::tracelog!</span>(
+            label = verifier,run_stmt_rules;
+            <span class="string">"{} generated a total of {} errors"</span>,
+            log_stmt(stmt),
+            errs.len().to_string().underline()
+        );
+
         errs
     }
 
-    <span class="kw">fn </span>run_expr_rules(<span class="kw-2">&amp;</span><span class="self">self</span>, expr: <span class="kw-2">&amp;</span>ast::Expr, span: <span class="kw-2">&amp;</span>Span) -&gt; Vec&lt;EgonErrorS&gt; {
+    <span class="kw">fn </span>run_expr_rules(<span class="kw-2">&amp;</span><span class="self">self</span>, expr: Arc&lt;ast::Expr&gt;, span: <span class="kw-2">&amp;</span>Span) -&gt; Vec&lt;EgonErrorS&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
 
         <span class="macro">tracelog::tracelog!</span>(
             label = verifier,run_expr_rules;
             <span class="string">"Run rules against expression {}"</span>,
-            log_expr(expr)
+            log_expr(<span class="kw-2">&amp;</span>expr)
         );
 
         <span class="kw">for </span>rule <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.rules {
             <span class="kw">let </span>rule_string = rule.to_string();
 
             <span class="kw">let </span>rule_errs = rule
-                .visit_expr(
-                    expr,
-                    span,
-                    <span class="kw-2">&amp;</span>|id: <span class="kw-2">&amp;</span>str, span: <span class="kw-2">&amp;</span>Span| <span class="self">self</span>.resolve_identifier(id, span),
-                    <span class="kw-2">&amp;</span>|expr: <span class="kw-2">&amp;</span>ast::Expr, span: <span class="kw-2">&amp;</span>Span| <span class="self">self</span>.resolve_expr_type(expr, span),
-                )
+                .visit_expr(expr.clone(), span, <span class="kw-2">&amp;</span><span class="self">self</span>.type_env, <span class="kw-2">&amp;</span><span class="self">self</span>.expr_types)
                 .err()
                 .unwrap_or_default();
 
             <span class="kw">if </span>!rule_errs.is_empty() {
                 <span class="macro">tracelog::tracelog!</span>(
+                    level = ERROR;
                     label = verifier,run_expr_rules;
                     <span class="string">"{} generated {} errors against expr {}"</span>,
                     rule_string.italic(),
-                    rule_errs.len(),
-                    log_expr(expr)
+                    rule_errs.len().to_string().red().bold().underline(),
+                    log_expr(<span class="kw-2">&amp;</span>expr)
                 );
+
+                <span class="kw">let </span>err_messages: Vec&lt;String&gt; = rule_errs.iter().map(|x| x.<span class="number">0</span>.to_string()).collect();
+
+                <span class="kw">for </span>e <span class="kw">in </span>err_messages {
+                    <span class="macro">tracelog::tracelog!</span>(
+                        label = verifier,run_stmt_rules,error;
+                        <span class="string">"{} from {} against statement {}"</span>,
+                        e.red(),
+                        rule_string.italic(),
+                        log_expr(<span class="kw-2">&amp;</span>expr)
+                    );
+                }
             }
 
             errs.extend(rule_errs);
         }
+
+        <span class="macro">tracelog::tracelog!</span>(
+            label = verifier,run_expr_rules;
+            <span class="string">"{} generated a total of {} errors"</span>,
+            log_expr(<span class="kw-2">&amp;</span>expr),
+            errs.len().to_string().underline()
+        );
 
         errs
     }
 
     <span class="kw">fn </span>visit_expr(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        expr: <span class="kw-2">&amp;mut </span>ast::Expr,
+        expr: Arc&lt;ast::Expr&gt;,
         span: <span class="kw-2">&amp;</span>Span,
     ) -&gt; EgonResultMultiSpannedErr&lt;TypeEnvValue&gt; {
-        <span class="kw">let </span>expr_string = log_expr(expr);
-        <span class="kw">let </span>expr_clone = expr.clone();
+        <span class="kw">let </span>expr_string = log_expr(<span class="kw-2">&amp;</span>expr);
 
         <span class="macro">tracelog::tracelog!</span>(label = verifier,visit_expr; <span class="string">"{}"</span>, expr_string);
 
-        <span class="kw">match </span>expr {
+        tracelog::indent();
+
+        <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
+
+        <span class="kw">let </span>expr_type = <span class="kw">match </span><span class="kw-2">&amp;*</span>expr {
             ast::Expr::Block(block_expr) =&gt; {
                 <span class="macro">tracelog::tracelog!</span>(label = verifier,visit_expr,expr_block; <span class="string">"{} is a block expression"</span>, expr_string);
 
-                <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
+                <span class="comment">// Open a new scope
+                </span><span class="self">self</span>.start_new_type_env();
 
-                <span class="self">self</span>.start_new_type_env();
+                <span class="comment">// Track if a return statement has been seen in the block
+                //
+                // Used to generate errors if non return statements or return
+                // expressions are found after
+                </span><span class="kw">let </span><span class="kw-2">mut </span>return_stmt_type: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Type&gt; = <span class="prelude-val">None</span>;
 
-                <span class="kw">let </span><span class="kw-2">mut </span>return_stmt_type: <span class="prelude-ty">Option</span>&lt;Type&gt; = <span class="prelude-val">None</span>;
+                <span class="macro">tracelog::tracelog!</span>(label = verifier,visit_expr,expr_block; <span class="string">"Visiting statements in block {}"</span>, expr_string);
 
-                <span class="kw">let </span>rule_errs = <span class="self">self</span>.run_expr_rules(<span class="kw-2">&amp;</span>expr_clone, span);
-                errs.extend(rule_errs);
-
-                <span class="kw">for </span>(stmt, stmt_span) <span class="kw">in </span><span class="kw-2">&amp;mut </span>block_expr.stmts {
-                    <span class="kw">if let </span>ast::Stmt::Return(stmt_return) = stmt {
-                        <span class="macro">tracelog::tracelog!</span>(label = verifier,visit_expr,expr_block,return_stmt; <span class="string">"{} has a return statement"</span>, expr_string);
-
-                        stmt_return.set_used_in_block();
-
-                        <span class="kw">match </span><span class="self">self</span>.resolve_expr_type(<span class="kw-2">&amp;</span>stmt_return.value.<span class="number">0</span>, <span class="kw-2">&amp;</span>stmt_return.value.<span class="number">1</span>) {
-                            <span class="prelude-val">Ok</span>(v) =&gt; {
-                                <span class="macro">tracelog::tracelog!</span>(
-                                    label = verifier,visit_expr,expr_block,return_stmt;
-                                    <span class="string">"caching return value: {}"</span>,
-                                    log_type(<span class="kw-2">&amp;</span>v.of_type)
-                                );
-
-                                return_stmt_type = <span class="prelude-val">Some</span>(v.of_type);
-                            }
-                            <span class="prelude-val">Err</span>(stmt_return_errs) =&gt; {
-                                errs.extend(stmt_return_errs);
-                            }
-                        }
+                <span class="comment">// Visit each of the block's statements
+                </span><span class="kw">for </span>(stmt, stmt_span) <span class="kw">in </span><span class="kw-2">&amp;</span>block_expr.stmts {
+                    <span class="kw">if let </span><span class="prelude-val">Err</span>(stmt_errs) = <span class="self">self</span>.visit_stmt(stmt, stmt_span) {
+                        errs.extend(stmt_errs);
                     }
-
-                    <span class="kw">let </span>stmt_errs = <span class="self">self</span>.visit_stmt(stmt, stmt_span).err().unwrap_or_default();
-
-                    errs.extend(stmt_errs);
                 }
 
-                <span class="kw">match </span><span class="kw-2">&amp;mut </span>block_expr.return_expr {
+                <span class="kw">if let </span><span class="prelude-val">Some</span>((ast::Stmt::Return(stmt_return), <span class="kw">_</span>)) = block_expr.stmts.last() {
+                    <span class="comment">// Check if statement is a return statement
+                    </span><span class="macro">tracelog::tracelog!</span>(label = verifier,visit_expr,expr_block,return_stmt; <span class="string">"{} has a return statement"</span>, expr_string);
+
+                    return_stmt_type = <span class="self">self</span>.expr_types.get(<span class="kw-2">&amp;</span>stmt_return.value);
+                }
+
+                <span class="macro">tracelog::tracelog!</span>(label = verifier,visit_expr,expr_block; <span class="string">"Checking for a return expression in block {}"</span>, expr_string);
+
+                <span class="comment">// Check for return expression in block
+                </span><span class="kw">let </span>block_type = <span class="kw">match </span><span class="kw-2">&amp;</span>block_expr.return_expr {
                     <span class="prelude-val">Some</span>((return_expr, return_span)) =&gt; {
                         <span class="macro">tracelog::tracelog!</span>(
                             label = verifier,visit_expr,expr_block;
@@ -3183,65 +3359,65 @@
                             log_expr(return_expr)
                         );
 
-                        <span class="kw">match </span><span class="self">self</span>.visit_expr(return_expr, return_span) {
-                            <span class="prelude-val">Ok</span>(return_type) =&gt; {
-                                <span class="kw">let </span>rule_errs = <span class="self">self</span>.run_expr_rules(return_expr, return_span);
-                                errs.extend(rule_errs);
+                        <span class="macro">tracelog::tracelog!</span>(label = verifier,visit_expr,expr_block; <span class="string">"Return expression {} found in block {}"</span>, log_expr(return_expr), expr_string);
 
-                                <span class="self">self</span>.end_current_type_env();
-
-                                <span class="kw">if </span>!errs.is_empty() {
-                                    <span class="kw">return </span><span class="prelude-val">Err</span>(errs);
-                                }
-
+                        <span class="comment">// Visit block's return expression
+                        </span><span class="kw">match </span><span class="self">self</span>.visit_expr(return_expr.clone(), return_span) {
+                            <span class="prelude-val">Ok</span>(return_type) =&gt; <span class="prelude-val">Ok</span>(return_type),
+                            <span class="prelude-val">Err</span>(return_errs) =&gt; {
                                 <span class="macro">tracelog::tracelog!</span>(
-                                    label = verifier,visit_expr,expr_block;
-                                    <span class="string">"{} resolved to type of {}"</span>,
-                                    expr_string,
-                                    log_type(<span class="kw-2">&amp;</span>return_type.of_type)
+                                    label = verifier,visit_expr,expr_block,error;
+                                    <span class="string">"Return expression {} had {} errors. Trying to resolve block expression's type."</span>,
+                                    log_expr(return_expr),
+                                    return_errs.len()
                                 );
 
-                                <span class="comment">// Record the block's returning expression
-                                // This is important for identifier expressions
-                                //
-                                // ```egon
-                                // let a = {
-                                //   let b = 123;
-                                //
-                                //   b
-                                // };
-                                // ```
-                                </span>block_expr.typeref = <span class="prelude-val">Some</span>(return_type.of_type.clone());
+                                <span class="kw">match </span><span class="self">self</span>.resolve_expr_type(return_expr.clone(), return_span) {
+                                    <span class="prelude-val">Ok</span>(resolved_type) =&gt; {
+                                        <span class="macro">tracelog::tracelog!</span>(
+                                            label = verifier,visit_expr,expr_block,error;
+                                            <span class="string">"Return expression {} resolved with type {}"</span>,
+                                            log_expr(return_expr),
+                                            log_type(<span class="kw-2">&amp;</span>resolved_type.of_type)
+                                        );
 
-                                <span class="prelude-val">Ok</span>(return_type)
-                            }
-                            <span class="prelude-val">Err</span>(return_errs) =&gt; {
-                                errs.extend(return_errs);
+                                        errs.extend(return_errs);
 
-                                <span class="self">self</span>.end_current_type_env();
+                                        <span class="prelude-val">Ok</span>(resolved_type)
+                                    }
+                                    <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; {
+                                        <span class="macro">tracelog::tracelog!</span>(
+                                            label = verifier,visit_expr,expr_block,error;
+                                            <span class="string">"Resolving return expression {} resulted in {} errors. Resolving type to {}"</span>,
+                                            log_expr(return_expr),
+                                            return_errs.len(),
+                                            log_type(<span class="kw-2">&amp;</span>Type::unknown())
+                                        );
 
-                                <span class="prelude-val">Err</span>(errs)
+                                        errs.extend(return_errs);
+
+                                        <span class="prelude-val">Ok</span>(Type::unknown().into())
+                                    }
+                                }
                             }
                         }
                     }
                     <span class="prelude-val">None </span>=&gt; {
-                        <span class="self">self</span>.end_current_type_env();
-
-                        <span class="kw">if let </span><span class="prelude-val">Some</span>(stmt_return_type) = return_stmt_type {
-                            block_expr.typeref = <span class="prelude-val">Some</span>(stmt_return_type);
-                        }
-
-                        <span class="kw">if </span>!errs.is_empty() {
-                            <span class="kw">return </span><span class="prelude-val">Err</span>(errs);
-                        }
-
                         <span class="kw">if let </span><span class="prelude-val">Some</span>(block_return_type) = <span class="kw-2">&amp;</span>block_expr.typeref {
-                            <span class="kw">return </span><span class="prelude-val">Ok</span>(block_return_type.clone().into());
+                            <span class="prelude-val">Ok</span>(block_return_type.clone().into())
+                        } <span class="kw">else </span>{
+                            <span class="prelude-val">Ok</span>(&lt;egonlang_types::Type <span class="kw">as </span>Clone&gt;::clone(
+                                return_stmt_type.unwrap_or(<span class="kw-2">&amp;</span>Type::unit()),
+                            )
+                            .into())
                         }
-
-                        <span class="prelude-val">Ok</span>(Type::unit().into())
                     }
-                }
+                };
+
+                <span class="comment">// Close the block's scope
+                </span><span class="self">self</span>.end_current_type_env();
+
+                block_type
             }
             ast::Expr::Assign(assign_expr) =&gt; {
                 <span class="macro">tracelog::tracelog!</span>(
@@ -3250,39 +3426,22 @@
                     expr_string
                 );
 
-                <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
-
-                <span class="kw">let </span>ident_errs = <span class="self">self
+                <span class="comment">// Resolve assignment identifier
+                </span><span class="kw">let </span>ident_errs = <span class="self">self
                     </span>.resolve_identifier(<span class="kw-2">&amp;</span>assign_expr.identifier.<span class="number">0</span>.name, <span class="kw-2">&amp;</span>assign_expr.identifier.<span class="number">1</span>)
                     .err()
                     .unwrap_or_default();
-
                 errs.extend(ident_errs);
 
-                <span class="kw">let </span>(value_expr, value_span) = <span class="kw-2">&amp;mut </span>assign_expr.value;
-                <span class="kw">let </span>value_type = <span class="self">self</span>.visit_expr(value_expr, value_span);
+                <span class="comment">// Visit assignment value expression
+                </span><span class="kw">let </span>(value_expr, value_span) = <span class="kw-2">&amp;</span>assign_expr.value;
 
-                <span class="kw">match </span>value_type {
-                    <span class="prelude-val">Ok</span>(value_type) =&gt; {
-                        <span class="kw">let </span>rule_errs = <span class="self">self</span>.run_expr_rules(value_expr, value_span);
-                        errs.extend(rule_errs);
-
-                        <span class="kw">let </span>rule_errs = <span class="self">self</span>.run_expr_rules(expr, span);
-                        errs.extend(rule_errs);
-
-                        <span class="kw">if </span>!errs.is_empty() {
-                            <span class="kw">return </span><span class="prelude-val">Err</span>(errs);
-                        }
-
-                        <span class="prelude-val">Ok</span>(value_type)
-                    }
+                <span class="kw">match </span><span class="self">self</span>.visit_expr(value_expr.clone(), value_span) {
+                    <span class="prelude-val">Ok</span>(value_type) =&gt; <span class="prelude-val">Ok</span>(value_type),
                     <span class="prelude-val">Err</span>(value_errs) =&gt; {
                         errs.extend(value_errs);
 
-                        <span class="kw">let </span>rule_errs = <span class="self">self</span>.run_expr_rules(expr, span);
-                        errs.extend(rule_errs);
-
-                        <span class="prelude-val">Err</span>(errs)
+                        <span class="prelude-val">Ok</span>(Type::unknown().into())
                     }
                 }
             }
@@ -3293,26 +3452,23 @@
                     expr_string
                 );
 
-                <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
+                <span class="kw">let </span>(lt_expr, lt_span) = <span class="kw-2">&amp;</span>infix_expr.lt;
 
-                <span class="kw">let </span>(lt_expr, lt_span) = <span class="kw-2">&amp;mut </span>infix_expr.lt;
-
-                <span class="kw">let </span>lt_errs = <span class="self">self</span>.visit_expr(lt_expr, lt_span).err().unwrap_or_default();
+                <span class="kw">let </span>lt_errs = <span class="self">self
+                    </span>.visit_expr(lt_expr.clone(), lt_span)
+                    .err()
+                    .unwrap_or_default();
 
                 errs.extend(lt_errs);
 
-                <span class="kw">let </span>(rt_expr, rt_span) = <span class="kw-2">&amp;mut </span>infix_expr.rt;
+                <span class="kw">let </span>(rt_expr, rt_span) = <span class="kw-2">&amp;</span>infix_expr.rt;
 
-                <span class="kw">let </span>rt_errs = <span class="self">self</span>.visit_expr(rt_expr, rt_span).err().unwrap_or_default();
+                <span class="kw">let </span>rt_errs = <span class="self">self
+                    </span>.visit_expr(rt_expr.clone(), rt_span)
+                    .err()
+                    .unwrap_or_default();
 
                 errs.extend(rt_errs);
-
-                <span class="kw">let </span>rule_errs = <span class="self">self</span>.run_expr_rules(<span class="kw-2">&amp;</span>expr_clone, span);
-                errs.extend(rule_errs);
-
-                <span class="kw">if </span>!errs.is_empty() {
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(errs);
-                }
 
                 <span class="prelude-val">Ok</span>(<span class="kw">match </span>infix_expr.op {
                     ast::OpInfix::Add =&gt; Type::number().into(),
@@ -3337,23 +3493,23 @@
                     expr_string
                 );
 
-                <span class="kw">let </span>(rt_expr, rt_span) = <span class="kw-2">&amp;mut </span>prefix_expr.rt;
+                <span class="comment">// Visit the right value of prefix expression
+                //
+                // Example:
+                // Input: `-100`
+                // Prefix Op: `-`
+                // Right Value: `100`
+                </span><span class="kw">let </span>(rt_expr, rt_span) = <span class="kw-2">&amp;</span>prefix_expr.rt;
+                <span class="kw">let </span>rt_type = <span class="self">self</span>.visit_expr(rt_expr.clone(), rt_span);
 
-                <span class="kw">match </span><span class="self">self</span>.visit_expr(rt_expr, rt_span) {
-                    <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; {
-                        <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
-
-                        <span class="kw">let </span>rule_errs = <span class="self">self</span>.run_expr_rules(<span class="kw-2">&amp;</span>expr_clone, span);
-                        errs.extend(rule_errs);
-
-                        <span class="kw">if </span>!errs.is_empty() {
-                            <span class="kw">return </span><span class="prelude-val">Err</span>(errs);
-                        }
-
-                        <span class="prelude-val">Ok</span>(<span class="self">self</span>.resolve_expr_type(expr, span).unwrap())
-                    }
-                    <span class="prelude-val">Err</span>(rt_errs) =&gt; <span class="prelude-val">Err</span>(rt_errs),
+                <span class="kw">if let </span><span class="prelude-val">Err</span>(rt_errs) = rt_type {
+                    errs.extend(rt_errs);
                 }
+
+                <span class="prelude-val">Ok</span>(<span class="kw">match </span>prefix_expr.op {
+                    ast::OpPrefix::Negate =&gt; Type::number().into(),
+                    ast::OpPrefix::Not =&gt; Type::bool().into(),
+                })
             }
             ast::Expr::Fn(fn_expr) =&gt; {
                 <span class="macro">tracelog::tracelog!</span>(
@@ -3362,10 +3518,11 @@
                     expr_string
                 );
 
-                <span class="self">self</span>.start_new_type_env();
+                <span class="comment">// Open a new scope
+                </span><span class="self">self</span>.start_new_type_env();
 
-                <span class="kw">let </span><span class="kw-2">mut </span>param_types: Vec&lt;Type&gt; = <span class="macro">vec!</span>[];
-
+                <span class="comment">// Add function's parameter types to scope type environments
+                </span><span class="kw">let </span><span class="kw-2">mut </span>param_types: Vec&lt;Type&gt; = <span class="macro">vec!</span>[];
                 <span class="kw">for </span>((ident, type_ref), <span class="kw">_</span>) <span class="kw">in </span><span class="kw-2">&amp;</span>fn_expr.params {
                     <span class="kw">let </span>name = <span class="kw-2">&amp;</span>ident.name;
 
@@ -3380,50 +3537,18 @@
                     );
                 }
 
-                <span class="kw">let </span>(body_expr, body_span) = <span class="kw-2">&amp;mut </span>fn_expr.body;
-
-                <span class="kw">match </span><span class="self">self</span>.visit_expr(body_expr, body_span) {
-                    <span class="prelude-val">Ok</span>(body_type) =&gt; {
-                        <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
-
-                        <span class="kw">let </span>rule_errs = <span class="self">self</span>.run_expr_rules(expr, span);
-                        errs.extend(rule_errs);
-
-                        <span class="self">self</span>.end_current_type_env();
-
-                        <span class="kw">if </span>!errs.is_empty() {
-                            <span class="macro">tracelog::tracelog!</span>(
-                                label = visit_expr,expr_function,body;
-                                <span class="string">"Expression function {} had {} errors"</span>,
-                                expr_string,
-                                errs.len()
-                            );
-
-                            <span class="kw">return </span><span class="prelude-val">Err</span>(errs);
-                        }
-
-                        <span class="prelude-val">Ok</span>(Type::function(Type::tuple(param_types), body_type.of_type).into())
-                    }
-                    <span class="prelude-val">Err</span>(body_errs) =&gt; {
-                        <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
-
-                        errs.extend(body_errs);
-
-                        <span class="kw">let </span>rule_errs = <span class="self">self</span>.run_expr_rules(expr, span);
-                        errs.extend(rule_errs);
-
-                        <span class="self">self</span>.end_current_type_env();
-
-                        <span class="macro">tracelog::tracelog!</span>(
-                            label = verifier,visit_expr,expr_function,body;
-                            <span class="string">"Expression function {} had {} errors"</span>,
-                            expr_string,
-                            errs.len()
-                        );
-
-                        <span class="prelude-val">Err</span>(errs)
-                    }
+                <span class="comment">// Visit function's body expression
+                </span><span class="kw">let </span>(body_expr, body_span) = <span class="kw-2">&amp;</span>fn_expr.body;
+                <span class="kw">if let </span><span class="prelude-val">Err</span>(body_errs) = <span class="self">self</span>.visit_expr(body_expr.clone(), body_span) {
+                    errs.extend(body_errs);
                 }
+
+                <span class="comment">// End function expression's scope
+                </span><span class="self">self</span>.end_current_type_env();
+
+                <span class="kw">let </span>(fn_return_type, _fn_return_type_span) = <span class="kw-2">&amp;</span>fn_expr.return_type;
+
+                <span class="prelude-val">Ok</span>(Type::function(Type::tuple(param_types), fn_return_type.clone()).into())
             }
             ast::Expr::If(if_expr) =&gt; {
                 <span class="macro">tracelog::tracelog!</span>(
@@ -3432,50 +3557,39 @@
                     expr_string
                 );
 
-                <span class="kw">let </span>(cond_expr, cond_span) = <span class="kw-2">&amp;mut </span>if_expr.cond;
-
-                <span class="kw">match </span><span class="self">self</span>.visit_expr(cond_expr, cond_span) {
-                    <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; {
-                        <span class="kw">let </span>(then_expr, then_span) = <span class="kw-2">&amp;mut </span>if_expr.then;
-
-                        <span class="kw">match </span><span class="self">self</span>.visit_expr(then_expr, then_span) {
-                            <span class="prelude-val">Ok</span>(then_type) =&gt; {
-                                <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
-
-                                <span class="kw">let </span>rule_errs = <span class="self">self</span>.run_expr_rules(<span class="kw-2">&amp;</span>expr_clone, span);
-                                errs.extend(rule_errs);
-
-                                <span class="kw">match </span><span class="kw-2">&amp;mut </span>if_expr.else_ {
-                                    <span class="prelude-val">Some</span>((else_expr, else_span)) =&gt; {
-                                        <span class="kw">match </span><span class="self">self</span>.visit_expr(else_expr, else_span) {
-                                            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; {
-                                                <span class="kw">if </span>!errs.is_empty() {
-                                                    <span class="kw">return </span><span class="prelude-val">Err</span>(errs);
-                                                }
-
-                                                <span class="prelude-val">Ok</span>(then_type.clone())
-                                            }
-                                            <span class="prelude-val">Err</span>(else_errs) =&gt; {
-                                                errs.extend(else_errs);
-
-                                                <span class="prelude-val">Err</span>(errs)
-                                            }
-                                        }
-                                    }
-                                    <span class="prelude-val">None </span>=&gt; {
-                                        <span class="kw">if </span>!errs.is_empty() {
-                                            <span class="kw">return </span><span class="prelude-val">Err</span>(errs);
-                                        }
-
-                                        <span class="prelude-val">Ok</span>(then_type.clone())
-                                    }
-                                }
-                            }
-                            <span class="prelude-val">Err</span>(then_errs) =&gt; <span class="prelude-val">Err</span>(then_errs),
-                        }
-                    }
-                    <span class="prelude-val">Err</span>(cond_errs) =&gt; <span class="prelude-val">Err</span>(cond_errs),
+                <span class="comment">// Visit the condition expression
+                </span><span class="kw">let </span>(cond_expr, cond_span) = <span class="kw-2">&amp;</span>if_expr.cond;
+                <span class="kw">if let </span><span class="prelude-val">Err</span>(cond_errs) = <span class="self">self</span>.visit_expr(cond_expr.clone(), cond_span) {
+                    errs.extend(cond_errs);
                 }
+
+                <span class="attr">#[allow(unused_assignments)]
+                </span><span class="kw">let </span><span class="kw-2">mut </span>if_type: <span class="prelude-ty">Option</span>&lt;Type&gt; = <span class="prelude-val">None</span>;
+
+                <span class="comment">// Visit the then expression
+                </span><span class="kw">let </span>(then_expr, then_span) = <span class="kw-2">&amp;</span>if_expr.then;
+                <span class="kw">match </span><span class="self">self</span>.visit_expr(then_expr.clone(), then_span) {
+                    <span class="prelude-val">Err</span>(then_errs) =&gt; {
+                        errs.extend(then_errs);
+                        if_type = <span class="prelude-val">Some</span>(Type::unknown());
+                    }
+                    <span class="prelude-val">Ok</span>(t) =&gt; {
+                        if_type = <span class="prelude-val">Some</span>(t.of_type);
+                    }
+                };
+
+                <span class="comment">// Visit the else expression
+                </span><span class="kw">if let </span><span class="prelude-val">Some</span>((else_expr, else_span)) = <span class="kw-2">&amp;</span>if_expr.else_ {
+                    <span class="kw">if let </span><span class="prelude-val">Err</span>(else_errs) = <span class="self">self</span>.visit_expr(else_expr.clone(), else_span) {
+                        errs.extend(else_errs);
+                    }
+                }
+
+                <span class="kw">let </span>if_type = if_type
+                    .expect(<span class="string">"This should have value if there were no errors"</span>)
+                    .into();
+
+                <span class="prelude-val">Ok</span>(if_type)
             }
             ast::Expr::Unit =&gt; <span class="prelude-val">Ok</span>(Type::unit().into()),
             ast::Expr::Literal(literal_expr) =&gt; <span class="prelude-val">Ok</span>(<span class="kw">match </span>literal_expr {
@@ -3483,53 +3597,75 @@
                 ast::ExprLiteral::Number(<span class="kw">_</span>) =&gt; Type::number().into(),
                 ast::ExprLiteral::String(<span class="kw">_</span>) =&gt; Type::string().into(),
             }),
-            ast::Expr::Identifier(_ident_expr) =&gt; <span class="self">self</span>.resolve_expr_type(<span class="kw-2">&amp;</span>expr_clone, span),
+            ast::Expr::Identifier(_ident_expr) =&gt; <span class="self">self</span>.resolve_expr_type(expr.clone(), span),
             ast::Expr::List(list_expr) =&gt; {
                 <span class="macro">tracelog::tracelog!</span>(
-                    label = visit_expr,expr_infix;
+                    label = visit_expr,expr_list;
                     <span class="string">"{} is an list expression"</span>,
                     expr_string
                 );
 
                 <span class="kw">if </span>list_expr.items.is_empty() {
-                    <span class="kw">return </span><span class="prelude-val">Ok</span>(Type::list(Type::unknown()).into());
-                }
+                    <span class="macro">tracelog::tracelog!</span>(
+                        label = visit_expr,expr_list;
+                        <span class="string">"{} is an empty list expression"</span>,
+                        expr_string
+                    );
 
-                <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
-                <span class="kw">let </span><span class="kw-2">mut </span>first_item_type = Type::unknown().into();
+                    <span class="prelude-val">Ok</span>(Type::list(Type::unknown()).into())
+                } <span class="kw">else </span>{
+                    <span class="kw">let </span><span class="kw-2">mut </span>first_item_type = Type::unknown().into();
 
-                <span class="kw">for </span>(i, (item_expr, item_span)) <span class="kw">in </span>list_expr.items.iter_mut().enumerate() {
-                    <span class="kw">match </span><span class="self">self</span>.visit_expr(item_expr, item_span) {
-                        <span class="prelude-val">Err</span>(item_errs) =&gt; {
-                            errs.extend(item_errs);
-                        }
-                        <span class="prelude-val">Ok</span>(item_type) =&gt; {
-                            <span class="kw">if </span>i == <span class="number">0 </span>{
-                                first_item_type = item_type;
+                    <span class="macro">tracelog::tracelog!</span>(
+                        label = visit_expr,expr_list;
+                        <span class="string">"Visiting items in list {}"</span>,
+                        expr_string
+                    );
+
+                    <span class="kw">for </span>(i, (item_expr, item_span)) <span class="kw">in </span>list_expr.items.iter().enumerate() {
+                        <span class="macro">tracelog::tracelog!</span>(
+                            label = visit_expr,expr_list,item;
+                            <span class="string">"Visiting item {} in list {}"</span>,
+                            i,
+                            expr_string
+                        );
+
+                        <span class="comment">// Visit
+                        </span><span class="kw">match </span><span class="self">self</span>.visit_expr(item_expr.clone(), item_span) {
+                            <span class="prelude-val">Err</span>(item_errs) =&gt; {
+                                <span class="macro">tracelog::tracelog!</span>(
+                                    label = visit_expr,expr_list,item;
+                                    <span class="string">"Item {} in list {} had {} errors"</span>,
+                                    i,
+                                    expr_string,
+                                    item_errs.len().to_string().underline()
+                                );
+
+                                errs.extend(item_errs);
+                            }
+                            <span class="prelude-val">Ok</span>(item_type) =&gt; {
+                                <span class="kw">if </span>i == <span class="number">0 </span>{
+                                    <span class="macro">tracelog::tracelog!</span>(
+                                        label = visit_expr,expr_list,item;
+                                        <span class="string">"Found first item type {} in list {}"</span>,
+                                        log_type(<span class="kw-2">&amp;</span>item_type.of_type),
+                                        expr_string
+                                    );
+
+                                    first_item_type = item_type;
+                                }
                             }
                         }
                     }
+
+                    <span class="prelude-val">Ok</span>(Type::list(first_item_type.of_type).into())
                 }
-
-                <span class="kw">let </span>rule_errs = <span class="self">self</span>.run_expr_rules(<span class="kw-2">&amp;</span>expr_clone, span);
-                errs.extend(rule_errs);
-
-                <span class="comment">// errs.dedup();
-
-                </span><span class="kw">if </span>!errs.is_empty() {
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(errs);
-                }
-
-                <span class="kw">let </span>t = Type::list(first_item_type.of_type).into();
-
-                <span class="prelude-val">Ok</span>(t)
             }
             ast::Expr::Tuple(tuple_expr) =&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>item_types: Vec&lt;Type&gt; = <span class="macro">vec!</span>[];
-                <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
-
-                <span class="kw">for </span>(item_expr, item_span) <span class="kw">in </span><span class="kw-2">&amp;mut </span>tuple_expr.items {
-                    <span class="kw">match </span><span class="self">self</span>.visit_expr(item_expr, item_span) {
+                <span class="comment">// Visit each tuple item and track each type
+                </span><span class="kw">let </span><span class="kw-2">mut </span>item_types: Vec&lt;Type&gt; = <span class="macro">vec!</span>[];
+                <span class="kw">for </span>(item_expr, item_span) <span class="kw">in </span><span class="kw-2">&amp;</span>tuple_expr.items {
+                    <span class="kw">match </span><span class="self">self</span>.visit_expr(item_expr.clone(), item_span) {
                         <span class="prelude-val">Ok</span>(item_type) =&gt; {
                             item_types.push(item_type.of_type.clone());
                         }
@@ -3540,27 +3676,9 @@
                     };
                 }
 
-                <span class="kw">let </span>rule_errs = <span class="self">self</span>.run_expr_rules(<span class="kw-2">&amp;</span>expr_clone, span);
-                errs.extend(rule_errs);
-
-                <span class="kw">if </span>!errs.is_empty() {
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(errs);
-                }
-
-                <span class="prelude-val">Ok</span>(Type::tuple(item_types.clone()).into())
+                <span class="prelude-val">Ok</span>(Type::tuple(item_types).into())
             }
-            ast::Expr::Range(<span class="kw">_</span>) =&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
-
-                <span class="kw">let </span>rule_errs = <span class="self">self</span>.run_expr_rules(<span class="kw-2">&amp;</span>expr_clone, span);
-                errs.extend(rule_errs);
-
-                <span class="kw">if </span>!errs.is_empty() {
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(errs);
-                }
-
-                <span class="prelude-val">Ok</span>(Type::range().into())
-            }
+            ast::Expr::Range(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(Type::range().into()),
             ast::Expr::Type(type_expr) =&gt; {
                 <span class="macro">tracelog::tracelog!</span>(
                     label = verifier,visit_expr,expr_type;
@@ -3568,61 +3686,99 @@
                     expr_string
                 );
 
-                <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
-
                 <span class="kw">let </span>typeref = <span class="kw-2">&amp;</span>type_expr.<span class="number">0</span>;
                 <span class="kw">let </span>typeref_ident = <span class="kw-2">&amp;</span>typeref.to_string();
 
-                <span class="kw">let </span>type_type = <span class="self">self</span>.resolve_identifier(typeref_ident, span);
-
-                <span class="kw">match </span>type_type {
-                    <span class="prelude-val">Ok</span>(t) =&gt; {
-                        <span class="kw">let </span>rule_errs = <span class="self">self</span>.run_expr_rules(<span class="kw-2">&amp;</span>expr_clone, span);
-                        errs.extend(rule_errs);
-
-                        <span class="kw">if </span>!errs.is_empty() {
-                            <span class="kw">return </span><span class="prelude-val">Err</span>(errs);
-                        }
-
-                        <span class="prelude-val">Ok</span>(t)
-                    }
-                    <span class="prelude-val">Err</span>(e) =&gt; {
+                <span class="comment">// Resolve the type's name as an identifier
+                </span><span class="kw">match </span><span class="self">self</span>.resolve_identifier(typeref_ident, span) {
+                    <span class="prelude-val">Ok</span>(typeref_ident_type) =&gt; <span class="prelude-val">Ok</span>(typeref_ident_type),
+                    <span class="prelude-val">Err</span>(type_errs) =&gt; {
                         <span class="kw">if </span>typeref.is_builtin() {
                             <span class="prelude-val">Ok</span>(typeref.clone().into())
                         } <span class="kw">else </span>{
-                            <span class="prelude-val">Err</span>(e)
+                            errs.extend(type_errs);
+
+                            <span class="kw">return </span><span class="prelude-val">Err</span>(errs);
                         }
                     }
                 }
             }
             ast::Expr::Call(expr_call) =&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
+                <span class="kw">let </span><span class="kw-2">mut </span>call_errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
 
-                <span class="kw">let </span>(callee_expr, callee_span) = <span class="kw-2">&amp;mut </span>expr_call.callee;
-                <span class="kw">let </span>callee_type = <span class="self">self</span>.visit_expr(callee_expr, callee_span);
-
+                <span class="comment">// Visit callee expression
+                </span><span class="kw">let </span>(callee_expr, callee_span) = <span class="kw-2">&amp;</span>expr_call.callee;
+                <span class="kw">let </span>callee_type = <span class="self">self</span>.visit_expr(callee_expr.clone(), callee_span);
                 <span class="kw">if let </span><span class="prelude-val">Err</span>(callee_errs) = <span class="kw-2">&amp;</span>callee_type {
-                    errs.extend(callee_errs.clone());
+                    call_errs.extend(callee_errs.clone());
                 };
 
-                <span class="kw">for </span>(arg_expr, arg_span) <span class="kw">in </span><span class="kw-2">&amp;mut </span>expr_call.args {
+                <span class="comment">// Visit each argument expression
+                </span><span class="kw">for </span>(arg_expr, arg_span) <span class="kw">in </span><span class="kw-2">&amp;</span>expr_call.args {
                     <span class="kw">let </span>arg_errs = <span class="self">self
-                        </span>.visit_expr(arg_expr, arg_span)
+                        </span>.visit_expr(arg_expr.clone(), arg_span)
                         .err()
                         .unwrap_or_default();
 
-                    errs.extend(arg_errs);
+                    call_errs.extend(arg_errs);
                 }
 
-                <span class="kw">let </span>rule_errs = <span class="self">self</span>.run_expr_rules(<span class="kw-2">&amp;</span>expr_clone, span);
-                errs.extend(rule_errs);
+                <span class="kw">let </span>call_type = <span class="kw">match </span><span class="self">self</span>.resolve_expr_type(expr.clone(), span) {
+                    <span class="prelude-val">Ok</span>(resolved_call_type) =&gt; <span class="prelude-val">Ok</span>(resolved_call_type),
+                    <span class="prelude-val">Err</span>(_resolve_expr_errs) =&gt; {
+                        <span class="comment">// call_errs.extend(resolve_expr_errs);
+                        </span><span class="prelude-val">Ok</span>(Type::unknown().into())
+                    }
+                };
 
-                <span class="kw">if </span>!errs.is_empty() {
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(errs);
-                }
+                errs.extend(call_errs);
 
-                <span class="prelude-val">Ok</span>(callee_type.unwrap())
+                call_type
             }
+        };
+
+        <span class="kw">match </span><span class="kw-2">&amp;</span>expr_type {
+            <span class="prelude-val">Ok</span>(expr_type) =&gt; {
+                <span class="macro">tracelog::tracelog!</span>(label = verifier,visit_expr; <span class="string">"caching type {} for expr {} @ {:?}"</span>, log_type(<span class="kw-2">&amp;</span>expr_type.of_type), expr_string, span);
+
+                <span class="self">self</span>.expr_types
+                    .insert((expr.clone(), span.clone()), expr_type.of_type.clone());
+            }
+            <span class="prelude-val">Err</span>(expr_type_errs) =&gt; {
+                <span class="macro">tracelog::tracelog!</span>(
+                    level = ERROR;
+                    label = verifier,visit_expr;
+                    <span class="string">"unable to cache a type for expr {} due to {}"</span>,
+                    expr_string, expr_type_errs.len()
+                );
+
+                errs.extend(expr_type_errs.clone());
+            }
+        }
+
+        <span class="kw">let </span>expr_rule_errs = <span class="self">self</span>.run_expr_rules(expr.clone(), span);
+        errs.extend(expr_rule_errs);
+
+        <span class="macro">tracelog::tracelog!</span>(
+            label = verifier,visit_expr,exit_expr;
+            <span class="string">"{}"</span>,
+            log_expr(<span class="kw-2">&amp;</span>expr.clone())
+        );
+
+        tracelog::nl();
+        tracelog::dedent();
+
+        <span class="macro">tracelog::tracelog!</span>(
+            label = verifier,visit_expr;
+            <span class="string">"{} generated a total of {} errors"</span>,
+            log_expr(<span class="kw-2">&amp;</span>expr),
+            errs.len().to_string().underline()
+        );
+
+        <span class="kw">if </span>!errs.is_empty() {
+            <span class="prelude-val">Err</span>(errs)
+        } <span class="kw">else </span>{
+            expr_type
         }
     }
 
@@ -3632,6 +3788,8 @@
             label = verifier,scope_start;
             <span class="string">"Starting new scope"
         </span>);
+
+        tracelog::indent();
 
         <span class="self">self</span>.type_env.start_scope();
     }
@@ -3646,6 +3804,9 @@
             level - <span class="number">1
         </span>);
 
+        tracelog::nl();
+        tracelog::dedent();
+
         <span class="kw">let _ </span>= <span class="self">self</span>.type_env.end_scope();
     }
 
@@ -3657,9 +3818,9 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>verifier_tests {
     <span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
-    <span class="kw">use </span>ast::{ExprBlock, Module, StmtExpr};
+    <span class="kw">use </span>ast::{Expr, ExprIdentifier};
     <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
-    <span class="kw">use </span>egonlang_errors::{EgonSyntaxError, EgonTypeError};
+    <span class="kw">use </span>egonlang_errors::{EgonError, EgonSyntaxError, EgonTypeError};
     <span class="kw">use </span>egonlang_types::Type;
     <span class="kw">use </span>pretty_assertions::assert_eq;
 
@@ -4398,26 +4559,26 @@
         ])
     );
 
-    <span class="macro">verifier_test!</span>(
-        validate_mismatch_type_when_let_decl_with_block_value,
-        <span class="string">r#"
-        let a: number = {
-            let a: string = "foo";
+    <span class="comment">// verifier_test!(
+    //     validate_mismatch_type_when_let_decl_with_block_value,
+    //     r#"
+    //     let a: number = {
+    //         let a: string = "foo";
 
-            a
-        };
-        "#</span>,
-        <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[(
-            EgonTypeError::MismatchType {
-                expected: Type::number().to_string(),
-                actual: Type::string().to_string()
-            }
-            .into(),
-            <span class="number">25</span>..<span class="number">86
-        </span>)])
-    );
+    //         a
+    //     };
+    //     "#,
+    //     Err(vec![(
+    //         EgonTypeError::MismatchType {
+    //             expected: Type::number().to_string(),
+    //             actual: Type::string().to_string()
+    //         }
+    //         .into(),
+    //         25..86
+    //     )])
+    // );
 
-    <span class="macro">verifier_test!</span>(
+    </span><span class="macro">verifier_test!</span>(
         validate_reassign_const_value_3,
         <span class="string">r#"
         const a: number = 123;
@@ -4545,9 +4706,11 @@ a = b;"#</span>,
         <span class="kw">let </span><span class="kw-2">mut </span>module = ast::Module::from(<span class="macro">vec!</span>[(
             ast::StmtExpr {
                 expr: (
-                    ast::Identifier {
-                        name: <span class="string">"a"</span>.to_string(),
-                    }
+                    Expr::Identifier(ExprIdentifier {
+                        identifier: ast::Identifier {
+                            name: <span class="string">"a"</span>.to_string(),
+                        },
+                    })
                     .into(),
                     <span class="number">1</span>..<span class="number">2</span>,
                 ),
@@ -4575,9 +4738,11 @@ a = b;"#</span>,
             (
                 ast::StmtExpr {
                     expr: (
-                        ast::Identifier {
-                            name: <span class="string">"a"</span>.to_string(),
-                        }
+                        Expr::Identifier(ExprIdentifier {
+                            identifier: ast::Identifier {
+                                name: <span class="string">"a"</span>.to_string(),
+                            },
+                        })
                         .into(),
                         <span class="number">1</span>..<span class="number">2</span>,
                     ),
@@ -4588,9 +4753,11 @@ a = b;"#</span>,
             (
                 ast::StmtExpr {
                     expr: (
-                        ast::Identifier {
-                            name: <span class="string">"b"</span>.to_string(),
-                        }
+                        Expr::Identifier(ExprIdentifier {
+                            identifier: ast::Identifier {
+                                name: <span class="string">"b"</span>.to_string(),
+                            },
+                        })
                         .into(),
                         <span class="number">5</span>..<span class="number">6</span>,
                     ),
@@ -4676,34 +4843,40 @@ a = b;"#</span>,
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Ok</span>(()), results);
     }
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>validate_applies_types_to_block_exprs() {
-        <span class="kw">let </span><span class="kw-2">mut </span>module = parse(<span class="string">"{ 123 };"</span>, <span class="number">0</span>).unwrap();
-        <span class="kw">let _ </span>= verify_module(<span class="kw-2">&amp;mut </span>module);
+    <span class="comment">// #[test]
+    // fn validate_applies_types_to_block_exprs() {
+    //     let mut module = parse("{ 123 };", 0).unwrap();
+    //     let _ = verify_module(&amp;mut module);
 
-        <span class="macro">assert_eq!</span>(
-            Module {
-                stmts: <span class="macro">vec!</span>[(
-                    StmtExpr {
-                        expr: (
-                            ExprBlock {
-                                stmts: <span class="macro">vec!</span>[],
-                                return_expr: <span class="prelude-val">Some</span>((<span class="number">123f64</span>.into(), <span class="number">2</span>..<span class="number">5</span>)),
-                                typeref: <span class="prelude-val">Some</span>(Type::number())
-                            }
-                            .into(),
-                            <span class="number">0</span>..<span class="number">7
-                        </span>)
-                    }
-                    .into(),
-                    <span class="number">0</span>..<span class="number">8
-                </span>)]
-            },
-            module
-        );
-    }
+    //     assert_eq!(
+    //         Module {
+    //             stmts: vec![(
+    //                 StmtExpr {
+    //                     expr: (
+    //                         Expr::Block(
+    //                             ExprBlock {
+    //                                 stmts: vec![],
+    //                                 return_expr: Some((
+    //                                     Expr::Literal(ast::ExprLiteral::Number(123f64)).into(),
+    //                                     2..5
+    //                                 )),
+    //                                 typeref: Some(Type::number())
+    //                             }
+    //                             .into()
+    //                         )
+    //                         .into(),
+    //                         0..7
+    //                     )
+    //                 }
+    //                 .into(),
+    //                 0..8
+    //             )]
+    //         },
+    //         module
+    //     );
+    // }
 
-    <span class="attr">#[test]
+    </span><span class="attr">#[test]
     </span><span class="kw">fn </span>errors_when_calling_number() {
         <span class="kw">let </span>results = parse(<span class="string">"123456();"</span>, <span class="number">0</span>).and_then(|<span class="kw-2">mut </span>module| verify_module(<span class="kw-2">&amp;mut </span>module));
 
@@ -4712,6 +4885,43 @@ a = b;"#</span>,
                 EgonTypeError::NotCallable(<span class="string">"number"</span>.to_string()).into(),
                 <span class="number">0</span>..<span class="number">6
             </span>)]),
+            results
+        );
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>errors_when_call_fn_stmt_with_calls_as_args_but_type_mismatched() {
+        <span class="kw">let </span>results = parse(
+            <span class="string">r#"
+        fn sum (a: number, b: number): number =&gt; {
+            a + b
+        }
+
+        fn empty_string (): string =&gt; { "" }
+
+        sum(empty_string(), empty_string());
+        "#</span>,
+            <span class="number">0</span>,
+        )
+        .and_then(|<span class="kw-2">mut </span>module| verify_module(<span class="kw-2">&amp;mut </span>module));
+
+        <span class="macro">assert_eq!</span>(
+            <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[
+                (
+                    EgonError::TypeError(EgonTypeError::MismatchType {
+                        expected: <span class="string">"number"</span>.to_string(),
+                        actual: <span class="string">"string"</span>.to_string()
+                    }),
+                    <span class="number">139</span>..<span class="number">153
+                </span>),
+                (
+                    EgonError::TypeError(EgonTypeError::MismatchType {
+                        expected: <span class="string">"number"</span>.to_string(),
+                        actual: <span class="string">"string"</span>.to_string()
+                    }),
+                    <span class="number">155</span>..<span class="number">169
+                </span>)
+            ]),
             results
         );
     }

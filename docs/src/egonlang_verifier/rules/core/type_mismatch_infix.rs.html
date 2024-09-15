@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `egonlang-verifier/src/rules/core/type_mismatch_infix.rs`."><title>type_mismatch_infix.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="egonlang_verifier" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.1 (3f5fd8dd4 2024-08-06)" data-channel="1.80.1" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `egonlang-verifier/src/rules/core/type_mismatch_infix.rs`."><title>type_mismatch_infix.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-c5d6553a23f1e5a6.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="egonlang_verifier" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0 (eeb90cda1 2024-09-04)" data-channel="1.81.0" data-search-js="search-d234aafac6c221dd.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-d2fab2bf619172d3.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -208,11 +208,19 @@
 <a href="#208" id="208">208</a>
 <a href="#209" id="209">209</a>
 <a href="#210" id="210">210</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span>std::{collections::HashMap, sync::Arc};
+
+<span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
+<span class="kw">use </span>ast::Expr;
 <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_errors::{EgonErrorS, EgonTypeError};
 <span class="kw">use </span>egonlang_types::Type;
-<span class="kw">use </span>rules::rule::ResolveExpr;
 
 <span class="macro">expr_rule!</span>(
     <span class="doccomment">/// Checks value types for all infix operation expressions
@@ -226,7 +234,7 @@
     |expr, _span, _resolve_ident, resolve_expr| {
         <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
 
-        <span class="kw">if let </span>ast::Expr::Infix(infix) = expr {
+        <span class="kw">if let </span>ast::Expr::Infix(infix) = <span class="kw-2">&amp;*</span>expr {
             <span class="kw">match </span>infix.op {
                 ast::OpInfix::Greater =&gt; {
                     <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
@@ -316,17 +324,21 @@
 <span class="kw">fn </span>validate_infix_types(
     infix: <span class="kw-2">&amp;</span>ast::ExprInfix,
     expected_type: Type,
-    resolve_expr: <span class="kw-2">&amp;</span><span class="kw">dyn </span>ResolveExpr,
+    resolve_expr: <span class="kw-2">&amp;</span>HashMap&lt;span::Spanned&lt;Arc&lt;Expr&gt;&gt;, Type&gt;,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;(), Vec&lt;EgonErrorS&gt;&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
 
     <span class="kw">let </span>(lt_expr, lt_span) = <span class="kw-2">&amp;</span>infix.lt;
-    <span class="kw">let </span>lt_type = resolve_expr(lt_expr, lt_span).unwrap().of_type;
+    <span class="kw">let </span>lt_type = resolve_expr
+        .get(<span class="kw-2">&amp;</span>(lt_expr.clone(), lt_span.clone()))
+        .unwrap();
 
     <span class="kw">let </span>(rt_expr, rt_span) = <span class="kw-2">&amp;</span>infix.rt;
-    <span class="kw">let </span>rt_type = resolve_expr(rt_expr, rt_span).unwrap().of_type;
+    <span class="kw">let </span>rt_type = resolve_expr
+        .get(<span class="kw-2">&amp;</span>(rt_expr.clone(), rt_span.clone()))
+        .unwrap();
 
-    <span class="kw">if </span>lt_type != expected_type {
+    <span class="kw">if </span><span class="kw-2">*</span>lt_type != expected_type {
         errs.push((
             EgonTypeError::MismatchType {
                 expected: expected_type.to_string(),
@@ -336,7 +348,7 @@
             lt_span.clone(),
         ));
     }
-    <span class="kw">if </span>rt_type != expected_type {
+    <span class="kw">if </span><span class="kw-2">*</span>rt_type != expected_type {
         errs.push((
             EgonTypeError::MismatchType {
                 expected: expected_type.to_string(),

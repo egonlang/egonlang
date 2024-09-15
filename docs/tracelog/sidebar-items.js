@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["log_expr","log_identifier","log_stmt","log_type"],"macro":["tracelog"]};
+window.SIDEBAR_ITEMS = {"fn":["current_indent","dedent","indent","log_expr","log_identifier","log_stmt","log_type","nl"],"macro":["tracelog"],"static":["INDENT_FACTOR"]};

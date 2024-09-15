@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["core"],"trait":["ResolveExpr","ResolveIdent","Rule"]};
+window.SIDEBAR_ITEMS = {"mod":["core"],"trait":["Rule"]};

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `egonlang-verifier/src/rules/core/type_mismatch_on_declarations.rs`."><title>type_mismatch_on_declarations.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="egonlang_verifier" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.1 (3f5fd8dd4 2024-08-06)" data-channel="1.80.1" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `egonlang-verifier/src/rules/core/type_mismatch_on_declarations.rs`."><title>type_mismatch_on_declarations.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-c5d6553a23f1e5a6.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="egonlang_verifier" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0 (eeb90cda1 2024-09-04)" data-channel="1.81.0" data-search-js="search-d234aafac6c221dd.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-d2fab2bf619172d3.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -155,10 +155,18 @@
 <a href="#155" id="155">155</a>
 <a href="#156" id="156">156</a>
 <a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_errors::EgonTypeError;
-<span class="kw">use </span>egonlang_types::Type;
 
 <span class="macro">stmt_rule!</span>(
     <span class="doccomment">/// Checks the value type of an assignment declaration matches the declaration type
@@ -180,11 +188,11 @@
                 }
                 <span class="comment">// let a = 123;
                 </span>(<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>((value_expr, value_span))) =&gt; {
-                    <span class="kw">if let </span><span class="prelude-val">Ok</span>(value_typeref) = resolve_expr(value_expr, value_span) {
+                    <span class="kw">if let </span><span class="prelude-val">Some</span>(value_typeref) = resolve_expr.get(<span class="kw-2">&amp;</span>(value_expr.clone(), value_span.clone())) {
                         <span class="comment">// Check for empty list assignment
                         // Example:
                         // let a = [];
-                        </span><span class="kw">if </span>value_typeref.of_type == Type::list(Type::unknown()) {
+                        </span><span class="kw">if </span>value_typeref.is_unknown_list() {
                             errs.push((EgonTypeError::UknownListType.into(), value_span.clone()));
                         }
                     }
@@ -192,52 +200,52 @@
                 }
                 <span class="comment">// let a: number;
                 </span>(<span class="prelude-val">Some</span>((assign_type_expr, assign_type_span)), <span class="prelude-val">None</span>) =&gt; {
-                    <span class="kw">match </span>resolve_expr(assign_type_expr, assign_type_span) {
-                        <span class="prelude-val">Ok</span>(assign_type) =&gt; {
+                    <span class="kw">match </span>resolve_expr.get(<span class="kw-2">&amp;</span>(assign_type_expr.clone(), assign_type_span.clone())) {
+                        <span class="prelude-val">Some</span>(assign_type) =&gt; {
                             <span class="comment">// Check for empty list assignment
                             // Example:
                             // let a: unknown;
-                            </span><span class="kw">if </span>assign_type.of_type.is_unknown() {
+                            </span><span class="kw">if </span>assign_type.is_unknown() {
                                 errs.push((
                                     EgonTypeError::UnknownType.into(),
                                     assign_type_span.clone()
                                 ));
                             }
                         },
-                        <span class="prelude-val">Err</span>(e) =&gt; {
-                            errs.extend(e)
-                        },
+                        <span class="prelude-val">None </span>=&gt; {
+                            <span class="comment">// errs.extend(e)
+                        </span>},
                     };
 
                 }
                 <span class="comment">// let a: number = 123;
                 </span>(<span class="prelude-val">Some</span>((assign_type_expr, assign_type_span)), <span class="prelude-val">Some</span>((value_expr, value_span))) =&gt; {
-                    <span class="kw">if let </span><span class="prelude-val">Ok</span>(assign_typeref) = resolve_expr(assign_type_expr, assign_type_span) {
+                    <span class="kw">if let </span><span class="prelude-val">Some</span>(assign_typeref) = resolve_expr.get(<span class="kw-2">&amp;</span>(assign_type_expr.clone(), assign_type_span.clone())) {
                         <span class="comment">// Check for empty list assignment
                         // Example:
                         // let a: unknown;
-                        </span><span class="kw">if </span>assign_typeref.of_type.is_unknown() {
+                        </span><span class="kw">if </span>assign_typeref.is_unknown() {
                             errs.push((
                                 EgonTypeError::UnknownType.into(),
                                 assign_type_span.clone()
                             ));
-                        } <span class="kw">else if let </span><span class="prelude-val">Ok</span>(value_typeref) = resolve_expr(value_expr, value_span) {
+                        } <span class="kw">else if let </span><span class="prelude-val">Some</span>(value_typeref) = resolve_expr.get(<span class="kw-2">&amp;</span>(value_expr.clone(), value_span.clone())) {
                             <span class="comment">// Types mismatched
-                            </span><span class="kw">if </span>assign_typeref.of_type != value_typeref.of_type {
+                            </span><span class="kw">if </span>assign_typeref != value_typeref {
                                 <span class="comment">// Check for empty list assignment
                                 // Example:
                                 // let a: list&lt;number&gt; = [];
-                                </span><span class="kw">if </span>value_typeref.of_type == Type::list(Type::unknown())
-                                    &amp;&amp; assign_typeref.of_type.is_known_list()
+                                </span><span class="kw">if </span>value_typeref.is_unknown_list()
+                                    &amp;&amp; assign_typeref.is_known_list()
                                 {
                                     <span class="kw">return </span><span class="macro">vec!</span>[];
                                 }
 
-                                <span class="kw">if </span>value_typeref.of_type.is_identifier() {
+                                <span class="kw">if </span>value_typeref.is_identifier() {
                                     <span class="kw">let </span>identifier = <span class="kw-2">&amp;</span>stmt_assign.identifier.<span class="number">0</span>.name;
 
-                                    <span class="kw">if let </span><span class="prelude-val">Ok</span>(identifier_type) = resolve_ident(identifier,  <span class="kw-2">&amp;</span>stmt_assign.identifier.<span class="number">1</span>) {
-                                        <span class="kw">if </span>assign_typeref.of_type == identifier_type.of_type {
+                                    <span class="kw">if let </span><span class="prelude-val">Some</span>(identifier_type) = resolve_ident.get(identifier) {
+                                        <span class="kw">if </span><span class="kw-2">*</span>assign_typeref == identifier_type.of_type {
                                             <span class="kw">return </span><span class="macro">vec!</span>[];
                                         }
                                     }
@@ -245,8 +253,8 @@
 
                                 errs.push((
                                     EgonTypeError::MismatchType {
-                                        expected: assign_typeref.of_type.to_string(),
-                                        actual: value_typeref.of_type.to_string(),
+                                        expected: assign_typeref.to_string(),
+                                        actual: value_typeref.to_string(),
                                     }
                                     .into(),
                                     value_span.clone(),
@@ -255,8 +263,8 @@
                                 <span class="comment">// Check for empty list assignment
                                 // Example:
                                 // let a: list&lt;unknown&gt; = [];
-                                </span><span class="kw">if </span>value_typeref.of_type == Type::list(Type::unknown())
-                                    &amp;&amp; assign_typeref.of_type.is_unknown_list()
+                                </span><span class="kw">if </span>value_typeref.is_unknown_list()
+                                    &amp;&amp; assign_typeref.is_unknown_list()
                                 {
                                     errs.push((EgonTypeError::UknownListType.into(), span.clone()));
                                 }
@@ -275,7 +283,7 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span><span class="kw">super</span>::TypeMismatchOnDeclarationsRule;
-    <span class="kw">use </span><span class="kw">crate</span>::verifier_rule_test;
+    <span class="kw">use crate</span>::{verifier_rule_test, Verifier};
     <span class="kw">use </span>egonlang_errors::EgonTypeError;
     <span class="kw">use </span>egonlang_types::Type;
 
@@ -284,6 +292,16 @@
         returns_ok_if_assignment_type_and_value_type_match,
         <span class="string">"const a: number = 123;"
     </span>}
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>returns_ok_2if_assignment_type_and_value_type_match() {
+        <span class="kw">let </span><span class="kw-2">mut </span>module = ::egonlang_core::parser::parse(<span class="string">"const a: number = 123;"</span>, <span class="number">0</span>)
+            .expect(<span class="string">"Unable to parse source to module"</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>verifier = Verifier::new();
+        verifier.add_rule(TypeMismatchOnDeclarationsRule);
+        <span class="kw">let </span>result = verifier.verify(<span class="kw-2">&amp;mut </span>module);
+        <span class="macro">::pretty_assertions::assert_eq!</span>((<span class="prelude-val">Ok</span>(())), result);
+    }
 
     <span class="macro">verifier_rule_test!</span> {
         TypeMismatchOnDeclarationsRule,
