@@ -16,7 +16,9 @@ expr_rule!(
     /// }
     /// ```
     TypeMismatchFnReturnExpr,
-    |expr, _span, _resolve_ident, resolve_expr| {
+    |expr_span, _resolve_ident, resolve_expr| {
+        let (expr, _) = expr_span;
+
         if let ast::Expr::Fn(fn_expr) = &*expr {
             let (fn_return_type_typeref, _) = &fn_expr.return_type;
             let (body_expr, body_span) = &fn_expr.body;

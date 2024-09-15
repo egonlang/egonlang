@@ -6,7 +6,9 @@ use span::Span;
 
 expr_rule!(
     WrongNumberOfArgsCallingFn,
-    |expr, span, _resolve_ident, resolve_expr| {
+    |expr_span, _resolve_ident, resolve_expr| {
+        let (expr, span) = expr_span;
+
         if let ast::Expr::Call(call_expr) = &*expr {
             let mut errs = vec![];
 

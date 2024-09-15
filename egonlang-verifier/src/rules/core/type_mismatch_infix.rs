@@ -15,7 +15,9 @@ expr_rule!(
     /// 1 + 2;
     /// ```
     TypeMismatchInfix,
-    |expr, _span, _resolve_ident, resolve_expr| {
+    |expr_span, _resolve_ident, resolve_expr| {
+        let (expr, _) = expr_span;
+
         let mut errs: Vec<EgonErrorS> = vec![];
 
         if let ast::Expr::Infix(infix) = &*expr {

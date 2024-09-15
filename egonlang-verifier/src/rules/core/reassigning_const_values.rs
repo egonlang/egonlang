@@ -10,7 +10,9 @@ expr_rule!(
     /// a = 456; // SyntaxError
     /// ```
     ReassigningConstValue,
-    |expr, span, resolve_ident, _resolve_expr| {
+    |expr_span, resolve_ident, _resolve_expr| {
+        let (expr, span) = expr_span;
+
         let mut errs = vec![];
 
         if let ast::Expr::Assign(expr_assign) = &*expr {

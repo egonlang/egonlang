@@ -11,7 +11,9 @@ expr_rule!(
     /// if ("example") {} else {}; // TypeError
     /// ```
     TypeMismatchIfCondExpr,
-    |expr, _span, _resolve_ident, resolve_expr| {
+    |expr_span, _resolve_ident, resolve_expr| {
+        let (expr, _) = expr_span;
+
         let mut errs = vec![];
 
         if let ast::Expr::If(if_expr) = &*expr {

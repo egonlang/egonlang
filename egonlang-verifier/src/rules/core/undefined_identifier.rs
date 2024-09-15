@@ -11,7 +11,9 @@ expr_rule!(
     /// a;
     /// ```
     ReferencingUndefinedIdentifier,
-    |expr, span, resolve_ident, _resolve_expr| {
+    |expr_span, resolve_ident, _resolve_expr| {
+        let (expr, span) = expr_span;
+
         let mut errs = vec![];
 
         if let ast::Expr::Identifier(boxed) = &*expr {

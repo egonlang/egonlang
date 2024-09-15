@@ -10,7 +10,9 @@ expr_rule!(
     /// let a = 10 / 0; // SyntaxError
     /// ```
     DivideByZero,
-    |expr| {
+    |expr_span| {
+        let (expr, _) = expr_span;
+
         let mut errs = vec![];
 
         if let ast::Expr::Infix(infix_expr) = &*expr {

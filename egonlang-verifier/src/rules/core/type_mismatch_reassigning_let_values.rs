@@ -19,7 +19,9 @@ expr_rule!(
     /// c = true;
     /// ```
     TypeMismatchReassigningLetValues,
-    |expr, _span, resolve_ident, resolve_expr| {
+    |expr_span, resolve_ident, resolve_expr| {
+        let (expr, _) = expr_span;
+
         let mut errs = vec![];
 
         if let ast::Expr::Assign(expr_assign) = &*expr {

@@ -4,7 +4,9 @@ use egonlang_errors::EgonSyntaxError;
 
 expr_rule!(
     NoStmtsAfterReturnStmt,
-    |expr, _span, _resolve_ident, _resolve_expr| {
+    |expr_span, _resolve_ident, _resolve_expr| {
+        let (expr, _) = expr_span;
+
         let mut errs = vec![];
 
         if let ast::Expr::Block(expr_block) = &*expr {

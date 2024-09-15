@@ -15,7 +15,9 @@ expr_rule!(
     /// 123(); // TypeError: number is not callable
     /// ```
     NoNonCallableCalled,
-    |expr, _span, _resolve_ident, resolve_expr| {
+    |expr_span, _resolve_ident, resolve_expr| {
+        let (expr, _) = expr_span;
+
         if let ast::Expr::Call(expr_call) = &*expr {
             if let Some(callee_type) = resolve_expr.get(&(expr_call.callee.0.clone(), expr_call.callee.1.clone())) {
                 if !callee_type.is_function() {
