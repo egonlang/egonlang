@@ -1,7 +1,4 @@
-use std::{
-    collections::{HashMap, HashSet},
-    sync::Arc,
-};
+use std::{collections::HashMap, sync::Arc};
 
 use egonlang_core::prelude::*;
 use egonlang_errors::{EgonErrorS, EgonResultMultiSpannedErr, EgonTypeError};
@@ -1269,8 +1266,7 @@ impl<'a> Verifier<'a> {
                     }
                 };
 
-                let unique_call_errs: HashSet<_> = call_errs.drain(..).collect();
-                errs.extend(unique_call_errs);
+                errs.extend(call_errs);
 
                 call_type
             }
