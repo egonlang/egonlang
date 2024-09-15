@@ -30,37 +30,37 @@ Stmt: ast::Stmt = {
 };
 
 StmtExpr: ast::Stmt = <expr:ExprS> ";" =>
-        ast::Stmt::Expr(ast::StmtExpr { <> });
+        ast::Stmt::Expr(ast::StmtExpr { <> }.into());
 
 StmtAssertType: ast::Stmt = "assert_type" <value:ExprS> "," <expected_type:Spanned<Type>> ";" =>
         ast::Stmt::AssertType(ast::StmtAssertType { 
             value,
             expected_type: (ast::Expr::Type(ast::ExprType(expected_type.0)).into(), expected_type.1)
-        });
+        }.into());
 
 StmtReturn: ast::Stmt = "return" <value:ExprS> ";" =>
-        ast::Stmt::Return(ast::StmtReturn::new(<>));
+        ast::Stmt::Return(ast::StmtReturn::new(<>).into());
 
 StmtAssignVariable: ast::Stmt = "let" <identifier:Spanned<Identifier>> <type_expr:(":" <Spanned<Type>>)?> <value:("=" <ExprS>)?> ";" =>
-        ast::StmtAssign {
+        ast::Stmt::Assign(ast::StmtAssign {
             identifier,
             type_expr: type_expr.map(|(ty, ty_span)|
                 (ast::Expr::Type(ast::ExprType(ty)).into(), ty_span)),
             is_const: false,
             value,
-        }.into();
+        }.into());
 
 StmtAssignConst: ast::Stmt = "const" <identifier:Spanned<Identifier>> <type_expr:(":" <Spanned<Type>>)?> <value:("=" <ExprS>)?> ";" =>
-        ast::StmtAssign {
+        ast::Stmt::Assign(ast::StmtAssign {
             identifier,
             type_expr: type_expr.map(|(ty, ty_span)|
                 (ast::Expr::Type(ast::ExprType(ty)).into(), ty_span)),
             is_const: true,
             value,
-        }.into();
+        }.into());
 
 StmtTypeAlias: ast::Stmt = "type" <alias:Spanned<Identifier>> <value:("=" <Spanned<Type>>)> ";" =>
-        ast::StmtTypeAlias { <> }.into();
+        ast::Stmt::TypeAlias(ast::StmtTypeAlias { <> }.into());
 
 StmtFn: ast::Stmt = "fn" <name:Spanned<Identifier>> <fn_expr:Spanned<ExprFn>> =>
     ast::Stmt::Fn(Box::new(ast::StmtFn { 

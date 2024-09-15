@@ -20,21 +20,21 @@ pub enum Stmt {
     /// ```egon
     /// [1, 2, 3];
     /// ```
-    Expr(StmtExpr),
+    Expr(Box<StmtExpr>),
     /// A statement that declares and/or initalizes a variable or constant
     ///
     /// ```egon
     /// let a: number = 123;
     /// const b = 456;
     /// ```
-    Assign(StmtAssign),
+    Assign(Box<StmtAssign>),
     /// A statement that declares a type alias
     ///
     /// ```egon
     /// type Int = number;
     /// let a: Int = 123;
     /// ```
-    TypeAlias(StmtTypeAlias),
+    TypeAlias(Box<StmtTypeAlias>),
     /// A statement declaring a function
     ///
     /// ```egon
@@ -46,25 +46,25 @@ pub enum Stmt {
     /// ```egon
     /// assert_type 123 number;
     /// ```
-    AssertType(StmtAssertType),
+    AssertType(Box<StmtAssertType>),
     /// A statement to return a value from a function
     ///
     /// ```egon
     /// (): number => { return 123; }
     /// ```
-    Return(StmtReturn),
+    Return(Box<StmtReturn>),
     Error,
 }
 
 impl From<StmtExpr> for Stmt {
     fn from(value: StmtExpr) -> Self {
-        Stmt::Expr(value)
+        Stmt::Expr(value.into())
     }
 }
 
 impl From<StmtAssign> for Stmt {
     fn from(value: StmtAssign) -> Self {
-        Stmt::Assign(value)
+        Stmt::Assign(value.into())
     }
 }
 
@@ -76,13 +76,13 @@ impl From<StmtFn> for Stmt {
 
 impl From<StmtAssertType> for Stmt {
     fn from(value: StmtAssertType) -> Self {
-        Stmt::AssertType(value)
+        Stmt::AssertType(value.into())
     }
 }
 
 impl From<StmtTypeAlias> for Stmt {
     fn from(value: StmtTypeAlias) -> Self {
-        Stmt::TypeAlias(value)
+        Stmt::TypeAlias(value.into())
     }
 }
 

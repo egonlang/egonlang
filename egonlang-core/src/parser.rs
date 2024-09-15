@@ -293,9 +293,12 @@ mod parser_tests {
         "123;",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (Expr::Literal(ExprLiteral::Number(123f64)).into(), 0..3),
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (Expr::Literal(ExprLiteral::Number(123f64)).into(), 0..3),
+                    }
+                    .into()
+                ),
                 0..4
             )]
         })
@@ -306,12 +309,15 @@ mod parser_tests {
         r#""foo";"#,
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Literal(ExprLiteral::String("foo".to_string())).into(),
-                        0..5
-                    ),
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::Literal(ExprLiteral::String("foo".to_string())).into(),
+                            0..5
+                        ),
+                    }
+                    .into()
+                ),
                 0..6
             )]
         })
@@ -322,17 +328,20 @@ mod parser_tests {
         r#"foo;"#,
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Identifier(ExprIdentifier {
-                            identifier: Identifier {
-                                name: "foo".to_string()
-                            }
-                        })
-                        .into(),
-                        0..3
-                    ),
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::Identifier(ExprIdentifier {
+                                identifier: Identifier {
+                                    name: "foo".to_string()
+                                }
+                            })
+                            .into(),
+                            0..3
+                        ),
+                    }
+                    .into()
+                ),
                 0..4
             )]
         })
@@ -343,9 +352,12 @@ mod parser_tests {
         "true;",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (Expr::Literal(ExprLiteral::Bool(true)).into(), 0..4),
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (Expr::Literal(ExprLiteral::Bool(true)).into(), 0..4),
+                    }
+                    .into()
+                ),
                 0..5
             )]
         })
@@ -356,9 +368,12 @@ mod parser_tests {
         "false;",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (Expr::Literal(ExprLiteral::Bool(false)).into(), 0..5),
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (Expr::Literal(ExprLiteral::Bool(false)).into(), 0..5),
+                    }
+                    .into()
+                ),
                 0..6
             )]
         })
@@ -370,44 +385,59 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![
                 (
-                    Stmt::Expr(StmtExpr {
-                        expr: (
-                            Expr::Identifier(ExprIdentifier {
-                                identifier: Identifier {
-                                    name: "foo".to_string()
-                                }
-                            })
-                            .into(),
-                            0..3
-                        ),
-                    }),
+                    Stmt::Expr(
+                        StmtExpr {
+                            expr: (
+                                Expr::Identifier(ExprIdentifier {
+                                    identifier: Identifier {
+                                        name: "foo".to_string()
+                                    }
+                                })
+                                .into(),
+                                0..3
+                            ),
+                        }
+                        .into()
+                    ),
                     0..4
                 ),
                 (
-                    Stmt::Expr(StmtExpr {
-                        expr: (Expr::Literal(ExprLiteral::Number(123f64)).into(), 4..7),
-                    }),
+                    Stmt::Expr(
+                        StmtExpr {
+                            expr: (Expr::Literal(ExprLiteral::Number(123f64)).into(), 4..7),
+                        }
+                        .into()
+                    ),
                     4..8
                 ),
                 (
-                    Stmt::Expr(StmtExpr {
-                        expr: (
-                            Expr::Literal(ExprLiteral::String("bar".to_string())).into(),
-                            8..13
-                        ),
-                    }),
+                    Stmt::Expr(
+                        StmtExpr {
+                            expr: (
+                                Expr::Literal(ExprLiteral::String("bar".to_string())).into(),
+                                8..13
+                            ),
+                        }
+                        .into()
+                    ),
                     8..14
                 ),
                 (
-                    Stmt::Expr(StmtExpr {
-                        expr: (Expr::Literal(ExprLiteral::Bool(true)).into(), 14..18),
-                    }),
+                    Stmt::Expr(
+                        StmtExpr {
+                            expr: (Expr::Literal(ExprLiteral::Bool(true)).into(), 14..18),
+                        }
+                        .into()
+                    ),
                     14..19
                 ),
                 (
-                    Stmt::Expr(StmtExpr {
-                        expr: (Expr::Literal(ExprLiteral::Bool(false)).into(), 19..24),
-                    }),
+                    Stmt::Expr(
+                        StmtExpr {
+                            expr: (Expr::Literal(ExprLiteral::Bool(false)).into(), 19..24),
+                        }
+                        .into()
+                    ),
                     19..25
                 ),
             ]
@@ -419,17 +449,20 @@ mod parser_tests {
         "{};",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Block(Box::from(ExprBlock {
-                            stmts: vec![],
-                            return_expr: None,
-                            typeref: None
-                        }))
-                        .into(),
-                        0..2
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::Block(Box::from(ExprBlock {
+                                stmts: vec![],
+                                return_expr: None,
+                                typeref: None
+                            }))
+                            .into(),
+                            0..2
+                        )
+                    }
+                    .into()
+                ),
                 0..3
             )]
         })
@@ -440,20 +473,23 @@ mod parser_tests {
         "{123};",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Block(Box::new(ExprBlock {
-                            stmts: vec![],
-                            return_expr: Some((
-                                Expr::Literal(ExprLiteral::Number(123f64)).into(),
-                                1..4
-                            )),
-                            typeref: None
-                        }))
-                        .into(),
-                        0..5
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::Block(Box::new(ExprBlock {
+                                stmts: vec![],
+                                return_expr: Some((
+                                    Expr::Literal(ExprLiteral::Number(123f64)).into(),
+                                    1..4
+                                )),
+                                typeref: None
+                            }))
+                            .into(),
+                            0..5
+                        )
+                    }
+                    .into()
+                ),
                 0..6
             )]
         })
@@ -464,20 +500,23 @@ mod parser_tests {
         r#"{"foo"};"#,
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Block(Box::new(ExprBlock {
-                            stmts: vec![],
-                            return_expr: Some((
-                                Expr::Literal(ExprLiteral::String("foo".to_string())).into(),
-                                1..6
-                            )),
-                            typeref: None
-                        }))
-                        .into(),
-                        0..7
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::Block(Box::new(ExprBlock {
+                                stmts: vec![],
+                                return_expr: Some((
+                                    Expr::Literal(ExprLiteral::String("foo".to_string())).into(),
+                                    1..6
+                                )),
+                                typeref: None
+                            }))
+                            .into(),
+                            0..7
+                        )
+                    }
+                    .into()
+                ),
                 0..8
             )]
         })
@@ -488,25 +527,28 @@ mod parser_tests {
         r#"{foo};"#,
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Block(Box::new(ExprBlock {
-                            stmts: vec![],
-                            return_expr: Some((
-                                Expr::Identifier(ExprIdentifier {
-                                    identifier: Identifier {
-                                        name: "foo".to_string()
-                                    }
-                                })
-                                .into(),
-                                1..4
-                            )),
-                            typeref: None
-                        }))
-                        .into(),
-                        0..5
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::Block(Box::new(ExprBlock {
+                                stmts: vec![],
+                                return_expr: Some((
+                                    Expr::Identifier(ExprIdentifier {
+                                        identifier: Identifier {
+                                            name: "foo".to_string()
+                                        }
+                                    })
+                                    .into(),
+                                    1..4
+                                )),
+                                typeref: None
+                            }))
+                            .into(),
+                            0..5
+                        )
+                    }
+                    .into()
+                ),
                 0..6
             )]
         })
@@ -517,30 +559,36 @@ mod parser_tests {
         r#"{foo;};"#,
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Block(Box::new(ExprBlock {
-                            stmts: vec![(
-                                Stmt::Expr(StmtExpr {
-                                    expr: (
-                                        Expr::Identifier(ExprIdentifier {
-                                            identifier: Identifier {
-                                                name: "foo".to_string()
-                                            }
-                                        })
-                                        .into(),
-                                        1..4
-                                    )
-                                }),
-                                1..5
-                            )],
-                            return_expr: None,
-                            typeref: None
-                        }))
-                        .into(),
-                        0..6
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::Block(Box::new(ExprBlock {
+                                stmts: vec![(
+                                    Stmt::Expr(
+                                        StmtExpr {
+                                            expr: (
+                                                Expr::Identifier(ExprIdentifier {
+                                                    identifier: Identifier {
+                                                        name: "foo".to_string()
+                                                    }
+                                                })
+                                                .into(),
+                                                1..4
+                                            )
+                                        }
+                                        .into()
+                                    ),
+                                    1..5
+                                )],
+                                return_expr: None,
+                                typeref: None
+                            }))
+                            .into(),
+                            0..6
+                        )
+                    }
+                    .into()
+                ),
                 0..7
             )]
         })
@@ -551,30 +599,36 @@ mod parser_tests {
         r#"{{};};"#,
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Block(Box::new(ExprBlock {
-                            stmts: vec![(
-                                Stmt::Expr(StmtExpr {
-                                    expr: (
-                                        Expr::Block(Box::new(ExprBlock {
-                                            stmts: vec![],
-                                            return_expr: None,
-                                            typeref: None
-                                        }))
-                                        .into(),
-                                        1..3
-                                    )
-                                }),
-                                1..4
-                            )],
-                            return_expr: None,
-                            typeref: None
-                        }))
-                        .into(),
-                        0..5
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::Block(Box::new(ExprBlock {
+                                stmts: vec![(
+                                    Stmt::Expr(
+                                        StmtExpr {
+                                            expr: (
+                                                Expr::Block(Box::new(ExprBlock {
+                                                    stmts: vec![],
+                                                    return_expr: None,
+                                                    typeref: None
+                                                }))
+                                                .into(),
+                                                1..3
+                                            )
+                                        }
+                                        .into()
+                                    ),
+                                    1..4
+                                )],
+                                return_expr: None,
+                                typeref: None
+                            }))
+                            .into(),
+                            0..5
+                        )
+                    }
+                    .into()
+                ),
                 0..6
             )]
         })
@@ -585,25 +639,28 @@ mod parser_tests {
         r#"{{}};"#,
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Block(Box::new(ExprBlock {
-                            stmts: vec![],
-                            return_expr: Some((
-                                Expr::Block(Box::new(ExprBlock {
-                                    stmts: vec![],
-                                    return_expr: None,
-                                    typeref: None
-                                }))
-                                .into(),
-                                1..3
-                            )),
-                            typeref: None
-                        }))
-                        .into(),
-                        0..4
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::Block(Box::new(ExprBlock {
+                                stmts: vec![],
+                                return_expr: Some((
+                                    Expr::Block(Box::new(ExprBlock {
+                                        stmts: vec![],
+                                        return_expr: None,
+                                        typeref: None
+                                    }))
+                                    .into(),
+                                    1..3
+                                )),
+                                typeref: None
+                            }))
+                            .into(),
+                            0..4
+                        )
+                    }
+                    .into()
+                ),
                 0..5
             )]
         })
@@ -614,38 +671,44 @@ mod parser_tests {
         r#"{{};{}};"#,
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Block(Box::new(ExprBlock {
-                            stmts: vec![(
-                                Stmt::Expr(StmtExpr {
-                                    expr: (
-                                        Expr::Block(Box::new(ExprBlock {
-                                            stmts: vec![],
-                                            return_expr: None,
-                                            typeref: None
-                                        }))
-                                        .into(),
-                                        1..3
-                                    )
-                                }),
-                                1..4
-                            )],
-                            return_expr: Some((
-                                Expr::Block(Box::new(ExprBlock {
-                                    stmts: vec![],
-                                    return_expr: None,
-                                    typeref: None
-                                }))
-                                .into(),
-                                4..6
-                            )),
-                            typeref: None
-                        }))
-                        .into(),
-                        0..7
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::Block(Box::new(ExprBlock {
+                                stmts: vec![(
+                                    Stmt::Expr(
+                                        StmtExpr {
+                                            expr: (
+                                                Expr::Block(Box::new(ExprBlock {
+                                                    stmts: vec![],
+                                                    return_expr: None,
+                                                    typeref: None
+                                                }))
+                                                .into(),
+                                                1..3
+                                            )
+                                        }
+                                        .into()
+                                    ),
+                                    1..4
+                                )],
+                                return_expr: Some((
+                                    Expr::Block(Box::new(ExprBlock {
+                                        stmts: vec![],
+                                        return_expr: None,
+                                        typeref: None
+                                    }))
+                                    .into(),
+                                    4..6
+                                )),
+                                typeref: None
+                            }))
+                            .into(),
+                            0..7
+                        )
+                    }
+                    .into()
+                ),
                 0..8
             )]
         })
@@ -656,50 +719,63 @@ mod parser_tests {
         r#"{foo;123;();"bar"};"#,
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Block(Box::new(ExprBlock {
-                            stmts: vec![
-                                (
-                                    Stmt::Expr(StmtExpr {
-                                        expr: (
-                                            Expr::Identifier(ExprIdentifier {
-                                                identifier: Identifier {
-                                                    name: "foo".to_string()
-                                                }
-                                            })
-                                            .into(),
-                                            1..4
-                                        )
-                                    }),
-                                    1..5
-                                ),
-                                (
-                                    Stmt::Expr(StmtExpr {
-                                        expr: (
-                                            Expr::Literal(ExprLiteral::Number(123f64)).into(),
-                                            5..8
-                                        )
-                                    }),
-                                    5..9
-                                ),
-                                (
-                                    Stmt::Expr(StmtExpr {
-                                        expr: (Expr::Unit.into(), 9..11)
-                                    }),
-                                    9..12
-                                )
-                            ],
-                            return_expr: Some((
-                                Expr::Literal(ExprLiteral::String("bar".to_string())).into(),
-                                12..17
-                            )),
-                            typeref: None
-                        }))
-                        .into(),
-                        0..18
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::Block(Box::new(ExprBlock {
+                                stmts: vec![
+                                    (
+                                        Stmt::Expr(
+                                            StmtExpr {
+                                                expr: (
+                                                    Expr::Identifier(ExprIdentifier {
+                                                        identifier: Identifier {
+                                                            name: "foo".to_string()
+                                                        }
+                                                    })
+                                                    .into(),
+                                                    1..4
+                                                )
+                                            }
+                                            .into()
+                                        ),
+                                        1..5
+                                    ),
+                                    (
+                                        Stmt::Expr(
+                                            StmtExpr {
+                                                expr: (
+                                                    Expr::Literal(ExprLiteral::Number(123f64))
+                                                        .into(),
+                                                    5..8
+                                                )
+                                            }
+                                            .into()
+                                        ),
+                                        5..9
+                                    ),
+                                    (
+                                        Stmt::Expr(
+                                            StmtExpr {
+                                                expr: (Expr::Unit.into(), 9..11)
+                                            }
+                                            .into()
+                                        ),
+                                        9..12
+                                    )
+                                ],
+                                return_expr: Some((
+                                    Expr::Literal(ExprLiteral::String("bar".to_string())).into(),
+                                    12..17
+                                )),
+                                typeref: None
+                            }))
+                            .into(),
+                            0..18
+                        )
+                    }
+                    .into()
+                ),
                 0..19
             )]
         })
@@ -710,9 +786,12 @@ mod parser_tests {
         "[];",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (Expr::List(ExprList { items: vec![] }.into()).into(), 0..2)
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (Expr::List(ExprList { items: vec![] }.into()).into(), 0..2)
+                    }
+                    .into()
+                ),
                 0..3
             )]
         })
@@ -749,46 +828,49 @@ mod parser_tests {
         "[a, b, c];",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::List(
-                            ExprList {
-                                items: vec![
-                                    (
-                                        Expr::Identifier(ExprIdentifier {
-                                            identifier: Identifier {
-                                                name: "a".to_string()
-                                            }
-                                        })
-                                        .into(),
-                                        1..2
-                                    ),
-                                    (
-                                        Expr::Identifier(ExprIdentifier {
-                                            identifier: Identifier {
-                                                name: "b".to_string()
-                                            }
-                                        })
-                                        .into(),
-                                        4..5
-                                    ),
-                                    (
-                                        Expr::Identifier(ExprIdentifier {
-                                            identifier: Identifier {
-                                                name: "c".to_string()
-                                            }
-                                        })
-                                        .into(),
-                                        7..8
-                                    )
-                                ]
-                            }
-                            .into()
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::List(
+                                ExprList {
+                                    items: vec![
+                                        (
+                                            Expr::Identifier(ExprIdentifier {
+                                                identifier: Identifier {
+                                                    name: "a".to_string()
+                                                }
+                                            })
+                                            .into(),
+                                            1..2
+                                        ),
+                                        (
+                                            Expr::Identifier(ExprIdentifier {
+                                                identifier: Identifier {
+                                                    name: "b".to_string()
+                                                }
+                                            })
+                                            .into(),
+                                            4..5
+                                        ),
+                                        (
+                                            Expr::Identifier(ExprIdentifier {
+                                                identifier: Identifier {
+                                                    name: "c".to_string()
+                                                }
+                                            })
+                                            .into(),
+                                            7..8
+                                        )
+                                    ]
+                                }
+                                .into()
+                            )
+                            .into(),
+                            0..9
                         )
-                        .into(),
-                        0..9
-                    )
-                }),
+                    }
+                    .into()
+                ),
                 0..10
             )]
         })
@@ -824,55 +906,58 @@ mod parser_tests {
         "[a, [b], c];",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::List(
-                            ExprList {
-                                items: vec![
-                                    (
-                                        Expr::Identifier(ExprIdentifier {
-                                            identifier: Identifier {
-                                                name: "a".to_string()
-                                            }
-                                        })
-                                        .into(),
-                                        1..2
-                                    ),
-                                    (
-                                        Expr::List(
-                                            ExprList {
-                                                items: vec![(
-                                                    Expr::Identifier(ExprIdentifier {
-                                                        identifier: Identifier {
-                                                            name: "b".to_string()
-                                                        }
-                                                    })
-                                                    .into(),
-                                                    5..6
-                                                )]
-                                            }
-                                            .into()
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::List(
+                                ExprList {
+                                    items: vec![
+                                        (
+                                            Expr::Identifier(ExprIdentifier {
+                                                identifier: Identifier {
+                                                    name: "a".to_string()
+                                                }
+                                            })
+                                            .into(),
+                                            1..2
+                                        ),
+                                        (
+                                            Expr::List(
+                                                ExprList {
+                                                    items: vec![(
+                                                        Expr::Identifier(ExprIdentifier {
+                                                            identifier: Identifier {
+                                                                name: "b".to_string()
+                                                            }
+                                                        })
+                                                        .into(),
+                                                        5..6
+                                                    )]
+                                                }
+                                                .into()
+                                            )
+                                            .into(),
+                                            4..7
+                                        ),
+                                        (
+                                            Expr::Identifier(ExprIdentifier {
+                                                identifier: Identifier {
+                                                    name: "c".to_string()
+                                                }
+                                            })
+                                            .into(),
+                                            9..10
                                         )
-                                        .into(),
-                                        4..7
-                                    ),
-                                    (
-                                        Expr::Identifier(ExprIdentifier {
-                                            identifier: Identifier {
-                                                name: "c".to_string()
-                                            }
-                                        })
-                                        .into(),
-                                        9..10
-                                    )
-                                ]
-                            }
-                            .into()
+                                    ]
+                                }
+                                .into()
+                            )
+                            .into(),
+                            0..11
                         )
-                        .into(),
-                        0..11
-                    )
-                }),
+                    }
+                    .into()
+                ),
                 0..12
             )]
         })
@@ -883,9 +968,12 @@ mod parser_tests {
         "();",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (Expr::Unit.into(), 0..2)
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (Expr::Unit.into(), 0..2)
+                    }
+                    .into()
+                ),
                 0..3
             )]
         })
@@ -922,21 +1010,24 @@ mod parser_tests {
         "(1,);",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Tuple(
-                            ExprTuple {
-                                items: vec![(
-                                    Expr::Literal(ExprLiteral::Number(1f64)).into(),
-                                    1..2
-                                )]
-                            }
-                            .into()
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::Tuple(
+                                ExprTuple {
+                                    items: vec![(
+                                        Expr::Literal(ExprLiteral::Number(1f64)).into(),
+                                        1..2
+                                    )]
+                                }
+                                .into()
+                            )
+                            .into(),
+                            0..4
                         )
-                        .into(),
-                        0..4
-                    )
-                }),
+                    }
+                    .into()
+                ),
                 0..5
             )]
         })
@@ -947,21 +1038,24 @@ mod parser_tests {
         "(1, 2,);",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Tuple(
-                            ExprTuple {
-                                items: vec![
-                                    (Expr::Literal(ExprLiteral::Number(1f64)).into(), 1..2),
-                                    (Expr::Literal(ExprLiteral::Number(2f64)).into(), 4..5)
-                                ]
-                            }
-                            .into()
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::Tuple(
+                                ExprTuple {
+                                    items: vec![
+                                        (Expr::Literal(ExprLiteral::Number(1f64)).into(), 1..2),
+                                        (Expr::Literal(ExprLiteral::Number(2f64)).into(), 4..5)
+                                    ]
+                                }
+                                .into()
+                            )
+                            .into(),
+                            0..7
                         )
-                        .into(),
-                        0..7
-                    )
-                }),
+                    }
+                    .into()
+                ),
                 0..8
             )]
         })
@@ -972,9 +1066,12 @@ mod parser_tests {
         "(1);",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (Expr::Literal(ExprLiteral::Number(1f64)).into(), 0..3)
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (Expr::Literal(ExprLiteral::Number(1f64)).into(), 0..3)
+                    }
+                    .into()
+                ),
                 0..4
             )]
         })
@@ -987,39 +1084,42 @@ mod parser_tests {
                 $input,
                 Ok(Module {
                     stmts: vec![(
-                        Stmt::Expr(StmtExpr {
-                            expr: (
-                                Expr::Infix(Box::new(ExprInfix {
-                                    lt: (
-                                        Expr::Identifier(
-                                            ExprIdentifier {
-                                                identifier: Identifier {
-                                                    name: "a".to_string()
+                        Stmt::Expr(
+                            StmtExpr {
+                                expr: (
+                                    Expr::Infix(Box::new(ExprInfix {
+                                        lt: (
+                                            Expr::Identifier(
+                                                ExprIdentifier {
+                                                    identifier: Identifier {
+                                                        name: "a".to_string()
+                                                    }
                                                 }
-                                            }
-                                            .into()
-                                        )
-                                        .into(),
-                                        0..1
-                                    ),
-                                    op: $expected,
-                                    rt: (
-                                        Expr::Identifier(
-                                            ExprIdentifier {
-                                                identifier: Identifier {
-                                                    name: "b".to_string()
+                                                .into()
+                                            )
+                                            .into(),
+                                            0..1
+                                        ),
+                                        op: $expected,
+                                        rt: (
+                                            Expr::Identifier(
+                                                ExprIdentifier {
+                                                    identifier: Identifier {
+                                                        name: "b".to_string()
+                                                    }
                                                 }
-                                            }
-                                            .into()
+                                                .into()
+                                            )
+                                            .into(),
+                                            4..5
                                         )
-                                        .into(),
-                                        4..5
-                                    )
-                                }))
-                                .into(),
-                                0..5
-                            )
-                        }),
+                                    }))
+                                    .into(),
+                                    0..5
+                                )
+                            }
+                            .into()
+                        ),
                         0..6
                     )]
                 })
@@ -1046,29 +1146,32 @@ mod parser_tests {
         "a = b;",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Assign(Box::new(ExprAssign {
-                            identifier: (
-                                Identifier {
-                                    name: "a".to_string()
-                                },
-                                0..1
-                            ),
-                            value: (
-                                Expr::Identifier(ExprIdentifier {
-                                    identifier: Identifier {
-                                        name: "b".to_string()
-                                    }
-                                })
-                                .into(),
-                                4..5
-                            )
-                        }))
-                        .into(),
-                        0..5
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::Assign(Box::new(ExprAssign {
+                                identifier: (
+                                    Identifier {
+                                        name: "a".to_string()
+                                    },
+                                    0..1
+                                ),
+                                value: (
+                                    Expr::Identifier(ExprIdentifier {
+                                        identifier: Identifier {
+                                            name: "b".to_string()
+                                        }
+                                    })
+                                    .into(),
+                                    4..5
+                                )
+                            }))
+                            .into(),
+                            0..5
+                        )
+                    }
+                    .into()
+                ),
                 0..6
             )]
         })
@@ -1079,33 +1182,36 @@ mod parser_tests {
         "a == b;",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Infix(Box::new(ExprInfix {
-                            lt: (
-                                Expr::Identifier(ExprIdentifier {
-                                    identifier: Identifier {
-                                        name: "a".to_string()
-                                    }
-                                })
-                                .into(),
-                                0..1
-                            ),
-                            op: OpInfix::Equal,
-                            rt: (
-                                Expr::Identifier(ExprIdentifier {
-                                    identifier: Identifier {
-                                        name: "b".to_string()
-                                    }
-                                })
-                                .into(),
-                                5..6
-                            )
-                        }))
-                        .into(),
-                        0..6
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::Infix(Box::new(ExprInfix {
+                                lt: (
+                                    Expr::Identifier(ExprIdentifier {
+                                        identifier: Identifier {
+                                            name: "a".to_string()
+                                        }
+                                    })
+                                    .into(),
+                                    0..1
+                                ),
+                                op: OpInfix::Equal,
+                                rt: (
+                                    Expr::Identifier(ExprIdentifier {
+                                        identifier: Identifier {
+                                            name: "b".to_string()
+                                        }
+                                    })
+                                    .into(),
+                                    5..6
+                                )
+                            }))
+                            .into(),
+                            0..6
+                        )
+                    }
+                    .into()
+                ),
                 0..7
             )]
         })
@@ -1116,33 +1222,36 @@ mod parser_tests {
         "a != b;",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Infix(Box::new(ExprInfix {
-                            lt: (
-                                Expr::Identifier(ExprIdentifier {
-                                    identifier: Identifier {
-                                        name: "a".to_string()
-                                    }
-                                })
-                                .into(),
-                                0..1
-                            ),
-                            op: OpInfix::NotEqual,
-                            rt: (
-                                Expr::Identifier(ExprIdentifier {
-                                    identifier: Identifier {
-                                        name: "b".to_string()
-                                    }
-                                })
-                                .into(),
-                                5..6
-                            )
-                        }))
-                        .into(),
-                        0..6
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::Infix(Box::new(ExprInfix {
+                                lt: (
+                                    Expr::Identifier(ExprIdentifier {
+                                        identifier: Identifier {
+                                            name: "a".to_string()
+                                        }
+                                    })
+                                    .into(),
+                                    0..1
+                                ),
+                                op: OpInfix::NotEqual,
+                                rt: (
+                                    Expr::Identifier(ExprIdentifier {
+                                        identifier: Identifier {
+                                            name: "b".to_string()
+                                        }
+                                    })
+                                    .into(),
+                                    5..6
+                                )
+                            }))
+                            .into(),
+                            0..6
+                        )
+                    }
+                    .into()
+                ),
                 0..7
             )]
         })
@@ -1153,33 +1262,36 @@ mod parser_tests {
         "a >= b;",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Infix(Box::new(ExprInfix {
-                            lt: (
-                                Expr::Identifier(ExprIdentifier {
-                                    identifier: Identifier {
-                                        name: "a".to_string()
-                                    }
-                                })
-                                .into(),
-                                0..1
-                            ),
-                            op: OpInfix::GreaterEqual,
-                            rt: (
-                                Expr::Identifier(ExprIdentifier {
-                                    identifier: Identifier {
-                                        name: "b".to_string()
-                                    }
-                                })
-                                .into(),
-                                5..6
-                            )
-                        }))
-                        .into(),
-                        0..6
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::Infix(Box::new(ExprInfix {
+                                lt: (
+                                    Expr::Identifier(ExprIdentifier {
+                                        identifier: Identifier {
+                                            name: "a".to_string()
+                                        }
+                                    })
+                                    .into(),
+                                    0..1
+                                ),
+                                op: OpInfix::GreaterEqual,
+                                rt: (
+                                    Expr::Identifier(ExprIdentifier {
+                                        identifier: Identifier {
+                                            name: "b".to_string()
+                                        }
+                                    })
+                                    .into(),
+                                    5..6
+                                )
+                            }))
+                            .into(),
+                            0..6
+                        )
+                    }
+                    .into()
+                ),
                 0..7
             )]
         })
@@ -1190,33 +1302,36 @@ mod parser_tests {
         "a <= b;",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Infix(Box::new(ExprInfix {
-                            lt: (
-                                Expr::Identifier(ExprIdentifier {
-                                    identifier: Identifier {
-                                        name: "a".to_string()
-                                    }
-                                })
-                                .into(),
-                                0..1
-                            ),
-                            op: OpInfix::LessEqual,
-                            rt: (
-                                Expr::Identifier(ExprIdentifier {
-                                    identifier: Identifier {
-                                        name: "b".to_string()
-                                    }
-                                })
-                                .into(),
-                                5..6
-                            )
-                        }))
-                        .into(),
-                        0..6
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::Infix(Box::new(ExprInfix {
+                                lt: (
+                                    Expr::Identifier(ExprIdentifier {
+                                        identifier: Identifier {
+                                            name: "a".to_string()
+                                        }
+                                    })
+                                    .into(),
+                                    0..1
+                                ),
+                                op: OpInfix::LessEqual,
+                                rt: (
+                                    Expr::Identifier(ExprIdentifier {
+                                        identifier: Identifier {
+                                            name: "b".to_string()
+                                        }
+                                    })
+                                    .into(),
+                                    5..6
+                                )
+                            }))
+                            .into(),
+                            0..6
+                        )
+                    }
+                    .into()
+                ),
                 0..7
             )]
         })
@@ -1227,33 +1342,36 @@ mod parser_tests {
         "a and b;",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Infix(Box::new(ExprInfix {
-                            lt: (
-                                Expr::Identifier(ExprIdentifier {
-                                    identifier: Identifier {
-                                        name: "a".to_string()
-                                    }
-                                })
-                                .into(),
-                                0..1
-                            ),
-                            op: OpInfix::LogicAnd,
-                            rt: (
-                                Expr::Identifier(ExprIdentifier {
-                                    identifier: Identifier {
-                                        name: "b".to_string()
-                                    }
-                                })
-                                .into(),
-                                6..7
-                            )
-                        }))
-                        .into(),
-                        0..7
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::Infix(Box::new(ExprInfix {
+                                lt: (
+                                    Expr::Identifier(ExprIdentifier {
+                                        identifier: Identifier {
+                                            name: "a".to_string()
+                                        }
+                                    })
+                                    .into(),
+                                    0..1
+                                ),
+                                op: OpInfix::LogicAnd,
+                                rt: (
+                                    Expr::Identifier(ExprIdentifier {
+                                        identifier: Identifier {
+                                            name: "b".to_string()
+                                        }
+                                    })
+                                    .into(),
+                                    6..7
+                                )
+                            }))
+                            .into(),
+                            0..7
+                        )
+                    }
+                    .into()
+                ),
                 0..8
             )]
         })
@@ -1264,33 +1382,36 @@ mod parser_tests {
         "a or b;",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Infix(Box::new(ExprInfix {
-                            lt: (
-                                Expr::Identifier(ExprIdentifier {
-                                    identifier: Identifier {
-                                        name: "a".to_string()
-                                    }
-                                })
-                                .into(),
-                                0..1
-                            ),
-                            op: OpInfix::LogicOr,
-                            rt: (
-                                Expr::Identifier(ExprIdentifier {
-                                    identifier: Identifier {
-                                        name: "b".to_string()
-                                    }
-                                })
-                                .into(),
-                                5..6
-                            )
-                        }))
-                        .into(),
-                        0..6
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::Infix(Box::new(ExprInfix {
+                                lt: (
+                                    Expr::Identifier(ExprIdentifier {
+                                        identifier: Identifier {
+                                            name: "a".to_string()
+                                        }
+                                    })
+                                    .into(),
+                                    0..1
+                                ),
+                                op: OpInfix::LogicOr,
+                                rt: (
+                                    Expr::Identifier(ExprIdentifier {
+                                        identifier: Identifier {
+                                            name: "b".to_string()
+                                        }
+                                    })
+                                    .into(),
+                                    5..6
+                                )
+                            }))
+                            .into(),
+                            0..6
+                        )
+                    }
+                    .into()
+                ),
                 0..7
             )]
         })
@@ -1301,25 +1422,28 @@ mod parser_tests {
         "if true {};",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::If(Box::new(ExprIf {
-                            cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 3..7),
-                            then: (
-                                Expr::Block(Box::new(ExprBlock {
-                                    stmts: vec![],
-                                    return_expr: None,
-                                    typeref: None
-                                }))
-                                .into(),
-                                8..10
-                            ),
-                            else_: None
-                        }))
-                        .into(),
-                        0..10
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::If(Box::new(ExprIf {
+                                cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 3..7),
+                                then: (
+                                    Expr::Block(Box::new(ExprBlock {
+                                        stmts: vec![],
+                                        return_expr: None,
+                                        typeref: None
+                                    }))
+                                    .into(),
+                                    8..10
+                                ),
+                                else_: None
+                            }))
+                            .into(),
+                            0..10
+                        )
+                    }
+                    .into()
+                ),
                 0..11
             )]
         })
@@ -1330,25 +1454,28 @@ mod parser_tests {
         "if (true) {};",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::If(Box::new(ExprIf {
-                            cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 3..9),
-                            then: (
-                                Expr::Block(Box::new(ExprBlock {
-                                    stmts: vec![],
-                                    return_expr: None,
-                                    typeref: None
-                                }))
-                                .into(),
-                                10..12
-                            ),
-                            else_: None
-                        }))
-                        .into(),
-                        0..12
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::If(Box::new(ExprIf {
+                                cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 3..9),
+                                then: (
+                                    Expr::Block(Box::new(ExprBlock {
+                                        stmts: vec![],
+                                        return_expr: None,
+                                        typeref: None
+                                    }))
+                                    .into(),
+                                    10..12
+                                ),
+                                else_: None
+                            }))
+                            .into(),
+                            0..12
+                        )
+                    }
+                    .into()
+                ),
                 0..13
             )]
         })
@@ -1359,33 +1486,36 @@ mod parser_tests {
         "if (true) {} else {};",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::If(Box::new(ExprIf {
-                            cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 3..9),
-                            then: (
-                                Expr::Block(Box::new(ExprBlock {
-                                    stmts: vec![],
-                                    return_expr: None,
-                                    typeref: None
-                                }))
-                                .into(),
-                                10..12
-                            ),
-                            else_: Some((
-                                Expr::Block(Box::new(ExprBlock {
-                                    stmts: vec![],
-                                    return_expr: None,
-                                    typeref: None
-                                }))
-                                .into(),
-                                18..20
-                            ))
-                        }))
-                        .into(),
-                        0..20
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::If(Box::new(ExprIf {
+                                cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 3..9),
+                                then: (
+                                    Expr::Block(Box::new(ExprBlock {
+                                        stmts: vec![],
+                                        return_expr: None,
+                                        typeref: None
+                                    }))
+                                    .into(),
+                                    10..12
+                                ),
+                                else_: Some((
+                                    Expr::Block(Box::new(ExprBlock {
+                                        stmts: vec![],
+                                        return_expr: None,
+                                        typeref: None
+                                    }))
+                                    .into(),
+                                    18..20
+                                ))
+                            }))
+                            .into(),
+                            0..20
+                        )
+                    }
+                    .into()
+                ),
                 0..21
             )]
         })
@@ -1396,41 +1526,47 @@ mod parser_tests {
         "if (true) {} else if (true) {};",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::If(Box::new(ExprIf {
-                            cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 3..9),
-                            then: (
-                                Expr::Block(Box::new(ExprBlock {
-                                    stmts: vec![],
-                                    return_expr: None,
-                                    typeref: None
-                                }))
-                                .into(),
-                                10..12
-                            ),
-                            else_: Some((
-                                Expr::If(Box::new(ExprIf {
-                                    cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 21..27),
-                                    then: (
-                                        Expr::Block(Box::new(ExprBlock {
-                                            stmts: vec![],
-                                            return_expr: None,
-                                            typeref: None
-                                        }))
-                                        .into(),
-                                        28..30
-                                    ),
-                                    else_: None
-                                }))
-                                .into(),
-                                18..30
-                            ))
-                        }))
-                        .into(),
-                        0..30
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::If(Box::new(ExprIf {
+                                cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 3..9),
+                                then: (
+                                    Expr::Block(Box::new(ExprBlock {
+                                        stmts: vec![],
+                                        return_expr: None,
+                                        typeref: None
+                                    }))
+                                    .into(),
+                                    10..12
+                                ),
+                                else_: Some((
+                                    Expr::If(Box::new(ExprIf {
+                                        cond: (
+                                            Expr::Literal(ExprLiteral::Bool(true)).into(),
+                                            21..27
+                                        ),
+                                        then: (
+                                            Expr::Block(Box::new(ExprBlock {
+                                                stmts: vec![],
+                                                return_expr: None,
+                                                typeref: None
+                                            }))
+                                            .into(),
+                                            28..30
+                                        ),
+                                        else_: None
+                                    }))
+                                    .into(),
+                                    18..30
+                                ))
+                            }))
+                            .into(),
+                            0..30
+                        )
+                    }
+                    .into()
+                ),
                 0..31
             )]
         })
@@ -1441,49 +1577,55 @@ mod parser_tests {
         "if (true) {} else if (true) {} else {};",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::If(Box::new(ExprIf {
-                            cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 3..9),
-                            then: (
-                                Expr::Block(Box::new(ExprBlock {
-                                    stmts: vec![],
-                                    return_expr: None,
-                                    typeref: None
-                                }))
-                                .into(),
-                                10..12
-                            ),
-                            else_: Some((
-                                Expr::If(Box::new(ExprIf {
-                                    cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 21..27),
-                                    then: (
-                                        Expr::Block(Box::new(ExprBlock {
-                                            stmts: vec![],
-                                            return_expr: None,
-                                            typeref: None
-                                        }))
-                                        .into(),
-                                        28..30
-                                    ),
-                                    else_: Some((
-                                        Expr::Block(Box::new(ExprBlock {
-                                            stmts: vec![],
-                                            return_expr: None,
-                                            typeref: None
-                                        }))
-                                        .into(),
-                                        36..38
-                                    ))
-                                }))
-                                .into(),
-                                18..38
-                            ))
-                        }))
-                        .into(),
-                        0..38
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::If(Box::new(ExprIf {
+                                cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 3..9),
+                                then: (
+                                    Expr::Block(Box::new(ExprBlock {
+                                        stmts: vec![],
+                                        return_expr: None,
+                                        typeref: None
+                                    }))
+                                    .into(),
+                                    10..12
+                                ),
+                                else_: Some((
+                                    Expr::If(Box::new(ExprIf {
+                                        cond: (
+                                            Expr::Literal(ExprLiteral::Bool(true)).into(),
+                                            21..27
+                                        ),
+                                        then: (
+                                            Expr::Block(Box::new(ExprBlock {
+                                                stmts: vec![],
+                                                return_expr: None,
+                                                typeref: None
+                                            }))
+                                            .into(),
+                                            28..30
+                                        ),
+                                        else_: Some((
+                                            Expr::Block(Box::new(ExprBlock {
+                                                stmts: vec![],
+                                                return_expr: None,
+                                                typeref: None
+                                            }))
+                                            .into(),
+                                            36..38
+                                        ))
+                                    }))
+                                    .into(),
+                                    18..38
+                                ))
+                            }))
+                            .into(),
+                            0..38
+                        )
+                    }
+                    .into()
+                ),
                 0..39
             )]
         })
@@ -1494,68 +1636,74 @@ mod parser_tests {
         "if (true) {} else if (true) {} else if (true) {} else {};",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::If(Box::new(ExprIf {
-                            cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 3..9),
-                            then: (
-                                Expr::Block(Box::new(ExprBlock {
-                                    stmts: vec![],
-                                    return_expr: None,
-                                    typeref: None
-                                }))
-                                .into(),
-                                10..12
-                            ),
-                            else_: Some((
-                                Expr::If(Box::new(ExprIf {
-                                    cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 21..27),
-                                    then: (
-                                        Expr::Block(Box::new(ExprBlock {
-                                            stmts: vec![],
-                                            return_expr: None,
-                                            typeref: None
-                                        }))
-                                        .into(),
-                                        28..30
-                                    ),
-                                    else_: Some((
-                                        Expr::If(Box::new(ExprIf {
-                                            cond: (
-                                                Expr::Literal(ExprLiteral::Bool(true)).into(),
-                                                39..45
-                                            ),
-                                            then: (
-                                                Expr::Block(Box::new(ExprBlock {
-                                                    stmts: vec![],
-                                                    return_expr: None,
-                                                    typeref: None
-                                                }))
-                                                .into(),
-                                                46..48
-                                            ),
-                                            else_: Some((
-                                                Expr::Block(Box::new(ExprBlock {
-                                                    stmts: vec![],
-                                                    return_expr: None,
-                                                    typeref: None
-                                                }))
-                                                .into(),
-                                                54..56
-                                            ))
-                                        }))
-                                        .into(),
-                                        36..56
-                                    ))
-                                }))
-                                .into(),
-                                18..56
-                            ))
-                        }))
-                        .into(),
-                        0..56
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::If(Box::new(ExprIf {
+                                cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 3..9),
+                                then: (
+                                    Expr::Block(Box::new(ExprBlock {
+                                        stmts: vec![],
+                                        return_expr: None,
+                                        typeref: None
+                                    }))
+                                    .into(),
+                                    10..12
+                                ),
+                                else_: Some((
+                                    Expr::If(Box::new(ExprIf {
+                                        cond: (
+                                            Expr::Literal(ExprLiteral::Bool(true)).into(),
+                                            21..27
+                                        ),
+                                        then: (
+                                            Expr::Block(Box::new(ExprBlock {
+                                                stmts: vec![],
+                                                return_expr: None,
+                                                typeref: None
+                                            }))
+                                            .into(),
+                                            28..30
+                                        ),
+                                        else_: Some((
+                                            Expr::If(Box::new(ExprIf {
+                                                cond: (
+                                                    Expr::Literal(ExprLiteral::Bool(true)).into(),
+                                                    39..45
+                                                ),
+                                                then: (
+                                                    Expr::Block(Box::new(ExprBlock {
+                                                        stmts: vec![],
+                                                        return_expr: None,
+                                                        typeref: None
+                                                    }))
+                                                    .into(),
+                                                    46..48
+                                                ),
+                                                else_: Some((
+                                                    Expr::Block(Box::new(ExprBlock {
+                                                        stmts: vec![],
+                                                        return_expr: None,
+                                                        typeref: None
+                                                    }))
+                                                    .into(),
+                                                    54..56
+                                                ))
+                                            }))
+                                            .into(),
+                                            36..56
+                                        ))
+                                    }))
+                                    .into(),
+                                    18..56
+                                ))
+                            }))
+                            .into(),
+                            0..56
+                        )
+                    }
+                    .into()
+                ),
                 0..57
             )]
         })
@@ -1690,17 +1838,20 @@ mod parser_tests {
         "0..;",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Range(ExprRange {
-                            start: Some((ExprLiteral::Number(0f64), 0..1)),
-                            end: None,
-                            inclusive_end: false
-                        })
-                        .into(),
-                        0..3
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::Range(ExprRange {
+                                start: Some((ExprLiteral::Number(0f64), 0..1)),
+                                end: None,
+                                inclusive_end: false
+                            })
+                            .into(),
+                            0..3
+                        )
+                    }
+                    .into()
+                ),
                 0..4
             )]
         })
@@ -1711,17 +1862,20 @@ mod parser_tests {
         "0..10;",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Range(ExprRange {
-                            start: Some((ExprLiteral::Number(0f64), 0..1)),
-                            end: Some((ExprLiteral::Number(10f64), 3..5)),
-                            inclusive_end: false
-                        })
-                        .into(),
-                        0..5
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::Range(ExprRange {
+                                start: Some((ExprLiteral::Number(0f64), 0..1)),
+                                end: Some((ExprLiteral::Number(10f64), 3..5)),
+                                inclusive_end: false
+                            })
+                            .into(),
+                            0..5
+                        )
+                    }
+                    .into()
+                ),
                 0..6
             )]
         })
@@ -1732,17 +1886,20 @@ mod parser_tests {
         "..10;",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Range(ExprRange {
-                            start: None,
-                            end: Some((ExprLiteral::Number(10f64), 2..4)),
-                            inclusive_end: false
-                        })
-                        .into(),
-                        0..4
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::Range(ExprRange {
+                                start: None,
+                                end: Some((ExprLiteral::Number(10f64), 2..4)),
+                                inclusive_end: false
+                            })
+                            .into(),
+                            0..4
+                        )
+                    }
+                    .into()
+                ),
                 0..5
             )]
         })
@@ -1753,17 +1910,20 @@ mod parser_tests {
         "..=10;",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Range(ExprRange {
-                            start: None,
-                            end: Some((ExprLiteral::Number(10f64), 3..5)),
-                            inclusive_end: true
-                        })
-                        .into(),
-                        0..5
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::Range(ExprRange {
+                                start: None,
+                                end: Some((ExprLiteral::Number(10f64), 3..5)),
+                                inclusive_end: true
+                            })
+                            .into(),
+                            0..5
+                        )
+                    }
+                    .into()
+                ),
                 0..6
             )]
         })
@@ -1774,17 +1934,20 @@ mod parser_tests {
         "0..=10;",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Range(ExprRange {
-                            start: Some((ExprLiteral::Number(0f64), 0..1)),
-                            end: Some((ExprLiteral::Number(10f64), 4..6)),
-                            inclusive_end: true
-                        })
-                        .into(),
-                        0..6
-                    )
-                }),
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::Range(ExprRange {
+                                start: Some((ExprLiteral::Number(0f64), 0..1)),
+                                end: Some((ExprLiteral::Number(10f64), 4..6)),
+                                inclusive_end: true
+                            })
+                            .into(),
+                            0..6
+                        )
+                    }
+                    .into()
+                ),
                 0..7
             )]
         })
@@ -1831,20 +1994,23 @@ mod parser_tests {
         "let a = 123;",
         Ok(Module {
             stmts: vec![(
-                Stmt::Assign(StmtAssign {
-                    identifier: (
-                        Identifier {
-                            name: "a".to_string()
-                        },
-                        4..5
-                    ),
-                    type_expr: None,
-                    is_const: false,
-                    value: Some((
-                        ast::Expr::Literal(ExprLiteral::Number(123f64)).into(),
-                        8..11
-                    ))
-                }),
+                Stmt::Assign(
+                    StmtAssign {
+                        identifier: (
+                            Identifier {
+                                name: "a".to_string()
+                            },
+                            4..5
+                        ),
+                        type_expr: None,
+                        is_const: false,
+                        value: Some((
+                            ast::Expr::Literal(ExprLiteral::Number(123f64)).into(),
+                            8..11
+                        ))
+                    }
+                    .into()
+                ),
                 0..12
             )]
         })
@@ -1855,29 +2021,32 @@ mod parser_tests {
         "let a = b = 123;",
         Ok(Module {
             stmts: vec![(
-                Stmt::Assign(StmtAssign {
-                    identifier: (
-                        Identifier {
-                            name: "a".to_string()
-                        },
-                        4..5
-                    ),
-                    type_expr: None,
-                    is_const: false,
-                    value: Some((
-                        ast::Expr::Assign(Box::new(ExprAssign {
-                            identifier: (
-                                Identifier {
-                                    name: "b".to_string()
-                                },
-                                8..9
-                            ),
-                            value: (Expr::Literal(ExprLiteral::Number(123f64)).into(), 12..15)
-                        }))
-                        .into(),
-                        8..15
-                    ))
-                }),
+                Stmt::Assign(
+                    StmtAssign {
+                        identifier: (
+                            Identifier {
+                                name: "a".to_string()
+                            },
+                            4..5
+                        ),
+                        type_expr: None,
+                        is_const: false,
+                        value: Some((
+                            ast::Expr::Assign(Box::new(ExprAssign {
+                                identifier: (
+                                    Identifier {
+                                        name: "b".to_string()
+                                    },
+                                    8..9
+                                ),
+                                value: (Expr::Literal(ExprLiteral::Number(123f64)).into(), 12..15)
+                            }))
+                            .into(),
+                            8..15
+                        ))
+                    }
+                    .into()
+                ),
                 0..16
             )]
         })
@@ -1888,29 +2057,32 @@ mod parser_tests {
         "let a: number = b = 123;",
         Ok(Module {
             stmts: vec![(
-                Stmt::Assign(StmtAssign {
-                    identifier: (
-                        Identifier {
-                            name: "a".to_string()
-                        },
-                        4..5
-                    ),
-                    type_expr: Some((Expr::Type(ExprType(Type::number())).into(), 7..13)),
-                    is_const: false,
-                    value: Some((
-                        ast::Expr::Assign(Box::new(ExprAssign {
-                            identifier: (
-                                Identifier {
-                                    name: "b".to_string()
-                                },
-                                16..17
-                            ),
-                            value: (Expr::Literal(ExprLiteral::Number(123f64)).into(), 20..23)
-                        }))
-                        .into(),
-                        16..23
-                    ))
-                }),
+                Stmt::Assign(
+                    StmtAssign {
+                        identifier: (
+                            Identifier {
+                                name: "a".to_string()
+                            },
+                            4..5
+                        ),
+                        type_expr: Some((Expr::Type(ExprType(Type::number())).into(), 7..13)),
+                        is_const: false,
+                        value: Some((
+                            ast::Expr::Assign(Box::new(ExprAssign {
+                                identifier: (
+                                    Identifier {
+                                        name: "b".to_string()
+                                    },
+                                    16..17
+                                ),
+                                value: (Expr::Literal(ExprLiteral::Number(123f64)).into(), 20..23)
+                            }))
+                            .into(),
+                            16..23
+                        ))
+                    }
+                    .into()
+                ),
                 0..24
             )]
         })
@@ -1921,20 +2093,23 @@ mod parser_tests {
         "let a: number = 123;",
         Ok(Module {
             stmts: vec![(
-                Stmt::Assign(StmtAssign {
-                    identifier: (
-                        Identifier {
-                            name: "a".to_string()
-                        },
-                        4..5
-                    ),
-                    type_expr: Some((Expr::Type(ExprType(Type::number())).into(), 7..13)),
-                    is_const: false,
-                    value: Some((
-                        ast::Expr::Literal(ExprLiteral::Number(123f64)).into(),
-                        16..19
-                    ))
-                }),
+                Stmt::Assign(
+                    StmtAssign {
+                        identifier: (
+                            Identifier {
+                                name: "a".to_string()
+                            },
+                            4..5
+                        ),
+                        type_expr: Some((Expr::Type(ExprType(Type::number())).into(), 7..13)),
+                        is_const: false,
+                        value: Some((
+                            ast::Expr::Literal(ExprLiteral::Number(123f64)).into(),
+                            16..19
+                        ))
+                    }
+                    .into()
+                ),
                 0..20
             )]
         })
@@ -1945,17 +2120,20 @@ mod parser_tests {
         "let a;",
         Ok(Module {
             stmts: vec![(
-                Stmt::Assign(StmtAssign {
-                    identifier: (
-                        Identifier {
-                            name: "a".to_string()
-                        },
-                        4..5
-                    ),
-                    type_expr: None,
-                    is_const: false,
-                    value: None
-                }),
+                Stmt::Assign(
+                    StmtAssign {
+                        identifier: (
+                            Identifier {
+                                name: "a".to_string()
+                            },
+                            4..5
+                        ),
+                        type_expr: None,
+                        is_const: false,
+                        value: None
+                    }
+                    .into()
+                ),
                 0..6
             )]
         })
@@ -1966,15 +2144,18 @@ mod parser_tests {
         "type NumberList = list<number>;",
         Ok(Module {
             stmts: vec![(
-                Stmt::TypeAlias(StmtTypeAlias {
-                    alias: (
-                        Identifier {
-                            name: "NumberList".to_string()
-                        },
-                        5..15
-                    ),
-                    value: (Type::list(Type::number()), 18..30)
-                }),
+                Stmt::TypeAlias(
+                    StmtTypeAlias {
+                        alias: (
+                            Identifier {
+                                name: "NumberList".to_string()
+                            },
+                            5..15
+                        ),
+                        value: (Type::list(Type::number()), 18..30)
+                    }
+                    .into()
+                ),
                 0..31
             )]
         })
@@ -1989,44 +2170,56 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![
                 (
-                    Stmt::TypeAlias(StmtTypeAlias {
-                        alias: (
-                            Identifier {
-                                name: "NumberList".to_string()
-                            },
-                            14..24
-                        ),
-                        value: (Type::list(Type::number()), 27..39)
-                    }),
+                    Stmt::TypeAlias(
+                        StmtTypeAlias {
+                            alias: (
+                                Identifier {
+                                    name: "NumberList".to_string()
+                                },
+                                14..24
+                            ),
+                            value: (Type::list(Type::number()), 27..39)
+                        }
+                        .into()
+                    ),
                     9..40
                 ),
                 (
-                    Stmt::Assign(StmtAssign {
-                        identifier: (
-                            Identifier {
-                                name: "a".to_string()
-                            },
-                            53..54
-                        ),
-                        type_expr: Some((
-                            Expr::Type(ExprType(Type::new("NumberList"))).into(),
-                            56..66
-                        )),
-                        is_const: false,
-                        value: Some((
-                            Expr::List(
-                                ExprList {
-                                    items: vec![
-                                        (Expr::Literal(ExprLiteral::Number(1f64)).into(), 70..71),
-                                        (Expr::Literal(ExprLiteral::Number(2f64)).into(), 73..74)
-                                    ]
-                                }
-                                .into()
-                            )
-                            .into(),
-                            69..75
-                        ))
-                    }),
+                    Stmt::Assign(
+                        StmtAssign {
+                            identifier: (
+                                Identifier {
+                                    name: "a".to_string()
+                                },
+                                53..54
+                            ),
+                            type_expr: Some((
+                                Expr::Type(ExprType(Type::new("NumberList"))).into(),
+                                56..66
+                            )),
+                            is_const: false,
+                            value: Some((
+                                Expr::List(
+                                    ExprList {
+                                        items: vec![
+                                            (
+                                                Expr::Literal(ExprLiteral::Number(1f64)).into(),
+                                                70..71
+                                            ),
+                                            (
+                                                Expr::Literal(ExprLiteral::Number(2f64)).into(),
+                                                73..74
+                                            )
+                                        ]
+                                    }
+                                    .into()
+                                )
+                                .into(),
+                                69..75
+                            ))
+                        }
+                        .into()
+                    ),
                     49..76
                 )
             ]
@@ -2045,106 +2238,128 @@ mod parser_tests {
         ",
         Ok(Module {
             stmts: vec![(
-                Stmt::Expr(StmtExpr {
-                    expr: (
-                        Expr::Fn(Box::new(ExprFn {
-                            name: None,
-                            params: vec![],
-                            return_type: (Type::unit(), 13..15),
-                            body: (
-                                Expr::Block(Box::new(ExprBlock {
-                                    stmts: vec![
-                                        (
-                                            Stmt::TypeAlias(StmtTypeAlias {
-                                                alias: (
-                                                    Identifier {
-                                                        name: "Int".to_string()
-                                                    },
-                                                    38..41
-                                                ),
-                                                value: (Type::number(), 44..50)
-                                            }),
-                                            33..51
-                                        ),
-                                        (
-                                            Stmt::Assign(StmtAssign {
-                                                identifier: (
-                                                    Identifier {
-                                                        name: "a".to_string()
-                                                    },
-                                                    68..69
-                                                ),
-                                                type_expr: Some((
-                                                    Expr::Type(ExprType(Type::number())).into(),
-                                                    71..77
-                                                )),
-                                                is_const: false,
-                                                value: Some((
-                                                    Expr::Literal(ExprLiteral::Number(5f64)).into(),
-                                                    80..81
-                                                ))
-                                            }),
-                                            64..82
-                                        ),
-                                        (
-                                            Stmt::Assign(StmtAssign {
-                                                identifier: (
-                                                    Identifier {
-                                                        name: "b".to_string()
-                                                    },
-                                                    99..100
-                                                ),
-                                                type_expr: Some((
-                                                    Expr::Type(ExprType(Type::new("Int"))).into(),
-                                                    102..105
-                                                )),
-                                                is_const: false,
-                                                value: Some((
-                                                    Expr::Infix(Box::new(ExprInfix {
-                                                        lt: (
-                                                            Expr::Identifier(ExprIdentifier {
-                                                                identifier: Identifier {
-                                                                    name: "a".to_string()
-                                                                }
-                                                            })
-                                                            .into(),
-                                                            108..109
+                Stmt::Expr(
+                    StmtExpr {
+                        expr: (
+                            Expr::Fn(Box::new(ExprFn {
+                                name: None,
+                                params: vec![],
+                                return_type: (Type::unit(), 13..15),
+                                body: (
+                                    Expr::Block(Box::new(ExprBlock {
+                                        stmts: vec![
+                                            (
+                                                Stmt::TypeAlias(
+                                                    StmtTypeAlias {
+                                                        alias: (
+                                                            Identifier {
+                                                                name: "Int".to_string()
+                                                            },
+                                                            38..41
                                                         ),
-                                                        op: OpInfix::Add,
-                                                        rt: (
+                                                        value: (Type::number(), 44..50)
+                                                    }
+                                                    .into()
+                                                ),
+                                                33..51
+                                            ),
+                                            (
+                                                Stmt::Assign(
+                                                    StmtAssign {
+                                                        identifier: (
+                                                            Identifier {
+                                                                name: "a".to_string()
+                                                            },
+                                                            68..69
+                                                        ),
+                                                        type_expr: Some((
+                                                            Expr::Type(ExprType(Type::number()))
+                                                                .into(),
+                                                            71..77
+                                                        )),
+                                                        is_const: false,
+                                                        value: Some((
                                                             Expr::Literal(ExprLiteral::Number(
-                                                                10f64
+                                                                5f64
                                                             ))
                                                             .into(),
-                                                            112..114
-                                                        )
-                                                    }))
-                                                    .into(),
-                                                    108..114
-                                                ))
-                                            }),
-                                            95..115
-                                        )
-                                    ],
-                                    return_expr: Some((
-                                        Expr::Identifier(ExprIdentifier {
-                                            identifier: Identifier {
-                                                name: "b".to_string()
-                                            }
-                                        })
-                                        .into(),
-                                        128..129
-                                    )),
-                                    typeref: None
-                                }))
-                                .into(),
-                                19..139
-                            )
-                        }))
-                        .into(),
-                        9..139
-                    )
-                }),
+                                                            80..81
+                                                        ))
+                                                    }
+                                                    .into()
+                                                ),
+                                                64..82
+                                            ),
+                                            (
+                                                Stmt::Assign(
+                                                    StmtAssign {
+                                                        identifier: (
+                                                            Identifier {
+                                                                name: "b".to_string()
+                                                            },
+                                                            99..100
+                                                        ),
+                                                        type_expr: Some((
+                                                            Expr::Type(ExprType(Type::new("Int")))
+                                                                .into(),
+                                                            102..105
+                                                        )),
+                                                        is_const: false,
+                                                        value: Some((
+                                                            Expr::Infix(Box::new(ExprInfix {
+                                                                lt: (
+                                                                    Expr::Identifier(
+                                                                        ExprIdentifier {
+                                                                            identifier:
+                                                                                Identifier {
+                                                                                    name: "a"
+                                                                                        .to_string(
+                                                                                        )
+                                                                                }
+                                                                        }
+                                                                    )
+                                                                    .into(),
+                                                                    108..109
+                                                                ),
+                                                                op: OpInfix::Add,
+                                                                rt: (
+                                                                    Expr::Literal(
+                                                                        ExprLiteral::Number(10f64)
+                                                                    )
+                                                                    .into(),
+                                                                    112..114
+                                                                )
+                                                            }))
+                                                            .into(),
+                                                            108..114
+                                                        ))
+                                                    }
+                                                    .into()
+                                                ),
+                                                95..115
+                                            )
+                                        ],
+                                        return_expr: Some((
+                                            Expr::Identifier(ExprIdentifier {
+                                                identifier: Identifier {
+                                                    name: "b".to_string()
+                                                }
+                                            })
+                                            .into(),
+                                            128..129
+                                        )),
+                                        typeref: None
+                                    }))
+                                    .into(),
+                                    19..139
+                                )
+                            }))
+                            .into(),
+                            9..139
+                        )
+                    }
+                    .into()
+                ),
                 9..140
             )]
         })
@@ -2155,17 +2370,20 @@ mod parser_tests {
         "let a: number;",
         Ok(Module {
             stmts: vec![(
-                Stmt::Assign(StmtAssign {
-                    identifier: (
-                        Identifier {
-                            name: "a".to_string()
-                        },
-                        4..5
-                    ),
-                    type_expr: Some((Expr::Type(ExprType(Type::number())).into(), 7..13)),
-                    is_const: false,
-                    value: None
-                }),
+                Stmt::Assign(
+                    StmtAssign {
+                        identifier: (
+                            Identifier {
+                                name: "a".to_string()
+                            },
+                            4..5
+                        ),
+                        type_expr: Some((Expr::Type(ExprType(Type::number())).into(), 7..13)),
+                        is_const: false,
+                        value: None
+                    }
+                    .into()
+                ),
                 0..14
             )]
         })
@@ -2176,47 +2394,50 @@ mod parser_tests {
         "let a = if (true) { 123 } else { 456 };",
         Ok(Module {
             stmts: vec![(
-                Stmt::Assign(StmtAssign {
-                    identifier: (
-                        Identifier {
-                            name: "a".to_string()
-                        },
-                        4..5
-                    ),
-                    type_expr: None,
-                    is_const: false,
-                    value: Some((
-                        Expr::If(Box::new(ExprIf {
-                            cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 11..17),
-                            then: (
-                                Expr::Block(Box::new(ExprBlock {
-                                    stmts: vec![],
-                                    return_expr: Some((
-                                        Expr::Literal(ExprLiteral::Number(123f64)).into(),
-                                        20..23
-                                    )),
-                                    typeref: None
-                                }))
-                                .into(),
-                                18..25
-                            ),
-                            else_: Some((
-                                Expr::Block(Box::new(ExprBlock {
-                                    stmts: vec![],
-                                    return_expr: Some((
-                                        Expr::Literal(ExprLiteral::Number(456f64)).into(),
-                                        33..36
-                                    )),
-                                    typeref: None
-                                }))
-                                .into(),
-                                31..38
-                            ))
-                        }))
-                        .into(),
-                        8..38
-                    ))
-                }),
+                Stmt::Assign(
+                    StmtAssign {
+                        identifier: (
+                            Identifier {
+                                name: "a".to_string()
+                            },
+                            4..5
+                        ),
+                        type_expr: None,
+                        is_const: false,
+                        value: Some((
+                            Expr::If(Box::new(ExprIf {
+                                cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 11..17),
+                                then: (
+                                    Expr::Block(Box::new(ExprBlock {
+                                        stmts: vec![],
+                                        return_expr: Some((
+                                            Expr::Literal(ExprLiteral::Number(123f64)).into(),
+                                            20..23
+                                        )),
+                                        typeref: None
+                                    }))
+                                    .into(),
+                                    18..25
+                                ),
+                                else_: Some((
+                                    Expr::Block(Box::new(ExprBlock {
+                                        stmts: vec![],
+                                        return_expr: Some((
+                                            Expr::Literal(ExprLiteral::Number(456f64)).into(),
+                                            33..36
+                                        )),
+                                        typeref: None
+                                    }))
+                                    .into(),
+                                    31..38
+                                ))
+                            }))
+                            .into(),
+                            8..38
+                        ))
+                    }
+                    .into()
+                ),
                 0..39
             )]
         })
