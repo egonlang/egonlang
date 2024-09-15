@@ -39,7 +39,7 @@ mod tests {
 
     verifier_rule_test!(
         AssertTypeRule,
-        should_work,
+        assert_type_mismatch_across_scopes,
         r#"
     let a = 123;
 
@@ -67,6 +67,107 @@ mod tests {
                     actual: "number".to_string()
                 }),
                 133..134
+            )
+        ])
+    );
+
+    verifier_rule_test!(
+        AssertTypeRule,
+        assert_type_mismatch_in_block,
+        r#"
+    {
+        assert_type 123, string;
+    };
+    "#,
+        Err(vec![(
+            EgonError::TypeError(egonlang_errors::EgonTypeError::MismatchType {
+                expected: "string".to_string(),
+                actual: "number".to_string()
+            }),
+            27..30
+        )])
+    );
+
+    verifier_rule_test!(
+        AssertTypeRule,
+        assert_type_mismatch_in_function_body,
+        r#"
+    (): () => {
+        assert_type 123, string;
+    };
+    "#,
+        Err(vec![(
+            EgonError::TypeError(egonlang_errors::EgonTypeError::MismatchType {
+                expected: "string".to_string(),
+                actual: "number".to_string()
+            }),
+            37..40
+        )])
+    );
+
+    verifier_rule_test!(
+        AssertTypeRule,
+        assert_type_mismatch_with_identifier,
+        r#"
+    let a = false;
+    assert_type a, number;
+    "#,
+        Err(vec![(
+            EgonError::TypeError(egonlang_errors::EgonTypeError::MismatchType {
+                expected: "number".to_string(),
+                actual: "bool".to_string()
+            }),
+            36..37
+        )])
+    );
+
+    verifier_rule_test!(
+        AssertTypeRule,
+        assert_type_mismatch_with_type_alias,
+        r#"
+    type String = string;
+
+    assert_type 123, String;
+    "#,
+        Err(vec![(
+            EgonError::TypeError(egonlang_errors::EgonTypeError::MismatchType {
+                expected: "string".to_string(),
+                actual: "number".to_string()
+            }),
+            44..47
+        )])
+    );
+
+    verifier_rule_test!(
+        AssertTypeRule,
+        assert_type_mismatch,
+        r#"assert_type 123, string;"#,
+        Err(vec![(
+            EgonError::TypeError(egonlang_errors::EgonTypeError::MismatchType {
+                expected: "string".to_string(),
+                actual: "number".to_string()
+            }),
+            12..15
+        )])
+    );
+
+    verifier_rule_test!(
+        AssertTypeRule,
+        assert_type_undefined_identifier,
+        r#"
+    assert_type b, number;
+    assert_type 123, Number;
+    "#,
+        Err(vec![
+            (
+                EgonError::TypeError(egonlang_errors::EgonTypeError::Undefined("b".to_string())),
+                17..18
+            ),
+            (
+                EgonError::TypeError(egonlang_errors::EgonTypeError::Undefined(
+                    "Number".to_string()
+                )),
+                49..55
             )
         ])
     );
