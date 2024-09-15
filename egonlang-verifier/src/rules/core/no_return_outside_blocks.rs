@@ -4,7 +4,9 @@ use egonlang_core::prelude::*;
 
 stmt_rule!(
     NoReturnOutsideBlock,
-    |stmt, _span, _resolve_ident, _resolve_expr| {
+    |stmt_span, _resolve_ident, _resolve_expr| {
+        let (stmt, _) = stmt_span;
+
         let errs = vec![];
 
         if let ast::Stmt::Return(_stmt_return) = stmt {

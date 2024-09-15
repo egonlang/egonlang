@@ -2,7 +2,9 @@ use crate::prelude::*;
 use egonlang_core::ast::Stmt;
 use egonlang_errors::{EgonErrorS, EgonTypeError};
 
-stmt_rule!(AssertType, |stmt, _span, _resolve_ident, resolve_expr| {
+stmt_rule!(AssertType, |stmt_span, _resolve_ident, resolve_expr| {
+    let (stmt, _) = stmt_span;
+
     let mut errs: Vec<EgonErrorS> = vec![];
 
     if let Stmt::AssertType(stmt_assert_type) = stmt {

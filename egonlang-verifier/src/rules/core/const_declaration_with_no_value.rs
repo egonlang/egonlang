@@ -5,7 +5,9 @@ use egonlang_errors::EgonSyntaxError;
 stmt_rule!(
     /// Checks assignment statements initialize consts with a value
     DeclareConstWithoutValue,
-    | stmt, span, _resolve_ident, _resolve_expr | {
+    | stmt_span, _resolve_ident, _resolve_expr | {
+        let (stmt, span) = stmt_span;
+
         let mut errs = vec![];
 
         if let ast::Stmt::Assign(stmt_assign) = stmt {

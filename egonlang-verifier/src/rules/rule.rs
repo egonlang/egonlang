@@ -130,7 +130,7 @@ macro_rules! expr_rule {
 /// Create a verifier [`Rule`] for a statement
 #[macro_export]
 macro_rules! stmt_rule {
-    ($(#[$attributes:meta])* $name:ident, |$stmt:ident, $span:ident, $resolve_ident:ident, $resolve_expr:ident| $body:expr) => {
+    ($(#[$attributes:meta])* $name:ident, |$stmt:ident, $resolve_ident:ident, $resolve_expr:ident| $body:expr) => {
         paste::paste! {
             /// Egon Verifier Statement Rule
             ///
@@ -145,13 +145,12 @@ macro_rules! stmt_rule {
                     resolve_ident: &::egonlang_types::type_env::TypeEnv,
                     expr_types: &$crate::verifier::VerifierExprTypeCache,
                 ) -> ::egonlang_errors::EgonResultMultiSpannedErr<()> {
-                    let internal = | $stmt: &::egonlang_core::ast::Stmt,
-                                     $span: &::span::Span,
+                    let internal = | $stmt: &::egonlang_core::ast::StmtS,
                                      $resolve_ident: &::egonlang_types::type_env::TypeEnv,
                                      $resolve_expr: &$crate::verifier::VerifierExprTypeCache |
                         { $body };
 
-                    let errs = internal(stmt, span, resolve_ident, expr_types);
+                    let errs = internal(&(stmt.clone(), span.clone()), resolve_ident, expr_types);
 
                     if !errs.is_empty() {
                         return Err(errs);

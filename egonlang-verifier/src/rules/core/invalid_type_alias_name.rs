@@ -11,7 +11,9 @@ stmt_rule!(
     /// type invalidTypeAlias = string; // SyntaxError∂
     /// ```
     InvalidTypeAliasName,
-    | stmt, span, _resolve_ident, _resolve_expr | {
+    | stmt_span, _resolve_ident, _resolve_expr | {
+        let (stmt, span) = stmt_span;
+
         let mut errs = vec![];
 
         if let ast::Stmt::TypeAlias(stmt_type_alias) = &stmt {

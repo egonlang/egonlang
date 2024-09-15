@@ -11,7 +11,9 @@ stmt_rule!(
     /// let c: bool = true;
     /// ```
     TypeMismatchOnDeclarations,
-    | stmt, span, resolve_ident, resolve_expr | {
+    | stmt_span, resolve_ident, resolve_expr | {
+        let (stmt, span) = stmt_span;
+
         let mut errs = vec![];
 
         if let ast::Stmt::Assign(stmt_assign) = stmt {
