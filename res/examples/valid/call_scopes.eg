@@ -1,0 +1,9 @@
+let id = (a: number): number => { a };
+
+let result = {
+    let result = id(10);
+
+    result
+};
+
+assert_type result, number;
