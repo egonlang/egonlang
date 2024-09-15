@@ -27,6 +27,8 @@
 <a href="#27" id="27">27</a>
 <a href="#28" id="28">28</a>
 <a href="#29" id="29">29</a>
+<a href="#30" id="30">30</a>
+<a href="#31" id="31">31</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::expr_rule;
 <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_errors::EgonTypeError;
@@ -44,7 +46,9 @@
     /// 123(); // TypeError: number is not callable
     /// ```
     </span>NoNonCallableCalled,
-    |expr, _span, _resolve_ident, resolve_expr| {
+    |expr_span, _resolve_ident, resolve_expr| {
+        <span class="kw">let </span>(expr, <span class="kw">_</span>) = expr_span;
+
         <span class="kw">if let </span>ast::Expr::Call(expr_call) = <span class="kw-2">&amp;*</span>expr {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(callee_type) = resolve_expr.get(<span class="kw-2">&amp;</span>(expr_call.callee.<span class="number">0</span>.clone(), expr_call.callee.<span class="number">1</span>.clone())) {
                 <span class="kw">if </span>!callee_type.is_function() {

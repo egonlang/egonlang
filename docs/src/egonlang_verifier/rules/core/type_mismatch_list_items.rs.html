@@ -106,6 +106,8 @@
 <a href="#106" id="106">106</a>
 <a href="#107" id="107">107</a>
 <a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
@@ -121,7 +123,9 @@
     /// ["a", "b", "c"];
     /// ```
     </span>TypeMisMatchListItems,
-    |expr, _span, _resolve_ident, resolve_expr| {
+    |expr_span, _resolve_ident, resolve_expr| {
+        <span class="kw">let </span>(expr, <span class="kw">_</span>) = expr_span;
+
         <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
 
         <span class="kw">if let </span>ast::Expr::List(expr_list) = <span class="kw-2">&amp;*</span>expr {

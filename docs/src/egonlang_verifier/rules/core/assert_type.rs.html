@@ -172,11 +172,15 @@
 <a href="#172" id="172">172</a>
 <a href="#173" id="173">173</a>
 <a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_core::ast::Stmt;
 <span class="kw">use </span>egonlang_errors::{EgonErrorS, EgonTypeError};
 
-<span class="macro">stmt_rule!</span>(AssertType, |stmt, _span, _resolve_ident, resolve_expr| {
+<span class="macro">stmt_rule!</span>(AssertType, |stmt_span, _resolve_ident, resolve_expr| {
+    <span class="kw">let </span>(stmt, <span class="kw">_</span>) = stmt_span;
+
     <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
 
     <span class="kw">if let </span>Stmt::AssertType(stmt_assert_type) = stmt {

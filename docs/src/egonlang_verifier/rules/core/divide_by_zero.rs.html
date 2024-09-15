@@ -66,6 +66,8 @@
 <a href="#66" id="66">66</a>
 <a href="#67" id="67">67</a>
 <a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a>
+<a href="#70" id="70">70</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>ast::{Expr, ExprLiteral};
 <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
@@ -78,7 +80,9 @@
     /// let a = 10 / 0; // SyntaxError
     /// ```
     </span>DivideByZero,
-    |expr| {
+    |expr_span| {
+        <span class="kw">let </span>(expr, <span class="kw">_</span>) = expr_span;
+
         <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
 
         <span class="kw">if let </span>ast::Expr::Infix(infix_expr) = <span class="kw-2">&amp;*</span>expr {

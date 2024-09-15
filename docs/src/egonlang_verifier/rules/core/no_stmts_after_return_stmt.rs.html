@@ -128,13 +128,17 @@
 <a href="#128" id="128">128</a>
 <a href="#129" id="129">129</a>
 <a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_errors::EgonSyntaxError;
 
 <span class="macro">expr_rule!</span>(
     NoStmtsAfterReturnStmt,
-    |expr, _span, _resolve_ident, _resolve_expr| {
+    |expr_span, _resolve_ident, _resolve_expr| {
+        <span class="kw">let </span>(expr, <span class="kw">_</span>) = expr_span;
+
         <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
 
         <span class="kw">if let </span>ast::Expr::Block(expr_block) = <span class="kw-2">&amp;*</span>expr {

@@ -117,6 +117,8 @@
 <a href="#117" id="117">117</a>
 <a href="#118" id="118">118</a>
 <a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_errors::EgonTypeError;
@@ -133,7 +135,9 @@
     /// !true
     /// ```
     </span>TypeMismatchPrefix,
-    |expr, _span, _resolve_ident, resolve_expr| {
+    |expr_span, _resolve_ident, resolve_expr| {
+        <span class="kw">let </span>(expr, <span class="kw">_</span>) = expr_span;
+
         <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
 
         <span class="kw">if let </span>ast::Expr::Prefix(prefix_expr) = <span class="kw-2">&amp;*</span>expr {

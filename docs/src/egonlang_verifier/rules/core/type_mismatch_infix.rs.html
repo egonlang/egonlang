@@ -214,6 +214,8 @@
 <a href="#214" id="214">214</a>
 <a href="#215" id="215">215</a>
 <a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::{collections::HashMap, sync::Arc};
 
 <span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
@@ -231,7 +233,9 @@
     /// 1 + 2;
     /// ```
     </span>TypeMismatchInfix,
-    |expr, _span, _resolve_ident, resolve_expr| {
+    |expr_span, _resolve_ident, resolve_expr| {
+        <span class="kw">let </span>(expr, <span class="kw">_</span>) = expr_span;
+
         <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
 
         <span class="kw">if let </span>ast::Expr::Infix(infix) = <span class="kw-2">&amp;*</span>expr {

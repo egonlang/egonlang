@@ -101,6 +101,8 @@
 <a href="#101" id="101">101</a>
 <a href="#102" id="102">102</a>
 <a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_errors::EgonTypeError;
@@ -121,7 +123,9 @@
     /// }
     /// ```
     </span>TypeMismatchArgsInCallExpr,
-    |expr, span, _resolve_ident, resolve_expr| {
+    |expr_span, _resolve_ident, resolve_expr| {
+        <span class="kw">let </span>(expr, span) = expr_span;
+
         <span class="kw">if let </span>ast::Expr::Call(call_expr) = <span class="kw-2">&amp;*</span>expr {
             <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
 
