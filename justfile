@@ -43,6 +43,7 @@ lsp:
 # Fix cargo issues
 fix:
     cargo fix --allow-staged
+    cargo clippy --fix --allow-staged
 
 # Format cargo crates code
 format:

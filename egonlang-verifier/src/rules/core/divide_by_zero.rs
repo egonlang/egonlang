@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use ast::{Expr, ExprLiteral};
 use egonlang_core::prelude::*;
 use egonlang_errors::EgonSyntaxError;
 
@@ -12,22 +13,22 @@ expr_rule!(
     |expr| {
         let mut errs = vec![];
 
-        if let ast::Expr::Infix(infix_expr) = &expr {
+        if let ast::Expr::Infix(infix_expr) = &*expr {
             if let ast::OpInfix::Divide = infix_expr.op {
-
                 let (lt_expr, lt_span) = &infix_expr.lt;
+
+                if let Expr::Literal(ExprLiteral::Number(lt_value)) = &**lt_expr {
+                    if *lt_value == 0f64 {
+                        errs.push((EgonSyntaxError::DivideByZero.into(), lt_span.clone()));
+                    }
+                }
 
                 let (rt_expr, rt_span) = &infix_expr.rt;
 
-                let lt_value: f64 = lt_expr.clone().try_into().unwrap();
-                let rt_value: f64 = rt_expr.clone().try_into().unwrap();
-
-                if lt_value == 0f64 {
-                    errs.push((EgonSyntaxError::DivideByZero.into(), lt_span.clone()));
-                }
-
-                if rt_value == 0f64 {
-                    errs.push((EgonSyntaxError::DivideByZero.into(), rt_span.clone()));
+                if let Expr::Literal(ExprLiteral::Number(rt_value)) = &**rt_expr {
+                    if *rt_value == 0f64 {
+                        errs.push((EgonSyntaxError::DivideByZero.into(), rt_span.clone()));
+                    }
                 }
             }
         }

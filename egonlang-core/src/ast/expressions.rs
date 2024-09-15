@@ -1,4 +1,7 @@
-use std::fmt::{self, Display, Formatter};
+use std::{
+    fmt::{self, Display, Formatter},
+    sync::Arc,
+};
 
 use egonlang_errors::EgonTypeError;
 use egonlang_types::Type;
@@ -11,7 +14,7 @@ use span::Spanned;
 use super::{Stmt, StmtS};
 
 /// A tuple containing an expression and it's span e.g. (expr, span)
-pub type ExprS = Spanned<Expr>;
+pub type ExprS = Spanned<Arc<Expr>>;
 
 /// Expressions
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -122,6 +125,20 @@ pub enum Expr {
     Call(Box<ExprCall>),
 }
 
+// This is a manual implementation to avoid using derive
+//
+// Deriving Eq will cause an issue with ExprLiteral and f64
+impl Eq for Expr {}
+
+// This is a manual implementation to avoid using derive
+//
+// Deriving Hash will cause an issue with ExprLiteral and f64
+impl std::hash::Hash for Expr {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        core::mem::discriminant(self).hash(state);
+    }
+}
+
 impl TryFrom<&str> for Expr {
     type Error = egonlang_errors::EgonError;
 
@@ -131,9 +148,10 @@ impl TryFrom<&str> for Expr {
         let (stmt, _) = module.stmts.first().unwrap();
 
         if let Stmt::Expr(stmt_expr) = stmt {
-            let expr = &stmt_expr.expr;
+            let (expr, _) = &stmt_expr.expr;
 
-            return Ok(expr.0.clone());
+            // Return the `Expr` directly, not wrapped in `Rc`
+            return Ok((**expr).clone()); // Dereference `Rc<Expr>` and clone `Expr`
         };
 
         Err(egonlang_errors::EgonSyntaxError::InvalidToken.into())
@@ -290,7 +308,7 @@ impl TryFrom<Expr> for f64 {
                 .into()]),
             },
             Expr::Prefix(prefix) => match prefix.op {
-                OpPrefix::Negate => prefix.rt.0.try_into(),
+                OpPrefix::Negate => prefix.rt.0.as_ref().clone().try_into(),
                 OpPrefix::Not => Err(vec![egonlang_errors::EgonTypeError::MismatchType {
                     expected: Type::number().to_string(),
                     actual: Type::bool().to_string(),
@@ -883,7 +901,7 @@ mod display_tests {
                 },
                 0..0
             ),
-            value: (ExprLiteral::Number(123f64).into(), 0..0)
+            value: (Expr::Literal(ExprLiteral::Number(123f64)).into(), 0..0)
         })),
         "foo = 123"
     );
@@ -892,7 +910,7 @@ mod display_tests {
         test_expr_prefix_negate,
         Expr::Prefix(Box::new(ExprPrefix {
             op: OpPrefix::Negate,
-            rt: (ExprLiteral::Number(43557f64).into(), 0..0)
+            rt: (Expr::Literal(ExprLiteral::Number(43557f64)).into(), 0..0)
         })),
         "-43557"
     );
@@ -901,7 +919,7 @@ mod display_tests {
         test_expr_prefix_not,
         Expr::Prefix(Box::new(ExprPrefix {
             op: OpPrefix::Not,
-            rt: (ExprLiteral::Bool(false).into(), 0..0)
+            rt: (Expr::Literal(ExprLiteral::Bool(false)).into(), 0..0)
         })),
         "!false"
     );
@@ -909,9 +927,9 @@ mod display_tests {
     expr_display_test!(
         test_expr_infix_add,
         Expr::Infix(Box::new(ExprInfix {
-            lt: (ExprLiteral::Number(100f64).into(), 0..0),
+            lt: (Expr::Literal(ExprLiteral::Number(100f64)).into(), 0..0),
             op: OpInfix::Add,
-            rt: (ExprLiteral::Number(55f64).into(), 0..0)
+            rt: (Expr::Literal(ExprLiteral::Number(55f64)).into(), 0..0)
         })),
         "100 + 55"
     );
@@ -919,9 +937,9 @@ mod display_tests {
     expr_display_test!(
         test_expr_infix_subtract,
         Expr::Infix(Box::new(ExprInfix {
-            lt: (ExprLiteral::Number(100f64).into(), 0..0),
+            lt: (Expr::Literal(ExprLiteral::Number(100f64)).into(), 0..0),
             op: OpInfix::Subtract,
-            rt: (ExprLiteral::Number(55f64).into(), 0..0)
+            rt: (Expr::Literal(ExprLiteral::Number(55f64)).into(), 0..0)
         })),
         "100 - 55"
     );
@@ -929,9 +947,9 @@ mod display_tests {
     expr_display_test!(
         test_expr_infix_multiply,
         Expr::Infix(Box::new(ExprInfix {
-            lt: (ExprLiteral::Number(100f64).into(), 0..0),
+            lt: (Expr::Literal(ExprLiteral::Number(100f64)).into(), 0..0),
             op: OpInfix::Multiply,
-            rt: (ExprLiteral::Number(55f64).into(), 0..0)
+            rt: (Expr::Literal(ExprLiteral::Number(55f64)).into(), 0..0)
         })),
         "100 * 55"
     );
@@ -939,9 +957,9 @@ mod display_tests {
     expr_display_test!(
         test_expr_infix_divide,
         Expr::Infix(Box::new(ExprInfix {
-            lt: (ExprLiteral::Number(100f64).into(), 0..0),
+            lt: (Expr::Literal(ExprLiteral::Number(100f64)).into(), 0..0),
             op: OpInfix::Divide,
-            rt: (ExprLiteral::Number(55f64).into(), 0..0)
+            rt: (Expr::Literal(ExprLiteral::Number(55f64)).into(), 0..0)
         })),
         "100 / 55"
     );
@@ -949,9 +967,9 @@ mod display_tests {
     expr_display_test!(
         test_expr_infix_modulus,
         Expr::Infix(Box::new(ExprInfix {
-            lt: (ExprLiteral::Number(100f64).into(), 0..0),
+            lt: (Expr::Literal(ExprLiteral::Number(100f64)).into(), 0..0),
             op: OpInfix::Modulus,
-            rt: (ExprLiteral::Number(55f64).into(), 0..0)
+            rt: (Expr::Literal(ExprLiteral::Number(55f64)).into(), 0..0)
         })),
         "100 % 55"
     );
@@ -959,9 +977,9 @@ mod display_tests {
     expr_display_test!(
         test_expr_infix_eq,
         Expr::Infix(Box::new(ExprInfix {
-            lt: (ExprLiteral::Number(100f64).into(), 0..0),
+            lt: (Expr::Literal(ExprLiteral::Number(100f64)).into(), 0..0),
             op: OpInfix::Equal,
-            rt: (ExprLiteral::Number(55f64).into(), 0..0)
+            rt: (Expr::Literal(ExprLiteral::Number(55f64)).into(), 0..0)
         })),
         "100 == 55"
     );
@@ -969,9 +987,9 @@ mod display_tests {
     expr_display_test!(
         test_expr_infix_not_eq,
         Expr::Infix(Box::new(ExprInfix {
-            lt: (ExprLiteral::Number(100f64).into(), 0..0),
+            lt: (Expr::Literal(ExprLiteral::Number(100f64)).into(), 0..0),
             op: OpInfix::NotEqual,
-            rt: (ExprLiteral::Number(55f64).into(), 0..0)
+            rt: (Expr::Literal(ExprLiteral::Number(55f64)).into(), 0..0)
         })),
         "100 != 55"
     );
@@ -979,9 +997,9 @@ mod display_tests {
     expr_display_test!(
         test_expr_infix_gt,
         Expr::Infix(Box::new(ExprInfix {
-            lt: (ExprLiteral::Number(100f64).into(), 0..0),
+            lt: (Expr::Literal(ExprLiteral::Number(100f64)).into(), 0..0),
             op: OpInfix::Greater,
-            rt: (ExprLiteral::Number(55f64).into(), 0..0)
+            rt: (Expr::Literal(ExprLiteral::Number(55f64)).into(), 0..0)
         })),
         "100 > 55"
     );
@@ -989,9 +1007,9 @@ mod display_tests {
     expr_display_test!(
         test_expr_infix_lt,
         Expr::Infix(Box::new(ExprInfix {
-            lt: (ExprLiteral::Number(100f64).into(), 0..0),
+            lt: (Expr::Literal(ExprLiteral::Number(100f64)).into(), 0..0),
             op: OpInfix::Less,
-            rt: (ExprLiteral::Number(55f64).into(), 0..0)
+            rt: (Expr::Literal(ExprLiteral::Number(55f64)).into(), 0..0)
         })),
         "100 < 55"
     );
@@ -999,9 +1017,9 @@ mod display_tests {
     expr_display_test!(
         test_expr_infix_gte,
         Expr::Infix(Box::new(ExprInfix {
-            lt: (ExprLiteral::Number(100f64).into(), 0..0),
+            lt: (Expr::Literal(ExprLiteral::Number(100f64)).into(), 0..0),
             op: OpInfix::GreaterEqual,
-            rt: (ExprLiteral::Number(55f64).into(), 0..0)
+            rt: (Expr::Literal(ExprLiteral::Number(55f64)).into(), 0..0)
         })),
         "100 >= 55"
     );
@@ -1009,9 +1027,9 @@ mod display_tests {
     expr_display_test!(
         test_expr_infix_lte,
         Expr::Infix(Box::new(ExprInfix {
-            lt: (ExprLiteral::Number(100f64).into(), 0..0),
+            lt: (Expr::Literal(ExprLiteral::Number(100f64)).into(), 0..0),
             op: OpInfix::LessEqual,
-            rt: (ExprLiteral::Number(55f64).into(), 0..0)
+            rt: (Expr::Literal(ExprLiteral::Number(55f64)).into(), 0..0)
         })),
         "100 <= 55"
     );
@@ -1019,9 +1037,9 @@ mod display_tests {
     expr_display_test!(
         test_expr_infix_and,
         Expr::Infix(Box::new(ExprInfix {
-            lt: (ExprLiteral::Bool(true).into(), 0..0),
+            lt: (Expr::Literal(ExprLiteral::Bool(true)).into(), 0..0),
             op: OpInfix::LogicAnd,
-            rt: (ExprLiteral::Bool(false).into(), 0..0)
+            rt: (Expr::Literal(ExprLiteral::Bool(false)).into(), 0..0)
         })),
         "true and false"
     );
@@ -1029,9 +1047,9 @@ mod display_tests {
     expr_display_test!(
         test_expr_infix_or,
         Expr::Infix(Box::new(ExprInfix {
-            lt: (ExprLiteral::Number(100f64).into(), 0..0),
+            lt: (Expr::Literal(ExprLiteral::Number(100f64)).into(), 0..0),
             op: OpInfix::LogicOr,
-            rt: (ExprLiteral::Number(55f64).into(), 0..0)
+            rt: (Expr::Literal(ExprLiteral::Number(55f64)).into(), 0..0)
         })),
         "100 or 55"
     );
@@ -1039,13 +1057,19 @@ mod display_tests {
     expr_display_test!(
         test_expr_if,
         Expr::If(Box::new(ExprIf {
-            cond: (Expr::Literal(ExprLiteral::Bool(true)), 0..0),
+            cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 0..0),
             then: (
-                ExprBlock {
-                    stmts: vec![],
-                    return_expr: Some((ExprLiteral::Number(123f64).into(), 0..0)),
-                    typeref: None
-                }
+                Expr::Block(
+                    ExprBlock {
+                        stmts: vec![],
+                        return_expr: Some((
+                            Expr::Literal(ExprLiteral::Number(123f64)).into(),
+                            0..0
+                        )),
+                        typeref: None
+                    }
+                    .into()
+                )
                 .into(),
                 0..0
             ),
@@ -1057,19 +1081,25 @@ mod display_tests {
     expr_display_test!(
         test_expr_if_with_stmts,
         Expr::If(Box::new(ExprIf {
-            cond: (ExprLiteral::Bool(true).into(), 0..0),
+            cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 0..0),
             then: (
-                ExprBlock {
-                    stmts: vec![(
-                        StmtExpr {
-                            expr: (ExprLiteral::Number(123f64).into(), 0..0)
-                        }
-                        .into(),
-                        0..0
-                    )],
-                    return_expr: Some((ExprLiteral::Number(456f64).into(), 0..0)),
-                    typeref: None
-                }
+                Expr::Block(
+                    ExprBlock {
+                        stmts: vec![(
+                            StmtExpr {
+                                expr: (Expr::Literal(ExprLiteral::Number(123f64)).into(), 0..0)
+                            }
+                            .into(),
+                            0..0
+                        )],
+                        return_expr: Some((
+                            Expr::Literal(ExprLiteral::Number(456f64)).into(),
+                            0..0
+                        )),
+                        typeref: None
+                    }
+                    .into()
+                )
                 .into(),
                 0..0
             ),
@@ -1081,22 +1111,34 @@ mod display_tests {
     expr_display_test!(
         test_expr_if_else,
         Expr::If(Box::new(ExprIf {
-            cond: (ExprLiteral::Bool(true).into(), 0..0),
+            cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 0..0),
             then: (
-                ExprBlock {
-                    stmts: vec![],
-                    return_expr: Some((ExprLiteral::Number(123f64).into(), 0..0)),
-                    typeref: None
-                }
+                Expr::Block(
+                    ExprBlock {
+                        stmts: vec![],
+                        return_expr: Some((
+                            Expr::Literal(ExprLiteral::Number(123f64)).into(),
+                            0..0
+                        )),
+                        typeref: None
+                    }
+                    .into()
+                )
                 .into(),
                 0..0
             ),
             else_: Some((
-                ExprBlock {
-                    stmts: vec![],
-                    return_expr: Some((ExprLiteral::Number(456f64).into(), 0..0)),
-                    typeref: None
-                }
+                Expr::Block(
+                    ExprBlock {
+                        stmts: vec![],
+                        return_expr: Some((
+                            Expr::Literal(ExprLiteral::Number(456f64)).into(),
+                            0..0
+                        )),
+                        typeref: None
+                    }
+                    .into()
+                )
                 .into(),
                 0..0
             ))
@@ -1107,34 +1149,43 @@ mod display_tests {
     expr_display_test!(
         test_expr_if_else_with_stmts,
         Expr::If(Box::new(ExprIf {
-            cond: (ExprLiteral::Bool(true).into(), 0..0),
+            cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 0..0),
             then: (
-                ExprBlock {
-                    stmts: vec![(
-                        StmtExpr {
-                            expr: (ExprLiteral::Number(123f64).into(), 0..0)
-                        }
-                        .into(),
-                        0..0
-                    )],
-                    return_expr: Some((ExprLiteral::Number(456f64).into(), 0..0)),
-                    typeref: None
-                }
+                Expr::Block(
+                    ExprBlock {
+                        stmts: vec![(
+                            StmtExpr {
+                                expr: (Expr::Literal(ExprLiteral::Number(123f64)).into(), 0..0)
+                            }
+                            .into(),
+                            0..0
+                        )],
+                        return_expr: Some((
+                            Expr::Literal(ExprLiteral::Number(456f64)).into(),
+                            0..0
+                        )),
+                        typeref: None
+                    }
+                    .into()
+                )
                 .into(),
                 0..0
             ),
             else_: Some((
-                ExprBlock {
-                    stmts: vec![(
-                        StmtExpr {
-                            expr: (ExprLiteral::Number(789f64).into(), 0..0)
-                        }
-                        .into(),
-                        0..0
-                    )],
-                    return_expr: Some((ExprLiteral::Number(0f64).into(), 0..0)),
-                    typeref: None
-                }
+                Expr::Block(
+                    ExprBlock {
+                        stmts: vec![(
+                            StmtExpr {
+                                expr: (Expr::Literal(ExprLiteral::Number(789f64)).into(), 0..0)
+                            }
+                            .into(),
+                            0..0
+                        )],
+                        return_expr: Some((Expr::Literal(ExprLiteral::Number(0f64)).into(), 0..0)),
+                        typeref: None
+                    }
+                    .into()
+                )
                 .into(),
                 0..0
             ))
@@ -1153,9 +1204,9 @@ mod display_tests {
         Expr::List(
             ExprList {
                 items: vec![
-                    (ExprLiteral::Number(1f64).into(), 0..0),
-                    (ExprLiteral::Number(2f64).into(), 0..0),
-                    (ExprLiteral::Number(3f64).into(), 0..0)
+                    (Expr::Literal(ExprLiteral::Number(1f64)).into(), 0..0),
+                    (Expr::Literal(ExprLiteral::Number(2f64)).into(), 0..0),
+                    (Expr::Literal(ExprLiteral::Number(3f64)).into(), 0..0)
                 ]
             }
             .into()
@@ -1168,9 +1219,9 @@ mod display_tests {
         Expr::Tuple(
             ExprTuple {
                 items: vec![
-                    (ExprLiteral::Number(1f64).into(), 0..0),
-                    (ExprLiteral::Number(2f64).into(), 0..0),
-                    (ExprLiteral::Number(3f64).into(), 0..0)
+                    (Expr::Literal(ExprLiteral::Number(1f64)).into(), 0..0),
+                    (Expr::Literal(ExprLiteral::Number(2f64)).into(), 0..0),
+                    (Expr::Literal(ExprLiteral::Number(3f64)).into(), 0..0)
                 ]
             }
             .into()
@@ -1185,11 +1236,14 @@ mod display_tests {
             params: vec![],
             return_type: (Type::unit(), 0..0),
             body: (
-                ExprBlock {
-                    stmts: vec![],
-                    return_expr: None,
-                    typeref: None
-                }
+                Expr::Block(
+                    ExprBlock {
+                        stmts: vec![],
+                        return_expr: None,
+                        typeref: None
+                    }
+                    .into()
+                )
                 .into(),
                 0..0
             )
@@ -1212,11 +1266,14 @@ mod display_tests {
             )],
             return_type: (Type::unit(), 0..0),
             body: (
-                ExprBlock {
-                    stmts: vec![],
-                    return_expr: None,
-                    typeref: None
-                }
+                Expr::Block(
+                    ExprBlock {
+                        stmts: vec![],
+                        return_expr: None,
+                        typeref: None
+                    }
+                    .into()
+                )
                 .into(),
                 0..0
             )
@@ -1250,11 +1307,14 @@ mod display_tests {
             ],
             return_type: (Type::unit(), 0..0),
             body: (
-                ExprBlock {
-                    stmts: vec![],
-                    return_expr: None,
-                    typeref: None
-                }
+                Expr::Block(
+                    ExprBlock {
+                        stmts: vec![],
+                        return_expr: None,
+                        typeref: None
+                    }
+                    .into()
+                )
                 .into(),
                 0..0
             )
@@ -1288,11 +1348,14 @@ mod display_tests {
             ],
             return_type: (Type::number(), 0..0),
             body: (
-                ExprBlock {
-                    stmts: vec![],
-                    return_expr: None,
-                    typeref: None
-                }
+                Expr::Block(
+                    ExprBlock {
+                        stmts: vec![],
+                        return_expr: None,
+                        typeref: None
+                    }
+                    .into()
+                )
                 .into(),
                 0..0
             )
@@ -1326,30 +1389,38 @@ mod display_tests {
             ],
             return_type: (Type::number(), 0..0),
             body: (
-                ExprBlock {
-                    stmts: vec![],
-                    return_expr: Some((
-                        Expr::Infix(Box::new(ExprInfix {
-                            lt: (
-                                Identifier {
-                                    name: "a".to_string()
-                                }
-                                .into(),
-                                0..0
-                            ),
-                            op: OpInfix::Add,
-                            rt: (
-                                Identifier {
-                                    name: "b".to_string()
-                                }
-                                .into(),
-                                0..0
-                            )
-                        })),
-                        0..0
-                    )),
-                    typeref: None
-                }
+                Expr::Block(
+                    ExprBlock {
+                        stmts: vec![],
+                        return_expr: Some((
+                            Expr::Infix(Box::new(ExprInfix {
+                                lt: (
+                                    Expr::Identifier(ExprIdentifier {
+                                        identifier: Identifier {
+                                            name: "a".to_string()
+                                        }
+                                    })
+                                    .into(),
+                                    0..0
+                                ),
+                                op: OpInfix::Add,
+                                rt: (
+                                    Expr::Identifier(ExprIdentifier {
+                                        identifier: Identifier {
+                                            name: "b".to_string()
+                                        }
+                                    })
+                                    .into(),
+                                    0..0
+                                )
+                            }))
+                            .into(),
+                            0..0
+                        )),
+                        typeref: None
+                    }
+                    .into()
+                )
                 .into(),
                 0..0
             )
@@ -1366,13 +1437,14 @@ mod display_tests {
                         identifier: Identifier {
                             name: "foo".to_string()
                         }
-                    }),
+                    })
+                    .into(),
                     0..3
                 ),
                 args: vec![
-                    (Expr::Literal(ExprLiteral::Number(1f64)), 4..5),
-                    (Expr::Literal(ExprLiteral::Number(2f64)), 7..8),
-                    (Expr::Literal(ExprLiteral::Number(3f64)), 10..11)
+                    (Expr::Literal(ExprLiteral::Number(1f64)).into(), 4..5),
+                    (Expr::Literal(ExprLiteral::Number(2f64)).into(), 7..8),
+                    (Expr::Literal(ExprLiteral::Number(3f64)).into(), 10..11)
                 ]
             }
             .into()

@@ -19,26 +19,28 @@ expr_rule!(
     /// ```
     TypeMismatchArgsInCallExpr,
     |expr, span, _resolve_ident, resolve_expr| {
-        if let ast::Expr::Call(call_expr) = &expr {
+        if let ast::Expr::Call(call_expr) = &*expr {
             let mut errs = vec![];
 
-            let fn_param_types: Vec<(Type, Span)> = if let Ok(callee_type) = resolve_expr(&call_expr.callee.0, &call_expr.callee.1) {
-                if !callee_type.of_type.is_function() {
+            let fn_param_types: Vec<(Type, Span)> = if let Some(callee_type) = resolve_expr.get(
+                &(call_expr.callee.0.clone(), call_expr.callee.1.clone())
+            ) {
+                if !callee_type.is_function() {
                     vec![]
                 } else {
-                    callee_type.of_type.get_function_params().iter().map(|x| (x.clone(), span.clone())).collect()
+                    callee_type.get_function_params().iter().map(|x| (x.clone(), span.clone())).collect()
                 }
             } else {
                 vec![]
             };
 
-            let call_arg_types: Vec<(Type, Span)> = call_expr.clone().args.into_iter().map(|x| {
-                let result = resolve_expr(&x.0, &x.1).expect("WHOOPS");
+            let call_arg_types: Vec<(&Type, Span)> = call_expr.clone().args.into_iter().map(|x| {
+                let result = resolve_expr.get(&(x.0.clone(), x.1.clone())).expect("WHOOPS");
 
-                (result.of_type, x.1.clone())
+                (result, x.1.clone())
             }).collect();
 
-            for (i, (t, s)) in call_arg_types.iter().enumerate() {
+            for (i, (t, s)) in call_arg_types.into_iter().enumerate() {
                 if let Some((xt, _)) = fn_param_types.get(i) {
                     if t != xt {
                         errs.push((

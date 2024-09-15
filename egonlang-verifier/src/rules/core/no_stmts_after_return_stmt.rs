@@ -7,7 +7,7 @@ expr_rule!(
     |expr, _span, _resolve_ident, _resolve_expr| {
         let mut errs = vec![];
 
-        if let ast::Expr::Block(expr_block) = expr {
+        if let ast::Expr::Block(expr_block) = &*expr {
             let mut return_stmt_found = false;
 
             for (stmt, stmt_span) in &expr_block.stmts {

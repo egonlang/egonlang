@@ -19,24 +19,24 @@ expr_rule!(
     /// c = true;
     /// ```
     TypeMismatchReassigningLetValues,
-    |expr, span, resolve_ident, resolve_expr| {
+    |expr, _span, resolve_ident, resolve_expr| {
         let mut errs = vec![];
 
-        if let ast::Expr::Assign(expr_assign) = expr {
+        if let ast::Expr::Assign(expr_assign) = &*expr {
             let identifier = &expr_assign.identifier.0.name;
 
-            if let Ok(type_env_value) = resolve_ident(identifier, span) {
+            if let Some(type_env_value) = resolve_ident.get(identifier) {
                 let type_env_typeref = &type_env_value.of_type;
                 let is_const = &type_env_value.is_const;
 
                 let (value_expr, value_span) = &expr_assign.value;
-                let value_typeref = resolve_expr(value_expr, value_span).unwrap();
+                let value_typeref = resolve_expr.get(&(value_expr.clone(), value_span.clone())).unwrap();
 
-                if !is_const && type_env_typeref != &value_typeref.of_type {
+                if !is_const && type_env_typeref != value_typeref {
                     errs.push((
                         EgonTypeError::MismatchType {
                             expected: type_env_typeref.to_string(),
-                            actual: value_typeref.of_type.to_string(),
+                            actual: value_typeref.to_string(),
                         }
                         .into(),
                         value_span.clone(),

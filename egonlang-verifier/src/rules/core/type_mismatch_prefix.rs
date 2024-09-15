@@ -17,17 +17,17 @@ expr_rule!(
     |expr, _span, _resolve_ident, resolve_expr| {
         let mut errs = vec![];
 
-        if let ast::Expr::Prefix(prefix_expr) = expr {
+        if let ast::Expr::Prefix(prefix_expr) = &*expr {
             match prefix_expr.op {
                 ast::OpPrefix::Negate => {
                     let (value_expr, value_span) = &prefix_expr.rt;
-                    let value_typeref = resolve_expr(value_expr, value_span).unwrap();
+                    let value_typeref = resolve_expr.get(&(value_expr.clone(), value_span.clone())).unwrap();
 
-                    if value_typeref.of_type != Type::number() {
+                    if *value_typeref != Type::number() {
                         errs.push((
                             EgonTypeError::MismatchType {
                                 expected: Type::number().to_string(),
-                                actual: value_typeref.of_type.to_string(),
+                                actual: value_typeref.to_string(),
                             }
                             .into(),
                             value_span.clone(),
@@ -36,13 +36,13 @@ expr_rule!(
                 }
                 ast::OpPrefix::Not => {
                     let (value_expr, value_span) = &prefix_expr.rt;
-                    let value_typeref = resolve_expr(value_expr, value_span).unwrap();
+                    let value_typeref = resolve_expr.get(&(value_expr.clone(), value_span.clone())).unwrap();
 
-                    if value_typeref.of_type != Type::bool() {
+                    if *value_typeref != Type::bool() {
                         errs.push((
                             EgonTypeError::MismatchType {
                                 expected: Type::bool().to_string(),
-                                actual: value_typeref.of_type.to_string(),
+                                actual: value_typeref.to_string(),
                             }
                             .into(),
                             value_span.clone(),

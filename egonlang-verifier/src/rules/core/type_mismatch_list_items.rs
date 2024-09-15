@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::prelude::*;
 use egonlang_core::prelude::*;
 use egonlang_errors::EgonTypeError;
@@ -14,23 +16,23 @@ expr_rule!(
     |expr, _span, _resolve_ident, resolve_expr| {
         let mut errs = vec![];
 
-        if let ast::Expr::List(expr_list) = expr {
+        if let ast::Expr::List(expr_list) = &*expr {
             let items = &expr_list.items;
 
             if !items.is_empty() {
                 let (first_item_expr, first_item_span) = items.first().unwrap();
-                let first_item_typeref = resolve_expr(first_item_expr, first_item_span)
+                let first_item_typeref = resolve_expr.get(&(first_item_expr.clone(), first_item_span.clone()))
                     .unwrap();
 
-                let remaining_items: Vec<span::Spanned<ast::Expr>> = items.clone().into_iter().skip(1).collect();
+                let remaining_items: Vec<span::Spanned<Arc<ast::Expr>>> = items.clone().into_iter().skip(1).collect();
 
                 for (item, item_span) in &remaining_items {
-                    if let Ok(item_typeref) = resolve_expr(item, item_span) {
-                        if item_typeref.of_type != first_item_typeref.of_type {
+                    if let Some(item_typeref) = resolve_expr.get(&(item.clone(), item_span.clone())) {
+                        if item_typeref != first_item_typeref {
                             errs.push((
                                 EgonTypeError::MismatchType {
-                                    expected: first_item_typeref.of_type.to_string(),
-                                    actual: item_typeref.of_type.to_string(),
+                                    expected: first_item_typeref.to_string(),
+                                    actual: item_typeref.to_string(),
                                 }
                                 .into(),
                                 item_span.clone(),
@@ -49,7 +51,7 @@ expr_rule!(
 mod tests {
     use super::TypeMisMatchListItemsRule;
     use crate::verifier_rule_test;
-    use egonlang_errors::EgonTypeError;
+    use egonlang_errors::{EgonError, EgonTypeError};
     use egonlang_types::Type;
 
     verifier_rule_test!(
@@ -92,5 +94,15 @@ mod tests {
                 12..17
             )
         ])
+    );
+
+    verifier_rule_test!(
+        TypeMisMatchListItemsRule,
+        returns_err_if_list_item_is_undefined_identifier,
+        "[1, a];",
+        Err(vec![(
+            EgonError::TypeError(EgonTypeError::Undefined("a".to_string())),
+            4..5
+        )])
     );
 }

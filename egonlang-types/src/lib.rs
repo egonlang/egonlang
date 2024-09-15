@@ -67,7 +67,12 @@ impl Type {
 
     /// Is this type a list with a unknown value type?
     pub fn is_unknown_list(&self) -> bool {
-        !self.is_known_list()
+        self.is_list()
+            && self
+                .params()
+                .first()
+                .unwrap_or(&Type::unknown())
+                .is_unknown()
     }
 
     /// Is this type a builtin type?
@@ -151,73 +156,73 @@ impl Type {
     }
 
     /// Create a `string` type instance
-    pub fn string() -> Type {
-        Type::new("string")
+    pub fn string() -> Self {
+        Self::new("string")
     }
 
     /// Create a `number` type instance
-    pub fn number() -> Type {
-        Type::new("number")
+    pub fn number() -> Self {
+        Self::new("number")
     }
 
     /// Create a `bool` type instance
-    pub fn bool() -> Type {
-        Type::new("bool")
+    pub fn bool() -> Self {
+        Self::new("bool")
     }
 
     /// Create a `()` type instance
-    pub fn unit() -> Type {
-        Type::new("()")
+    pub fn unit() -> Self {
+        Self::new("()")
     }
 
     /// Create a `range` type instance
-    pub fn range() -> Type {
-        Type::new("range")
+    pub fn range() -> Self {
+        Self::new("range")
     }
 
     /// Create a `list<T>` type instance
-    pub fn list(item_type: Type) -> Type {
-        Type::new_with_args("list", vec![item_type])
+    pub fn list(item_type: Type) -> Self {
+        Self::new_with_args("list", vec![item_type])
     }
 
     /// Create a `list<unknown>` type instance
-    pub fn unknown_list() -> Type {
-        Type::list(Type::unknown())
+    pub fn unknown_list() -> Self {
+        Self::list(Type::unknown())
     }
 
     /// Create a `tuple<T, U...>` type instance
-    pub fn tuple(item_types: Vec<Type>) -> Type {
-        Type::new_with_args("tuple", item_types)
+    pub fn tuple(item_types: Vec<Type>) -> Self {
+        Self::new_with_args("tuple", item_types)
     }
 
     /// Create a `tuple<T, U>` type instance
-    pub fn tuple2(first: Type, second: Type) -> Type {
-        Type::tuple(vec![first, second])
+    pub fn tuple2(first: Type, second: Type) -> Self {
+        Self::tuple(vec![first, second])
     }
 
     /// Create a `tuple<T, U, V>` type instance
-    pub fn tuple3(first: Type, second: Type, third: Type) -> Type {
-        Type::tuple(vec![first, second, third])
+    pub fn tuple3(first: Type, second: Type, third: Type) -> Self {
+        Self::tuple(vec![first, second, third])
     }
 
     /// Create an `identifier` type instance
-    pub fn identifier() -> Type {
-        Type::new("identifier")
+    pub fn identifier() -> Self {
+        Self::new("identifier")
     }
 
     /// Create an `unknown` type instance
-    pub fn unknown() -> Type {
-        Type::new("unknown")
+    pub fn unknown() -> Self {
+        Self::new("unknown")
     }
 
     /// Create a `function` type instance
-    pub fn function(params_types: Type, return_type: Type) -> Type {
-        Type::new_with_args("function", vec![params_types, return_type])
+    pub fn function(params_types: Type, return_type: Type) -> Self {
+        Self::new_with_args("function", vec![params_types, return_type])
     }
 
     /// Create a `type` type instance
-    pub fn typed(value: Type) -> Type {
-        Type::new_with_args("type", vec![value])
+    pub fn typed(value: Type) -> Self {
+        Self::new_with_args("type", vec![value])
     }
 }
 

@@ -14,12 +14,12 @@ expr_rule!(
     |expr, _span, _resolve_ident, resolve_expr| {
         let mut errs = vec![];
 
-        if let ast::Expr::If(if_expr) = expr {
+        if let ast::Expr::If(if_expr) = &*expr {
             let (then_expr, then_span) = &if_expr.then;
-            let then_typeref = resolve_expr(then_expr, then_span).unwrap().of_type;
+            let then_typeref = resolve_expr.get(&(then_expr.clone(), then_span.clone())).unwrap();
 
             if let Some((else_expr, else_span)) = &if_expr.else_ {
-                let else_typeref = resolve_expr(else_expr, else_span).unwrap().of_type;
+                let else_typeref = resolve_expr.get(&(else_expr.clone(), else_span.clone())).unwrap();
 
                 if then_typeref != else_typeref {
                     if then_typeref.is_list() && else_typeref.is_list() {
@@ -139,19 +139,19 @@ mod tests {
         Err(vec![
             (
                 EgonTypeError::MismatchType {
-                    expected: "list<number>".to_string(),
-                    actual: "number".to_string()
-                }
-                .into(),
-                29..61
-            ),
-            (
-                EgonTypeError::MismatchType {
                     expected: "number".to_string(),
                     actual: "string".to_string()
                 }
                 .into(),
                 52..61
+            ),
+            (
+                EgonTypeError::MismatchType {
+                    expected: "list<number>".to_string(),
+                    actual: "number".to_string()
+                }
+                .into(),
+                29..61
             )
         ])
     }

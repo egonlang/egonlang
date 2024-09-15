@@ -4,3 +4,4 @@
 };
 
 // out: SyntaxError: unreachable code
+// out: TypeError: mismatched types: expected type `number` but received `()`

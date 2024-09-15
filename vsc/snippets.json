@@ -129,5 +129,14 @@
       "return $1;$0"
     ],
     "description": "Create a return statement"
+  },
+  "type Alias = T": {
+    "prefix": [
+      "type"
+    ],
+    "body": [
+      "type $1 = $2;$0"
+    ],
+    "description": "Create a type alias"
   }
 }

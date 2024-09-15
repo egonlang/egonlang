@@ -14,19 +14,19 @@ expr_rule!(
     |expr, _span, _resolve_ident, resolve_expr| {
         let mut errs = vec![];
 
-        if let ast::Expr::If(if_expr) = expr {
+        if let ast::Expr::If(if_expr) = &*expr {
             let (cond_expr, cond_span) = &if_expr.cond;
-            let cond_typeref = resolve_expr(cond_expr, cond_span).unwrap().of_type;
-
-            if cond_typeref != Type::bool() {
-                errs.push((
-                    EgonTypeError::MismatchType {
-                        expected: Type::bool().to_string(),
-                        actual: cond_typeref.to_string(),
-                    }
-                    .into(),
-                    cond_span.clone(),
-                ));
+            if let Some(cond_typeref) = resolve_expr.get(&(cond_expr.clone(), cond_span.clone())) {
+                if *cond_typeref != Type::bool() {
+                    errs.push((
+                        EgonTypeError::MismatchType {
+                            expected: Type::bool().to_string(),
+                            actual: cond_typeref.to_string(),
+                        }
+                        .into(),
+                        cond_span.clone(),
+                    ));
+                }
             }
         };
 

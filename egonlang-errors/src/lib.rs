@@ -42,7 +42,7 @@ impl Diagnosable for EgonError {
     }
 }
 
-#[derive(Debug, Clone, Error, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Error, PartialEq, Serialize, Deserialize)]
 pub enum EgonSyntaxError {
     #[error("extraneous input: {token:?}")]
     ExtraToken { token: String },
@@ -115,7 +115,7 @@ impl ErrorCode for EgonSyntaxError {
     }
 }
 
-#[derive(Debug, Clone, Error, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Error, PartialEq, Serialize, Deserialize)]
 pub enum EgonTypeError {
     #[error("mismatched types: expected type `{expected}` but received `{actual}`")]
     MismatchType { expected: String, actual: String },
