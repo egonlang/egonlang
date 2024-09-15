@@ -294,7 +294,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    expr: (Expr::Literal(ExprLiteral::Number(123f64)), 0..3),
+                    expr: (Expr::Literal(ExprLiteral::Number(123f64)).into(), 0..3),
                 }),
                 0..4
             )]
@@ -307,7 +307,10 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    expr: (Expr::Literal(ExprLiteral::String("foo".to_string())), 0..5),
+                    expr: (
+                        Expr::Literal(ExprLiteral::String("foo".to_string())).into(),
+                        0..5
+                    ),
                 }),
                 0..6
             )]
@@ -325,7 +328,8 @@ mod parser_tests {
                             identifier: Identifier {
                                 name: "foo".to_string()
                             }
-                        }),
+                        })
+                        .into(),
                         0..3
                     ),
                 }),
@@ -340,7 +344,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    expr: (Expr::Literal(ExprLiteral::Bool(true)), 0..4),
+                    expr: (Expr::Literal(ExprLiteral::Bool(true)).into(), 0..4),
                 }),
                 0..5
             )]
@@ -353,7 +357,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    expr: (Expr::Literal(ExprLiteral::Bool(false)), 0..5),
+                    expr: (Expr::Literal(ExprLiteral::Bool(false)).into(), 0..5),
                 }),
                 0..6
             )]
@@ -372,7 +376,8 @@ mod parser_tests {
                                 identifier: Identifier {
                                     name: "foo".to_string()
                                 }
-                            }),
+                            })
+                            .into(),
                             0..3
                         ),
                     }),
@@ -380,25 +385,28 @@ mod parser_tests {
                 ),
                 (
                     Stmt::Expr(StmtExpr {
-                        expr: (Expr::Literal(ExprLiteral::Number(123f64)), 4..7),
+                        expr: (Expr::Literal(ExprLiteral::Number(123f64)).into(), 4..7),
                     }),
                     4..8
                 ),
                 (
                     Stmt::Expr(StmtExpr {
-                        expr: (Expr::Literal(ExprLiteral::String("bar".to_string())), 8..13),
+                        expr: (
+                            Expr::Literal(ExprLiteral::String("bar".to_string())).into(),
+                            8..13
+                        ),
                     }),
                     8..14
                 ),
                 (
                     Stmt::Expr(StmtExpr {
-                        expr: (Expr::Literal(ExprLiteral::Bool(true)), 14..18),
+                        expr: (Expr::Literal(ExprLiteral::Bool(true)).into(), 14..18),
                     }),
                     14..19
                 ),
                 (
                     Stmt::Expr(StmtExpr {
-                        expr: (Expr::Literal(ExprLiteral::Bool(false)), 19..24),
+                        expr: (Expr::Literal(ExprLiteral::Bool(false)).into(), 19..24),
                     }),
                     19..25
                 ),
@@ -417,7 +425,8 @@ mod parser_tests {
                             stmts: vec![],
                             return_expr: None,
                             typeref: None
-                        })),
+                        }))
+                        .into(),
                         0..2
                     )
                 }),
@@ -435,9 +444,13 @@ mod parser_tests {
                     expr: (
                         Expr::Block(Box::new(ExprBlock {
                             stmts: vec![],
-                            return_expr: Some((Expr::Literal(ExprLiteral::Number(123f64)), 1..4)),
+                            return_expr: Some((
+                                Expr::Literal(ExprLiteral::Number(123f64)).into(),
+                                1..4
+                            )),
                             typeref: None
-                        })),
+                        }))
+                        .into(),
                         0..5
                     )
                 }),
@@ -456,11 +469,12 @@ mod parser_tests {
                         Expr::Block(Box::new(ExprBlock {
                             stmts: vec![],
                             return_expr: Some((
-                                Expr::Literal(ExprLiteral::String("foo".to_string())),
+                                Expr::Literal(ExprLiteral::String("foo".to_string())).into(),
                                 1..6
                             )),
                             typeref: None
-                        })),
+                        }))
+                        .into(),
                         0..7
                     )
                 }),
@@ -483,11 +497,13 @@ mod parser_tests {
                                     identifier: Identifier {
                                         name: "foo".to_string()
                                     }
-                                }),
+                                })
+                                .into(),
                                 1..4
                             )),
                             typeref: None
-                        })),
+                        }))
+                        .into(),
                         0..5
                     )
                 }),
@@ -511,7 +527,8 @@ mod parser_tests {
                                             identifier: Identifier {
                                                 name: "foo".to_string()
                                             }
-                                        }),
+                                        })
+                                        .into(),
                                         1..4
                                     )
                                 }),
@@ -519,7 +536,8 @@ mod parser_tests {
                             )],
                             return_expr: None,
                             typeref: None
-                        })),
+                        }))
+                        .into(),
                         0..6
                     )
                 }),
@@ -543,7 +561,8 @@ mod parser_tests {
                                             stmts: vec![],
                                             return_expr: None,
                                             typeref: None
-                                        })),
+                                        }))
+                                        .into(),
                                         1..3
                                     )
                                 }),
@@ -551,7 +570,8 @@ mod parser_tests {
                             )],
                             return_expr: None,
                             typeref: None
-                        })),
+                        }))
+                        .into(),
                         0..5
                     )
                 }),
@@ -574,11 +594,13 @@ mod parser_tests {
                                     stmts: vec![],
                                     return_expr: None,
                                     typeref: None
-                                })),
+                                }))
+                                .into(),
                                 1..3
                             )),
                             typeref: None
-                        })),
+                        }))
+                        .into(),
                         0..4
                     )
                 }),
@@ -602,7 +624,8 @@ mod parser_tests {
                                             stmts: vec![],
                                             return_expr: None,
                                             typeref: None
-                                        })),
+                                        }))
+                                        .into(),
                                         1..3
                                     )
                                 }),
@@ -613,11 +636,13 @@ mod parser_tests {
                                     stmts: vec![],
                                     return_expr: None,
                                     typeref: None
-                                })),
+                                }))
+                                .into(),
                                 4..6
                             )),
                             typeref: None
-                        })),
+                        }))
+                        .into(),
                         0..7
                     )
                 }),
@@ -642,7 +667,8 @@ mod parser_tests {
                                                 identifier: Identifier {
                                                     name: "foo".to_string()
                                                 }
-                                            }),
+                                            })
+                                            .into(),
                                             1..4
                                         )
                                     }),
@@ -650,23 +676,27 @@ mod parser_tests {
                                 ),
                                 (
                                     Stmt::Expr(StmtExpr {
-                                        expr: (Expr::Literal(ExprLiteral::Number(123f64)), 5..8)
+                                        expr: (
+                                            Expr::Literal(ExprLiteral::Number(123f64)).into(),
+                                            5..8
+                                        )
                                     }),
                                     5..9
                                 ),
                                 (
                                     Stmt::Expr(StmtExpr {
-                                        expr: (Expr::Unit, 9..11)
+                                        expr: (Expr::Unit.into(), 9..11)
                                     }),
                                     9..12
                                 )
                             ],
                             return_expr: Some((
-                                Expr::Literal(ExprLiteral::String("bar".to_string())),
+                                Expr::Literal(ExprLiteral::String("bar".to_string())).into(),
                                 12..17
                             )),
                             typeref: None
-                        })),
+                        }))
+                        .into(),
                         0..18
                     )
                 }),
@@ -681,7 +711,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    expr: (Expr::List(ExprList { items: vec![] }.into()), 0..2)
+                    expr: (Expr::List(ExprList { items: vec![] }.into()).into(), 0..2)
                 }),
                 0..3
             )]
@@ -729,7 +759,8 @@ mod parser_tests {
                                             identifier: Identifier {
                                                 name: "a".to_string()
                                             }
-                                        }),
+                                        })
+                                        .into(),
                                         1..2
                                     ),
                                     (
@@ -737,7 +768,8 @@ mod parser_tests {
                                             identifier: Identifier {
                                                 name: "b".to_string()
                                             }
-                                        }),
+                                        })
+                                        .into(),
                                         4..5
                                     ),
                                     (
@@ -745,13 +777,15 @@ mod parser_tests {
                                             identifier: Identifier {
                                                 name: "c".to_string()
                                             }
-                                        }),
+                                        })
+                                        .into(),
                                         7..8
                                     )
                                 ]
                             }
                             .into()
-                        ),
+                        )
+                        .into(),
                         0..9
                     )
                 }),
@@ -800,7 +834,8 @@ mod parser_tests {
                                             identifier: Identifier {
                                                 name: "a".to_string()
                                             }
-                                        }),
+                                        })
+                                        .into(),
                                         1..2
                                     ),
                                     (
@@ -811,12 +846,14 @@ mod parser_tests {
                                                         identifier: Identifier {
                                                             name: "b".to_string()
                                                         }
-                                                    }),
+                                                    })
+                                                    .into(),
                                                     5..6
                                                 )]
                                             }
                                             .into()
-                                        ),
+                                        )
+                                        .into(),
                                         4..7
                                     ),
                                     (
@@ -824,13 +861,15 @@ mod parser_tests {
                                             identifier: Identifier {
                                                 name: "c".to_string()
                                             }
-                                        }),
+                                        })
+                                        .into(),
                                         9..10
                                     )
                                 ]
                             }
                             .into()
-                        ),
+                        )
+                        .into(),
                         0..11
                     )
                 }),
@@ -845,7 +884,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    expr: (Expr::Unit, 0..2)
+                    expr: (Expr::Unit.into(), 0..2)
                 }),
                 0..3
             )]
@@ -887,10 +926,14 @@ mod parser_tests {
                     expr: (
                         Expr::Tuple(
                             ExprTuple {
-                                items: vec![(Expr::Literal(ExprLiteral::Number(1f64)), 1..2)]
+                                items: vec![(
+                                    Expr::Literal(ExprLiteral::Number(1f64)).into(),
+                                    1..2
+                                )]
                             }
                             .into()
-                        ),
+                        )
+                        .into(),
                         0..4
                     )
                 }),
@@ -909,12 +952,13 @@ mod parser_tests {
                         Expr::Tuple(
                             ExprTuple {
                                 items: vec![
-                                    (Expr::Literal(ExprLiteral::Number(1f64)), 1..2),
-                                    (Expr::Literal(ExprLiteral::Number(2f64)), 4..5)
+                                    (Expr::Literal(ExprLiteral::Number(1f64)).into(), 1..2),
+                                    (Expr::Literal(ExprLiteral::Number(2f64)).into(), 4..5)
                                 ]
                             }
                             .into()
-                        ),
+                        )
+                        .into(),
                         0..7
                     )
                 }),
@@ -929,7 +973,7 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 Stmt::Expr(StmtExpr {
-                    expr: (Expr::Literal(ExprLiteral::Number(1f64)), 0..3)
+                    expr: (Expr::Literal(ExprLiteral::Number(1f64)).into(), 0..3)
                 }),
                 0..4
             )]
@@ -954,7 +998,8 @@ mod parser_tests {
                                                 }
                                             }
                                             .into()
-                                        ),
+                                        )
+                                        .into(),
                                         0..1
                                     ),
                                     op: $expected,
@@ -966,10 +1011,12 @@ mod parser_tests {
                                                 }
                                             }
                                             .into()
-                                        ),
+                                        )
+                                        .into(),
                                         4..5
                                     )
-                                })),
+                                }))
+                                .into(),
                                 0..5
                             )
                         }),
@@ -1013,10 +1060,12 @@ mod parser_tests {
                                     identifier: Identifier {
                                         name: "b".to_string()
                                     }
-                                }),
+                                })
+                                .into(),
                                 4..5
                             )
-                        })),
+                        }))
+                        .into(),
                         0..5
                     )
                 }),
@@ -1038,7 +1087,8 @@ mod parser_tests {
                                     identifier: Identifier {
                                         name: "a".to_string()
                                     }
-                                }),
+                                })
+                                .into(),
                                 0..1
                             ),
                             op: OpInfix::Equal,
@@ -1047,10 +1097,12 @@ mod parser_tests {
                                     identifier: Identifier {
                                         name: "b".to_string()
                                     }
-                                }),
+                                })
+                                .into(),
                                 5..6
                             )
-                        })),
+                        }))
+                        .into(),
                         0..6
                     )
                 }),
@@ -1072,7 +1124,8 @@ mod parser_tests {
                                     identifier: Identifier {
                                         name: "a".to_string()
                                     }
-                                }),
+                                })
+                                .into(),
                                 0..1
                             ),
                             op: OpInfix::NotEqual,
@@ -1081,10 +1134,12 @@ mod parser_tests {
                                     identifier: Identifier {
                                         name: "b".to_string()
                                     }
-                                }),
+                                })
+                                .into(),
                                 5..6
                             )
-                        })),
+                        }))
+                        .into(),
                         0..6
                     )
                 }),
@@ -1106,7 +1161,8 @@ mod parser_tests {
                                     identifier: Identifier {
                                         name: "a".to_string()
                                     }
-                                }),
+                                })
+                                .into(),
                                 0..1
                             ),
                             op: OpInfix::GreaterEqual,
@@ -1115,10 +1171,12 @@ mod parser_tests {
                                     identifier: Identifier {
                                         name: "b".to_string()
                                     }
-                                }),
+                                })
+                                .into(),
                                 5..6
                             )
-                        })),
+                        }))
+                        .into(),
                         0..6
                     )
                 }),
@@ -1140,7 +1198,8 @@ mod parser_tests {
                                     identifier: Identifier {
                                         name: "a".to_string()
                                     }
-                                }),
+                                })
+                                .into(),
                                 0..1
                             ),
                             op: OpInfix::LessEqual,
@@ -1149,10 +1208,12 @@ mod parser_tests {
                                     identifier: Identifier {
                                         name: "b".to_string()
                                     }
-                                }),
+                                })
+                                .into(),
                                 5..6
                             )
-                        })),
+                        }))
+                        .into(),
                         0..6
                     )
                 }),
@@ -1174,7 +1235,8 @@ mod parser_tests {
                                     identifier: Identifier {
                                         name: "a".to_string()
                                     }
-                                }),
+                                })
+                                .into(),
                                 0..1
                             ),
                             op: OpInfix::LogicAnd,
@@ -1183,10 +1245,12 @@ mod parser_tests {
                                     identifier: Identifier {
                                         name: "b".to_string()
                                     }
-                                }),
+                                })
+                                .into(),
                                 6..7
                             )
-                        })),
+                        }))
+                        .into(),
                         0..7
                     )
                 }),
@@ -1208,7 +1272,8 @@ mod parser_tests {
                                     identifier: Identifier {
                                         name: "a".to_string()
                                     }
-                                }),
+                                })
+                                .into(),
                                 0..1
                             ),
                             op: OpInfix::LogicOr,
@@ -1217,10 +1282,12 @@ mod parser_tests {
                                     identifier: Identifier {
                                         name: "b".to_string()
                                     }
-                                }),
+                                })
+                                .into(),
                                 5..6
                             )
-                        })),
+                        }))
+                        .into(),
                         0..6
                     )
                 }),
@@ -1237,17 +1304,19 @@ mod parser_tests {
                 Stmt::Expr(StmtExpr {
                     expr: (
                         Expr::If(Box::new(ExprIf {
-                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 3..7),
+                            cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 3..7),
                             then: (
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: vec![],
                                     return_expr: None,
                                     typeref: None
-                                })),
+                                }))
+                                .into(),
                                 8..10
                             ),
                             else_: None
-                        })),
+                        }))
+                        .into(),
                         0..10
                     )
                 }),
@@ -1264,17 +1333,19 @@ mod parser_tests {
                 Stmt::Expr(StmtExpr {
                     expr: (
                         Expr::If(Box::new(ExprIf {
-                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 3..9),
+                            cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 3..9),
                             then: (
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: vec![],
                                     return_expr: None,
                                     typeref: None
-                                })),
+                                }))
+                                .into(),
                                 10..12
                             ),
                             else_: None
-                        })),
+                        }))
+                        .into(),
                         0..12
                     )
                 }),
@@ -1291,13 +1362,14 @@ mod parser_tests {
                 Stmt::Expr(StmtExpr {
                     expr: (
                         Expr::If(Box::new(ExprIf {
-                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 3..9),
+                            cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 3..9),
                             then: (
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: vec![],
                                     return_expr: None,
                                     typeref: None
-                                })),
+                                }))
+                                .into(),
                                 10..12
                             ),
                             else_: Some((
@@ -1305,10 +1377,12 @@ mod parser_tests {
                                     stmts: vec![],
                                     return_expr: None,
                                     typeref: None
-                                })),
+                                }))
+                                .into(),
                                 18..20
                             ))
-                        })),
+                        }))
+                        .into(),
                         0..20
                     )
                 }),
@@ -1325,31 +1399,35 @@ mod parser_tests {
                 Stmt::Expr(StmtExpr {
                     expr: (
                         Expr::If(Box::new(ExprIf {
-                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 3..9),
+                            cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 3..9),
                             then: (
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: vec![],
                                     return_expr: None,
                                     typeref: None
-                                })),
+                                }))
+                                .into(),
                                 10..12
                             ),
                             else_: Some((
                                 Expr::If(Box::new(ExprIf {
-                                    cond: (Expr::Literal(ExprLiteral::Bool(true)), 21..27),
+                                    cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 21..27),
                                     then: (
                                         Expr::Block(Box::new(ExprBlock {
                                             stmts: vec![],
                                             return_expr: None,
                                             typeref: None
-                                        })),
+                                        }))
+                                        .into(),
                                         28..30
                                     ),
                                     else_: None
-                                })),
+                                }))
+                                .into(),
                                 18..30
                             ))
-                        })),
+                        }))
+                        .into(),
                         0..30
                     )
                 }),
@@ -1366,24 +1444,26 @@ mod parser_tests {
                 Stmt::Expr(StmtExpr {
                     expr: (
                         Expr::If(Box::new(ExprIf {
-                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 3..9),
+                            cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 3..9),
                             then: (
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: vec![],
                                     return_expr: None,
                                     typeref: None
-                                })),
+                                }))
+                                .into(),
                                 10..12
                             ),
                             else_: Some((
                                 Expr::If(Box::new(ExprIf {
-                                    cond: (Expr::Literal(ExprLiteral::Bool(true)), 21..27),
+                                    cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 21..27),
                                     then: (
                                         Expr::Block(Box::new(ExprBlock {
                                             stmts: vec![],
                                             return_expr: None,
                                             typeref: None
-                                        })),
+                                        }))
+                                        .into(),
                                         28..30
                                     ),
                                     else_: Some((
@@ -1391,13 +1471,16 @@ mod parser_tests {
                                             stmts: vec![],
                                             return_expr: None,
                                             typeref: None
-                                        })),
+                                        }))
+                                        .into(),
                                         36..38
                                     ))
-                                })),
+                                }))
+                                .into(),
                                 18..38
                             ))
-                        })),
+                        }))
+                        .into(),
                         0..38
                     )
                 }),
@@ -1414,35 +1497,41 @@ mod parser_tests {
                 Stmt::Expr(StmtExpr {
                     expr: (
                         Expr::If(Box::new(ExprIf {
-                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 3..9),
+                            cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 3..9),
                             then: (
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: vec![],
                                     return_expr: None,
                                     typeref: None
-                                })),
+                                }))
+                                .into(),
                                 10..12
                             ),
                             else_: Some((
                                 Expr::If(Box::new(ExprIf {
-                                    cond: (Expr::Literal(ExprLiteral::Bool(true)), 21..27),
+                                    cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 21..27),
                                     then: (
                                         Expr::Block(Box::new(ExprBlock {
                                             stmts: vec![],
                                             return_expr: None,
                                             typeref: None
-                                        })),
+                                        }))
+                                        .into(),
                                         28..30
                                     ),
                                     else_: Some((
                                         Expr::If(Box::new(ExprIf {
-                                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 39..45),
+                                            cond: (
+                                                Expr::Literal(ExprLiteral::Bool(true)).into(),
+                                                39..45
+                                            ),
                                             then: (
                                                 Expr::Block(Box::new(ExprBlock {
                                                     stmts: vec![],
                                                     return_expr: None,
                                                     typeref: None
-                                                })),
+                                                }))
+                                                .into(),
                                                 46..48
                                             ),
                                             else_: Some((
@@ -1450,16 +1539,20 @@ mod parser_tests {
                                                     stmts: vec![],
                                                     return_expr: None,
                                                     typeref: None
-                                                })),
+                                                }))
+                                                .into(),
                                                 54..56
                                             ))
-                                        })),
+                                        }))
+                                        .into(),
                                         36..56
                                     ))
-                                })),
+                                }))
+                                .into(),
                                 18..56
                             ))
-                        })),
+                        }))
+                        .into(),
                         0..56
                     )
                 }),
@@ -1603,7 +1696,8 @@ mod parser_tests {
                             start: Some((ExprLiteral::Number(0f64), 0..1)),
                             end: None,
                             inclusive_end: false
-                        }),
+                        })
+                        .into(),
                         0..3
                     )
                 }),
@@ -1623,7 +1717,8 @@ mod parser_tests {
                             start: Some((ExprLiteral::Number(0f64), 0..1)),
                             end: Some((ExprLiteral::Number(10f64), 3..5)),
                             inclusive_end: false
-                        }),
+                        })
+                        .into(),
                         0..5
                     )
                 }),
@@ -1643,7 +1738,8 @@ mod parser_tests {
                             start: None,
                             end: Some((ExprLiteral::Number(10f64), 2..4)),
                             inclusive_end: false
-                        }),
+                        })
+                        .into(),
                         0..4
                     )
                 }),
@@ -1663,7 +1759,8 @@ mod parser_tests {
                             start: None,
                             end: Some((ExprLiteral::Number(10f64), 3..5)),
                             inclusive_end: true
-                        }),
+                        })
+                        .into(),
                         0..5
                     )
                 }),
@@ -1683,7 +1780,8 @@ mod parser_tests {
                             start: Some((ExprLiteral::Number(0f64), 0..1)),
                             end: Some((ExprLiteral::Number(10f64), 4..6)),
                             inclusive_end: true
-                        }),
+                        })
+                        .into(),
                         0..6
                     )
                 }),
@@ -1742,7 +1840,10 @@ mod parser_tests {
                     ),
                     type_expr: None,
                     is_const: false,
-                    value: Some((ast::Expr::Literal(ExprLiteral::Number(123f64)), 8..11))
+                    value: Some((
+                        ast::Expr::Literal(ExprLiteral::Number(123f64)).into(),
+                        8..11
+                    ))
                 }),
                 0..12
             )]
@@ -1771,8 +1872,9 @@ mod parser_tests {
                                 },
                                 8..9
                             ),
-                            value: (Expr::Literal(ExprLiteral::Number(123f64)), 12..15)
-                        })),
+                            value: (Expr::Literal(ExprLiteral::Number(123f64)).into(), 12..15)
+                        }))
+                        .into(),
                         8..15
                     ))
                 }),
@@ -1793,7 +1895,7 @@ mod parser_tests {
                         },
                         4..5
                     ),
-                    type_expr: Some((Expr::Type(ExprType(Type::number())), 7..13)),
+                    type_expr: Some((Expr::Type(ExprType(Type::number())).into(), 7..13)),
                     is_const: false,
                     value: Some((
                         ast::Expr::Assign(Box::new(ExprAssign {
@@ -1803,8 +1905,9 @@ mod parser_tests {
                                 },
                                 16..17
                             ),
-                            value: (Expr::Literal(ExprLiteral::Number(123f64)), 20..23)
-                        })),
+                            value: (Expr::Literal(ExprLiteral::Number(123f64)).into(), 20..23)
+                        }))
+                        .into(),
                         16..23
                     ))
                 }),
@@ -1825,9 +1928,12 @@ mod parser_tests {
                         },
                         4..5
                     ),
-                    type_expr: Some((Expr::Type(ExprType(Type::number())), 7..13)),
+                    type_expr: Some((Expr::Type(ExprType(Type::number())).into(), 7..13)),
                     is_const: false,
-                    value: Some((ast::Expr::Literal(ExprLiteral::Number(123f64)), 16..19))
+                    value: Some((
+                        ast::Expr::Literal(ExprLiteral::Number(123f64)).into(),
+                        16..19
+                    ))
                 }),
                 0..20
             )]
@@ -1902,18 +2008,22 @@ mod parser_tests {
                             },
                             53..54
                         ),
-                        type_expr: Some((Expr::Type(ExprType(Type::new("NumberList"))), 56..66)),
+                        type_expr: Some((
+                            Expr::Type(ExprType(Type::new("NumberList"))).into(),
+                            56..66
+                        )),
                         is_const: false,
                         value: Some((
                             Expr::List(
                                 ExprList {
                                     items: vec![
-                                        (Expr::Literal(ExprLiteral::Number(1f64)), 70..71),
-                                        (Expr::Literal(ExprLiteral::Number(2f64)), 73..74)
+                                        (Expr::Literal(ExprLiteral::Number(1f64)).into(), 70..71),
+                                        (Expr::Literal(ExprLiteral::Number(2f64)).into(), 73..74)
                                     ]
                                 }
                                 .into()
-                            ),
+                            )
+                            .into(),
                             69..75
                         ))
                     }),
@@ -1965,12 +2075,12 @@ mod parser_tests {
                                                     68..69
                                                 ),
                                                 type_expr: Some((
-                                                    Expr::Type(ExprType(Type::number())),
+                                                    Expr::Type(ExprType(Type::number())).into(),
                                                     71..77
                                                 )),
                                                 is_const: false,
                                                 value: Some((
-                                                    Expr::Literal(ExprLiteral::Number(5f64)),
+                                                    Expr::Literal(ExprLiteral::Number(5f64)).into(),
                                                     80..81
                                                 ))
                                             }),
@@ -1985,7 +2095,7 @@ mod parser_tests {
                                                     99..100
                                                 ),
                                                 type_expr: Some((
-                                                    Expr::Type(ExprType(Type::new("Int"))),
+                                                    Expr::Type(ExprType(Type::new("Int"))).into(),
                                                     102..105
                                                 )),
                                                 is_const: false,
@@ -1996,17 +2106,20 @@ mod parser_tests {
                                                                 identifier: Identifier {
                                                                     name: "a".to_string()
                                                                 }
-                                                            }),
+                                                            })
+                                                            .into(),
                                                             108..109
                                                         ),
                                                         op: OpInfix::Add,
                                                         rt: (
                                                             Expr::Literal(ExprLiteral::Number(
                                                                 10f64
-                                                            )),
+                                                            ))
+                                                            .into(),
                                                             112..114
                                                         )
-                                                    })),
+                                                    }))
+                                                    .into(),
                                                     108..114
                                                 ))
                                             }),
@@ -2018,14 +2131,17 @@ mod parser_tests {
                                             identifier: Identifier {
                                                 name: "b".to_string()
                                             }
-                                        }),
+                                        })
+                                        .into(),
                                         128..129
                                     )),
                                     typeref: None
-                                })),
+                                }))
+                                .into(),
                                 19..139
                             )
-                        })),
+                        }))
+                        .into(),
                         9..139
                     )
                 }),
@@ -2046,7 +2162,7 @@ mod parser_tests {
                         },
                         4..5
                     ),
-                    type_expr: Some((Expr::Type(ExprType(Type::number())), 7..13)),
+                    type_expr: Some((Expr::Type(ExprType(Type::number())).into(), 7..13)),
                     is_const: false,
                     value: None
                 }),
@@ -2071,30 +2187,33 @@ mod parser_tests {
                     is_const: false,
                     value: Some((
                         Expr::If(Box::new(ExprIf {
-                            cond: (Expr::Literal(ExprLiteral::Bool(true)), 11..17),
+                            cond: (Expr::Literal(ExprLiteral::Bool(true)).into(), 11..17),
                             then: (
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: vec![],
                                     return_expr: Some((
-                                        Expr::Literal(ExprLiteral::Number(123f64)),
+                                        Expr::Literal(ExprLiteral::Number(123f64)).into(),
                                         20..23
                                     )),
                                     typeref: None
-                                })),
+                                }))
+                                .into(),
                                 18..25
                             ),
                             else_: Some((
                                 Expr::Block(Box::new(ExprBlock {
                                     stmts: vec![],
                                     return_expr: Some((
-                                        Expr::Literal(ExprLiteral::Number(456f64)),
+                                        Expr::Literal(ExprLiteral::Number(456f64)).into(),
                                         33..36
                                     )),
                                     typeref: None
-                                })),
+                                }))
+                                .into(),
                                 31..38
                             ))
-                        })),
+                        }))
+                        .into(),
                         8..38
                     ))
                 }),
@@ -2109,8 +2228,8 @@ mod parser_tests {
         Ok(Module {
             stmts: vec![(
                 StmtAssertType {
-                    value: (123f64.into(), 12..15),
-                    expected_type: (ast::ExprType(Type::number()).into(), 17..23)
+                    value: (Expr::Literal(ExprLiteral::Number(123f64)).into(), 12..15),
+                    expected_type: (Expr::Type(ExprType(Type::number())).into(), 17..23)
                 }
                 .into(),
                 0..24
@@ -2147,18 +2266,22 @@ mod parser_tests {
                                                     identifier: Identifier {
                                                         name: "a".to_string()
                                                     }
-                                                }),
+                                                })
+                                                .into(),
                                                 25..26
                                             )),
                                             typeref: None
-                                        })),
+                                        }))
+                                        .into(),
                                         23..28
                                     )
-                                })),
+                                }))
+                                .into(),
                                 0..28
                             ),
-                            args: vec![(Expr::Literal(ExprLiteral::Number(100f64)), 29..32)]
-                        })),
+                            args: vec![(Expr::Literal(ExprLiteral::Number(100f64)).into(), 29..32)]
+                        }))
+                        .into(),
                         0..33
                     )
                 }

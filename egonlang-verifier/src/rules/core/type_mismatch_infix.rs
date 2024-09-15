@@ -1,8 +1,10 @@
+use std::{collections::HashMap, sync::Arc};
+
 use crate::prelude::*;
+use ast::Expr;
 use egonlang_core::prelude::*;
 use egonlang_errors::{EgonErrorS, EgonTypeError};
 use egonlang_types::Type;
-use rules::rule::ResolveExpr;
 
 expr_rule!(
     /// Checks value types for all infix operation expressions
@@ -16,7 +18,7 @@ expr_rule!(
     |expr, _span, _resolve_ident, resolve_expr| {
         let mut errs: Vec<EgonErrorS> = vec![];
 
-        if let ast::Expr::Infix(infix) = expr {
+        if let ast::Expr::Infix(infix) = &*expr {
             match infix.op {
                 ast::OpInfix::Greater => {
                     let infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
@@ -106,17 +108,21 @@ expr_rule!(
 fn validate_infix_types(
     infix: &ast::ExprInfix,
     expected_type: Type,
-    resolve_expr: &dyn ResolveExpr,
+    resolve_expr: &HashMap<span::Spanned<Arc<Expr>>, Type>,
 ) -> Result<(), Vec<EgonErrorS>> {
     let mut errs = vec![];
 
     let (lt_expr, lt_span) = &infix.lt;
-    let lt_type = resolve_expr(lt_expr, lt_span).unwrap().of_type;
+    let lt_type = resolve_expr
+        .get(&(lt_expr.clone(), lt_span.clone()))
+        .unwrap();
 
     let (rt_expr, rt_span) = &infix.rt;
-    let rt_type = resolve_expr(rt_expr, rt_span).unwrap().of_type;
+    let rt_type = resolve_expr
+        .get(&(rt_expr.clone(), rt_span.clone()))
+        .unwrap();
 
-    if lt_type != expected_type {
+    if *lt_type != expected_type {
         errs.push((
             EgonTypeError::MismatchType {
                 expected: expected_type.to_string(),
@@ -126,7 +132,7 @@ fn validate_infix_types(
             lt_span.clone(),
         ));
     }
-    if rt_type != expected_type {
+    if *rt_type != expected_type {
         errs.push((
             EgonTypeError::MismatchType {
                 expected: expected_type.to_string(),

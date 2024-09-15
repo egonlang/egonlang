@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
 use egonlang_errors::EgonTypeError;
-use egonlang_types::Type;
 
 stmt_rule!(
     /// Checks the value type of an assignment declaration matches the declaration type
@@ -23,11 +22,11 @@ stmt_rule!(
                 }
                 // let a = 123;
                 (None, Some((value_expr, value_span))) => {
-                    if let Ok(value_typeref) = resolve_expr(value_expr, value_span) {
+                    if let Some(value_typeref) = resolve_expr.get(&(value_expr.clone(), value_span.clone())) {
                         // Check for empty list assignment
                         // Example:
                         // let a = [];
-                        if value_typeref.of_type == Type::list(Type::unknown()) {
+                        if value_typeref.is_unknown_list() {
                             errs.push((EgonTypeError::UknownListType.into(), value_span.clone()));
                         }
                     }
@@ -35,52 +34,52 @@ stmt_rule!(
                 }
                 // let a: number;
                 (Some((assign_type_expr, assign_type_span)), None) => {
-                    match resolve_expr(assign_type_expr, assign_type_span) {
-                        Ok(assign_type) => {
+                    match resolve_expr.get(&(assign_type_expr.clone(), assign_type_span.clone())) {
+                        Some(assign_type) => {
                             // Check for empty list assignment
                             // Example:
                             // let a: unknown;
-                            if assign_type.of_type.is_unknown() {
+                            if assign_type.is_unknown() {
                                 errs.push((
                                     EgonTypeError::UnknownType.into(),
                                     assign_type_span.clone()
                                 ));
                             }
                         },
-                        Err(e) => {
-                            errs.extend(e)
+                        None => {
+                            // errs.extend(e)
                         },
                     };
 
                 }
                 // let a: number = 123;
                 (Some((assign_type_expr, assign_type_span)), Some((value_expr, value_span))) => {
-                    if let Ok(assign_typeref) = resolve_expr(assign_type_expr, assign_type_span) {
+                    if let Some(assign_typeref) = resolve_expr.get(&(assign_type_expr.clone(), assign_type_span.clone())) {
                         // Check for empty list assignment
                         // Example:
                         // let a: unknown;
-                        if assign_typeref.of_type.is_unknown() {
+                        if assign_typeref.is_unknown() {
                             errs.push((
                                 EgonTypeError::UnknownType.into(),
                                 assign_type_span.clone()
                             ));
-                        } else if let Ok(value_typeref) = resolve_expr(value_expr, value_span) {
+                        } else if let Some(value_typeref) = resolve_expr.get(&(value_expr.clone(), value_span.clone())) {
                             // Types mismatched
-                            if assign_typeref.of_type != value_typeref.of_type {
+                            if assign_typeref != value_typeref {
                                 // Check for empty list assignment
                                 // Example:
                                 // let a: list<number> = [];
-                                if value_typeref.of_type == Type::list(Type::unknown())
-                                    && assign_typeref.of_type.is_known_list()
+                                if value_typeref.is_unknown_list()
+                                    && assign_typeref.is_known_list()
                                 {
                                     return vec![];
                                 }
 
-                                if value_typeref.of_type.is_identifier() {
+                                if value_typeref.is_identifier() {
                                     let identifier = &stmt_assign.identifier.0.name;
 
-                                    if let Ok(identifier_type) = resolve_ident(identifier,  &stmt_assign.identifier.1) {
-                                        if assign_typeref.of_type == identifier_type.of_type {
+                                    if let Some(identifier_type) = resolve_ident.get(identifier) {
+                                        if *assign_typeref == identifier_type.of_type {
                                             return vec![];
                                         }
                                     }
@@ -88,8 +87,8 @@ stmt_rule!(
 
                                 errs.push((
                                     EgonTypeError::MismatchType {
-                                        expected: assign_typeref.of_type.to_string(),
-                                        actual: value_typeref.of_type.to_string(),
+                                        expected: assign_typeref.to_string(),
+                                        actual: value_typeref.to_string(),
                                     }
                                     .into(),
                                     value_span.clone(),
@@ -98,8 +97,8 @@ stmt_rule!(
                                 // Check for empty list assignment
                                 // Example:
                                 // let a: list<unknown> = [];
-                                if value_typeref.of_type == Type::list(Type::unknown())
-                                    && assign_typeref.of_type.is_unknown_list()
+                                if value_typeref.is_unknown_list()
+                                    && assign_typeref.is_unknown_list()
                                 {
                                     errs.push((EgonTypeError::UknownListType.into(), span.clone()));
                                 }
@@ -118,7 +117,7 @@ stmt_rule!(
 #[cfg(test)]
 mod tests {
     use super::TypeMismatchOnDeclarationsRule;
-    use crate::verifier_rule_test;
+    use crate::{verifier_rule_test, Verifier};
     use egonlang_errors::EgonTypeError;
     use egonlang_types::Type;
 
@@ -126,6 +125,16 @@ mod tests {
         TypeMismatchOnDeclarationsRule,
         returns_ok_if_assignment_type_and_value_type_match,
         "const a: number = 123;"
+    }
+
+    #[test]
+    fn returns_ok_2if_assignment_type_and_value_type_match() {
+        let mut module = ::egonlang_core::parser::parse("const a: number = 123;", 0)
+            .expect("Unable to parse source to module");
+        let mut verifier = Verifier::new();
+        verifier.add_rule(TypeMismatchOnDeclarationsRule);
+        let result = verifier.verify(&mut module);
+        ::pretty_assertions::assert_eq!((Ok(())), result);
     }
 
     verifier_rule_test! {

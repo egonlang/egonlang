@@ -1,4 +1,4 @@
-use std::fmt::Debug;
+use std::{fmt::Debug, sync::Arc};
 
 use egonlang_types::Type;
 use serde::{Deserialize, Serialize};
@@ -38,19 +38,19 @@ impl Module {
 
         match &stmt {
             Stmt::Expr(stmt_expr) => {
-                let (expr_expr, expr_span) = &stmt_expr.expr;
+                let (expr_expr, expr_span) = stmt_expr.expr.clone();
 
-                let expr_nodes = self.get_nodes_from_expr(expr_expr, expr_span, index);
+                let expr_nodes = self.get_nodes_from_expr(expr_expr, &expr_span, index);
                 nodes.extend(expr_nodes);
             }
             Stmt::Assign(stmt_assign) => {
-                if let Some((type_expr, type_span)) = &stmt_assign.type_expr {
-                    let type_nodes = self.get_nodes_from_expr(type_expr, type_span, index);
+                if let Some((type_expr, type_span)) = stmt_assign.type_expr.clone() {
+                    let type_nodes = self.get_nodes_from_expr(type_expr, &type_span, index);
                     nodes.extend(type_nodes);
                 }
 
-                if let Some((value_expr, value_span)) = &stmt_assign.value {
-                    let value_nodes = self.get_nodes_from_expr(value_expr, value_span, index);
+                if let Some((value_expr, value_span)) = stmt_assign.value.clone() {
+                    let value_nodes = self.get_nodes_from_expr(value_expr, &value_span, index);
                     nodes.extend(value_nodes);
                 }
 
@@ -71,8 +71,8 @@ impl Module {
                 }
             }
             Stmt::Fn(stmt_fn) => {
-                let (fn_expr_expr, fn_expr_span) = &stmt_fn.fn_expr;
-                let fn_expr_nodes = self.get_nodes_from_expr(fn_expr_expr, fn_expr_span, index);
+                let (fn_expr_expr, fn_expr_span) = stmt_fn.fn_expr.clone();
+                let fn_expr_nodes = self.get_nodes_from_expr(fn_expr_expr, &fn_expr_span, index);
 
                 nodes.extend(fn_expr_nodes);
 
@@ -82,18 +82,19 @@ impl Module {
                 }
             }
             Stmt::AssertType(stmt_assert_type) => {
-                let (value_expr, value_span) = &stmt_assert_type.value;
-                let value_nodes = self.get_nodes_from_expr(value_expr, value_span, index);
+                let (value_expr, value_span) = stmt_assert_type.value.clone();
+                let value_nodes = self.get_nodes_from_expr(value_expr, &value_span, index);
                 nodes.extend(value_nodes);
 
-                let (expected_type_expr, expected_type_span) = &stmt_assert_type.expected_type;
+                let (expected_type_expr, expected_type_span) =
+                    stmt_assert_type.expected_type.clone();
                 let expected_type_nodes =
-                    self.get_nodes_from_expr(expected_type_expr, expected_type_span, index);
+                    self.get_nodes_from_expr(expected_type_expr, &expected_type_span, index);
                 nodes.extend(expected_type_nodes);
             }
             Stmt::Return(stmt_return) => {
-                let (value_expr, value_span) = &stmt_return.value;
-                let value_nodes = self.get_nodes_from_expr(value_expr, value_span, index);
+                let (value_expr, value_span) = stmt_return.value.clone();
+                let value_nodes = self.get_nodes_from_expr(value_expr, &value_span, index);
                 nodes.extend(value_nodes);
             }
             Stmt::Error => {}
@@ -102,12 +103,7 @@ impl Module {
         nodes
     }
 
-    fn get_nodes_from_expr<'a>(
-        &self,
-        expr: &'a Expr,
-        span: &'a Span,
-        index: usize,
-    ) -> Vec<AstNode> {
+    fn get_nodes_from_expr(&self, expr: Arc<Expr>, span: &'_ Span, index: usize) -> Vec<AstNode> {
         let mut nodes = vec![];
 
         if !span.contains(&index) {
@@ -116,7 +112,7 @@ impl Module {
 
         nodes.push(AstNode::Expr((expr.clone(), span.clone())));
 
-        match &expr {
+        match &*expr {
             Expr::Unit => {}
             Expr::Literal(_) => {}
             Expr::Identifier(_) => {}
@@ -128,54 +124,57 @@ impl Module {
 
                 if let Some((return_expr_expr, return_expr_span)) = &expr_block.return_expr {
                     let return_expr_nodes =
-                        self.get_nodes_from_expr(return_expr_expr, return_expr_span, index);
+                        self.get_nodes_from_expr(return_expr_expr.clone(), return_expr_span, index);
                     nodes.extend(return_expr_nodes);
                 }
             }
             Expr::List(expr_list) => {
                 for (item_expr, item_span) in &expr_list.items {
-                    let item_nodes = self.get_nodes_from_expr(item_expr, item_span, index);
+                    let item_nodes = self.get_nodes_from_expr(item_expr.clone(), item_span, index);
                     nodes.extend(item_nodes);
                 }
             }
             Expr::Tuple(expr_tuple) => {
                 for (item_expr, item_span) in &expr_tuple.items {
-                    let item_nodes = self.get_nodes_from_expr(item_expr, item_span, index);
+                    let item_nodes = self.get_nodes_from_expr(item_expr.clone(), item_span, index);
                     nodes.extend(item_nodes);
                 }
             }
             Expr::Infix(expr_infix) => {
                 let (lt_value_expr, lt_value_span) = &expr_infix.lt;
-                let lt_value_nodes = self.get_nodes_from_expr(lt_value_expr, lt_value_span, index);
+                let lt_value_nodes =
+                    self.get_nodes_from_expr(lt_value_expr.clone(), lt_value_span, index);
                 nodes.extend(lt_value_nodes);
 
                 let (rt_value_expr, rt_value_span) = &expr_infix.rt;
-                let rt_value_nodes = self.get_nodes_from_expr(rt_value_expr, rt_value_span, index);
+                let rt_value_nodes =
+                    self.get_nodes_from_expr(rt_value_expr.clone(), rt_value_span, index);
                 nodes.extend(rt_value_nodes);
             }
             Expr::Prefix(expr_prefix) => {
                 let (rt_value_expr, rt_value_span) = &expr_prefix.rt;
-                let rt_value_nodes = self.get_nodes_from_expr(rt_value_expr, rt_value_span, index);
+                let rt_value_nodes =
+                    self.get_nodes_from_expr(rt_value_expr.clone(), rt_value_span, index);
                 nodes.extend(rt_value_nodes);
             }
             Expr::Assign(expr_assign) => {
                 let (value_expr, value_span) = &expr_assign.value;
-                let value_nodes = self.get_nodes_from_expr(value_expr, value_span, index);
+                let value_nodes = self.get_nodes_from_expr(value_expr.clone(), value_span, index);
                 nodes.extend(value_nodes);
 
                 nodes.push(AstNode::Identifier(expr_assign.identifier.clone()));
             }
             Expr::If(expr_if) => {
                 let (value_expr, value_span) = &expr_if.cond;
-                let value_nodes = self.get_nodes_from_expr(value_expr, value_span, index);
+                let value_nodes = self.get_nodes_from_expr(value_expr.clone(), value_span, index);
                 nodes.extend(value_nodes);
 
                 let (value_expr, value_span) = &expr_if.then;
-                let value_nodes = self.get_nodes_from_expr(value_expr, value_span, index);
+                let value_nodes = self.get_nodes_from_expr(value_expr.clone(), value_span, index);
                 nodes.extend(value_nodes);
 
                 if let Some((else_expr, else_span)) = &expr_if.else_ {
-                    let value_nodes = self.get_nodes_from_expr(else_expr, else_span, index);
+                    let value_nodes = self.get_nodes_from_expr(else_expr.clone(), else_span, index);
                     nodes.extend(value_nodes);
                 }
             }
@@ -199,7 +198,7 @@ impl Module {
                 }
 
                 let (body_expr, body_span) = &expr_fn.body;
-                let body_nodes = self.get_nodes_from_expr(body_expr, body_span, index);
+                let body_nodes = self.get_nodes_from_expr(body_expr.clone(), body_span, index);
                 nodes.extend(body_nodes);
 
                 if let Some(expr_fn_name) = &expr_fn.name {
@@ -211,12 +210,15 @@ impl Module {
                 nodes.push(AstNode::Type((expr_type.0.clone(), span.clone())));
             }
             Expr::Call(expr_call) => {
-                let callee_nodes =
-                    self.get_nodes_from_expr(&expr_call.callee.0, &expr_call.callee.1, index);
+                let callee_nodes = self.get_nodes_from_expr(
+                    expr_call.callee.0.clone(),
+                    &expr_call.callee.1,
+                    index,
+                );
                 nodes.extend(callee_nodes);
 
                 for arg in &expr_call.args {
-                    let arg_nodes = self.get_nodes_from_expr(&arg.0, &arg.1, index);
+                    let arg_nodes = self.get_nodes_from_expr(arg.0.clone(), &arg.1, index);
                     nodes.extend(arg_nodes);
                 }
             }
@@ -332,7 +334,7 @@ mod tests {
                         ),
                         type_expr: None,
                         is_const: false,
-                        value: Some((123f64.into(), 8..11))
+                        value: Some((Expr::Literal(ExprLiteral::Number(123f64)).into(), 8..11))
                     }),
                     0..12
                 )),
@@ -366,11 +368,11 @@ mod tests {
                         ),
                         type_expr: None,
                         is_const: false,
-                        value: Some((123f64.into(), 8..11))
+                        value: Some((Expr::Literal(ExprLiteral::Number(123f64)).into(), 8..11))
                     }),
                     0..12
                 )),
-                AstNode::Expr((123f64.into(), 8..11)),
+                AstNode::Expr((Expr::Literal(ExprLiteral::Number(123f64)).into(), 8..11)),
             ],
             nodes
         );
@@ -395,7 +397,7 @@ mod tests {
                         ),
                         type_expr: None,
                         is_const: false,
-                        value: Some((123f64.into(), 8..11))
+                        value: Some((Expr::Literal(ExprLiteral::Number(123f64)).into(), 8..11))
                     }),
                     0..12
                 )),
@@ -427,13 +429,13 @@ mod tests {
                             },
                             4..5
                         ),
-                        type_expr: Some((Expr::Type(ExprType(Type::number())), 7..13)),
+                        type_expr: Some((Expr::Type(ExprType(Type::number())).into(), 7..13)),
                         is_const: false,
-                        value: Some((123f64.into(), 16..19))
+                        value: Some((Expr::Literal(ExprLiteral::Number(123f64)).into(), 16..19))
                     }),
                     0..20
                 )),
-                AstNode::Expr((Expr::Type(ExprType(Type::number())), 7..13)),
+                AstNode::Expr((Expr::Type(ExprType(Type::number())).into(), 7..13)),
                 AstNode::Type((Type::number(), 7..13)),
             ],
             nodes
@@ -493,7 +495,7 @@ mod tests {
                         ),
                         type_expr: None,
                         is_const: true,
-                        value: Some((123f64.into(), 10..13))
+                        value: Some((Expr::Literal(ExprLiteral::Number(123f64)).into(), 10..13))
                     }),
                     0..14
                 )),
@@ -527,11 +529,11 @@ mod tests {
                         ),
                         type_expr: None,
                         is_const: true,
-                        value: Some((123f64.into(), 10..13))
+                        value: Some((Expr::Literal(ExprLiteral::Number(123f64)).into(), 10..13))
                     }),
                     0..14
                 )),
-                AstNode::Expr((123f64.into(), 10..13)),
+                AstNode::Expr((Expr::Literal(ExprLiteral::Number(123f64)).into(), 10..13)),
             ],
             nodes
         );
@@ -556,7 +558,7 @@ mod tests {
                         ),
                         type_expr: None,
                         is_const: true,
-                        value: Some((123f64.into(), 10..13))
+                        value: Some((Expr::Literal(ExprLiteral::Number(123f64)).into(), 10..13))
                     }),
                     0..14
                 )),
@@ -588,13 +590,13 @@ mod tests {
                             },
                             6..7
                         ),
-                        type_expr: Some((Expr::Type(ExprType(Type::number())), 9..15)),
+                        type_expr: Some((Expr::Type(ExprType(Type::number())).into(), 9..15)),
                         is_const: true,
-                        value: Some((123f64.into(), 18..21))
+                        value: Some((Expr::Literal(ExprLiteral::Number(123f64)).into(), 18..21))
                     }),
                     0..22
                 )),
-                AstNode::Expr((Expr::Type(ExprType(Type::number())), 9..15)),
+                AstNode::Expr((Expr::Type(ExprType(Type::number())).into(), 9..15)),
                 AstNode::Type((Type::number(), 9..15)),
             ],
             nodes
@@ -616,25 +618,31 @@ mod tests {
                             Expr::If(Box::new(ExprIf {
                                 cond: (
                                     Expr::Infix(Box::new(ExprInfix {
-                                        lt: (Expr::Literal(ExprLiteral::Number(10f64)), 3..5),
+                                        lt: (
+                                            Expr::Literal(ExprLiteral::Number(10f64)).into(),
+                                            3..5
+                                        ),
                                         op: OpInfix::Less,
-                                        rt: (Expr::Literal(ExprLiteral::Number(0f64)), 8..9)
-                                    })),
+                                        rt: (Expr::Literal(ExprLiteral::Number(0f64)).into(), 8..9)
+                                    }))
+                                    .into(),
                                     3..9
                                 ),
                                 then: (
                                     Expr::Block(Box::new(ExprBlock {
                                         stmts: vec![],
                                         return_expr: Some((
-                                            Expr::Literal(ExprLiteral::Bool(false)),
+                                            Expr::Literal(ExprLiteral::Bool(false)).into(),
                                             12..17
                                         )),
                                         typeref: None
-                                    })),
+                                    }))
+                                    .into(),
                                     10..19
                                 ),
                                 else_: None
-                            })),
+                            }))
+                            .into(),
                             0..19
                         )
                     }),
@@ -644,36 +652,40 @@ mod tests {
                     Expr::If(Box::new(ExprIf {
                         cond: (
                             Expr::Infix(Box::new(ExprInfix {
-                                lt: (Expr::Literal(ExprLiteral::Number(10f64)), 3..5),
+                                lt: (Expr::Literal(ExprLiteral::Number(10f64)).into(), 3..5),
                                 op: OpInfix::Less,
-                                rt: (Expr::Literal(ExprLiteral::Number(0f64)), 8..9)
-                            })),
+                                rt: (Expr::Literal(ExprLiteral::Number(0f64)).into(), 8..9)
+                            }))
+                            .into(),
                             3..9
                         ),
                         then: (
                             Expr::Block(Box::new(ExprBlock {
                                 stmts: vec![],
                                 return_expr: Some((
-                                    Expr::Literal(ExprLiteral::Bool(false)),
+                                    Expr::Literal(ExprLiteral::Bool(false)).into(),
                                     12..17
                                 )),
                                 typeref: None
-                            })),
+                            }))
+                            .into(),
                             10..19
                         ),
                         else_: None
-                    })),
+                    }))
+                    .into(),
                     0..19
                 )),
                 AstNode::Expr((
                     Expr::Infix(Box::new(ExprInfix {
-                        lt: (Expr::Literal(ExprLiteral::Number(10f64)), 3..5),
+                        lt: (Expr::Literal(ExprLiteral::Number(10f64)).into(), 3..5),
                         op: OpInfix::Less,
-                        rt: (Expr::Literal(ExprLiteral::Number(0f64)), 8..9)
-                    })),
+                        rt: (Expr::Literal(ExprLiteral::Number(0f64)).into(), 8..9)
+                    }))
+                    .into(),
                     3..9
                 )),
-                AstNode::Expr((Expr::Literal(ExprLiteral::Number(10f64)), 3..5)),
+                AstNode::Expr((Expr::Literal(ExprLiteral::Number(10f64)).into(), 3..5)),
             ],
             nodes
         );
@@ -694,35 +706,45 @@ mod tests {
                             Expr::If(Box::new(ExprIf {
                                 cond: (
                                     Expr::Infix(Box::new(ExprInfix {
-                                        lt: (Expr::Literal(ExprLiteral::Number(10f64)), 3..5),
+                                        lt: (
+                                            Expr::Literal(ExprLiteral::Number(10f64)).into(),
+                                            3..5
+                                        ),
                                         op: OpInfix::NotEqual,
-                                        rt: (Expr::Literal(ExprLiteral::Number(0f64)), 9..10)
-                                    })),
+                                        rt: (
+                                            Expr::Literal(ExprLiteral::Number(0f64)).into(),
+                                            9..10
+                                        )
+                                    }))
+                                    .into(),
                                     3..10
                                 ),
                                 then: (
                                     Expr::Block(Box::new(ExprBlock {
                                         stmts: vec![],
                                         return_expr: Some((
-                                            Expr::Literal(ExprLiteral::Bool(false)),
+                                            Expr::Literal(ExprLiteral::Bool(false)).into(),
                                             13..18
                                         )),
                                         typeref: None
-                                    })),
+                                    }))
+                                    .into(),
                                     11..20
                                 ),
                                 else_: Some((
                                     Expr::Block(Box::new(ExprBlock {
                                         stmts: vec![],
                                         return_expr: Some((
-                                            Expr::Literal(ExprLiteral::Bool(true)),
+                                            Expr::Literal(ExprLiteral::Bool(true)).into(),
                                             28..32
                                         )),
                                         typeref: None
-                                    })),
+                                    }))
+                                    .into(),
                                     26..34
                                 ))
-                            })),
+                            }))
+                            .into(),
                             0..34
                         )
                     }),
@@ -732,43 +754,51 @@ mod tests {
                     Expr::If(Box::new(ExprIf {
                         cond: (
                             Expr::Infix(Box::new(ExprInfix {
-                                lt: (Expr::Literal(ExprLiteral::Number(10f64)), 3..5),
+                                lt: (Expr::Literal(ExprLiteral::Number(10f64)).into(), 3..5),
                                 op: OpInfix::NotEqual,
-                                rt: (Expr::Literal(ExprLiteral::Number(0f64)), 9..10)
-                            })),
+                                rt: (Expr::Literal(ExprLiteral::Number(0f64)).into(), 9..10)
+                            }))
+                            .into(),
                             3..10
                         ),
                         then: (
                             Expr::Block(Box::new(ExprBlock {
                                 stmts: vec![],
                                 return_expr: Some((
-                                    Expr::Literal(ExprLiteral::Bool(false)),
+                                    Expr::Literal(ExprLiteral::Bool(false)).into(),
                                     13..18
                                 )),
                                 typeref: None
-                            })),
+                            }))
+                            .into(),
                             11..20
                         ),
                         else_: Some((
                             Expr::Block(Box::new(ExprBlock {
                                 stmts: vec![],
-                                return_expr: Some((Expr::Literal(ExprLiteral::Bool(true)), 28..32)),
+                                return_expr: Some((
+                                    Expr::Literal(ExprLiteral::Bool(true)).into(),
+                                    28..32
+                                )),
                                 typeref: None
-                            })),
+                            }))
+                            .into(),
                             26..34
                         ))
-                    })),
+                    }))
+                    .into(),
                     0..34
                 )),
                 AstNode::Expr((
                     Expr::Infix(Box::new(ExprInfix {
-                        lt: (Expr::Literal(ExprLiteral::Number(10f64)), 3..5),
+                        lt: (Expr::Literal(ExprLiteral::Number(10f64)).into(), 3..5),
                         op: OpInfix::NotEqual,
-                        rt: (Expr::Literal(ExprLiteral::Number(0f64)), 9..10)
-                    })),
+                        rt: (Expr::Literal(ExprLiteral::Number(0f64)).into(), 9..10)
+                    }))
+                    .into(),
                     3..10
                 )),
-                AstNode::Expr((Expr::Literal(ExprLiteral::Number(0f64)), 9..10)),
+                AstNode::Expr((Expr::Literal(ExprLiteral::Number(0f64)).into(), 9..10)),
             ],
             nodes
         );
@@ -809,17 +839,21 @@ mod tests {
                                                         identifier: Identifier {
                                                             name: "a".to_string()
                                                         }
-                                                    }),
+                                                    })
+                                                    .into(),
                                                     24..25
                                                 )
-                                            })),
+                                            }))
+                                            .into(),
                                             23..25
                                         )),
                                         typeref: None
-                                    })),
+                                    }))
+                                    .into(),
                                     21..27
                                 )
-                            })),
+                            }))
+                            .into(),
                             0..27
                         )
                     }),
@@ -849,17 +883,21 @@ mod tests {
                                                 identifier: Identifier {
                                                     name: "a".to_string()
                                                 }
-                                            }),
+                                            })
+                                            .into(),
                                             24..25
                                         )
-                                    })),
+                                    }))
+                                    .into(),
                                     23..25
                                 )),
                                 typeref: None
-                            })),
+                            }))
+                            .into(),
                             21..27
                         )
-                    })),
+                    }))
+                    .into(),
                     0..27
                 )),
                 AstNode::Expr((
@@ -873,14 +911,17 @@ mod tests {
                                         identifier: Identifier {
                                             name: "a".to_string()
                                         }
-                                    }),
+                                    })
+                                    .into(),
                                     24..25
                                 )
-                            })),
+                            }))
+                            .into(),
                             23..25
                         )),
                         typeref: None
-                    })),
+                    }))
+                    .into(),
                     21..27
                 )),
                 AstNode::Expr((
@@ -891,10 +932,12 @@ mod tests {
                                 identifier: Identifier {
                                     name: "a".to_string()
                                 }
-                            }),
+                            })
+                            .into(),
                             24..25
                         )
-                    })),
+                    }))
+                    .into(),
                     23..25
                 )),
                 AstNode::Expr((
@@ -902,7 +945,8 @@ mod tests {
                         identifier: Identifier {
                             name: "a".to_string()
                         }
-                    }),
+                    })
+                    .into(),
                     24..25
                 )),
             ],
@@ -926,14 +970,15 @@ mod tests {
                                 identifier: Identifier {
                                     name: "a".to_string()
                                 }
-                            }),
+                            })
+                            .into(),
                             12..13
                         ),
-                        expected_type: (Expr::Type(ExprType(Type::bool())), 15..19)
+                        expected_type: (Expr::Type(ExprType(Type::bool())).into(), 15..19)
                     }),
                     0..20
                 )),
-                AstNode::Expr((Expr::Type(ExprType(Type::bool())), 15..19)),
+                AstNode::Expr((Expr::Type(ExprType(Type::bool())).into(), 15..19)),
                 AstNode::Type((Type::bool(), 15..19)),
             ],
             nodes
@@ -959,17 +1004,19 @@ mod tests {
                                             identifier: Identifier {
                                                 name: "foo".to_string()
                                             }
-                                        }),
+                                        })
+                                        .into(),
                                         0..3
                                     ),
                                     args: vec![
-                                        (1f64.into(), 4..5),
-                                        (2f64.into(), 7..8),
-                                        (3f64.into(), 10..11)
+                                        (Expr::Literal(ExprLiteral::Number(1f64)).into(), 4..5),
+                                        (Expr::Literal(ExprLiteral::Number(2f64)).into(), 7..8),
+                                        (Expr::Literal(ExprLiteral::Number(3f64)).into(), 10..11)
                                     ]
                                 }
                                 .into()
-                            ),
+                            )
+                            .into(),
                             0..12
                         )
                     }
@@ -984,17 +1031,19 @@ mod tests {
                                     identifier: Identifier {
                                         name: "foo".to_string()
                                     }
-                                }),
+                                })
+                                .into(),
                                 0..3
                             ),
                             args: vec![
-                                (1f64.into(), 4..5),
-                                (2f64.into(), 7..8),
-                                (3f64.into(), 10..11)
+                                (Expr::Literal(ExprLiteral::Number(1f64)).into(), 4..5),
+                                (Expr::Literal(ExprLiteral::Number(2f64)).into(), 7..8),
+                                (Expr::Literal(ExprLiteral::Number(3f64)).into(), 10..11)
                             ]
                         }
                         .into()
-                    ),
+                    )
+                    .into(),
                     0..12
                 )),
                 AstNode::Expr((
@@ -1002,7 +1051,8 @@ mod tests {
                         identifier: Identifier {
                             name: "foo".to_string()
                         }
-                    }),
+                    })
+                    .into(),
                     0..3
                 ))
             ],
@@ -1029,17 +1079,19 @@ mod tests {
                                             identifier: Identifier {
                                                 name: "foo".to_string()
                                             }
-                                        }),
+                                        })
+                                        .into(),
                                         0..3
                                     ),
                                     args: vec![
-                                        (1f64.into(), 4..5),
-                                        (2f64.into(), 7..8),
-                                        (3f64.into(), 10..11)
+                                        (Expr::Literal(ExprLiteral::Number(1f64)).into(), 4..5),
+                                        (Expr::Literal(ExprLiteral::Number(2f64)).into(), 7..8),
+                                        (Expr::Literal(ExprLiteral::Number(3f64)).into(), 10..11)
                                     ]
                                 }
                                 .into()
-                            ),
+                            )
+                            .into(),
                             0..12
                         )
                     }
@@ -1054,20 +1106,22 @@ mod tests {
                                     identifier: Identifier {
                                         name: "foo".to_string()
                                     }
-                                }),
+                                })
+                                .into(),
                                 0..3
                             ),
                             args: vec![
-                                (1f64.into(), 4..5),
-                                (2f64.into(), 7..8),
-                                (3f64.into(), 10..11)
+                                (Expr::Literal(ExprLiteral::Number(1f64)).into(), 4..5),
+                                (Expr::Literal(ExprLiteral::Number(2f64)).into(), 7..8),
+                                (Expr::Literal(ExprLiteral::Number(3f64)).into(), 10..11)
                             ]
                         }
                         .into()
-                    ),
+                    )
+                    .into(),
                     0..12
                 )),
-                AstNode::Expr((1f64.into(), 4..5))
+                AstNode::Expr((Expr::Literal(ExprLiteral::Number(1f64)).into(), 4..5))
             ],
             nodes
         );
@@ -1092,17 +1146,19 @@ mod tests {
                                             identifier: Identifier {
                                                 name: "foo".to_string()
                                             }
-                                        }),
+                                        })
+                                        .into(),
                                         0..3
                                     ),
                                     args: vec![
-                                        (1f64.into(), 4..5),
-                                        (2f64.into(), 7..8),
-                                        (3f64.into(), 10..11)
+                                        (Expr::Literal(ExprLiteral::Number(1f64)).into(), 4..5),
+                                        (Expr::Literal(ExprLiteral::Number(2f64)).into(), 7..8),
+                                        (Expr::Literal(ExprLiteral::Number(3f64)).into(), 10..11)
                                     ]
                                 }
                                 .into()
-                            ),
+                            )
+                            .into(),
                             0..12
                         )
                     }
@@ -1117,20 +1173,22 @@ mod tests {
                                     identifier: Identifier {
                                         name: "foo".to_string()
                                     }
-                                }),
+                                })
+                                .into(),
                                 0..3
                             ),
                             args: vec![
-                                (1f64.into(), 4..5),
-                                (2f64.into(), 7..8),
-                                (3f64.into(), 10..11)
+                                (Expr::Literal(ExprLiteral::Number(1f64)).into(), 4..5),
+                                (Expr::Literal(ExprLiteral::Number(2f64)).into(), 7..8),
+                                (Expr::Literal(ExprLiteral::Number(3f64)).into(), 10..11)
                             ]
                         }
                         .into()
-                    ),
+                    )
+                    .into(),
                     0..12
                 )),
-                AstNode::Expr((2f64.into(), 7..8))
+                AstNode::Expr((Expr::Literal(ExprLiteral::Number(2f64)).into(), 7..8))
             ],
             nodes
         );
@@ -1155,17 +1213,19 @@ mod tests {
                                             identifier: Identifier {
                                                 name: "foo".to_string()
                                             }
-                                        }),
+                                        })
+                                        .into(),
                                         0..3
                                     ),
                                     args: vec![
-                                        (1f64.into(), 4..5),
-                                        (2f64.into(), 7..8),
-                                        (3f64.into(), 10..11)
+                                        (Expr::Literal(ExprLiteral::Number(1f64)).into(), 4..5),
+                                        (Expr::Literal(ExprLiteral::Number(2f64)).into(), 7..8),
+                                        (Expr::Literal(ExprLiteral::Number(3f64)).into(), 10..11)
                                     ]
                                 }
                                 .into()
-                            ),
+                            )
+                            .into(),
                             0..12
                         )
                     }
@@ -1180,20 +1240,22 @@ mod tests {
                                     identifier: Identifier {
                                         name: "foo".to_string()
                                     }
-                                }),
+                                })
+                                .into(),
                                 0..3
                             ),
                             args: vec![
-                                (1f64.into(), 4..5),
-                                (2f64.into(), 7..8),
-                                (3f64.into(), 10..11)
+                                (Expr::Literal(ExprLiteral::Number(1f64)).into(), 4..5),
+                                (Expr::Literal(ExprLiteral::Number(2f64)).into(), 7..8),
+                                (Expr::Literal(ExprLiteral::Number(3f64)).into(), 10..11)
                             ]
                         }
                         .into()
-                    ),
+                    )
+                    .into(),
                     0..12
                 )),
-                AstNode::Expr((3f64.into(), 10..11))
+                AstNode::Expr((Expr::Literal(ExprLiteral::Number(3f64)).into(), 10..11))
             ],
             nodes
         );

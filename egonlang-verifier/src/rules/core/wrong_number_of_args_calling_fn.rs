@@ -7,26 +7,29 @@ use span::Span;
 expr_rule!(
     WrongNumberOfArgsCallingFn,
     |expr, span, _resolve_ident, resolve_expr| {
-        if let ast::Expr::Call(call_expr) = &expr {
+        if let ast::Expr::Call(call_expr) = &*expr {
             let mut errs = vec![];
 
-            if let Ok(callee_type) = resolve_expr(&call_expr.callee.0, &call_expr.callee.1) {
-                if callee_type.of_type.is_function() {
+            if let Some(callee_type) =
+                resolve_expr.get(&(call_expr.callee.0.clone(), call_expr.callee.1.clone()))
+            {
+                if callee_type.is_function() {
                     let fn_param_types: Vec<(Type, Span)> = callee_type
-                        .of_type
                         .get_function_params()
                         .iter()
                         .map(|x| (x.clone(), span.clone()))
                         .collect();
 
-                    let call_arg_types: Vec<(Type, Span)> = call_expr
+                    let call_arg_types: Vec<(&Type, Span)> = call_expr
                         .clone()
                         .args
                         .into_iter()
                         .map(|x| {
-                            let result = resolve_expr(&x.0, &x.1).expect("WHOOPS");
+                            let result = resolve_expr
+                                .get(&(x.0.clone(), x.1.clone()))
+                                .expect("WHOOPS");
 
-                            (result.of_type, x.1.clone())
+                            (result, x.1.clone())
                         })
                         .collect();
 

@@ -67,7 +67,12 @@ impl Type {
 
     /// Is this type a list with a unknown value type?
     pub fn is_unknown_list(&self) -> bool {
-        !self.is_known_list()
+        self.is_list()
+            && self
+                .params()
+                .first()
+                .unwrap_or(&Type::unknown())
+                .is_unknown()
     }
 
     /// Is this type a builtin type?

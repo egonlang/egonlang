@@ -12,7 +12,7 @@ pub type EgonResultSingleSpannedErr<T> = Result<T, EgonErrorS>;
 /// A [`Result`] using multiple [`EgonError`] wrapped in [`Span`]s.
 pub type EgonResultMultiSpannedErr<T> = Result<T, Vec<EgonErrorS>>;
 
-#[derive(Debug, Clone, Error, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Error, PartialEq, Serialize, Deserialize, Eq, Hash)]
 pub enum EgonError {
     #[error("SyntaxError: {0}")]
     SyntaxError(EgonSyntaxError),
@@ -42,7 +42,7 @@ impl Diagnosable for EgonError {
     }
 }
 
-#[derive(Debug, Clone, Error, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Error, Eq, PartialEq, Serialize, Deserialize, Hash)]
 pub enum EgonSyntaxError {
     #[error("extraneous input: {token:?}")]
     ExtraToken { token: String },
@@ -115,7 +115,7 @@ impl ErrorCode for EgonSyntaxError {
     }
 }
 
-#[derive(Debug, Clone, Error, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Error, Eq, PartialEq, Serialize, Deserialize, Hash)]
 pub enum EgonTypeError {
     #[error("mismatched types: expected type `{expected}` but received `{actual}`")]
     MismatchType { expected: String, actual: String },
