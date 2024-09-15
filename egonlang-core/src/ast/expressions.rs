@@ -125,8 +125,14 @@ pub enum Expr {
     Call(Box<ExprCall>),
 }
 
+// This is a manual implementation to avoid using derive
+//
+// Deriving Eq will cause an issue with ExprLiteral and f64
 impl Eq for Expr {}
 
+// This is a manual implementation to avoid using derive
+//
+// Deriving Hash will cause an issue with ExprLiteral and f64
 impl std::hash::Hash for Expr {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         core::mem::discriminant(self).hash(state);
