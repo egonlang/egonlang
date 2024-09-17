@@ -335,21 +335,21 @@
     /// ```egon
     /// [1, 2, 3];
     /// ```
-    </span>Expr(StmtExpr),
+    </span>Expr(Box&lt;StmtExpr&gt;),
     <span class="doccomment">/// A statement that declares and/or initalizes a variable or constant
     ///
     /// ```egon
     /// let a: number = 123;
     /// const b = 456;
     /// ```
-    </span>Assign(StmtAssign),
+    </span>Assign(Box&lt;StmtAssign&gt;),
     <span class="doccomment">/// A statement that declares a type alias
     ///
     /// ```egon
     /// type Int = number;
     /// let a: Int = 123;
     /// ```
-    </span>TypeAlias(StmtTypeAlias),
+    </span>TypeAlias(Box&lt;StmtTypeAlias&gt;),
     <span class="doccomment">/// A statement declaring a function
     ///
     /// ```egon
@@ -361,25 +361,25 @@
     /// ```egon
     /// assert_type 123 number;
     /// ```
-    </span>AssertType(StmtAssertType),
+    </span>AssertType(Box&lt;StmtAssertType&gt;),
     <span class="doccomment">/// A statement to return a value from a function
     ///
     /// ```egon
     /// (): number =&gt; { return 123; }
     /// ```
-    </span>Return(StmtReturn),
+    </span>Return(Box&lt;StmtReturn&gt;),
     Error,
 }
 
 <span class="kw">impl </span>From&lt;StmtExpr&gt; <span class="kw">for </span>Stmt {
     <span class="kw">fn </span>from(value: StmtExpr) -&gt; <span class="self">Self </span>{
-        Stmt::Expr(value)
+        Stmt::Expr(value.into())
     }
 }
 
 <span class="kw">impl </span>From&lt;StmtAssign&gt; <span class="kw">for </span>Stmt {
     <span class="kw">fn </span>from(value: StmtAssign) -&gt; <span class="self">Self </span>{
-        Stmt::Assign(value)
+        Stmt::Assign(value.into())
     }
 }
 
@@ -391,13 +391,13 @@
 
 <span class="kw">impl </span>From&lt;StmtAssertType&gt; <span class="kw">for </span>Stmt {
     <span class="kw">fn </span>from(value: StmtAssertType) -&gt; <span class="self">Self </span>{
-        Stmt::AssertType(value)
+        Stmt::AssertType(value.into())
     }
 }
 
 <span class="kw">impl </span>From&lt;StmtTypeAlias&gt; <span class="kw">for </span>Stmt {
     <span class="kw">fn </span>from(value: StmtTypeAlias) -&gt; <span class="self">Self </span>{
-        Stmt::TypeAlias(value)
+        Stmt::TypeAlias(value.into())
     }
 }
 

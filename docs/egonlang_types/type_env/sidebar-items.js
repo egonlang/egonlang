@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["RootScopeEndedError","TypeEnv","TypeEnvValue"]};
+window.SIDEBAR_ITEMS = {"struct":["RootScopeEndedError","TypeEnv","TypeEnvGetByIdent"]};

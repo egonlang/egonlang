@@ -29,7 +29,14 @@
 <a href="#29" id="29">29</a>
 <a href="#30" id="30">30</a>
 <a href="#31" id="31">31</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::expr_rule;
+<a href="#32" id="32">32</a>
+<a href="#33" id="33">33</a>
+<a href="#34" id="34">34</a>
+<a href="#35" id="35">35</a>
+<a href="#36" id="36">36</a>
+<a href="#37" id="37">37</a>
+<a href="#38" id="38">38</a>
+</pre></div><pre class="rust"><code><span class="kw">use crate</span>::{expr_rule, rules};
 <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_errors::EgonTypeError;
 
@@ -46,18 +53,25 @@
     /// 123(); // TypeError: number is not callable
     /// ```
     </span>NoNonCallableCalled,
-    |expr_span, _resolve_ident, resolve_expr| {
-        <span class="kw">let </span>(expr, <span class="kw">_</span>) = expr_span;
+    |context| {
+        <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
 
-        <span class="kw">if let </span>ast::Expr::Call(expr_call) = <span class="kw-2">&amp;*</span>expr {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(callee_type) = resolve_expr.get(<span class="kw-2">&amp;</span>(expr_call.callee.<span class="number">0</span>.clone(), expr_call.callee.<span class="number">1</span>.clone())) {
-                <span class="kw">if </span>!callee_type.is_function() {
-                    <span class="kw">return </span><span class="macro">vec!</span>[(EgonTypeError::NotCallable(callee_type.to_string()).into(), expr_call.callee.<span class="number">1</span>.clone())];
+        <span class="kw">if let </span>rules::rule::RuleTarget::Expr(expr) = context.target() {
+            <span class="kw">if let </span>ast::Expr::Call(expr_call) = <span class="kw-2">&amp;*</span>expr {
+                <span class="kw">let </span>(callee_expr, callee_span) = <span class="kw-2">&amp;</span>expr_call.callee;
+
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(callee_type) = context.resolve_expr(callee_expr.clone(), callee_span) {
+                    <span class="kw">if </span>!callee_type.is_function() {
+                        errs.push((
+                            EgonTypeError::NotCallable(callee_type.to_string()).into(),
+                            expr_call.callee.<span class="number">1</span>.clone())
+                        );
+                    }
                 }
             }
         }
 
-        <span class="macro">vec!</span>[]
+        errs
     }
 );
 </code></pre></div></section></main></body></html>

@@ -80,26 +80,26 @@
     /// let a = 10 / 0; // SyntaxError
     /// ```
     </span>DivideByZero,
-    |expr_span| {
-        <span class="kw">let </span>(expr, <span class="kw">_</span>) = expr_span;
-
+    |context| {
         <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
 
-        <span class="kw">if let </span>ast::Expr::Infix(infix_expr) = <span class="kw-2">&amp;*</span>expr {
-            <span class="kw">if let </span>ast::OpInfix::Divide = infix_expr.op {
-                <span class="kw">let </span>(lt_expr, lt_span) = <span class="kw-2">&amp;</span>infix_expr.lt;
+        <span class="kw">if let </span>rules::rule::RuleTarget::Expr(expr) = context.target() {
+            <span class="kw">if let </span>ast::Expr::Infix(infix_expr) = <span class="kw-2">&amp;*</span>expr {
+                <span class="kw">if let </span>ast::OpInfix::Divide = infix_expr.op {
+                    <span class="kw">let </span>(lt_expr, lt_span) = <span class="kw-2">&amp;</span>infix_expr.lt;
 
-                <span class="kw">if let </span>Expr::Literal(ExprLiteral::Number(lt_value)) = <span class="kw-2">&amp;**</span>lt_expr {
-                    <span class="kw">if </span><span class="kw-2">*</span>lt_value == <span class="number">0f64 </span>{
-                        errs.push((EgonSyntaxError::DivideByZero.into(), lt_span.clone()));
+                    <span class="kw">if let </span>Expr::Literal(ExprLiteral::Number(lt_value)) = <span class="kw-2">&amp;**</span>lt_expr {
+                        <span class="kw">if </span><span class="kw-2">*</span>lt_value == <span class="number">0f64 </span>{
+                            errs.push((EgonSyntaxError::DivideByZero.into(), lt_span.clone()));
+                        }
                     }
-                }
 
-                <span class="kw">let </span>(rt_expr, rt_span) = <span class="kw-2">&amp;</span>infix_expr.rt;
+                    <span class="kw">let </span>(rt_expr, rt_span) = <span class="kw-2">&amp;</span>infix_expr.rt;
 
-                <span class="kw">if let </span>Expr::Literal(ExprLiteral::Number(rt_value)) = <span class="kw-2">&amp;**</span>rt_expr {
-                    <span class="kw">if </span><span class="kw-2">*</span>rt_value == <span class="number">0f64 </span>{
-                        errs.push((EgonSyntaxError::DivideByZero.into(), rt_span.clone()));
+                    <span class="kw">if let </span>Expr::Literal(ExprLiteral::Number(rt_value)) = <span class="kw-2">&amp;**</span>rt_expr {
+                        <span class="kw">if </span><span class="kw-2">*</span>rt_value == <span class="number">0f64 </span>{
+                            errs.push((EgonSyntaxError::DivideByZero.into(), rt_span.clone()));
+                        }
                     }
                 }
             }

@@ -112,12 +112,10 @@
 <a href="#112" id="112">112</a>
 <a href="#113" id="113">113</a>
 <a href="#114" id="114">114</a>
-<a href="#115" id="115">115</a>
-<a href="#116" id="116">116</a>
-<a href="#117" id="117">117</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_errors::EgonTypeError;
+<span class="kw">use </span>rules::rule::RuleTarget;
 
 <span class="macro">expr_rule!</span>(
     <span class="doccomment">/// Checks the return type of a function matches function body's
@@ -133,34 +131,30 @@
     /// }
     /// ```
     </span>TypeMismatchFnReturnExpr,
-    |expr_span, _resolve_ident, resolve_expr| {
-        <span class="kw">let </span>(expr, <span class="kw">_</span>) = expr_span;
+    |context| {
+        <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
 
-        <span class="kw">if let </span>ast::Expr::Fn(fn_expr) = <span class="kw-2">&amp;*</span>expr {
-            <span class="kw">let </span>(fn_return_type_typeref, <span class="kw">_</span>) = <span class="kw-2">&amp;</span>fn_expr.return_type;
-            <span class="kw">let </span>(body_expr, body_span) = <span class="kw-2">&amp;</span>fn_expr.body;
+        <span class="kw">if let </span>RuleTarget::Expr(expr) = context.target() {
+            <span class="kw">if let </span>ast::Expr::Fn(fn_expr) = <span class="kw-2">&amp;*</span>expr {
+                <span class="kw">let </span>(fn_return_type_typeref, <span class="kw">_</span>) = <span class="kw-2">&amp;</span>fn_expr.return_type;
+                <span class="kw">let </span>(body_expr, body_span) = <span class="kw-2">&amp;</span>fn_expr.body;
 
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(body_typeref) = resolve_expr.get(<span class="kw-2">&amp;</span>(body_expr.clone(), body_span.clone())) {
-                <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
-
-                <span class="kw">if </span>!body_typeref.is_unknown() &amp;&amp; body_typeref != fn_return_type_typeref {
-                    errs.push((
-                        EgonTypeError::MismatchType {
-                            expected: fn_return_type_typeref.to_string(),
-                            actual: body_typeref.to_string(),
-                        }
-                        .into(),
-                        body_span.clone(),
-                    ));
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(body_typeref) = context.resolve_expr(body_expr.clone(), body_span) {
+                    <span class="kw">if </span>!body_typeref.is_unknown() &amp;&amp; body_typeref != fn_return_type_typeref {
+                        errs.push((
+                            EgonTypeError::MismatchType {
+                                expected: fn_return_type_typeref.to_string(),
+                                actual: body_typeref.to_string(),
+                            }
+                            .into(),
+                            body_span.clone(),
+                        ));
+                    }
                 }
-
-                errs
-            } <span class="kw">else </span>{
-                <span class="macro">vec!</span>[]
             }
-        } <span class="kw">else </span>{
-            <span class="macro">vec!</span>[]
         }
+
+        errs
     }
 );
 

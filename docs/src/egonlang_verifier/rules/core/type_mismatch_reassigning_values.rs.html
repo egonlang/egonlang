@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `egonlang-verifier/src/rules/core/type_mismatch_reassigning_let_values.rs`."><title>type_mismatch_reassigning_let_values.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-c5d6553a23f1e5a6.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="egonlang_verifier" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0 (eeb90cda1 2024-09-04)" data-channel="1.81.0" data-search-js="search-d234aafac6c221dd.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-d2fab2bf619172d3.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `egonlang-verifier/src/rules/core/type_mismatch_reassigning_values.rs`."><title>type_mismatch_reassigning_values.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-c5d6553a23f1e5a6.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="egonlang_verifier" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0 (eeb90cda1 2024-09-04)" data-channel="1.81.0" data-search-js="search-d234aafac6c221dd.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-d2fab2bf619172d3.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -87,9 +87,6 @@
 <a href="#87" id="87">87</a>
 <a href="#88" id="88">88</a>
 <a href="#89" id="89">89</a>
-<a href="#90" id="90">90</a>
-<a href="#91" id="91">91</a>
-<a href="#92" id="92">92</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_errors::EgonTypeError;
@@ -110,34 +107,31 @@
     /// c = 123; // TypeRrror
     /// c = true;
     /// ```
-    </span>TypeMismatchReassigningLetValues,
-    |expr_span, resolve_ident, resolve_expr| {
-        <span class="kw">let </span>(expr, <span class="kw">_</span>) = expr_span;
-
+    </span>TypeMismatchReassigningValues,
+    |context| {
         <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
 
-        <span class="kw">if let </span>ast::Expr::Assign(expr_assign) = <span class="kw-2">&amp;*</span>expr {
-            <span class="kw">let </span>identifier = <span class="kw-2">&amp;</span>expr_assign.identifier.<span class="number">0</span>.name;
+        <span class="kw">if let </span>rules::rule::RuleTarget::Expr(expr) = context.target() {
+            <span class="kw">if let </span>ast::Expr::Assign(expr_assign) = <span class="kw-2">&amp;*</span>expr {
+                <span class="kw">let </span>identifier = <span class="kw-2">&amp;</span>expr_assign.identifier.<span class="number">0</span>.name;
 
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(type_env_value) = resolve_ident.get(identifier) {
-                <span class="kw">let </span>type_env_typeref = <span class="kw-2">&amp;</span>type_env_value.of_type;
-                <span class="kw">let </span>is_const = <span class="kw-2">&amp;</span>type_env_value.is_const;
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(type_env_value) = context.resolve_identifier(identifier) {
+                    <span class="kw">let </span>(value_expr, value_span) = <span class="kw-2">&amp;</span>expr_assign.value;
+                    <span class="kw">let </span>value_typeref = context.resolve_expr(value_expr.clone(), value_span).unwrap();
 
-                <span class="kw">let </span>(value_expr, value_span) = <span class="kw-2">&amp;</span>expr_assign.value;
-                <span class="kw">let </span>value_typeref = resolve_expr.get(<span class="kw-2">&amp;</span>(value_expr.clone(), value_span.clone())).unwrap();
-
-                <span class="kw">if </span>!is_const &amp;&amp; type_env_typeref != value_typeref {
-                    errs.push((
-                        EgonTypeError::MismatchType {
-                            expected: type_env_typeref.to_string(),
-                            actual: value_typeref.to_string(),
-                        }
-                        .into(),
-                        value_span.clone(),
-                    ));
+                    <span class="kw">if </span>type_env_value.of_type != <span class="kw-2">*</span>value_typeref {
+                        errs.push((
+                            EgonTypeError::MismatchType {
+                                expected: type_env_value.of_type.to_string(),
+                                actual: value_typeref.to_string(),
+                            }
+                            .into(),
+                            value_span.clone(),
+                        ));
+                    }
                 }
-            }
-        };
+            };
+        }
 
         errs
     }
@@ -145,19 +139,19 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use </span><span class="kw">super</span>::TypeMismatchReassigningLetValuesRule;
+    <span class="kw">use </span><span class="kw">super</span>::TypeMismatchReassigningValuesRule;
     <span class="kw">use </span><span class="kw">crate</span>::verifier_rule_test;
     <span class="kw">use </span>egonlang_errors::EgonTypeError;
     <span class="kw">use </span>egonlang_types::Type;
 
     <span class="macro">verifier_rule_test!</span> {
-        TypeMismatchReassigningLetValuesRule,
+        TypeMismatchReassigningValuesRule,
         returns_ok_reassigning_with_the_same_type,
         <span class="string">"let a = 123; a = 456;"
     </span>}
 
     <span class="macro">verifier_rule_test!</span> {
-        TypeMismatchReassigningLetValuesRule,
+        TypeMismatchReassigningValuesRule,
         returns_err_reassigning_with_different_type,
         <span class="string">"let a = 123; a = false;"</span>,
         <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[(
@@ -170,7 +164,7 @@
     }
 
     <span class="macro">verifier_rule_test!</span> {
-        TypeMismatchReassigningLetValuesRule,
+        TypeMismatchReassigningValuesRule,
         returns_err_reassigning_with_different_type_2,
         <span class="string">"let a = [1, 2, 3]; a = [false, true];"</span>,
         <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[(

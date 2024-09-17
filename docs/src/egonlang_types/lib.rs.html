@@ -611,37 +611,17 @@
 <a href="#611" id="611">611</a>
 <a href="#612" id="612">612</a>
 <a href="#613" id="613">613</a>
-<a href="#614" id="614">614</a>
-<a href="#615" id="615">615</a>
-<a href="#616" id="616">616</a>
-<a href="#617" id="617">617</a>
-<a href="#618" id="618">618</a>
-<a href="#619" id="619">619</a>
-<a href="#620" id="620">620</a>
-<a href="#621" id="621">621</a>
-<a href="#622" id="622">622</a>
-<a href="#623" id="623">623</a>
 </pre></div><pre class="rust"><code><span class="kw">pub mod </span>type_env;
 
 <span class="kw">use </span>std::fmt::{<span class="self">self</span>, Display, Formatter};
 
 <span class="kw">use </span>serde::{Deserialize, Serialize};
-<span class="kw">use </span>type_env::TypeEnvValue;
 
 <span class="doccomment">/// Type in the Egon language
-</span><span class="attr">#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+</span><span class="attr">#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 </span><span class="kw">pub struct </span>Type {
     name: String,
     params: Vec&lt;Type&gt;,
-}
-
-<span class="kw">impl </span>From&lt;Type&gt; <span class="kw">for </span>TypeEnvValue {
-    <span class="kw">fn </span>from(value: Type) -&gt; <span class="self">Self </span>{
-        TypeEnvValue {
-            of_type: value,
-            is_const: <span class="bool-val">true</span>,
-        }
-    }
 }
 
 <span class="kw">impl </span>Type {

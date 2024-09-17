@@ -60,6 +60,7 @@
 <a href="#60" id="60">60</a>
 <a href="#61" id="61">61</a>
 <a href="#62" id="62">62</a>
+<a href="#63" id="63">63</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_errors::EgonSyntaxError;
@@ -72,26 +73,27 @@
     /// a = 456; // SyntaxError
     /// ```
     </span>ReassigningConstValue,
-    |expr_span, resolve_ident, _resolve_expr| {
-        <span class="kw">let </span>(expr, span) = expr_span;
-
+    |context| {
         <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
 
-        <span class="kw">if let </span>ast::Expr::Assign(expr_assign) = <span class="kw-2">&amp;*</span>expr {
-            <span class="kw">let </span>identifier = <span class="kw-2">&amp;</span>expr_assign.identifier.<span class="number">0</span>.name;
-            <span class="kw">let </span>type_env_value = resolve_ident.get(identifier);
-            <span class="kw">let </span>is_const = type_env_value.map(|x| x.is_const).unwrap_or(<span class="bool-val">false</span>);
-
-            <span class="kw">if </span>is_const {
-                errs.push((
-                    EgonSyntaxError::ReassigningConst {
-                        name: identifier.clone(),
+        <span class="kw">if let </span>rules::rule::RuleTarget::Expr(expr) = context.target() {
+            <span class="kw">if let </span>ast::Expr::Assign(expr_assign) = <span class="kw-2">&amp;*</span>expr {
+                <span class="kw">let </span>identifier = <span class="kw-2">&amp;</span>expr_assign.identifier.<span class="number">0</span>.name;
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(resolved) = context.resolve_identifier(identifier) {
+                    <span class="kw">if </span>resolved.is_const {
+                        errs.push((
+                            EgonSyntaxError::ReassigningConst {
+                                name: identifier.clone(),
+                            }
+                            .into(),
+                            context.span().clone(),
+                        ));
                     }
-                    .into(),
-                    span.clone(),
-                ));
-            }
-        };
+                }
+
+            };
+        }
+
 
         errs
     }

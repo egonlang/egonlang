@@ -108,6 +108,9 @@
 <a href="#108" id="108">108</a>
 <a href="#109" id="109">109</a>
 <a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
@@ -123,37 +126,40 @@
     /// ["a", "b", "c"];
     /// ```
     </span>TypeMisMatchListItems,
-    |expr_span, _resolve_ident, resolve_expr| {
-        <span class="kw">let </span>(expr, <span class="kw">_</span>) = expr_span;
-
+    |context| {
         <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
 
-        <span class="kw">if let </span>ast::Expr::List(expr_list) = <span class="kw-2">&amp;*</span>expr {
-            <span class="kw">let </span>items = <span class="kw-2">&amp;</span>expr_list.items;
+        <span class="kw">if let </span>rules::rule::RuleTarget::Expr(expr) = context.target() {
 
-            <span class="kw">if </span>!items.is_empty() {
-                <span class="kw">let </span>(first_item_expr, first_item_span) = items.first().unwrap();
-                <span class="kw">let </span>first_item_typeref = resolve_expr.get(<span class="kw-2">&amp;</span>(first_item_expr.clone(), first_item_span.clone()))
-                    .unwrap();
+            <span class="kw">if let </span>ast::Expr::List(expr_list) = <span class="kw-2">&amp;*</span>expr {
+                <span class="kw">let </span>items = <span class="kw-2">&amp;</span>expr_list.items;
 
-                <span class="kw">let </span>remaining_items: Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt; = items.clone().into_iter().skip(<span class="number">1</span>).collect();
+                <span class="kw">if </span>!items.is_empty() {
+                    <span class="kw">let </span>(first_item_expr, first_item_span) = items.first().unwrap();
+                    <span class="kw">let </span>first_item_typeref = context.resolve_expr(first_item_expr.clone(), first_item_span)
+                        .unwrap();
 
-                <span class="kw">for </span>(item, item_span) <span class="kw">in </span><span class="kw-2">&amp;</span>remaining_items {
-                    <span class="kw">if let </span><span class="prelude-val">Some</span>(item_typeref) = resolve_expr.get(<span class="kw-2">&amp;</span>(item.clone(), item_span.clone())) {
-                        <span class="kw">if </span>item_typeref != first_item_typeref {
-                            errs.push((
-                                EgonTypeError::MismatchType {
-                                    expected: first_item_typeref.to_string(),
-                                    actual: item_typeref.to_string(),
-                                }
-                                .into(),
-                                item_span.clone(),
-                            ));
+                    <span class="kw">let </span>remaining_items: Vec&lt;span::Spanned&lt;Arc&lt;ast::Expr&gt;&gt;&gt; = items.clone().into_iter().skip(<span class="number">1</span>).collect();
+
+                    <span class="kw">for </span>(item, item_span) <span class="kw">in </span><span class="kw-2">&amp;</span>remaining_items {
+                        <span class="kw">if let </span><span class="prelude-val">Some</span>(item_typeref) = context.resolve_expr(item.clone(), item_span) {
+                            <span class="kw">if </span>item_typeref != first_item_typeref {
+                                errs.push((
+                                    EgonTypeError::MismatchType {
+                                        expected: first_item_typeref.to_string(),
+                                        actual: item_typeref.to_string(),
+                                    }
+                                    .into(),
+                                    item_span.clone(),
+                                ));
+                            }
                         }
                     }
                 }
-            }
-        };
+            };
+        }
+
+
 
         errs
     }

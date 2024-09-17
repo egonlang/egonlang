@@ -123,48 +123,48 @@
     /// }
     /// ```
     </span>TypeMismatchArgsInCallExpr,
-    |expr_span, _resolve_ident, resolve_expr| {
-        <span class="kw">let </span>(expr, span) = expr_span;
+    |context| {
+        <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
 
-        <span class="kw">if let </span>ast::Expr::Call(call_expr) = <span class="kw-2">&amp;*</span>expr {
-            <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
+        <span class="kw">let </span>span = context.span();
 
-            <span class="kw">let </span>fn_param_types: Vec&lt;(Type, Span)&gt; = <span class="kw">if let </span><span class="prelude-val">Some</span>(callee_type) = resolve_expr.get(
-                <span class="kw-2">&amp;</span>(call_expr.callee.<span class="number">0</span>.clone(), call_expr.callee.<span class="number">1</span>.clone())
-            ) {
-                <span class="kw">if </span>!callee_type.is_function() {
-                    <span class="macro">vec!</span>[]
-                } <span class="kw">else </span>{
-                    callee_type.get_function_params().iter().map(|x| (x.clone(), span.clone())).collect()
-                }
-            } <span class="kw">else </span>{
-                <span class="macro">vec!</span>[]
-            };
-
-            <span class="kw">let </span>call_arg_types: Vec&lt;(<span class="kw-2">&amp;</span>Type, Span)&gt; = call_expr.clone().args.into_iter().map(|x| {
-                <span class="kw">let </span>result = resolve_expr.get(<span class="kw-2">&amp;</span>(x.<span class="number">0</span>.clone(), x.<span class="number">1</span>.clone())).expect(<span class="string">"WHOOPS"</span>);
-
-                (result, x.<span class="number">1</span>.clone())
-            }).collect();
-
-            <span class="kw">for </span>(i, (t, s)) <span class="kw">in </span>call_arg_types.into_iter().enumerate() {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>((xt, <span class="kw">_</span>)) = fn_param_types.get(i) {
-                    <span class="kw">if </span>t != xt {
-                        errs.push((
-                            EgonTypeError::MismatchType {
-                                expected: xt.to_string(),
-                                actual: t.to_string()
-                            }.into(),
-                            s.clone()
-                        ));
+        <span class="kw">if let </span>rules::rule::RuleTarget::Expr(expr) = context.target() {
+            <span class="kw">if let </span>ast::Expr::Call(call_expr) = <span class="kw-2">&amp;*</span>expr {
+                <span class="kw">let </span>fn_param_types: Vec&lt;(Type, Span)&gt; = <span class="kw">if let </span><span class="prelude-val">Some</span>(callee_type) = context.resolve_expr(
+                    call_expr.callee.<span class="number">0</span>.clone(), <span class="kw-2">&amp;</span>call_expr.callee.<span class="number">1
+                </span>) {
+                    <span class="kw">if </span>!callee_type.is_function() {
+                        <span class="macro">vec!</span>[]
+                    } <span class="kw">else </span>{
+                        callee_type.get_function_params().iter().map(|x| (x.clone(), span.clone())).collect()
                     }
-                }
-            };
+                } <span class="kw">else </span>{
+                    <span class="macro">vec!</span>[]
+                };
 
-            errs
-        } <span class="kw">else </span>{
-            <span class="macro">vec!</span>[]
+                <span class="kw">let </span>call_arg_types: Vec&lt;(<span class="kw-2">&amp;</span>Type, Span)&gt; = call_expr.clone().args.into_iter().map(|x| {
+                    <span class="kw">let </span>result = context.resolve_expr(x.<span class="number">0</span>, <span class="kw-2">&amp;</span>x.<span class="number">1</span>).expect(<span class="string">"WHOOPS"</span>);
+
+                    (result, x.<span class="number">1</span>.clone())
+                }).collect();
+
+                <span class="kw">for </span>(i, (t, s)) <span class="kw">in </span>call_arg_types.into_iter().enumerate() {
+                    <span class="kw">if let </span><span class="prelude-val">Some</span>((xt, <span class="kw">_</span>)) = fn_param_types.get(i) {
+                        <span class="kw">if </span>t != xt {
+                            errs.push((
+                                EgonTypeError::MismatchType {
+                                    expected: xt.to_string(),
+                                    actual: t.to_string()
+                                }.into(),
+                                s.clone()
+                            ));
+                        }
+                    }
+                };
+            }
         }
+
+        errs
     }
 );
 

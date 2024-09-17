@@ -328,6 +328,9 @@
 <a href="#328" id="328">328</a>
 <a href="#329" id="329">329</a>
 <a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>egonlang_diagnostics::Diagnosable;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>thiserror::Error;
@@ -461,6 +464,8 @@
     </span>NotCallable(String),
     <span class="attr">#[error(<span class="string">"expects {expected} arguments but received {actual}"</span>)]
     </span>WrongNumberOfArgs { expected: usize, actual: usize },
+    <span class="attr">#[error(<span class="string">"{0} is already defined"</span>)]
+    </span>AlreadyDefined(String),
 }
 
 <span class="kw">impl </span>ErrorCode <span class="kw">for </span>EgonTypeError {
@@ -478,6 +483,7 @@
                 expected: <span class="kw">_</span>,
                 actual: <span class="kw">_</span>,
             } =&gt; <span class="string">"WrongNumberOfArgs"</span>,
+            EgonTypeError::AlreadyDefined(<span class="kw">_</span>) =&gt; <span class="string">"AlreadyDefined"</span>,
         }
         .to_string();
 

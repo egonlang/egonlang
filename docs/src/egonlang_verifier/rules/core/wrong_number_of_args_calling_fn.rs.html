@@ -96,45 +96,37 @@
 <a href="#96" id="96">96</a>
 <a href="#97" id="97">97</a>
 <a href="#98" id="98">98</a>
-<a href="#99" id="99">99</a>
-<a href="#100" id="100">100</a>
-<a href="#101" id="101">101</a>
-<a href="#102" id="102">102</a>
-<a href="#103" id="103">103</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_errors::EgonTypeError;
 <span class="kw">use </span>egonlang_types::Type;
 <span class="kw">use </span>span::Span;
 
-<span class="macro">expr_rule!</span>(
-    WrongNumberOfArgsCallingFn,
-    |expr_span, _resolve_ident, resolve_expr| {
-        <span class="kw">let </span>(expr, span) = expr_span;
+<span class="macro">expr_rule!</span>(WrongNumberOfArgsCallingFn, |context| {
+    <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
 
+    <span class="kw">if let </span>rules::rule::RuleTarget::Expr(expr) = context.target() {
         <span class="kw">if let </span>ast::Expr::Call(call_expr) = <span class="kw-2">&amp;*</span>expr {
-            <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
-
             <span class="kw">if let </span><span class="prelude-val">Some</span>(callee_type) =
-                resolve_expr.get(<span class="kw-2">&amp;</span>(call_expr.callee.<span class="number">0</span>.clone(), call_expr.callee.<span class="number">1</span>.clone()))
+                context.resolve_expr(call_expr.callee.<span class="number">0</span>.clone(), <span class="kw-2">&amp;</span>call_expr.callee.<span class="number">1</span>)
             {
                 <span class="kw">if </span>callee_type.is_function() {
                     <span class="kw">let </span>fn_param_types: Vec&lt;(Type, Span)&gt; = callee_type
                         .get_function_params()
                         .iter()
-                        .map(|x| (x.clone(), span.clone()))
+                        .map(|param_expr| (param_expr.clone(), context.span().clone()))
                         .collect();
 
                     <span class="kw">let </span>call_arg_types: Vec&lt;(<span class="kw-2">&amp;</span>Type, Span)&gt; = call_expr
                         .clone()
                         .args
                         .into_iter()
-                        .map(|x| {
-                            <span class="kw">let </span>result = resolve_expr
-                                .get(<span class="kw-2">&amp;</span>(x.<span class="number">0</span>.clone(), x.<span class="number">1</span>.clone()))
+                        .map(|(call_arg_expr, call_arg_span)| {
+                            <span class="kw">let </span>result = context
+                                .resolve_expr(call_arg_expr, <span class="kw-2">&amp;</span>call_arg_span)
                                 .expect(<span class="string">"WHOOPS"</span>);
 
-                            (result, x.<span class="number">1</span>.clone())
+                            (result, call_arg_span)
                         })
                         .collect();
 
@@ -145,18 +137,16 @@
                                 actual: call_arg_types.len(),
                             }
                             .into(),
-                            span.clone(),
+                            context.span().clone(),
                         ));
                     }
                 }
             }
-
-            errs
-        } <span class="kw">else </span>{
-            <span class="macro">vec!</span>[]
         }
     }
-);
+
+    errs
+});
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {

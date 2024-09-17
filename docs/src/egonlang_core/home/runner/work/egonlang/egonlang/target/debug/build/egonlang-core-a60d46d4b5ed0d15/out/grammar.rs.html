@@ -12819,7 +12819,7 @@
 <a href="#12819" id="12819">12819</a>
 <a href="#12820" id="12820">12820</a>
 </pre></div><pre class="rust"><code><span class="comment">// auto-generated: "lalrpop 0.21.0"
-// sha3: 107ed872d274f8f99ea6d0d49345807c8ac8873c1c786ce4af1b5e6fb76e1725
+// sha3: 5e08ce49a5e00b490c23711265b1b2f43c21b9123d185af97c7ff683cde7e878
 </span><span class="kw">use </span>lalrpop_util::ParseError;
 <span class="kw">use </span>egonlang_errors::EgonErrorS;
 <span class="kw">use </span>std::sync::Arc;
@@ -20341,7 +20341,7 @@
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
 ) -&gt; ast::Stmt
 {
-    ast::Stmt::Expr(ast::StmtExpr { expr })
+    ast::Stmt::Expr(ast::StmtExpr { expr }.into())
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -20360,7 +20360,7 @@
     ast::Stmt::AssertType(ast::StmtAssertType { 
             value,
             expected_type: (ast::Expr::Type(ast::ExprType(expected_type.<span class="number">0</span>)).into(), expected_type.<span class="number">1</span>)
-        })
+        }.into())
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -20374,7 +20374,7 @@
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
 ) -&gt; ast::Stmt
 {
-    ast::Stmt::Return(ast::StmtReturn::new(value))
+    ast::Stmt::Return(ast::StmtReturn::new(value).into())
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -20390,13 +20390,13 @@
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
 ) -&gt; ast::Stmt
 {
-    ast::StmtAssign {
+    ast::Stmt::Assign(ast::StmtAssign {
             identifier,
             type_expr: type_expr.map(|(ty, ty_span)|
                 (ast::Expr::Type(ast::ExprType(ty)).into(), ty_span)),
             is_const: <span class="bool-val">false</span>,
             value,
-        }.into()
+        }.into())
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -20412,13 +20412,13 @@
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
 ) -&gt; ast::Stmt
 {
-    ast::StmtAssign {
+    ast::Stmt::Assign(ast::StmtAssign {
             identifier,
             type_expr: type_expr.map(|(ty, ty_span)|
                 (ast::Expr::Type(ast::ExprType(ty)).into(), ty_span)),
             is_const: <span class="bool-val">true</span>,
             value,
-        }.into()
+        }.into())
 }
 
 <span class="attr">#[allow(unused_variables)]
@@ -20433,7 +20433,7 @@
     (<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>): (usize, lexer::Token, usize),
 ) -&gt; ast::Stmt
 {
-    ast::StmtTypeAlias { alias, value }.into()
+    ast::Stmt::TypeAlias(ast::StmtTypeAlias { alias, value }.into())
 }
 
 <span class="attr">#[allow(unused_variables)]

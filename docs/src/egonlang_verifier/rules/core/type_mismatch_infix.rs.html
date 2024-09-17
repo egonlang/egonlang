@@ -211,18 +211,11 @@
 <a href="#211" id="211">211</a>
 <a href="#212" id="212">212</a>
 <a href="#213" id="213">213</a>
-<a href="#214" id="214">214</a>
-<a href="#215" id="215">215</a>
-<a href="#216" id="216">216</a>
-<a href="#217" id="217">217</a>
-<a href="#218" id="218">218</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>std::{collections::HashMap, sync::Arc};
-
-<span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
-<span class="kw">use </span>ast::Expr;
+</pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>egonlang_errors::{EgonErrorS, EgonTypeError};
 <span class="kw">use </span>egonlang_types::Type;
+<span class="kw">use </span>rules::rule::RuleContext;
 
 <span class="macro">expr_rule!</span>(
     <span class="doccomment">/// Checks value types for all infix operation expressions
@@ -233,93 +226,94 @@
     /// 1 + 2;
     /// ```
     </span>TypeMismatchInfix,
-    |expr_span, _resolve_ident, resolve_expr| {
-        <span class="kw">let </span>(expr, <span class="kw">_</span>) = expr_span;
-
+    |context| {
         <span class="kw">let </span><span class="kw-2">mut </span>errs: Vec&lt;EgonErrorS&gt; = <span class="macro">vec!</span>[];
+        <span class="kw">if let </span>rules::rule::RuleTarget::Expr(expr) = context.target() {
+            <span class="kw">if let </span>ast::Expr::Infix(infix) = <span class="kw-2">&amp;*</span>expr {
+                <span class="kw">match </span>infix.op {
+                    ast::OpInfix::Greater =&gt; {
+                        <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), context)
+                            .err()
+                            .unwrap_or_default();
 
-        <span class="kw">if let </span>ast::Expr::Infix(infix) = <span class="kw-2">&amp;*</span>expr {
-            <span class="kw">match </span>infix.op {
-                ast::OpInfix::Greater =&gt; {
-                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
-                        .err()
-                        .unwrap_or_default();
+                        errs.extend(infix_errs);
+                    }
+                    ast::OpInfix::GreaterEqual =&gt; {
+                        <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), context)
+                            .err()
+                            .unwrap_or_default();
 
-                    errs.extend(infix_errs);
-                }
-                ast::OpInfix::GreaterEqual =&gt; {
-                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
-                        .err()
-                        .unwrap_or_default();
+                        errs.extend(infix_errs);
+                    }
+                    ast::OpInfix::Less =&gt; {
+                        <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), context)
+                            .err()
+                            .unwrap_or_default();
 
-                    errs.extend(infix_errs);
-                }
-                ast::OpInfix::Less =&gt; {
-                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
-                        .err()
-                        .unwrap_or_default();
+                        errs.extend(infix_errs);
+                    }
+                    ast::OpInfix::LessEqual =&gt; {
+                        <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), context)
+                            .err()
+                            .unwrap_or_default();
 
-                    errs.extend(infix_errs);
-                }
-                ast::OpInfix::LessEqual =&gt; {
-                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
-                        .err()
-                        .unwrap_or_default();
+                        errs.extend(infix_errs);
+                    }
+                    ast::OpInfix::Add =&gt; {
+                        <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), context)
+                            .err()
+                            .unwrap_or_default();
 
-                    errs.extend(infix_errs);
-                }
-                ast::OpInfix::Add =&gt; {
-                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
-                        .err()
-                        .unwrap_or_default();
+                        errs.extend(infix_errs);
+                    }
+                    ast::OpInfix::Subtract =&gt; {
+                        <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), context)
+                            .err()
+                            .unwrap_or_default();
 
-                    errs.extend(infix_errs);
-                }
-                ast::OpInfix::Subtract =&gt; {
-                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
-                        .err()
-                        .unwrap_or_default();
+                        errs.extend(infix_errs);
+                    }
+                    ast::OpInfix::Multiply =&gt; {
+                        <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), context)
+                            .err()
+                            .unwrap_or_default();
 
-                    errs.extend(infix_errs);
-                }
-                ast::OpInfix::Multiply =&gt; {
-                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
-                        .err()
-                        .unwrap_or_default();
+                        errs.extend(infix_errs);
+                    }
+                    ast::OpInfix::Divide =&gt; {
+                        <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), context)
+                            .err()
+                            .unwrap_or_default();
 
-                    errs.extend(infix_errs);
-                }
-                ast::OpInfix::Divide =&gt; {
-                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
-                        .err()
-                        .unwrap_or_default();
+                        errs.extend(infix_errs);
+                    }
+                    ast::OpInfix::LogicAnd =&gt; {
+                        <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::bool(), context)
+                            .err()
+                            .unwrap_or_default();
 
-                    errs.extend(infix_errs);
-                }
-                ast::OpInfix::LogicAnd =&gt; {
-                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::bool(), resolve_expr)
-                        .err()
-                        .unwrap_or_default();
+                        errs.extend(infix_errs);
+                    }
+                    ast::OpInfix::LogicOr =&gt; {
+                        <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::bool(), context)
+                            .err()
+                            .unwrap_or_default();
 
-                    errs.extend(infix_errs);
-                }
-                ast::OpInfix::LogicOr =&gt; {
-                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::bool(), resolve_expr)
-                        .err()
-                        .unwrap_or_default();
+                        errs.extend(infix_errs);
+                    }
+                    ast::OpInfix::Modulus =&gt; {
+                        <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), context)
+                            .err()
+                            .unwrap_or_default();
 
-                    errs.extend(infix_errs);
-                }
-                ast::OpInfix::Modulus =&gt; {
-                    <span class="kw">let </span>infix_errs = validate_infix_types(infix, Type::number(), resolve_expr)
-                        .err()
-                        .unwrap_or_default();
-
-                    errs.extend(infix_errs);
-                }
-                <span class="kw">_ </span>=&gt; {}
-            };
+                        errs.extend(infix_errs);
+                    }
+                    <span class="kw">_ </span>=&gt; {}
+                };
+            }
         }
+
+
 
         errs
     }
@@ -328,19 +322,15 @@
 <span class="kw">fn </span>validate_infix_types(
     infix: <span class="kw-2">&amp;</span>ast::ExprInfix,
     expected_type: Type,
-    resolve_expr: <span class="kw-2">&amp;</span>HashMap&lt;span::Spanned&lt;Arc&lt;Expr&gt;&gt;, Type&gt;,
+    context: <span class="kw-2">&amp;</span>RuleContext,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;(), Vec&lt;EgonErrorS&gt;&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>errs = <span class="macro">vec!</span>[];
 
     <span class="kw">let </span>(lt_expr, lt_span) = <span class="kw-2">&amp;</span>infix.lt;
-    <span class="kw">let </span>lt_type = resolve_expr
-        .get(<span class="kw-2">&amp;</span>(lt_expr.clone(), lt_span.clone()))
-        .unwrap();
+    <span class="kw">let </span>lt_type = context.resolve_expr(lt_expr.clone(), lt_span).unwrap();
 
     <span class="kw">let </span>(rt_expr, rt_span) = <span class="kw-2">&amp;</span>infix.rt;
-    <span class="kw">let </span>rt_type = resolve_expr
-        .get(<span class="kw-2">&amp;</span>(rt_expr.clone(), rt_span.clone()))
-        .unwrap();
+    <span class="kw">let </span>rt_type = context.resolve_expr(rt_expr.clone(), rt_span).unwrap();
 
     <span class="kw">if </span><span class="kw-2">*</span>lt_type != expected_type {
         errs.push((
