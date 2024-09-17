@@ -1,22 +1,31 @@
 use crate::prelude::*;
 use egonlang_core::ast::Stmt;
 use egonlang_errors::{EgonErrorS, EgonTypeError};
+use rules::rule::RuleTarget;
 
-stmt_rule!(AssertType, |stmt_span, _resolve_ident, resolve_expr| {
-    let (stmt, _) = stmt_span;
-
+stmt_rule!(AssertType, |context| {
     let mut errs: Vec<EgonErrorS> = vec![];
 
-    if let Stmt::AssertType(stmt_assert_type) = stmt {
-        if let Some(value_type) = resolve_expr.get(&(
-            stmt_assert_type.value.0.clone(),
-            stmt_assert_type.value.1.clone(),
-        )) {
-            if let Some(expected_type_type) = resolve_expr.get(&(
+    if let RuleTarget::Stmt(Stmt::AssertType(stmt_assert_type)) = context.target() {
+        if let Some(value_type) =
+            context.resolve_expr(stmt_assert_type.value.0.clone(), &stmt_assert_type.value.1)
+        {
+            if let Some(expected_type_type) = context.resolve_expr(
                 stmt_assert_type.expected_type.0.clone(),
-                stmt_assert_type.expected_type.1.clone(),
-            )) {
-                if value_type != expected_type_type {
+                &stmt_assert_type.expected_type.1,
+            ) {
+                // Check if the value type is the expected type
+                //
+                // Ignore this if the expected type is "unknown"
+                // This prevents generating confusing type errors
+                //
+                // ```egon
+                // type 123, DoesntExist;
+                // // out: TypeError: mismatched types: expected type `number` but received `string`
+                // ```
+                //
+                // TODO: Should this produce TypeError:UnknownType instead?
+                if value_type != expected_type_type && !expected_type_type.is_unknown() {
                     errs.push((
                         EgonTypeError::MismatchType {
                             expected: expected_type_type.to_string(),

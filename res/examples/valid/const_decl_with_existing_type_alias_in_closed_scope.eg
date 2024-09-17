@@ -1,0 +1,5 @@
+{
+    type A = number;
+};
+
+const A = 123;

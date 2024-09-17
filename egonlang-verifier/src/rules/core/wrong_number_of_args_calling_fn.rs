@@ -4,34 +4,31 @@ use egonlang_errors::EgonTypeError;
 use egonlang_types::Type;
 use span::Span;
 
-expr_rule!(
-    WrongNumberOfArgsCallingFn,
-    |expr_span, _resolve_ident, resolve_expr| {
-        let (expr, span) = expr_span;
+expr_rule!(WrongNumberOfArgsCallingFn, |context| {
+    let mut errs = vec![];
 
+    if let rules::rule::RuleTarget::Expr(expr) = context.target() {
         if let ast::Expr::Call(call_expr) = &*expr {
-            let mut errs = vec![];
-
             if let Some(callee_type) =
-                resolve_expr.get(&(call_expr.callee.0.clone(), call_expr.callee.1.clone()))
+                context.resolve_expr(call_expr.callee.0.clone(), &call_expr.callee.1)
             {
                 if callee_type.is_function() {
                     let fn_param_types: Vec<(Type, Span)> = callee_type
                         .get_function_params()
                         .iter()
-                        .map(|x| (x.clone(), span.clone()))
+                        .map(|param_expr| (param_expr.clone(), context.span().clone()))
                         .collect();
 
                     let call_arg_types: Vec<(&Type, Span)> = call_expr
                         .clone()
                         .args
                         .into_iter()
-                        .map(|x| {
-                            let result = resolve_expr
-                                .get(&(x.0.clone(), x.1.clone()))
+                        .map(|(call_arg_expr, call_arg_span)| {
+                            let result = context
+                                .resolve_expr(call_arg_expr, &call_arg_span)
                                 .expect("WHOOPS");
 
-                            (result, x.1.clone())
+                            (result, call_arg_span)
                         })
                         .collect();
 
@@ -42,18 +39,16 @@ expr_rule!(
                                 actual: call_arg_types.len(),
                             }
                             .into(),
-                            span.clone(),
+                            context.span().clone(),
                         ));
                     }
                 }
             }
-
-            errs
-        } else {
-            vec![]
         }
     }
-);
+
+    errs
+});
 
 #[cfg(test)]
 mod tests {

@@ -10,26 +10,26 @@ expr_rule!(
     /// let a = 10 / 0; // SyntaxError
     /// ```
     DivideByZero,
-    |expr_span| {
-        let (expr, _) = expr_span;
-
+    |context| {
         let mut errs = vec![];
 
-        if let ast::Expr::Infix(infix_expr) = &*expr {
-            if let ast::OpInfix::Divide = infix_expr.op {
-                let (lt_expr, lt_span) = &infix_expr.lt;
+        if let rules::rule::RuleTarget::Expr(expr) = context.target() {
+            if let ast::Expr::Infix(infix_expr) = &*expr {
+                if let ast::OpInfix::Divide = infix_expr.op {
+                    let (lt_expr, lt_span) = &infix_expr.lt;
 
-                if let Expr::Literal(ExprLiteral::Number(lt_value)) = &**lt_expr {
-                    if *lt_value == 0f64 {
-                        errs.push((EgonSyntaxError::DivideByZero.into(), lt_span.clone()));
+                    if let Expr::Literal(ExprLiteral::Number(lt_value)) = &**lt_expr {
+                        if *lt_value == 0f64 {
+                            errs.push((EgonSyntaxError::DivideByZero.into(), lt_span.clone()));
+                        }
                     }
-                }
 
-                let (rt_expr, rt_span) = &infix_expr.rt;
+                    let (rt_expr, rt_span) = &infix_expr.rt;
 
-                if let Expr::Literal(ExprLiteral::Number(rt_value)) = &**rt_expr {
-                    if *rt_value == 0f64 {
-                        errs.push((EgonSyntaxError::DivideByZero.into(), rt_span.clone()));
+                    if let Expr::Literal(ExprLiteral::Number(rt_value)) = &**rt_expr {
+                        if *rt_value == 0f64 {
+                            errs.push((EgonSyntaxError::DivideByZero.into(), rt_span.clone()));
+                        }
                     }
                 }
             }

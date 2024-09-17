@@ -1,0 +1,7 @@
+let a = 123;
+
+{
+    const a = 456;
+};
+
+// out: TypeError: a is already defined

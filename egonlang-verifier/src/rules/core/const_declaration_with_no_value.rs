@@ -1,26 +1,25 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
 use egonlang_errors::EgonSyntaxError;
+use rules::rule::RuleTarget;
 
 stmt_rule!(
     /// Checks assignment statements initialize consts with a value
     DeclareConstWithoutValue,
-    | stmt_span, _resolve_ident, _resolve_expr | {
-        let (stmt, span) = stmt_span;
-
+    |context| {
         let mut errs = vec![];
 
-        if let ast::Stmt::Assign(stmt_assign) = stmt {
+        if let RuleTarget::Stmt(ast::Stmt::Assign(stmt_assign)) = context.target() {
             if stmt_assign.is_const && stmt_assign.value.is_none() {
                 errs.push((
                     EgonSyntaxError::UninitializedConst {
                         name: stmt_assign.identifier.0.name.clone(),
                     }
                     .into(),
-                    span.clone(),
+                    context.span().clone(),
                 ));
             }
-        };
+        }
 
         errs
     }

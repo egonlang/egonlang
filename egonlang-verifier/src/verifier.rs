@@ -2,12 +2,8 @@ use std::{collections::HashMap, sync::Arc};
 
 use ast::ExprS;
 use egonlang_core::prelude::*;
-use egonlang_errors::{EgonErrorS, EgonResultMultiSpannedErr, EgonTypeError};
-use egonlang_types::{
-    egon_unknown,
-    type_env::{TypeEnv, TypeEnvValue},
-    Type,
-};
+use egonlang_errors::{EgonError, EgonErrorS, EgonResultMultiSpannedErr, EgonTypeError};
+use egonlang_types::{egon_unknown, type_env::TypeEnv, Type};
 use span::Span;
 use tracelog::{log_expr, log_identifier, log_stmt, log_type};
 
@@ -85,7 +81,7 @@ impl<'a> Verifier<'a> {
         self.add_rule(DivideByZeroRule);
         self.add_rule(TypeMismatchFnReturnExprRule);
         self.add_rule(TypeMismatchIfCondExprRule);
-        self.add_rule(TypeMismatchReassigningLetValuesRule);
+        self.add_rule(TypeMismatchReassigningValuesRule);
         self.add_rule(TypeMismatchIfthenElseExprRule);
         self.add_rule(InvalidTypeAliasNameRule);
         self.add_rule(AssertTypeRule);
@@ -127,7 +123,7 @@ impl<'a> Verifier<'a> {
         &mut self,
         identifier: &str,
         span: &Span,
-    ) -> EgonResultMultiSpannedErr<TypeEnvValue> {
+    ) -> EgonResultMultiSpannedErr<Type> {
         tracelog::tracelog!(
             label = verifier, resolve_identifier;
             "(level: {}) Resolving type for identifier: {}",
@@ -135,16 +131,19 @@ impl<'a> Verifier<'a> {
             log_identifier(&identifier)
         );
 
-        let resolved_to = self.type_env.get(identifier);
+        let resolved_to = self
+            .type_env
+            .get_constant(identifier)
+            .or_else(|| self.type_env.get_variable(identifier));
 
-        match &resolved_to {
+        match resolved_to {
             Some(resolved_to) => {
                 tracelog::tracelog!(
                     label = verifier, resolve_identifier;
                     "(level: {}) Resolved identifier: {} to type: {}",
                     self.current_type_env_level(),
                     log_identifier(&identifier),
-                    log_type(&resolved_to.of_type)
+                    log_type(&resolved_to)
                 );
             }
             None => {
@@ -157,10 +156,12 @@ impl<'a> Verifier<'a> {
             }
         }
 
-        resolved_to.ok_or(vec![(
-            EgonTypeError::Undefined(identifier.to_string()).into(),
-            span.clone(),
-        )])
+        resolved_to
+            .ok_or(vec![(
+                EgonError::TypeError(EgonTypeError::Undefined(identifier.to_string())),
+                span.clone(),
+            )])
+            .cloned()
     }
 
     /// Resolve an expression's type recursively.
@@ -178,7 +179,7 @@ impl<'a> Verifier<'a> {
         &mut self,
         expr: Arc<ast::Expr>,
         span: &Span,
-    ) -> EgonResultMultiSpannedErr<TypeEnvValue> {
+    ) -> EgonResultMultiSpannedErr<Type> {
         tracelog::tracelog!(
             label = verifier,resolve_expr_type;
             "(level: {}) Resolving type for expression {}",
@@ -186,21 +187,18 @@ impl<'a> Verifier<'a> {
             log_expr(&expr)
         );
 
-        if let Some(v) = self.expr_types.get(&(expr.clone(), span.clone())) {
+        if let Some(expr_type) = self.expr_types.get(&(expr.clone(), span.clone())) {
             tracelog::tracelog!(
                 label = verifier,resolve_expr_type;
                 "Found cached type {} for expression {}",
-                log_type(v),
+                log_type(expr_type),
                 log_expr(&expr)
             );
 
-            return Ok(TypeEnvValue {
-                of_type: v.clone(),
-                is_const: true,
-            });
+            return Ok(expr_type.clone());
         }
 
-        let resolved_type = match &*expr {
+        let resolved_type: EgonResultMultiSpannedErr<Type> = match &*expr {
             ast::Expr::Call(expr_call) => {
                 tracelog::tracelog!(
                     label = verifier,resolve_expr_type,expr_call;
@@ -211,7 +209,7 @@ impl<'a> Verifier<'a> {
 
                 match self.resolve_expr_type(expr_call.callee.0.clone(), span) {
                     Ok(callee_type) => {
-                        if callee_type.of_type.is_function() {
+                        if callee_type.is_function() {
                             tracelog::tracelog!(
                                 label = verifier,resolve_expr_type,expr_call,resolve_callee;
                                 "(level: {}) callee {} in call expression {} is a function",
@@ -220,7 +218,7 @@ impl<'a> Verifier<'a> {
                                 log_expr(&expr)
                             );
 
-                            Ok(callee_type.of_type.get_function_return().into())
+                            Ok(callee_type.get_function_return())
                         } else {
                             tracelog::tracelog!(
                                 label = verifier,resolve_expr_type,expr_call,resolve_callee;
@@ -230,7 +228,7 @@ impl<'a> Verifier<'a> {
                                 log_expr(&expr)
                             );
 
-                            Ok(egon_unknown!().into())
+                            Ok(egon_unknown!())
                         }
                     }
                     Err(errs) => Err(errs),
@@ -255,15 +253,13 @@ impl<'a> Verifier<'a> {
                 );
 
                 if list_expr.items.is_empty() {
-                    return Ok(Type::unknown_list().into());
+                    return Ok(Type::unknown_list());
                 }
 
                 let (first_item_expr, _) = list_expr.items.first().unwrap().clone();
-                let first_item_type = self
-                    .resolve_expr_type(first_item_expr.clone(), span)?
-                    .of_type;
+                let first_item_type = self.resolve_expr_type(first_item_expr.clone(), span)?;
 
-                Ok(Type::list(first_item_type).into())
+                Ok(Type::list(first_item_type))
             }
             ast::Expr::Tuple(tuple_expr) => {
                 tracelog::tracelog!(
@@ -274,21 +270,17 @@ impl<'a> Verifier<'a> {
                 );
 
                 if tuple_expr.items.is_empty() {
-                    return Ok(Type::tuple(vec![]).into());
+                    return Ok(Type::tuple(vec![]));
                 }
 
                 let item_types: Vec<Type> = tuple_expr
                     .items
                     .clone()
                     .into_iter()
-                    .map(|(x_expr, _)| {
-                        self.resolve_expr_type(x_expr.clone(), span)
-                            .unwrap()
-                            .of_type
-                    })
+                    .map(|(x_expr, _)| self.resolve_expr_type(x_expr.clone(), span).unwrap())
                     .collect();
 
-                Ok(Type::tuple(item_types).into())
+                Ok(Type::tuple(item_types))
             }
             ast::Expr::Block(block_expr) => {
                 tracelog::tracelog!(
@@ -299,10 +291,7 @@ impl<'a> Verifier<'a> {
                 );
 
                 if let Some(block_typeref) = &block_expr.typeref {
-                    return Ok(TypeEnvValue {
-                        of_type: block_typeref.clone(),
-                        is_const: true,
-                    });
+                    return Ok(block_typeref.clone());
                 }
 
                 if let Some((block_expr_return_expr, _)) = &block_expr.return_expr {
@@ -318,7 +307,7 @@ impl<'a> Verifier<'a> {
                         log_type(&resolved_type)
                     );
 
-                    return Ok(resolved_type.into());
+                    Ok(resolved_type)
                 }
             }
             ast::Expr::Type(type_expr) => {
@@ -338,7 +327,7 @@ impl<'a> Verifier<'a> {
                         log_type(type_expr)
                     );
 
-                    return Ok(type_expr.0.clone().into());
+                    return Ok(type_expr.0.clone());
                 }
 
                 match self.resolve_identifier(type_expr.0.to_string().as_str(), span) {
@@ -348,10 +337,10 @@ impl<'a> Verifier<'a> {
                             "(level: {}) Resolved type expression {} to type {}",
                             self.current_type_env_level(),
                             log_expr(type_expr),
-                            log_type(&type_env_value.of_type)
+                            log_type(&type_env_value)
                         );
 
-                        Ok(type_env_value.clone())
+                        Ok(type_env_value)
                     }
                     Err(errs) => Err(errs),
                 }
@@ -389,7 +378,7 @@ impl<'a> Verifier<'a> {
                     log_expr(&expr)
                 );
 
-                Ok(Type::unit().into())
+                Ok(Type::unit())
             }
             ast::Expr::Literal(literal) => {
                 tracelog::tracelog!(
@@ -403,8 +392,7 @@ impl<'a> Verifier<'a> {
                     ast::ExprLiteral::Bool(_) => Type::bool(),
                     ast::ExprLiteral::Number(_) => Type::number(),
                     ast::ExprLiteral::String(_) => Type::string(),
-                }
-                .into())
+                })
             }
             ast::Expr::Infix(infix) => {
                 tracelog::tracelog!(
@@ -428,8 +416,7 @@ impl<'a> Verifier<'a> {
                     ast::OpInfix::NotEqual => Type::bool(),
                     ast::OpInfix::LogicAnd => Type::bool(),
                     ast::OpInfix::LogicOr => Type::bool(),
-                }
-                .into())
+                })
             }
             ast::Expr::Prefix(prefix) => {
                 tracelog::tracelog!(
@@ -442,8 +429,7 @@ impl<'a> Verifier<'a> {
                 Ok(match prefix.op {
                     ast::OpPrefix::Negate => Type::number(),
                     ast::OpPrefix::Not => Type::bool(),
-                }
-                .into())
+                })
             }
             ast::Expr::Fn(fn_) => {
                 tracelog::tracelog!(
@@ -462,8 +448,7 @@ impl<'a> Verifier<'a> {
                             .collect(),
                     ),
                     fn_.return_type.clone().0,
-                )
-                .into())
+                ))
             }
             ast::Expr::Range(_) => {
                 tracelog::tracelog!(
@@ -473,7 +458,7 @@ impl<'a> Verifier<'a> {
                     log_expr(&expr)
                 );
 
-                Ok(Type::range().into())
+                Ok(Type::range())
             }
         };
 
@@ -484,7 +469,7 @@ impl<'a> Verifier<'a> {
                     "(level: {}) Resolved expression {} to the type {}",
                     self.current_type_env_level(),
                     log_expr(&expr),
-                    log_type(&resolved_type.of_type)
+                    log_type(&resolved_type)
                 );
             }
             Err(expr_errs) => {
@@ -557,24 +542,32 @@ impl<'a> Verifier<'a> {
                     (None, Some((value_expr, value_span))) => {
                         let value_typeref = self.visit_expr(value_expr.clone(), value_span)?;
 
-                        self.type_env.set(
-                            &stmt_assign.identifier.0.name,
-                            TypeEnvValue {
-                                of_type: value_typeref.of_type,
-                                is_const: stmt_assign.is_const,
-                            },
-                        );
+                        let result = if stmt_assign.is_const {
+                            self.type_env
+                                .set_const(&stmt_assign.identifier.0.name, value_typeref)
+                        } else {
+                            self.type_env
+                                .set_variable(&stmt_assign.identifier.0.name, value_typeref)
+                        };
+
+                        if let Err(result_err) = result {
+                            errs.push((result_err, stmt_assign.identifier.1.clone()));
+                        }
                     }
                     (Some((type_expr, type_span)), None) => {
                         match self.visit_expr(type_expr.clone(), type_span) {
                             Ok(type_typeref) => {
-                                self.type_env.set(
-                                    &stmt_assign.identifier.0.name,
-                                    TypeEnvValue {
-                                        of_type: type_typeref.of_type,
-                                        is_const: stmt_assign.is_const,
-                                    },
-                                );
+                                let result = if stmt_assign.is_const {
+                                    self.type_env
+                                        .set_const(&stmt_assign.identifier.0.name, type_typeref)
+                                } else {
+                                    self.type_env
+                                        .set_variable(&stmt_assign.identifier.0.name, type_typeref)
+                                };
+
+                                if let Err(result_err) = result {
+                                    errs.push((result_err, stmt_assign.identifier.1.clone()));
+                                }
                             }
                             Err(type_errs) => {
                                 errs.extend(type_errs);
@@ -586,13 +579,17 @@ impl<'a> Verifier<'a> {
                             Ok(type_typeref) => {
                                 self.visit_expr(value_expr.clone(), value_span)?;
 
-                                self.type_env.set(
-                                    &stmt_assign.identifier.0.name,
-                                    TypeEnvValue {
-                                        of_type: type_typeref.of_type,
-                                        is_const: stmt_assign.is_const,
-                                    },
-                                );
+                                let result = if stmt_assign.is_const {
+                                    self.type_env
+                                        .set_const(&stmt_assign.identifier.0.name, type_typeref)
+                                } else {
+                                    self.type_env
+                                        .set_variable(&stmt_assign.identifier.0.name, type_typeref)
+                                };
+
+                                if let Err(result_err) = result {
+                                    errs.push((result_err, stmt_assign.identifier.1.clone()));
+                                }
                             }
                             Err(type_errs) => {
                                 errs.extend(type_errs);
@@ -610,15 +607,19 @@ impl<'a> Verifier<'a> {
                     stmt_string
                 );
 
-                let alias = &stmt_type_alias.alias;
+                let (alias_identifier, alias_span) = &stmt_type_alias.alias;
                 let value = self
-                    .resolve_identifier(
-                        &stmt_type_alias.value.0.to_string(),
-                        &stmt_type_alias.value.1.clone(),
-                    )
-                    .unwrap_or(stmt_type_alias.value.0.clone().into());
+                    .type_env
+                    .get_type_alias(&stmt_type_alias.value.0)
+                    .unwrap_or(&stmt_type_alias.value.0)
+                    .to_owned();
 
-                self.type_env.set(&alias.0.name, value);
+                if let Err(e) = self
+                    .type_env
+                    .set_type_alias(Type::new(&alias_identifier.name), value)
+                {
+                    errs.push((e, alias_span.clone()));
+                }
 
                 Ok(())
             }
@@ -639,7 +640,9 @@ impl<'a> Verifier<'a> {
 
                 match self.visit_expr(fn_expr.clone(), fn_expr_span) {
                     Ok(fn_expr_type) => {
-                        self.type_env.set(&stmt_fn.name.0.name, fn_expr_type);
+                        let _ = self
+                            .type_env
+                            .set_variable(&stmt_fn.name.0.name, fn_expr_type);
 
                         Ok(())
                     }
@@ -801,7 +804,7 @@ impl<'a> Verifier<'a> {
             let rule_string = rule.to_string();
 
             let rule_errs = rule
-                .visit_expr(expr.clone(), span, &self.type_env, &self.expr_types)
+                .visit_expr(&self.type_env, expr.clone(), span, &self.expr_types)
                 .err()
                 .unwrap_or_default();
 
@@ -841,11 +844,7 @@ impl<'a> Verifier<'a> {
         errs
     }
 
-    fn visit_expr(
-        &mut self,
-        expr: Arc<ast::Expr>,
-        span: &Span,
-    ) -> EgonResultMultiSpannedErr<TypeEnvValue> {
+    fn visit_expr(&mut self, expr: Arc<ast::Expr>, span: &Span) -> EgonResultMultiSpannedErr<Type> {
         let expr_string = log_expr(&expr);
 
         tracelog::tracelog!(label = verifier,visit_expr; "{}", expr_string);
@@ -914,7 +913,7 @@ impl<'a> Verifier<'a> {
                                             label = verifier,visit_expr,expr_block,error;
                                             "Return expression {} resolved with type {}",
                                             log_expr(return_expr),
-                                            log_type(&resolved_type.of_type)
+                                            log_type(&resolved_type)
                                         );
 
                                         errs.extend(return_errs);
@@ -932,7 +931,7 @@ impl<'a> Verifier<'a> {
 
                                         errs.extend(return_errs);
 
-                                        Ok(Type::unknown().into())
+                                        Ok(Type::unknown())
                                     }
                                 }
                             }
@@ -940,12 +939,9 @@ impl<'a> Verifier<'a> {
                     }
                     None => {
                         if let Some(block_return_type) = &block_expr.typeref {
-                            Ok(block_return_type.clone().into())
+                            Ok(block_return_type.clone())
                         } else {
-                            Ok(<egonlang_types::Type as Clone>::clone(
-                                return_stmt_type.unwrap_or(&Type::unit()),
-                            )
-                            .into())
+                            Ok(return_stmt_type.unwrap_or(&Type::unit()).clone())
                         }
                     }
                 };
@@ -977,7 +973,7 @@ impl<'a> Verifier<'a> {
                     Err(value_errs) => {
                         errs.extend(value_errs);
 
-                        Ok(Type::unknown().into())
+                        Ok(Type::unknown())
                     }
                 }
             }
@@ -1007,19 +1003,19 @@ impl<'a> Verifier<'a> {
                 errs.extend(rt_errs);
 
                 Ok(match infix_expr.op {
-                    ast::OpInfix::Add => Type::number().into(),
-                    ast::OpInfix::Subtract => Type::number().into(),
-                    ast::OpInfix::Multiply => Type::number().into(),
-                    ast::OpInfix::Divide => Type::number().into(),
-                    ast::OpInfix::Modulus => Type::number().into(),
-                    ast::OpInfix::Less => Type::bool().into(),
-                    ast::OpInfix::LessEqual => Type::bool().into(),
-                    ast::OpInfix::Greater => Type::bool().into(),
-                    ast::OpInfix::GreaterEqual => Type::bool().into(),
-                    ast::OpInfix::Equal => Type::bool().into(),
-                    ast::OpInfix::NotEqual => Type::bool().into(),
-                    ast::OpInfix::LogicAnd => Type::bool().into(),
-                    ast::OpInfix::LogicOr => Type::bool().into(),
+                    ast::OpInfix::Add => Type::number(),
+                    ast::OpInfix::Subtract => Type::number(),
+                    ast::OpInfix::Multiply => Type::number(),
+                    ast::OpInfix::Divide => Type::number(),
+                    ast::OpInfix::Modulus => Type::number(),
+                    ast::OpInfix::Less => Type::bool(),
+                    ast::OpInfix::LessEqual => Type::bool(),
+                    ast::OpInfix::Greater => Type::bool(),
+                    ast::OpInfix::GreaterEqual => Type::bool(),
+                    ast::OpInfix::Equal => Type::bool(),
+                    ast::OpInfix::NotEqual => Type::bool(),
+                    ast::OpInfix::LogicAnd => Type::bool(),
+                    ast::OpInfix::LogicOr => Type::bool(),
                 })
             }
             ast::Expr::Prefix(prefix_expr) => {
@@ -1043,8 +1039,8 @@ impl<'a> Verifier<'a> {
                 }
 
                 Ok(match prefix_expr.op {
-                    ast::OpPrefix::Negate => Type::number().into(),
-                    ast::OpPrefix::Not => Type::bool().into(),
+                    ast::OpPrefix::Negate => Type::number(),
+                    ast::OpPrefix::Not => Type::bool(),
                 })
             }
             ast::Expr::Fn(fn_expr) => {
@@ -1064,13 +1060,7 @@ impl<'a> Verifier<'a> {
 
                     param_types.push(type_ref.clone());
 
-                    self.type_env.set(
-                        name,
-                        TypeEnvValue {
-                            of_type: type_ref.clone(),
-                            is_const: true,
-                        },
-                    );
+                    let _ = self.type_env.set_variable(name, type_ref.clone());
                 }
 
                 // Visit function's body expression
@@ -1084,7 +1074,10 @@ impl<'a> Verifier<'a> {
 
                 let (fn_return_type, _fn_return_type_span) = &fn_expr.return_type;
 
-                Ok(Type::function(Type::tuple(param_types), fn_return_type.clone()).into())
+                Ok(Type::function(
+                    Type::tuple(param_types),
+                    fn_return_type.clone(),
+                ))
             }
             ast::Expr::If(if_expr) => {
                 tracelog::tracelog!(
@@ -1110,7 +1103,7 @@ impl<'a> Verifier<'a> {
                         if_type = Some(Type::unknown());
                     }
                     Ok(t) => {
-                        if_type = Some(t.of_type);
+                        if_type = Some(t);
                     }
                 };
 
@@ -1121,17 +1114,15 @@ impl<'a> Verifier<'a> {
                     }
                 }
 
-                let if_type = if_type
-                    .expect("This should have value if there were no errors")
-                    .into();
+                let if_type = if_type.expect("This should have value if there were no errors");
 
                 Ok(if_type)
             }
-            ast::Expr::Unit => Ok(Type::unit().into()),
+            ast::Expr::Unit => Ok(Type::unit()),
             ast::Expr::Literal(literal_expr) => Ok(match literal_expr {
-                ast::ExprLiteral::Bool(_) => Type::bool().into(),
-                ast::ExprLiteral::Number(_) => Type::number().into(),
-                ast::ExprLiteral::String(_) => Type::string().into(),
+                ast::ExprLiteral::Bool(_) => Type::bool(),
+                ast::ExprLiteral::Number(_) => Type::number(),
+                ast::ExprLiteral::String(_) => Type::string(),
             }),
             ast::Expr::Identifier(_ident_expr) => self.resolve_expr_type(expr.clone(), span),
             ast::Expr::List(list_expr) => {
@@ -1148,9 +1139,9 @@ impl<'a> Verifier<'a> {
                         expr_string
                     );
 
-                    Ok(Type::list(Type::unknown()).into())
+                    Ok(Type::list(Type::unknown()))
                 } else {
-                    let mut first_item_type = Type::unknown().into();
+                    let mut first_item_type = Type::unknown();
 
                     tracelog::tracelog!(
                         label = visit_expr,expr_list;
@@ -1184,7 +1175,7 @@ impl<'a> Verifier<'a> {
                                     tracelog::tracelog!(
                                         label = visit_expr,expr_list,item;
                                         "Found first item type {} in list {}",
-                                        log_type(&item_type.of_type),
+                                        log_type(&item_type),
                                         expr_string
                                     );
 
@@ -1194,7 +1185,7 @@ impl<'a> Verifier<'a> {
                         }
                     }
 
-                    Ok(Type::list(first_item_type.of_type).into())
+                    Ok(Type::list(first_item_type))
                 }
             }
             ast::Expr::Tuple(tuple_expr) => {
@@ -1203,7 +1194,7 @@ impl<'a> Verifier<'a> {
                 for (item_expr, item_span) in &tuple_expr.items {
                     match self.visit_expr(item_expr.clone(), item_span) {
                         Ok(item_type) => {
-                            item_types.push(item_type.of_type.clone());
+                            item_types.push(item_type.clone());
                         }
                         Err(item_errs) => {
                             item_types.push(Type::unknown());
@@ -1212,9 +1203,9 @@ impl<'a> Verifier<'a> {
                     };
                 }
 
-                Ok(Type::tuple(item_types).into())
+                Ok(Type::tuple(item_types))
             }
-            ast::Expr::Range(_) => Ok(Type::range().into()),
+            ast::Expr::Range(_) => Ok(Type::range()),
             ast::Expr::Type(type_expr) => {
                 tracelog::tracelog!(
                     label = verifier,visit_expr,expr_type;
@@ -1225,16 +1216,18 @@ impl<'a> Verifier<'a> {
                 let typeref = &type_expr.0;
                 let typeref_ident = &typeref.to_string();
 
-                // Resolve the type's name as an identifier
-                match self.resolve_identifier(typeref_ident, span) {
-                    Ok(typeref_ident_type) => Ok(typeref_ident_type),
-                    Err(type_errs) => {
-                        if typeref.is_builtin() {
-                            Ok(typeref.clone().into())
-                        } else {
-                            errs.extend(type_errs);
-
-                            return Err(errs);
+                if let Some(resolved_type_alias) = self.type_env.get_type_alias(typeref).cloned() {
+                    Ok(resolved_type_alias)
+                } else {
+                    match self.resolve_identifier(typeref_ident, span) {
+                        Ok(typeref_ident_type) => Ok(typeref_ident_type),
+                        Err(type_errs) => {
+                            if typeref.is_builtin() {
+                                Ok(typeref.clone())
+                            } else {
+                                errs.extend(type_errs);
+                                Ok(Type::unknown())
+                            }
                         }
                     }
                 }
@@ -1262,8 +1255,8 @@ impl<'a> Verifier<'a> {
                 let call_type = match self.resolve_expr_type(expr.clone(), span) {
                     Ok(resolved_call_type) => Ok(resolved_call_type),
                     Err(_resolve_expr_errs) => {
-                        // call_errs.extend(resolve_expr_errs);
-                        Ok(Type::unknown().into())
+                        // Errors are discarded here to prevent double reporting undefined identifiers
+                        Ok(Type::unknown())
                     }
                 };
 
@@ -1275,10 +1268,10 @@ impl<'a> Verifier<'a> {
 
         match &expr_type {
             Ok(expr_type) => {
-                tracelog::tracelog!(label = verifier,visit_expr; "caching type {} for expr {} @ {:?}", log_type(&expr_type.of_type), expr_string, span);
+                tracelog::tracelog!(label = verifier,visit_expr; "caching type {} for expr {} @ {:?}", log_type(&expr_type), expr_string, span);
 
                 self.expr_types
-                    .insert((expr.clone(), span.clone()), expr_type.of_type.clone());
+                    .insert((expr.clone(), span.clone()), expr_type.clone());
             }
             Err(expr_type_errs) => {
                 tracelog::tracelog!(
@@ -1861,13 +1854,23 @@ mod verifier_tests {
         const a = 123;
         a = \"foo\";
         ",
-        Err(vec![(
-            EgonSyntaxError::ReassigningConst {
-                name: "a".to_string()
-            }
-            .into(),
-            32..41
-        )])
+        Err(vec![
+            (
+                EgonSyntaxError::ReassigningConst {
+                    name: "a".to_string()
+                }
+                .into(),
+                32..41
+            ),
+            (
+                EgonTypeError::MismatchType {
+                    expected: "number".to_string(),
+                    actual: "string".to_string()
+                }
+                .into(),
+                36..41
+            )
+        ])
     );
 
     verifier_test!(
@@ -2054,25 +2057,25 @@ mod verifier_tests {
         )])
     );
 
-    // verifier_test!(
-    //     validate_fn_expr_mismatch_return_identifier_declared_in_body,
-    //     "
-    //     (): () => {
-    //         type Int = number;
-    //         let a: number = 5;
-    //         let b: Int = a + 10;
-    //         b
-    //     };
-    //     ",
-    //     Err(vec![(
-    //         EgonTypeError::MismatchType {
-    //             expected: "()".to_string(),
-    //             actual: "number".to_string()
-    //         }
-    //         .into(),
-    //         128..129
-    //     )])
-    // );
+    verifier_test!(
+        validate_fn_expr_mismatch_return_identifier_declared_in_body,
+        "
+        (): () => {
+            type Int = number;
+            let a: number = 5;
+            let b: Int = a + 10;
+            b
+        };
+        ",
+        Err(vec![(
+            EgonTypeError::MismatchType {
+                expected: "()".to_string(),
+                actual: "number".to_string()
+            }
+            .into(),
+            19..139
+        )])
+    );
 
     verifier_test!(
         validate_divide_by_zero,
@@ -2095,24 +2098,24 @@ mod verifier_tests {
         ])
     );
 
-    // verifier_test!(
-    //     validate_mismatch_type_when_let_decl_with_block_value,
-    //     r#"
-    //     let a: number = {
-    //         let a: string = "foo";
+    verifier_test!(
+        validate_mismatch_type_when_let_decl_with_block_value,
+        r#"
+        let a: number = {
+            let a: string = "foo";
 
-    //         a
-    //     };
-    //     "#,
-    //     Err(vec![(
-    //         EgonTypeError::MismatchType {
-    //             expected: Type::number().to_string(),
-    //             actual: Type::string().to_string()
-    //         }
-    //         .into(),
-    //         25..86
-    //     )])
-    // );
+            a
+        };
+        "#,
+        Err(vec![(
+            EgonTypeError::MismatchType {
+                expected: Type::number().to_string(),
+                actual: Type::string().to_string()
+            }
+            .into(),
+            25..86
+        )])
+    );
 
     verifier_test!(
         validate_reassign_const_value_3,
@@ -2145,10 +2148,13 @@ mod verifier_tests {
         
         let c: Integer = a + 20;
         "#,
-        Err(vec![(
-            EgonTypeError::Undefined("Integer".to_string()).into(),
-            131..138
-        )])
+        Err(vec![
+            (
+                EgonTypeError::Undefined("Integer".to_string()).into(),
+                131..138
+            ),
+            (EgonTypeError::UnknownType.into(), 131..138)
+        ])
     );
 
     verifier_test!(
@@ -2162,10 +2168,13 @@ mod verifier_tests {
         
         let c: Integer = 5 + 20;
         "#,
-        Err(vec![(
-            EgonTypeError::Undefined("Integer".to_string()).into(),
-            106..113
-        )])
+        Err(vec![
+            (
+                EgonTypeError::Undefined("Integer".to_string()).into(),
+                106..113
+            ),
+            (EgonTypeError::UnknownType.into(), 106..113)
+        ])
     );
 
     verifier_test!(
@@ -2179,10 +2188,13 @@ mod verifier_tests {
         
         let c: Integer = 5 + 20;
         "#,
-        Err(vec![(
-            EgonTypeError::Undefined("Integer".to_string()).into(),
-            106..113
-        )])
+        Err(vec![
+            (
+                EgonTypeError::Undefined("Integer".to_string()).into(),
+                106..113
+            ),
+            (EgonTypeError::UnknownType.into(), 106..113)
+        ])
     );
 
     verifier_test!(
@@ -2379,6 +2391,7 @@ a = b;"#,
         assert_eq!(Ok(()), results);
     }
 
+    // TODO
     // #[test]
     // fn validate_applies_types_to_block_exprs() {
     //     let mut module = parse("{ 123 };", 0).unwrap();

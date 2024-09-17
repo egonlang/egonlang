@@ -18,34 +18,31 @@ expr_rule!(
     /// c = 123; // TypeRrror
     /// c = true;
     /// ```
-    TypeMismatchReassigningLetValues,
-    |expr_span, resolve_ident, resolve_expr| {
-        let (expr, _) = expr_span;
-
+    TypeMismatchReassigningValues,
+    |context| {
         let mut errs = vec![];
 
-        if let ast::Expr::Assign(expr_assign) = &*expr {
-            let identifier = &expr_assign.identifier.0.name;
+        if let rules::rule::RuleTarget::Expr(expr) = context.target() {
+            if let ast::Expr::Assign(expr_assign) = &*expr {
+                let identifier = &expr_assign.identifier.0.name;
 
-            if let Some(type_env_value) = resolve_ident.get(identifier) {
-                let type_env_typeref = &type_env_value.of_type;
-                let is_const = &type_env_value.is_const;
+                if let Some(type_env_value) = context.resolve_identifier(identifier) {
+                    let (value_expr, value_span) = &expr_assign.value;
+                    let value_typeref = context.resolve_expr(value_expr.clone(), value_span).unwrap();
 
-                let (value_expr, value_span) = &expr_assign.value;
-                let value_typeref = resolve_expr.get(&(value_expr.clone(), value_span.clone())).unwrap();
-
-                if !is_const && type_env_typeref != value_typeref {
-                    errs.push((
-                        EgonTypeError::MismatchType {
-                            expected: type_env_typeref.to_string(),
-                            actual: value_typeref.to_string(),
-                        }
-                        .into(),
-                        value_span.clone(),
-                    ));
+                    if type_env_value.of_type != *value_typeref {
+                        errs.push((
+                            EgonTypeError::MismatchType {
+                                expected: type_env_value.of_type.to_string(),
+                                actual: value_typeref.to_string(),
+                            }
+                            .into(),
+                            value_span.clone(),
+                        ));
+                    }
                 }
-            }
-        };
+            };
+        }
 
         errs
     }
@@ -53,19 +50,19 @@ expr_rule!(
 
 #[cfg(test)]
 mod tests {
-    use super::TypeMismatchReassigningLetValuesRule;
+    use super::TypeMismatchReassigningValuesRule;
     use crate::verifier_rule_test;
     use egonlang_errors::EgonTypeError;
     use egonlang_types::Type;
 
     verifier_rule_test! {
-        TypeMismatchReassigningLetValuesRule,
+        TypeMismatchReassigningValuesRule,
         returns_ok_reassigning_with_the_same_type,
         "let a = 123; a = 456;"
     }
 
     verifier_rule_test! {
-        TypeMismatchReassigningLetValuesRule,
+        TypeMismatchReassigningValuesRule,
         returns_err_reassigning_with_different_type,
         "let a = 123; a = false;",
         Err(vec![(
@@ -78,7 +75,7 @@ mod tests {
     }
 
     verifier_rule_test! {
-        TypeMismatchReassigningLetValuesRule,
+        TypeMismatchReassigningValuesRule,
         returns_err_reassigning_with_different_type_2,
         "let a = [1, 2, 3]; a = [false, true];",
         Err(vec![(

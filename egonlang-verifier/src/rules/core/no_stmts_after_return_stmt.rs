@@ -2,13 +2,10 @@ use crate::prelude::*;
 use egonlang_core::prelude::*;
 use egonlang_errors::EgonSyntaxError;
 
-expr_rule!(
-    NoStmtsAfterReturnStmt,
-    |expr_span, _resolve_ident, _resolve_expr| {
-        let (expr, _) = expr_span;
+expr_rule!(NoStmtsAfterReturnStmt, |context| {
+    let mut errs = vec![];
 
-        let mut errs = vec![];
-
+    if let rules::rule::RuleTarget::Expr(expr) = context.target() {
         if let ast::Expr::Block(expr_block) = &*expr {
             let mut return_stmt_found = false;
 
@@ -32,10 +29,10 @@ expr_rule!(
                 }
             }
         }
-
-        errs
     }
-);
+
+    errs
+});
 
 #[cfg(test)]
 mod tests {

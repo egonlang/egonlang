@@ -1,0 +1,4 @@
+type A = number;
+let A = 456;
+
+// out: TypeError: A is already defined

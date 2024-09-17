@@ -13,37 +13,40 @@ expr_rule!(
     /// ["a", "b", "c"];
     /// ```
     TypeMisMatchListItems,
-    |expr_span, _resolve_ident, resolve_expr| {
-        let (expr, _) = expr_span;
-
+    |context| {
         let mut errs = vec![];
 
-        if let ast::Expr::List(expr_list) = &*expr {
-            let items = &expr_list.items;
+        if let rules::rule::RuleTarget::Expr(expr) = context.target() {
 
-            if !items.is_empty() {
-                let (first_item_expr, first_item_span) = items.first().unwrap();
-                let first_item_typeref = resolve_expr.get(&(first_item_expr.clone(), first_item_span.clone()))
-                    .unwrap();
+            if let ast::Expr::List(expr_list) = &*expr {
+                let items = &expr_list.items;
 
-                let remaining_items: Vec<span::Spanned<Arc<ast::Expr>>> = items.clone().into_iter().skip(1).collect();
+                if !items.is_empty() {
+                    let (first_item_expr, first_item_span) = items.first().unwrap();
+                    let first_item_typeref = context.resolve_expr(first_item_expr.clone(), first_item_span)
+                        .unwrap();
 
-                for (item, item_span) in &remaining_items {
-                    if let Some(item_typeref) = resolve_expr.get(&(item.clone(), item_span.clone())) {
-                        if item_typeref != first_item_typeref {
-                            errs.push((
-                                EgonTypeError::MismatchType {
-                                    expected: first_item_typeref.to_string(),
-                                    actual: item_typeref.to_string(),
-                                }
-                                .into(),
-                                item_span.clone(),
-                            ));
+                    let remaining_items: Vec<span::Spanned<Arc<ast::Expr>>> = items.clone().into_iter().skip(1).collect();
+
+                    for (item, item_span) in &remaining_items {
+                        if let Some(item_typeref) = context.resolve_expr(item.clone(), item_span) {
+                            if item_typeref != first_item_typeref {
+                                errs.push((
+                                    EgonTypeError::MismatchType {
+                                        expected: first_item_typeref.to_string(),
+                                        actual: item_typeref.to_string(),
+                                    }
+                                    .into(),
+                                    item_span.clone(),
+                                ));
+                            }
                         }
                     }
                 }
-            }
-        };
+            };
+        }
+
+
 
         errs
     }

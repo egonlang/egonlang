@@ -76,10 +76,14 @@ test *args:
     cargo test --doc
 
 # Run tests and gather coverage across the project
+# Writes report to `./target/coverage/html`
 coverage *args:
-    CARGO_INCREMENTAL=0 RUSTFLAGS='-Cinstrument-coverage' LLVM_PROFILE_FILE='cargo-test-%p-%m.profraw' cargo nextest run --workspace {{args}}
-    grcov . --binary-path ./target/debug/deps/ -s . -t html --branch --ignore-not-existing --ignore '../*' --ignore "/*" -o target/coverage/html
+    -CARGO_INCREMENTAL=0 RUSTFLAGS='-Cinstrument-coverage' LLVM_PROFILE_FILE='cargo-test-%p-%m.profraw' cargo nextest run --workspace {{args}}
+    -grcov . --binary-path ./target/debug/deps/ -s . -t html --branch --ignore-not-existing --ignore '../*' --ignore "/*" -o target/coverage/html
     just clean-coverage
+
+coverage-trace *args:
+    just coverage --features='tracelog' --no-capture {{args}}
 
 # Clean up coverage files
 clean-coverage:

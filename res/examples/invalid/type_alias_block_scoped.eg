@@ -10,3 +10,4 @@ let b: number = 20;
 let c: Integer = a + b;
 
 // out: TypeError: `Integer` is not defined
+// out: TypeError: unknown type e.g. let a: unknown; or let a;

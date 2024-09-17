@@ -1,0 +1,4 @@
+type Int = number;
+type Int = number;
+
+// out: TypeError: Int is already defined

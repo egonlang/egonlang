@@ -1,0 +1,4 @@
+const a = 123;
+let a = 456;
+
+// out: TypeError: a is already defined

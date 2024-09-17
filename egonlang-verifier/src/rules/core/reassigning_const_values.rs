@@ -10,26 +10,27 @@ expr_rule!(
     /// a = 456; // SyntaxError
     /// ```
     ReassigningConstValue,
-    |expr_span, resolve_ident, _resolve_expr| {
-        let (expr, span) = expr_span;
-
+    |context| {
         let mut errs = vec![];
 
-        if let ast::Expr::Assign(expr_assign) = &*expr {
-            let identifier = &expr_assign.identifier.0.name;
-            let type_env_value = resolve_ident.get(identifier);
-            let is_const = type_env_value.map(|x| x.is_const).unwrap_or(false);
-
-            if is_const {
-                errs.push((
-                    EgonSyntaxError::ReassigningConst {
-                        name: identifier.clone(),
+        if let rules::rule::RuleTarget::Expr(expr) = context.target() {
+            if let ast::Expr::Assign(expr_assign) = &*expr {
+                let identifier = &expr_assign.identifier.0.name;
+                if let Some(resolved) = context.resolve_identifier(identifier) {
+                    if resolved.is_const {
+                        errs.push((
+                            EgonSyntaxError::ReassigningConst {
+                                name: identifier.clone(),
+                            }
+                            .into(),
+                            context.span().clone(),
+                        ));
                     }
-                    .into(),
-                    span.clone(),
-                ));
-            }
-        };
+                }
+
+            };
+        }
+
 
         errs
     }

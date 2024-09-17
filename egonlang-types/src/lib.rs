@@ -3,22 +3,12 @@ pub mod type_env;
 use std::fmt::{self, Display, Formatter};
 
 use serde::{Deserialize, Serialize};
-use type_env::TypeEnvValue;
 
 /// Type in the Egon language
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Type {
     name: String,
     params: Vec<Type>,
-}
-
-impl From<Type> for TypeEnvValue {
-    fn from(value: Type) -> Self {
-        TypeEnvValue {
-            of_type: value,
-            is_const: true,
-        }
-    }
 }
 
 impl Type {

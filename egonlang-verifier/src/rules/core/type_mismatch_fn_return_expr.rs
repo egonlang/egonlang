@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
 use egonlang_errors::EgonTypeError;
+use rules::rule::RuleTarget;
 
 expr_rule!(
     /// Checks the return type of a function matches function body's
@@ -16,34 +17,30 @@ expr_rule!(
     /// }
     /// ```
     TypeMismatchFnReturnExpr,
-    |expr_span, _resolve_ident, resolve_expr| {
-        let (expr, _) = expr_span;
+    |context| {
+        let mut errs = vec![];
 
-        if let ast::Expr::Fn(fn_expr) = &*expr {
-            let (fn_return_type_typeref, _) = &fn_expr.return_type;
-            let (body_expr, body_span) = &fn_expr.body;
+        if let RuleTarget::Expr(expr) = context.target() {
+            if let ast::Expr::Fn(fn_expr) = &*expr {
+                let (fn_return_type_typeref, _) = &fn_expr.return_type;
+                let (body_expr, body_span) = &fn_expr.body;
 
-            if let Some(body_typeref) = resolve_expr.get(&(body_expr.clone(), body_span.clone())) {
-                let mut errs = vec![];
-
-                if !body_typeref.is_unknown() && body_typeref != fn_return_type_typeref {
-                    errs.push((
-                        EgonTypeError::MismatchType {
-                            expected: fn_return_type_typeref.to_string(),
-                            actual: body_typeref.to_string(),
-                        }
-                        .into(),
-                        body_span.clone(),
-                    ));
+                if let Some(body_typeref) = context.resolve_expr(body_expr.clone(), body_span) {
+                    if !body_typeref.is_unknown() && body_typeref != fn_return_type_typeref {
+                        errs.push((
+                            EgonTypeError::MismatchType {
+                                expected: fn_return_type_typeref.to_string(),
+                                actual: body_typeref.to_string(),
+                            }
+                            .into(),
+                            body_span.clone(),
+                        ));
+                    }
                 }
-
-                errs
-            } else {
-                vec![]
             }
-        } else {
-            vec![]
         }
+
+        errs
     }
 );
 

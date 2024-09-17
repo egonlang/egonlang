@@ -1,6 +1,69 @@
 use std::sync::Arc;
 
+use egonlang_core::ast::{Expr, Stmt};
 use egonlang_errors::EgonResultMultiSpannedErr;
+use egonlang_types::type_env::{TypeEnv, TypeEnvGetByIdent};
+use span::Span;
+
+use crate::verifier::VerifierExprTypeCache;
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum RuleTarget<'target> {
+    Stmt(&'target Stmt),
+    Expr(Arc<Expr>),
+}
+
+#[derive(Debug)]
+pub struct RuleContext<'target> {
+    type_env: &'target TypeEnv,
+    expr_types: &'target VerifierExprTypeCache,
+    target: RuleTarget<'target>,
+    span: &'target Span,
+}
+
+impl<'target> RuleContext<'target> {
+    pub fn new(
+        type_env: &'target TypeEnv,
+        expr_types: &'target VerifierExprTypeCache,
+        target: RuleTarget<'target>,
+        span: &'target Span,
+    ) -> Self {
+        Self {
+            type_env,
+            expr_types,
+            target,
+            span,
+        }
+    }
+}
+
+impl<'target> RuleContext<'target> {
+    /// The target value for the rule
+    ///
+    /// This will be a statement expression
+    pub fn target(&self) -> RuleTarget<'target> {
+        self.target.clone()
+    }
+
+    /// The span of the value for the rule
+    pub fn span(&self) -> &Span {
+        self.span
+    }
+
+    pub fn scope_depth(&self) -> usize {
+        self.type_env.get_scope_depth()
+    }
+
+    /// Resolve a constant or variable's type from an indentifier
+    pub fn resolve_identifier(&self, key: &str) -> Option<TypeEnvGetByIdent> {
+        self.type_env.get_by_identifier(key)
+    }
+
+    /// Resolve an expression's type
+    pub fn resolve_expr(&self, expr: Arc<Expr>, span: &Span) -> Option<&egonlang_types::Type> {
+        self.expr_types.get(&(expr.clone(), span.clone()))
+    }
+}
 
 /// Rule for verifying statements and expressions
 pub trait Rule<'a>: std::fmt::Display {
@@ -14,17 +77,17 @@ pub trait Rule<'a>: std::fmt::Display {
 
     fn visit_expr(
         &self,
+        type_env: &::egonlang_types::type_env::TypeEnv,
         expr: Arc<::egonlang_core::ast::Expr>,
         span: &::span::Span,
-        resolve_ident: &::egonlang_types::type_env::TypeEnv,
-        expr_types: &crate::verifier::VerifierExprTypeCache,
+        expr_types: &VerifierExprTypeCache,
     ) -> EgonResultMultiSpannedErr<()>;
 }
 
 /// Create a verifier [`Rule`] for an expression
 #[macro_export]
 macro_rules! expr_rule {
-    ($(#[$attributes:meta])* $name:ident, |$expr:ident| $body:expr) => {
+    ($(#[$attributes:meta])* $name:ident, |$context:ident| $body:expr) => {
         ::paste::paste! {
             /// Egon Verifier Expression Rule
             ///
@@ -44,68 +107,24 @@ macro_rules! expr_rule {
 
                 fn visit_expr(
                     &self,
+                    type_env: &::egonlang_types::type_env::TypeEnv,
                     expr: ::std::sync::Arc<::egonlang_core::ast::Expr>,
                     span: &::span::Span,
-                    _resolve_ident: &::egonlang_types::type_env::TypeEnv,
-                    _expr_types: &$crate::verifier::VerifierExprTypeCache,
+                    expr_types: &$crate::verifier::VerifierExprTypeCache,
                 ) -> ::egonlang_errors::EgonResultMultiSpannedErr<()> {
-                    let internal = |$expr: ::egonlang_core::ast::ExprS | ->
+                    let context = $crate::rules::rule::RuleContext::new(
+                        type_env,
+                        expr_types,
+                        $crate::rules::rule::RuleTarget::Expr(expr),
+                        span,
+                    );
+
+                    let internal = |$context: &$crate::rules::rule::RuleContext| ->
                         Vec<::egonlang_errors::EgonErrorS> {
                             $body
                         };
 
-                    let errs = internal((expr, span.clone()));
-
-                    if !errs.is_empty() {
-                        return Err(errs);
-                    }
-
-                    Ok(())
-                }
-            }
-
-            impl ::std::fmt::Display for [<$name Rule>] {
-                fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> Result<(), ::std::fmt::Error> {
-                    f.write_fmt(format_args!(
-                        "{}",
-                        stringify!([<$name Rule>])
-                    ))
-                 }
-            }
-        }
-    };
-
-    ($(#[$attributes:meta])* $name:ident, |$expr:ident, $resolve_ident:ident, $resolve_expr:ident| $body:expr) => {
-        ::paste::paste! {
-            /// Egon Verifier Expression Rule
-            ///
-            $(#[$attributes])*
-            pub struct [<$name Rule>];
-
-            impl<'a> $crate::rules::rule::Rule<'a> for [<$name Rule>] {
-                fn visit_stmt(
-                    &self,
-                    _stmt: &::egonlang_core::ast::Stmt,
-                    _span: &::span::Span,
-                    _resolve_ident: &::egonlang_types::type_env::TypeEnv,
-                    _expr_types: &$crate::verifier::VerifierExprTypeCache,
-                ) -> ::egonlang_errors::EgonResultMultiSpannedErr<()> {
-                    Ok(())
-                }
-
-                fn visit_expr(
-                    &self,
-                    expr: ::std::sync::Arc<::egonlang_core::ast::Expr>,
-                    span: &::span::Span,
-                    resolve_ident: &::egonlang_types::type_env::TypeEnv,
-                    expr_types: &$crate::verifier::VerifierExprTypeCache,
-                ) -> ::egonlang_errors::EgonResultMultiSpannedErr<()> {
-                    let internal = | $expr: ::egonlang_core::ast::ExprS,
-                                     $resolve_ident: &::egonlang_types::type_env::TypeEnv,
-                                     $resolve_expr: &$crate::verifier::VerifierExprTypeCache |
-                        { $body };
-
-                    let errs = internal((expr, span.clone()), resolve_ident, expr_types);
+                    let errs = internal(&context);
 
                     if !errs.is_empty() {
                         return Err(errs);
@@ -130,7 +149,7 @@ macro_rules! expr_rule {
 /// Create a verifier [`Rule`] for a statement
 #[macro_export]
 macro_rules! stmt_rule {
-    ($(#[$attributes:meta])* $name:ident, |$stmt:ident, $resolve_ident:ident, $resolve_expr:ident| $body:expr) => {
+    ($(#[$attributes:meta])* $name:ident, |$context:ident| $body:expr) => {
         paste::paste! {
             /// Egon Verifier Statement Rule
             ///
@@ -142,15 +161,22 @@ macro_rules! stmt_rule {
                     &self,
                     stmt: &::egonlang_core::ast::Stmt,
                     span: &::span::Span,
-                    resolve_ident: &::egonlang_types::type_env::TypeEnv,
+                    type_env: &::egonlang_types::type_env::TypeEnv,
                     expr_types: &$crate::verifier::VerifierExprTypeCache,
                 ) -> ::egonlang_errors::EgonResultMultiSpannedErr<()> {
-                    let internal = | $stmt: &::egonlang_core::ast::StmtS,
-                                     $resolve_ident: &::egonlang_types::type_env::TypeEnv,
-                                     $resolve_expr: &$crate::verifier::VerifierExprTypeCache |
-                        { $body };
+                    let context = $crate::rules::rule::RuleContext::new(
+                        type_env,
+                        expr_types,
+                        $crate::rules::rule::RuleTarget::Stmt(stmt),
+                        span,
+                    );
 
-                    let errs = internal(&(stmt.clone(), span.clone()), resolve_ident, expr_types);
+                    let internal = |$context: &$crate::rules::rule::RuleContext| ->
+                        Vec<::egonlang_errors::EgonErrorS> {
+                            $body
+                        };
+
+                    let errs = internal(&context);
 
                     if !errs.is_empty() {
                         return Err(errs);
@@ -161,9 +187,9 @@ macro_rules! stmt_rule {
 
                 fn visit_expr(
                     &self,
+                    _type_env: &::egonlang_types::type_env::TypeEnv,
                     _expr: ::std::sync::Arc<::egonlang_core::ast::Expr>,
                     _span: &::span::Span,
-                    _resolve_ident: &::egonlang_types::type_env::TypeEnv,
                     _expr_types: &$crate::verifier::VerifierExprTypeCache,
                 ) -> ::egonlang_errors::EgonResultMultiSpannedErr<()> {
                     Ok(())

@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use egonlang_core::prelude::*;
-use egonlang_errors::EgonTypeError;
+use egonlang_errors::{EgonError, EgonTypeError};
 
 expr_rule!(
     /// Checks for references to undefined variables
@@ -11,17 +11,20 @@ expr_rule!(
     /// a;
     /// ```
     ReferencingUndefinedIdentifier,
-    |expr_span, resolve_ident, _resolve_expr| {
-        let (expr, span) = expr_span;
-
+    |context| {
         let mut errs = vec![];
 
-        if let ast::Expr::Identifier(boxed) = &*expr {
-            let identifier = &boxed.identifier;
-            let name = &identifier.name;
+        if let rules::rule::RuleTarget::Expr(expr) = context.target() {
+            if let ast::Expr::Identifier(boxed) = &*expr {
+                let identifier = &boxed.identifier;
+                let name = &identifier.name;
 
-            if resolve_ident.get(name).is_none() {
-                errs.push((EgonTypeError::Undefined(name.to_string()).into(), span.clone()));
+                if context.resolve_identifier(name).is_none() {
+                    errs.push((
+                        EgonError::TypeError(EgonTypeError::Undefined(name.to_string())),
+                        context.span().clone()
+                    ));
+                }
             }
         }
 

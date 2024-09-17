@@ -2,3 +2,4 @@ const a = 123;
 a = "foo";
 
 // out: SyntaxError: `a` is a const value and can't be reassigned
+// out: TypeError: mismatched types: expected type `number` but received `string`

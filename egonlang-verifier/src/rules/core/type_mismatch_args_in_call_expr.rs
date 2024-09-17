@@ -18,48 +18,48 @@ expr_rule!(
     /// }
     /// ```
     TypeMismatchArgsInCallExpr,
-    |expr_span, _resolve_ident, resolve_expr| {
-        let (expr, span) = expr_span;
+    |context| {
+        let mut errs = vec![];
 
-        if let ast::Expr::Call(call_expr) = &*expr {
-            let mut errs = vec![];
+        let span = context.span();
 
-            let fn_param_types: Vec<(Type, Span)> = if let Some(callee_type) = resolve_expr.get(
-                &(call_expr.callee.0.clone(), call_expr.callee.1.clone())
-            ) {
-                if !callee_type.is_function() {
-                    vec![]
-                } else {
-                    callee_type.get_function_params().iter().map(|x| (x.clone(), span.clone())).collect()
-                }
-            } else {
-                vec![]
-            };
-
-            let call_arg_types: Vec<(&Type, Span)> = call_expr.clone().args.into_iter().map(|x| {
-                let result = resolve_expr.get(&(x.0.clone(), x.1.clone())).expect("WHOOPS");
-
-                (result, x.1.clone())
-            }).collect();
-
-            for (i, (t, s)) in call_arg_types.into_iter().enumerate() {
-                if let Some((xt, _)) = fn_param_types.get(i) {
-                    if t != xt {
-                        errs.push((
-                            EgonTypeError::MismatchType {
-                                expected: xt.to_string(),
-                                actual: t.to_string()
-                            }.into(),
-                            s.clone()
-                        ));
+        if let rules::rule::RuleTarget::Expr(expr) = context.target() {
+            if let ast::Expr::Call(call_expr) = &*expr {
+                let fn_param_types: Vec<(Type, Span)> = if let Some(callee_type) = context.resolve_expr(
+                    call_expr.callee.0.clone(), &call_expr.callee.1
+                ) {
+                    if !callee_type.is_function() {
+                        vec![]
+                    } else {
+                        callee_type.get_function_params().iter().map(|x| (x.clone(), span.clone())).collect()
                     }
-                }
-            };
+                } else {
+                    vec![]
+                };
 
-            errs
-        } else {
-            vec![]
+                let call_arg_types: Vec<(&Type, Span)> = call_expr.clone().args.into_iter().map(|x| {
+                    let result = context.resolve_expr(x.0, &x.1).expect("WHOOPS");
+
+                    (result, x.1.clone())
+                }).collect();
+
+                for (i, (t, s)) in call_arg_types.into_iter().enumerate() {
+                    if let Some((xt, _)) = fn_param_types.get(i) {
+                        if t != xt {
+                            errs.push((
+                                EgonTypeError::MismatchType {
+                                    expected: xt.to_string(),
+                                    actual: t.to_string()
+                                }.into(),
+                                s.clone()
+                            ));
+                        }
+                    }
+                };
+            }
         }
+
+        errs
     }
 );
 

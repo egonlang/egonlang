@@ -11,26 +11,28 @@ expr_rule!(
     /// if ("example") {} else {}; // TypeError
     /// ```
     TypeMismatchIfCondExpr,
-    |expr_span, _resolve_ident, resolve_expr| {
-        let (expr, _) = expr_span;
-
+    |context| {
         let mut errs = vec![];
 
-        if let ast::Expr::If(if_expr) = &*expr {
-            let (cond_expr, cond_span) = &if_expr.cond;
-            if let Some(cond_typeref) = resolve_expr.get(&(cond_expr.clone(), cond_span.clone())) {
-                if *cond_typeref != Type::bool() {
-                    errs.push((
-                        EgonTypeError::MismatchType {
-                            expected: Type::bool().to_string(),
-                            actual: cond_typeref.to_string(),
-                        }
-                        .into(),
-                        cond_span.clone(),
-                    ));
+        if let rules::rule::RuleTarget::Expr(expr) = context.target() {
+            if let ast::Expr::If(if_expr) = &*expr {
+                let (cond_expr, cond_span) = &if_expr.cond;
+                if let Some(cond_typeref) = context.resolve_expr(cond_expr.clone(), cond_span) {
+                    if *cond_typeref != Type::bool() {
+                        errs.push((
+                            EgonTypeError::MismatchType {
+                                expected: Type::bool().to_string(),
+                                actual: cond_typeref.to_string(),
+                            }
+                            .into(),
+                            cond_span.clone(),
+                        ));
+                    }
                 }
-            }
-        };
+            };
+        }
+
+
 
         errs
     }

@@ -2,6 +2,7 @@ use crate::prelude::*;
 use egonlang_core::prelude::*;
 use egonlang_errors::EgonSyntaxError;
 use regex::Regex;
+use rules::rule::RuleTarget;
 
 stmt_rule!(
     /// Checks type aliases are formatted correctly
@@ -11,12 +12,10 @@ stmt_rule!(
     /// type invalidTypeAlias = string; // SyntaxError∂
     /// ```
     InvalidTypeAliasName,
-    | stmt_span, _resolve_ident, _resolve_expr | {
-        let (stmt, span) = stmt_span;
-
+    |context| {
         let mut errs = vec![];
 
-        if let ast::Stmt::TypeAlias(stmt_type_alias) = &stmt {
+        if let RuleTarget::Stmt(ast::Stmt::TypeAlias(stmt_type_alias)) = context.target() {
             let name = &stmt_type_alias.alias.0.name;
             let pattern = Regex::new("^[A-Z][A-Za-z0-9]*$").unwrap();
 
@@ -26,7 +25,7 @@ stmt_rule!(
                         name: name.to_string(),
                     }
                     .into(),
-                    span.clone(),
+                    context.span().clone(),
                 ));
             }
         }

@@ -1,0 +1,4 @@
+const Int = 123;
+type Int = number;
+
+// out: TypeError: Int is already defined

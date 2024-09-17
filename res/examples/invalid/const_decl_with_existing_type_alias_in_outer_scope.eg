@@ -1,0 +1,7 @@
+type A = number;
+
+{
+    const A = 123;
+};
+
+// out: TypeError: A is already defined
