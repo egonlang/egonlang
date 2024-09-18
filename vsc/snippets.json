@@ -54,6 +54,20 @@
     ],
     "description": "Declare a variable with a type and value"
   },
+  "const a = ...;": {
+    "prefix": "const",
+    "body": [
+      "const ${1:a} = ${2:()};$0"
+    ],
+    "description": "Declare a constant with a value (type is inferred)"
+  },
+  "const a: T = ...;": {
+    "prefix": "const",
+    "body": [
+      "const ${1:a}: ${2:T} = ${3:()};$0"
+    ],
+    "description": "Declare a constant with a type and value"
+  },
   "if else (expression)": {
     "prefix": [
       "if",
