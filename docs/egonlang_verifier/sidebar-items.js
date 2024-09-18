@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["verify_module"],"macro":["expr_rule","stmt_rule"],"mod":["prelude","rules"],"struct":["Verifier"]};
+window.SIDEBAR_ITEMS = {"macro":["expr_rule","stmt_rule"],"mod":["prelude","rules"],"struct":["Verifier"],"type":["VerifierExprTypeCache"]};

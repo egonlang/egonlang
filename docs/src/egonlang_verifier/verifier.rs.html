@@ -2454,27 +2454,6 @@
 <a href="#2454" id="2454">2454</a>
 <a href="#2455" id="2455">2455</a>
 <a href="#2456" id="2456">2456</a>
-<a href="#2457" id="2457">2457</a>
-<a href="#2458" id="2458">2458</a>
-<a href="#2459" id="2459">2459</a>
-<a href="#2460" id="2460">2460</a>
-<a href="#2461" id="2461">2461</a>
-<a href="#2462" id="2462">2462</a>
-<a href="#2463" id="2463">2463</a>
-<a href="#2464" id="2464">2464</a>
-<a href="#2465" id="2465">2465</a>
-<a href="#2466" id="2466">2466</a>
-<a href="#2467" id="2467">2467</a>
-<a href="#2468" id="2468">2468</a>
-<a href="#2469" id="2469">2469</a>
-<a href="#2470" id="2470">2470</a>
-<a href="#2471" id="2471">2471</a>
-<a href="#2472" id="2472">2472</a>
-<a href="#2473" id="2473">2473</a>
-<a href="#2474" id="2474">2474</a>
-<a href="#2475" id="2475">2475</a>
-<a href="#2476" id="2476">2476</a>
-<a href="#2477" id="2477">2477</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::{collections::HashMap, sync::Arc};
 
 <span class="kw">use </span>ast::ExprS;
@@ -2494,59 +2473,45 @@
 /// ```
 /// use egonlang_core::prelude::*;
 /// use egonlang_verifier::prelude::*;
+/// use egonlang_types::type_env::TypeEnv;
+/// use std::collections::HashMap;
 ///
 /// // Verifier with the default rule set
-/// let verifier = Verifier::default();
+/// let result = match parse("123;", 0) {
+///     Ok(mut module) =&gt; {
+///         let mut type_env = TypeEnv::new();
+///         let mut type_cache: VerifierExprTypeCache = HashMap::&lt;_, _&gt;::new();
+///         let mut verifier = Verifier::new(&amp;mut type_env, &amp;mut type_cache).with_default_rules();
 ///
-/// let mut module = parse("let a = 123;", 0).expect("Unable to parse");
-///
-/// let result = verify_module(&amp;mut module);
+///     verifier.verify(&amp;mut module)
+///     }
+///     Err(parse_errs) =&gt; Err(parse_errs),
+/// };
 ///
 /// matches!(result, Ok(()));
 /// ```
 </span><span class="kw">pub struct </span>Verifier&lt;<span class="lifetime">'a</span>&gt; {
-    rules: Vec&lt;Box&lt;<span class="kw">dyn </span>Rule&lt;<span class="lifetime">'a</span>&gt;&gt;&gt;,
-    type_env: TypeEnv,
-    expr_types: VerifierExprTypeCache,
-}
-
-<span class="kw">impl </span>Default <span class="kw">for </span>Verifier&lt;<span class="lifetime">'_</span>&gt; {
-    <span class="doccomment">/// Create a [`Verifier`] with the [`Rule`] set
-    </span><span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>::new().with_default_rules()
-    }
+    rules: Vec&lt;Arc&lt;<span class="kw">dyn </span>Rule&lt;<span class="lifetime">'a</span>&gt; + Send + Sync&gt;&gt;,
+    type_env: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>TypeEnv,
+    expr_types: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>VerifierExprTypeCache,
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Verifier&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Create a [`Verifier`] with no default [`Rule`](crate::rules::Rule) set
-    </span><span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(type_env: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>TypeEnv, expr_types: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>VerifierExprTypeCache) -&gt; <span class="self">Self </span>{
         Verifier {
             rules: Default::default(),
-            type_env: TypeEnv::new(),
-            expr_types: HashMap::new(),
+            type_env,
+            expr_types,
         }
     }
 
     <span class="doccomment">/// Register a [`Rule`](crate::rules::Rule)
-    ///
-    /// ```ignore
-    /// use egonlang_verifier::prelude::*;
-    ///
-    /// let verifier = Verifier::new().with_rule(TypeMismatchInfixRule);
-    /// ```
-    </span><span class="kw">pub fn </span>add_rule&lt;R: Rule&lt;<span class="lifetime">'a</span>&gt; + <span class="lifetime">'static</span>&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rule: R) {
-        <span class="self">self</span>.rules.push(Box::new(rule));
+    </span><span class="kw">pub fn </span>add_rule&lt;R: Rule&lt;<span class="lifetime">'a</span>&gt; + <span class="lifetime">'static </span>+ Send + Sync&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rule: R) {
+        <span class="self">self</span>.rules.push(Arc::new(rule));
     }
 
     <span class="doccomment">/// Register the core language [`Rule`](crate::rules::Rule) set
-    ///
-    /// ```
-    /// use egonlang_verifier::prelude::*;
-    ///
-    /// // These are the same
-    /// let verifier = Verifier::new().with_default_rules();
-    /// let verifier = Verifier::default();
-    /// ```
     </span><span class="kw">pub fn </span>with_default_rules(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.add_rule(TypeMismatchInfixRule);
         <span class="self">self</span>.add_rule(TypeMismatchPrefixRule);
@@ -2554,8 +2519,7 @@
         <span class="self">self</span>.add_rule(TypeMismatchOnDeclarationsRule);
         <span class="self">self</span>.add_rule(DeclareConstWithoutValueRule);
         <span class="self">self</span>.add_rule(ReassigningConstValueRule);
-        <span class="comment">// self.add_rule(ReferencingUndefinedIdentifierRule);
-        </span><span class="self">self</span>.add_rule(DivideByZeroRule);
+        <span class="self">self</span>.add_rule(DivideByZeroRule);
         <span class="self">self</span>.add_rule(TypeMismatchFnReturnExprRule);
         <span class="self">self</span>.add_rule(TypeMismatchIfCondExprRule);
         <span class="self">self</span>.add_rule(TypeMismatchReassigningValuesRule);
@@ -3229,7 +3193,7 @@
             <span class="kw">let </span>rule_string = rule.to_string();
 
             <span class="kw">let </span>rule_errs = rule
-                .visit_stmt(stmt, span, <span class="kw-2">&amp;</span><span class="self">self</span>.type_env, <span class="kw-2">&amp;</span><span class="self">self</span>.expr_types)
+                .visit_stmt(stmt, span, <span class="self">self</span>.type_env, <span class="self">self</span>.expr_types)
                 .err()
                 .unwrap_or_default();
 
@@ -3281,7 +3245,7 @@
             <span class="kw">let </span>rule_string = rule.to_string();
 
             <span class="kw">let </span>rule_errs = rule
-                .visit_expr(<span class="kw-2">&amp;</span><span class="self">self</span>.type_env, expr.clone(), span, <span class="kw-2">&amp;</span><span class="self">self</span>.expr_types)
+                .visit_expr(<span class="self">self</span>.type_env, expr.clone(), span, <span class="self">self</span>.expr_types)
                 .err()
                 .unwrap_or_default();
 
@@ -3823,8 +3787,9 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>verifier_tests {
-    <span class="kw">use </span><span class="kw">crate</span>::prelude::<span class="kw-2">*</span>;
-    <span class="kw">use </span>ast::{Expr, ExprIdentifier};
+    <span class="kw">use </span>std::collections::HashMap;
+
+    <span class="kw">use </span>ast::{AstNode, Expr};
     <span class="kw">use </span>egonlang_core::prelude::<span class="kw-2">*</span>;
     <span class="kw">use </span>egonlang_errors::{EgonError, EgonSyntaxError, EgonTypeError};
     <span class="kw">use </span>egonlang_types::Type;
@@ -3836,7 +3801,18 @@
         (<span class="macro-nonterminal">$test_name</span>:ident, <span class="macro-nonterminal">$input</span>:expr, <span class="macro-nonterminal">$expected</span>:expr) =&gt; {
             <span class="attr">#[test]
             </span><span class="kw">fn </span><span class="macro-nonterminal">$test_name</span>() {
-                <span class="kw">let </span>result = parse(<span class="macro-nonterminal">$input</span>, <span class="number">0</span>).and_then(|<span class="kw-2">mut </span>module| verify_module(<span class="kw-2">&amp;mut </span>module));
+                <span class="kw">let </span>result = <span class="kw">match </span>parse(<span class="macro-nonterminal">$input</span>, <span class="number">0</span>) {
+                    <span class="prelude-val">Ok</span>(<span class="kw-2">mut </span>module) =&gt; {
+                        <span class="kw">let </span><span class="kw-2">mut </span>type_env = ::egonlang_types::type_env::TypeEnv::new();
+                        <span class="kw">let </span><span class="kw-2">mut </span>type_cache: <span class="macro-nonterminal">$crate::verifier::VerifierExprTypeCache </span>=
+                            HashMap::&lt;::egonlang_core::ast::ExprS, Type&gt;::new();
+                        <span class="kw">let </span><span class="kw-2">mut </span>verifier =
+                            Verifier::new(<span class="kw-2">&amp;mut </span>type_env, <span class="kw-2">&amp;mut </span>type_cache).with_default_rules();
+
+                        verifier.verify(<span class="kw-2">&amp;mut </span>module)
+                    }
+                    <span class="prelude-val">Err</span>(parse_errs) =&gt; <span class="prelude-val">Err</span>(parse_errs),
+                };
 
                 <span class="macro">assert_eq!</span>(<span class="macro-nonterminal">$expected</span>, result);
             }
@@ -3846,7 +3822,18 @@
             <span class="attr">#[test]
             #[ignore = <span class="macro-nonterminal">$ignore_reason</span>]
             </span><span class="kw">fn </span><span class="macro-nonterminal">$test_name</span>() {
-                <span class="kw">let </span>result = parse(<span class="macro-nonterminal">$input</span>, <span class="number">0</span>).and_then(|module| Verifier::new().verify(<span class="kw-2">&amp;</span>module));
+                <span class="kw">let </span>result = <span class="kw">match </span>parse(<span class="macro-nonterminal">$input</span>, <span class="number">0</span>) {
+                    <span class="prelude-val">Ok</span>(<span class="kw-2">mut </span>module) =&gt; {
+                        <span class="kw">let </span><span class="kw-2">mut </span>type_env = ::egonlang_types::type_env::TypeEnv::new();
+                        <span class="kw">let </span><span class="kw-2">mut </span>type_cache: <span class="macro-nonterminal">$crate::verifier::VerifierExprTypeCache </span>=
+                            HashMap::&lt;::egonlang_core::ast::ExprS, Type&gt;::new();
+                        <span class="kw">let </span><span class="kw-2">mut </span>verifier =
+                            Verifier::new(<span class="kw-2">&amp;mut </span>type_env, <span class="kw-2">&amp;mut </span>type_cache).with_default_rules();
+
+                        verifier.verify(<span class="kw-2">&amp;mut </span>module)
+                    }
+                    <span class="prelude-val">Err</span>(parse_errs) =&gt; <span class="prelude-val">Err</span>(parse_errs),
+                };
 
                 <span class="macro">assert_eq!</span>(<span class="macro-nonterminal">$expected</span>, result);
             }
@@ -4724,149 +4711,67 @@ a = b;"#</span>,
         </span>)])
     );
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>errors_when_referencing_undefined_identifier() {
-        <span class="kw">let </span><span class="kw-2">mut </span>verifier = Verifier::default();
+    <span class="macro">verifier_test!</span>(
+        errors_when_referencing_undefined_identifier,
+        <span class="string">r#"a;"#</span>,
+        <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[(
+            EgonTypeError::Undefined(<span class="string">"a"</span>.to_string()).into(),
+            <span class="number">0</span>..<span class="number">1
+        </span>)])
+    );
 
-        <span class="kw">let </span><span class="kw-2">mut </span>module = ast::Module::from(<span class="macro">vec!</span>[(
-            ast::StmtExpr {
-                expr: (
-                    Expr::Identifier(ExprIdentifier {
-                        identifier: ast::Identifier {
-                            name: <span class="string">"a"</span>.to_string(),
-                        },
-                    })
-                    .into(),
-                    <span class="number">1</span>..<span class="number">2</span>,
-                ),
+    <span class="macro">verifier_test!</span>(
+        errors_when_referencing_multiple_undefined_identifiers,
+        <span class="string">r#"a; a;"#</span>,
+        <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[
+            (EgonTypeError::Undefined(<span class="string">"a"</span>.to_string()).into(), <span class="number">0</span>..<span class="number">1</span>),
+            (EgonTypeError::Undefined(<span class="string">"a"</span>.to_string()).into(), <span class="number">3</span>..<span class="number">4</span>)
+        ])
+    );
+
+    <span class="macro">verifier_test!</span>(
+        errors_when_declaring_let_using_list_with_type_mismatched_items,
+        <span class="string">r#"let a = [10, false];"#</span>,
+        <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[(
+            EgonTypeError::MismatchType {
+                expected: Type::number().to_string(),
+                actual: Type::bool().to_string()
             }
             .into(),
-            <span class="number">0</span>..<span class="number">3</span>,
-        )]);
+            <span class="number">13</span>..<span class="number">18
+        </span>)])
+    );
 
-        <span class="kw">let </span>results = verifier.verify(<span class="kw-2">&amp;mut </span>module);
+    <span class="macro">verifier_test!</span>(
+        errors_when_assigning_using_list_with_type_mismatched_items,
+        <span class="string">r#"let a: list&lt;number&gt;; a = [10, false];"#</span>,
+        <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[(
+            EgonTypeError::MismatchType {
+                expected: Type::number().to_string(),
+                actual: Type::bool().to_string()
+            }
+            .into(),
+            <span class="number">30</span>..<span class="number">35
+        </span>)])
+    );
 
-        <span class="macro">assert_eq!</span>(
-            <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[(
-                EgonTypeError::Undefined(<span class="string">"a"</span>.to_string()).into(),
-                <span class="number">1</span>..<span class="number">2
-            </span>)]),
-            results
-        );
-    }
-
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>errors_when_referencing_multiple_undefined_identifiers() {
-        <span class="kw">let </span><span class="kw-2">mut </span>verifier = Verifier::default();
-
-        <span class="kw">let </span><span class="kw-2">mut </span>module = ast::Module::from(<span class="macro">vec!</span>[
+    <span class="macro">verifier_test!</span>(
+        errors_when_reassigning_to_undefined_ident_using_list_with_type_mismatched_items,
+        <span class="string">r#"a = [10, false];"#</span>,
+        <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[
+            (EgonTypeError::Undefined(<span class="string">"a"</span>.to_string()).into(), <span class="number">0</span>..<span class="number">1</span>),
             (
-                ast::StmtExpr {
-                    expr: (
-                        Expr::Identifier(ExprIdentifier {
-                            identifier: ast::Identifier {
-                                name: <span class="string">"a"</span>.to_string(),
-                            },
-                        })
-                        .into(),
-                        <span class="number">1</span>..<span class="number">2</span>,
-                    ),
-                }
-                .into(),
-                <span class="number">0</span>..<span class="number">0</span>,
-            ),
-            (
-                ast::StmtExpr {
-                    expr: (
-                        Expr::Identifier(ExprIdentifier {
-                            identifier: ast::Identifier {
-                                name: <span class="string">"b"</span>.to_string(),
-                            },
-                        })
-                        .into(),
-                        <span class="number">5</span>..<span class="number">6</span>,
-                    ),
-                }
-                .into(),
-                <span class="number">0</span>..<span class="number">0</span>,
-            ),
-        ]);
-
-        <span class="kw">let </span>results = verifier.verify(<span class="kw-2">&amp;mut </span>module);
-
-        <span class="macro">assert_eq!</span>(
-            <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[
-                (EgonTypeError::Undefined(<span class="string">"a"</span>.to_string()).into(), <span class="number">1</span>..<span class="number">2</span>),
-                (EgonTypeError::Undefined(<span class="string">"b"</span>.to_string()).into(), <span class="number">5</span>..<span class="number">6</span>)
-            ]),
-            results
-        );
-    }
-
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>errors_when_declaring_let_using_list_with_type_mismatched_items() {
-        <span class="kw">let </span>results =
-            parse(<span class="string">"let a = [10, false];"</span>, <span class="number">0</span>).and_then(|<span class="kw-2">mut </span>module| verify_module(<span class="kw-2">&amp;mut </span>module));
-
-        <span class="macro">assert_eq!</span>(
-            <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[(
                 EgonTypeError::MismatchType {
                     expected: Type::number().to_string(),
                     actual: Type::bool().to_string()
                 }
                 .into(),
-                <span class="number">13</span>..<span class="number">18
-            </span>)]),
-            results
-        );
-    }
+                <span class="number">9</span>..<span class="number">14
+            </span>),
+        ])
+    );
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>errors_when_assigning_using_list_with_type_mismatched_items() {
-        <span class="kw">let </span>results = parse(<span class="string">"let a: list&lt;number&gt;; a = [10, false];"</span>, <span class="number">0</span>)
-            .and_then(|<span class="kw-2">mut </span>module| verify_module(<span class="kw-2">&amp;mut </span>module));
-
-        <span class="macro">assert_eq!</span>(
-            <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[(
-                EgonTypeError::MismatchType {
-                    expected: Type::number().to_string(),
-                    actual: Type::bool().to_string()
-                }
-                .into(),
-                <span class="number">30</span>..<span class="number">35
-            </span>)]),
-            results
-        );
-    }
-
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>errors_when_reassigning_to_undefined_ident_using_list_with_type_mismatched_items() {
-        <span class="kw">let </span>results =
-            parse(<span class="string">"a = [10, false];"</span>, <span class="number">0</span>).and_then(|<span class="kw-2">mut </span>module| verify_module(<span class="kw-2">&amp;mut </span>module));
-
-        <span class="macro">assert_eq!</span>(
-            <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[
-                (EgonTypeError::Undefined(<span class="string">"a"</span>.to_string()).into(), <span class="number">0</span>..<span class="number">1</span>),
-                (
-                    EgonTypeError::MismatchType {
-                        expected: Type::number().to_string(),
-                        actual: Type::bool().to_string()
-                    }
-                    .into(),
-                    <span class="number">9</span>..<span class="number">14
-                </span>),
-            ]),
-            results
-        );
-    }
-
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>no_errors() {
-        <span class="kw">let </span>results = parse(<span class="string">"(a: number): number =&gt; { a };"</span>, <span class="number">0</span>)
-            .and_then(|<span class="kw-2">mut </span>module| verify_module(<span class="kw-2">&amp;mut </span>module));
-
-        <span class="macro">assert_eq!</span>(<span class="prelude-val">Ok</span>(()), results);
-    }
+    <span class="macro">verifier_test!</span>(no_errors, <span class="string">r#"(a: number): number =&gt; { a };"#</span>, <span class="prelude-val">Ok</span>(()));
 
     <span class="comment">// TODO
     // #[test]
@@ -4902,23 +4807,18 @@ a = b;"#</span>,
     //     );
     // }
 
-    </span><span class="attr">#[test]
-    </span><span class="kw">fn </span>errors_when_calling_number() {
-        <span class="kw">let </span>results = parse(<span class="string">"123456();"</span>, <span class="number">0</span>).and_then(|<span class="kw-2">mut </span>module| verify_module(<span class="kw-2">&amp;mut </span>module));
+    </span><span class="macro">verifier_test!</span>(
+        errors_when_calling_number,
+        <span class="string">r#"123456();"#</span>,
+        <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[(
+            EgonTypeError::NotCallable(<span class="string">"number"</span>.to_string()).into(),
+            <span class="number">0</span>..<span class="number">6
+        </span>)])
+    );
 
-        <span class="macro">assert_eq!</span>(
-            <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[(
-                EgonTypeError::NotCallable(<span class="string">"number"</span>.to_string()).into(),
-                <span class="number">0</span>..<span class="number">6
-            </span>)]),
-            results
-        );
-    }
-
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>errors_when_call_fn_stmt_with_calls_as_args_but_type_mismatched() {
-        <span class="kw">let </span>results = parse(
-            <span class="string">r#"
+    <span class="macro">verifier_test!</span>(
+        errors_when_call_fn_stmt_with_calls_as_args_but_type_mismatched,
+        <span class="string">r#"
         fn sum (a: number, b: number): number =&gt; {
             a + b
         }
@@ -4927,29 +4827,87 @@ a = b;"#</span>,
 
         sum(empty_string(), empty_string());
         "#</span>,
-            <span class="number">0</span>,
-        )
-        .and_then(|<span class="kw-2">mut </span>module| verify_module(<span class="kw-2">&amp;mut </span>module));
+        <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[
+            (
+                EgonError::TypeError(EgonTypeError::MismatchType {
+                    expected: <span class="string">"number"</span>.to_string(),
+                    actual: <span class="string">"string"</span>.to_string()
+                }),
+                <span class="number">139</span>..<span class="number">153
+            </span>),
+            (
+                EgonError::TypeError(EgonTypeError::MismatchType {
+                    expected: <span class="string">"number"</span>.to_string(),
+                    actual: <span class="string">"string"</span>.to_string()
+                }),
+                <span class="number">155</span>..<span class="number">169
+            </span>)
+        ])
+    );
 
-        <span class="macro">assert_eq!</span>(
-            <span class="prelude-val">Err</span>(<span class="macro">vec!</span>[
-                (
-                    EgonError::TypeError(EgonTypeError::MismatchType {
-                        expected: <span class="string">"number"</span>.to_string(),
-                        actual: <span class="string">"string"</span>.to_string()
-                    }),
-                    <span class="number">139</span>..<span class="number">153
-                </span>),
-                (
-                    EgonError::TypeError(EgonTypeError::MismatchType {
-                        expected: <span class="string">"number"</span>.to_string(),
-                        actual: <span class="string">"string"</span>.to_string()
-                    }),
-                    <span class="number">155</span>..<span class="number">169
-                </span>)
-            ]),
-            results
-        );
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>should_be_able_to_get_types_from_type_cache_after_verify() {
+        <span class="kw">let </span><span class="kw-2">mut </span>module = parse(<span class="string">"let a = 123; { let b = false; }; let b = ();"</span>, <span class="number">0</span>).expect(<span class="string">"..."</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>type_env = ::egonlang_types::type_env::TypeEnv::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>type_cache: <span class="kw">crate</span>::VerifierExprTypeCache =
+            HashMap::&lt;::egonlang_core::ast::ExprS, Type&gt;::new();
+
+        {
+            <span class="kw">let </span><span class="kw-2">mut </span>verifier = Verifier::new(<span class="kw-2">&amp;mut </span>type_env, <span class="kw-2">&amp;mut </span>type_cache).with_default_rules();
+            <span class="kw">let _ </span>= verifier.verify(<span class="kw-2">&amp;mut </span>module);
+        };
+
+        {
+            <span class="kw">let </span>nodes = module.get_by_index(<span class="number">9</span>);
+            <span class="kw">let </span>number_expr_node = nodes.last().unwrap();
+            <span class="macro">assert_eq!</span>(
+                <span class="kw-2">&amp;</span>AstNode::Expr((
+                    Expr::Literal(ast::ExprLiteral::Number(<span class="number">123f64</span>)).into(),
+                    <span class="number">8</span>..<span class="number">11
+                </span>)),
+                number_expr_node
+            );
+
+            <span class="kw">if let </span>AstNode::Expr((e, s)) = number_expr_node {
+                <span class="macro">assert_eq!</span>(
+                    <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>Type::number()),
+                    type_cache.get(<span class="kw-2">&amp;</span>(e.clone(), s.clone()))
+                )
+            } <span class="kw">else </span>{
+                <span class="macro">panic!</span>(<span class="string">"FAILED!"</span>)
+            }
+        };
+
+        {
+            <span class="kw">let </span>nodes = module.get_by_index(<span class="number">26</span>);
+            <span class="kw">let </span>bool_expr_node = nodes.last().unwrap();
+            <span class="macro">assert_eq!</span>(
+                <span class="kw-2">&amp;</span>AstNode::Expr((Expr::Literal(ast::ExprLiteral::Bool(<span class="bool-val">false</span>)).into(), <span class="number">23</span>..<span class="number">28</span>)),
+                bool_expr_node
+            );
+
+            <span class="kw">if let </span>AstNode::Expr((e, s)) = bool_expr_node {
+                <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>Type::bool()), type_cache.get(<span class="kw-2">&amp;</span>(e.clone(), s.clone())))
+            } <span class="kw">else </span>{
+                <span class="macro">panic!</span>(<span class="string">"FAILED!"</span>)
+            }
+        };
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>should_be_able_to_get_types_from_type_env_after_verify() {
+        <span class="kw">let </span><span class="kw-2">mut </span>module = parse(<span class="string">"let a = 123; { let b = false; }; let b = ();"</span>, <span class="number">0</span>).expect(<span class="string">"..."</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>type_env = ::egonlang_types::type_env::TypeEnv::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>type_cache: <span class="kw">crate</span>::VerifierExprTypeCache =
+            HashMap::&lt;::egonlang_core::ast::ExprS, Type&gt;::new();
+
+        {
+            <span class="kw">let </span><span class="kw-2">mut </span>verifier = Verifier::new(<span class="kw-2">&amp;mut </span>type_env, <span class="kw-2">&amp;mut </span>type_cache).with_default_rules();
+            <span class="kw">let _ </span>= verifier.verify(<span class="kw-2">&amp;mut </span>module);
+        };
+
+        <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>Type::number()), type_env.get_variable(<span class="string">"a"</span>));
+        <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>Type::unit()), type_env.get_variable(<span class="string">"b"</span>));
     }
 }
 </code></pre></div></section></main></body></html>

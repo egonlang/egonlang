@@ -266,6 +266,10 @@
 <a href="#266" id="266">266</a>
 <a href="#267" id="267">267</a>
 <a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>egonlang_core::ast::{Expr, Stmt};
@@ -524,7 +528,11 @@
             <span class="kw">let </span><span class="kw-2">mut </span>module = ::egonlang_core::parser::parse(<span class="macro-nonterminal">$input</span>, <span class="number">0</span>)
                 .expect(<span class="string">"Unable to parse source to module"</span>);
 
-            <span class="kw">let </span><span class="kw-2">mut </span>verifier = <span class="macro-nonterminal">$crate::verifier::Verifier::new</span>();
+                <span class="kw">let </span><span class="kw-2">mut </span>type_env = ::egonlang_types::type_env::TypeEnv::new();
+                <span class="kw">let </span><span class="kw-2">mut </span>type_cache: <span class="macro-nonterminal">$crate::verifier::VerifierExprTypeCache </span>=
+                    ::std::collections::HashMap::&lt;::egonlang_core::ast::ExprS, ::egonlang_types::Type&gt;::new();
+                <span class="kw">let </span><span class="kw-2">mut </span>verifier =
+                    <span class="macro-nonterminal">$crate::Verifier::new</span>(<span class="kw-2">&amp;mut </span>type_env, <span class="kw-2">&amp;mut </span>type_cache);
 
             verifier.add_rule(<span class="macro-nonterminal">$rule</span>);
 
