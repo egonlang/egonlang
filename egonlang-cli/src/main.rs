@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{collections::HashMap, path::PathBuf};
 
 use clap::{Parser, Subcommand};
 use egonlang_core::prelude::*;
@@ -46,8 +46,15 @@ fn main() {
 
                 let module = match parse(&content, 0) {
                     Ok(mut module) => {
-                        let mut verifier = Verifier::default();
-                        verifier.verify(&mut module)
+                        let mut type_env = ::egonlang_types::type_env::TypeEnv::new();
+                        let mut type_cache: ::egonlang_verifier::VerifierExprTypeCache =
+                            HashMap::<::egonlang_core::ast::ExprS, ::egonlang_types::Type>::new();
+                        let mut verifier =
+                            Verifier::new(&mut type_env, &mut type_cache).with_default_rules();
+                        match verifier.verify(&mut module) {
+                            Ok(_) => Ok(module),
+                            Err(verify_errs) => Err(verify_errs),
+                        }
                     }
                     Err(errs) => Err(errs),
                 };

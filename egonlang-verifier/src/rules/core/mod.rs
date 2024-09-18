@@ -17,7 +17,6 @@ mod type_mismatch_list_items;
 mod type_mismatch_on_declarations;
 mod type_mismatch_prefix;
 mod type_mismatch_reassigning_values;
-mod undefined_identifier;
 mod wrong_number_of_args_calling_fn;
 
 pub use assert_type::AssertTypeRule;
@@ -37,5 +36,4 @@ pub use type_mismatch_list_items::TypeMisMatchListItemsRule;
 pub use type_mismatch_on_declarations::TypeMismatchOnDeclarationsRule;
 pub use type_mismatch_prefix::TypeMismatchPrefixRule;
 pub use type_mismatch_reassigning_values::TypeMismatchReassigningValuesRule;
-pub use undefined_identifier::ReferencingUndefinedIdentifierRule;
 pub use wrong_number_of_args_calling_fn::WrongNumberOfArgsCallingFnRule;

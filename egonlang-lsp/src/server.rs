@@ -72,7 +72,12 @@ impl LanguageServer for EgonLanguageServerBackend {
 
         match module {
             Ok(mut module) => {
-                let errs = verify_module(&mut module).err().unwrap_or_default();
+                let mut type_env = ::egonlang_types::type_env::TypeEnv::new();
+                let mut type_cache: ::egonlang_verifier::VerifierExprTypeCache =
+                    HashMap::<::egonlang_core::ast::ExprS, ::egonlang_types::Type>::new();
+                let mut verifier =
+                    Verifier::new(&mut type_env, &mut type_cache).with_default_rules();
+                let errs = verifier.verify(&mut module).err().unwrap_or_default();
 
                 // Map errors to
                 let diagnostics: Vec<LspDiagnosis> = errs
@@ -125,7 +130,12 @@ impl LanguageServer for EgonLanguageServerBackend {
 
         match module {
             Ok(mut module) => {
-                let errs = verify_module(&mut module).err().unwrap_or_default();
+                let mut type_env = ::egonlang_types::type_env::TypeEnv::new();
+                let mut type_cache: ::egonlang_verifier::VerifierExprTypeCache =
+                    HashMap::<::egonlang_core::ast::ExprS, ::egonlang_types::Type>::new();
+                let mut verifier =
+                    Verifier::new(&mut type_env, &mut type_cache).with_default_rules();
+                let errs = verifier.verify(&mut module).err().unwrap_or_default();
 
                 // Map errors to
                 let diagnostics: Vec<LspDiagnosis> = errs
@@ -175,7 +185,11 @@ impl LanguageServer for EgonLanguageServerBackend {
         let index = position_to_index(doc, (position.line as usize, position.character as usize));
 
         if let Ok(mut module) = parse(doc, 0) {
-            let _ = verify_module(&mut module);
+            let mut type_env = ::egonlang_types::type_env::TypeEnv::new();
+            let mut type_cache: ::egonlang_verifier::VerifierExprTypeCache =
+                HashMap::<::egonlang_core::ast::ExprS, ::egonlang_types::Type>::new();
+            let mut verifier = Verifier::new(&mut type_env, &mut type_cache).with_default_rules();
+            let _ = verifier.verify(&mut module);
 
             let mut nodes = module.get_by_index(index);
 

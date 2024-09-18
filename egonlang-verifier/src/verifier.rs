@@ -17,59 +17,45 @@ pub type VerifierExprTypeCache = HashMap<ExprS, Type>;
 /// ```
 /// use egonlang_core::prelude::*;
 /// use egonlang_verifier::prelude::*;
+/// use egonlang_types::type_env::TypeEnv;
+/// use std::collections::HashMap;
 ///
 /// // Verifier with the default rule set
-/// let verifier = Verifier::default();
+/// let result = match parse("123;", 0) {
+///     Ok(mut module) => {
+///         let mut type_env = TypeEnv::new();
+///         let mut type_cache: VerifierExprTypeCache = HashMap::<_, _>::new();
+///         let mut verifier = Verifier::new(&mut type_env, &mut type_cache).with_default_rules();
 ///
-/// let mut module = parse("let a = 123;", 0).expect("Unable to parse");
-///
-/// let result = verify_module(&mut module);
+///     verifier.verify(&mut module)
+///     }
+///     Err(parse_errs) => Err(parse_errs),
+/// };
 ///
 /// matches!(result, Ok(()));
 /// ```
 pub struct Verifier<'a> {
-    rules: Vec<Box<dyn Rule<'a>>>,
-    type_env: TypeEnv,
-    expr_types: VerifierExprTypeCache,
-}
-
-impl Default for Verifier<'_> {
-    /// Create a [`Verifier`] with the [`Rule`] set
-    fn default() -> Self {
-        Self::new().with_default_rules()
-    }
+    rules: Vec<Arc<dyn Rule<'a> + Send + Sync>>,
+    type_env: &'a mut TypeEnv,
+    expr_types: &'a mut VerifierExprTypeCache,
 }
 
 impl<'a> Verifier<'a> {
     /// Create a [`Verifier`] with no default [`Rule`](crate::rules::Rule) set
-    pub fn new() -> Self {
+    pub fn new(type_env: &'a mut TypeEnv, expr_types: &'a mut VerifierExprTypeCache) -> Self {
         Verifier {
             rules: Default::default(),
-            type_env: TypeEnv::new(),
-            expr_types: HashMap::new(),
+            type_env,
+            expr_types,
         }
     }
 
     /// Register a [`Rule`](crate::rules::Rule)
-    ///
-    /// ```ignore
-    /// use egonlang_verifier::prelude::*;
-    ///
-    /// let verifier = Verifier::new().with_rule(TypeMismatchInfixRule);
-    /// ```
-    pub fn add_rule<R: Rule<'a> + 'static>(&mut self, rule: R) {
-        self.rules.push(Box::new(rule));
+    pub fn add_rule<R: Rule<'a> + 'static + Send + Sync>(&mut self, rule: R) {
+        self.rules.push(Arc::new(rule));
     }
 
     /// Register the core language [`Rule`](crate::rules::Rule) set
-    ///
-    /// ```
-    /// use egonlang_verifier::prelude::*;
-    ///
-    /// // These are the same
-    /// let verifier = Verifier::new().with_default_rules();
-    /// let verifier = Verifier::default();
-    /// ```
     pub fn with_default_rules(mut self) -> Self {
         self.add_rule(TypeMismatchInfixRule);
         self.add_rule(TypeMismatchPrefixRule);
@@ -77,7 +63,6 @@ impl<'a> Verifier<'a> {
         self.add_rule(TypeMismatchOnDeclarationsRule);
         self.add_rule(DeclareConstWithoutValueRule);
         self.add_rule(ReassigningConstValueRule);
-        // self.add_rule(ReferencingUndefinedIdentifierRule);
         self.add_rule(DivideByZeroRule);
         self.add_rule(TypeMismatchFnReturnExprRule);
         self.add_rule(TypeMismatchIfCondExprRule);
@@ -752,7 +737,7 @@ impl<'a> Verifier<'a> {
             let rule_string = rule.to_string();
 
             let rule_errs = rule
-                .visit_stmt(stmt, span, &self.type_env, &self.expr_types)
+                .visit_stmt(stmt, span, self.type_env, self.expr_types)
                 .err()
                 .unwrap_or_default();
 
@@ -804,7 +789,7 @@ impl<'a> Verifier<'a> {
             let rule_string = rule.to_string();
 
             let rule_errs = rule
-                .visit_expr(&self.type_env, expr.clone(), span, &self.expr_types)
+                .visit_expr(self.type_env, expr.clone(), span, self.expr_types)
                 .err()
                 .unwrap_or_default();
 
@@ -1346,8 +1331,9 @@ impl<'a> Verifier<'a> {
 
 #[cfg(test)]
 mod verifier_tests {
-    use crate::prelude::*;
-    use ast::{Expr, ExprIdentifier};
+    use std::collections::HashMap;
+
+    use ast::{AstNode, Expr};
     use egonlang_core::prelude::*;
     use egonlang_errors::{EgonError, EgonSyntaxError, EgonTypeError};
     use egonlang_types::Type;
@@ -1359,7 +1345,18 @@ mod verifier_tests {
         ($test_name:ident, $input:expr, $expected:expr) => {
             #[test]
             fn $test_name() {
-                let result = parse($input, 0).and_then(|mut module| verify_module(&mut module));
+                let result = match parse($input, 0) {
+                    Ok(mut module) => {
+                        let mut type_env = ::egonlang_types::type_env::TypeEnv::new();
+                        let mut type_cache: $crate::verifier::VerifierExprTypeCache =
+                            HashMap::<::egonlang_core::ast::ExprS, Type>::new();
+                        let mut verifier =
+                            Verifier::new(&mut type_env, &mut type_cache).with_default_rules();
+
+                        verifier.verify(&mut module)
+                    }
+                    Err(parse_errs) => Err(parse_errs),
+                };
 
                 assert_eq!($expected, result);
             }
@@ -1369,7 +1366,18 @@ mod verifier_tests {
             #[test]
             #[ignore = $ignore_reason]
             fn $test_name() {
-                let result = parse($input, 0).and_then(|module| Verifier::new().verify(&module));
+                let result = match parse($input, 0) {
+                    Ok(mut module) => {
+                        let mut type_env = ::egonlang_types::type_env::TypeEnv::new();
+                        let mut type_cache: $crate::verifier::VerifierExprTypeCache =
+                            HashMap::<::egonlang_core::ast::ExprS, Type>::new();
+                        let mut verifier =
+                            Verifier::new(&mut type_env, &mut type_cache).with_default_rules();
+
+                        verifier.verify(&mut module)
+                    }
+                    Err(parse_errs) => Err(parse_errs),
+                };
 
                 assert_eq!($expected, result);
             }
@@ -2247,149 +2255,67 @@ a = b;"#,
         )])
     );
 
-    #[test]
-    fn errors_when_referencing_undefined_identifier() {
-        let mut verifier = Verifier::default();
+    verifier_test!(
+        errors_when_referencing_undefined_identifier,
+        r#"a;"#,
+        Err(vec![(
+            EgonTypeError::Undefined("a".to_string()).into(),
+            0..1
+        )])
+    );
 
-        let mut module = ast::Module::from(vec![(
-            ast::StmtExpr {
-                expr: (
-                    Expr::Identifier(ExprIdentifier {
-                        identifier: ast::Identifier {
-                            name: "a".to_string(),
-                        },
-                    })
-                    .into(),
-                    1..2,
-                ),
+    verifier_test!(
+        errors_when_referencing_multiple_undefined_identifiers,
+        r#"a; a;"#,
+        Err(vec![
+            (EgonTypeError::Undefined("a".to_string()).into(), 0..1),
+            (EgonTypeError::Undefined("a".to_string()).into(), 3..4)
+        ])
+    );
+
+    verifier_test!(
+        errors_when_declaring_let_using_list_with_type_mismatched_items,
+        r#"let a = [10, false];"#,
+        Err(vec![(
+            EgonTypeError::MismatchType {
+                expected: Type::number().to_string(),
+                actual: Type::bool().to_string()
             }
             .into(),
-            0..3,
-        )]);
+            13..18
+        )])
+    );
 
-        let results = verifier.verify(&mut module);
+    verifier_test!(
+        errors_when_assigning_using_list_with_type_mismatched_items,
+        r#"let a: list<number>; a = [10, false];"#,
+        Err(vec![(
+            EgonTypeError::MismatchType {
+                expected: Type::number().to_string(),
+                actual: Type::bool().to_string()
+            }
+            .into(),
+            30..35
+        )])
+    );
 
-        assert_eq!(
-            Err(vec![(
-                EgonTypeError::Undefined("a".to_string()).into(),
-                1..2
-            )]),
-            results
-        );
-    }
-
-    #[test]
-    fn errors_when_referencing_multiple_undefined_identifiers() {
-        let mut verifier = Verifier::default();
-
-        let mut module = ast::Module::from(vec![
+    verifier_test!(
+        errors_when_reassigning_to_undefined_ident_using_list_with_type_mismatched_items,
+        r#"a = [10, false];"#,
+        Err(vec![
+            (EgonTypeError::Undefined("a".to_string()).into(), 0..1),
             (
-                ast::StmtExpr {
-                    expr: (
-                        Expr::Identifier(ExprIdentifier {
-                            identifier: ast::Identifier {
-                                name: "a".to_string(),
-                            },
-                        })
-                        .into(),
-                        1..2,
-                    ),
-                }
-                .into(),
-                0..0,
-            ),
-            (
-                ast::StmtExpr {
-                    expr: (
-                        Expr::Identifier(ExprIdentifier {
-                            identifier: ast::Identifier {
-                                name: "b".to_string(),
-                            },
-                        })
-                        .into(),
-                        5..6,
-                    ),
-                }
-                .into(),
-                0..0,
-            ),
-        ]);
-
-        let results = verifier.verify(&mut module);
-
-        assert_eq!(
-            Err(vec![
-                (EgonTypeError::Undefined("a".to_string()).into(), 1..2),
-                (EgonTypeError::Undefined("b".to_string()).into(), 5..6)
-            ]),
-            results
-        );
-    }
-
-    #[test]
-    fn errors_when_declaring_let_using_list_with_type_mismatched_items() {
-        let results =
-            parse("let a = [10, false];", 0).and_then(|mut module| verify_module(&mut module));
-
-        assert_eq!(
-            Err(vec![(
                 EgonTypeError::MismatchType {
                     expected: Type::number().to_string(),
                     actual: Type::bool().to_string()
                 }
                 .into(),
-                13..18
-            )]),
-            results
-        );
-    }
+                9..14
+            ),
+        ])
+    );
 
-    #[test]
-    fn errors_when_assigning_using_list_with_type_mismatched_items() {
-        let results = parse("let a: list<number>; a = [10, false];", 0)
-            .and_then(|mut module| verify_module(&mut module));
-
-        assert_eq!(
-            Err(vec![(
-                EgonTypeError::MismatchType {
-                    expected: Type::number().to_string(),
-                    actual: Type::bool().to_string()
-                }
-                .into(),
-                30..35
-            )]),
-            results
-        );
-    }
-
-    #[test]
-    fn errors_when_reassigning_to_undefined_ident_using_list_with_type_mismatched_items() {
-        let results =
-            parse("a = [10, false];", 0).and_then(|mut module| verify_module(&mut module));
-
-        assert_eq!(
-            Err(vec![
-                (EgonTypeError::Undefined("a".to_string()).into(), 0..1),
-                (
-                    EgonTypeError::MismatchType {
-                        expected: Type::number().to_string(),
-                        actual: Type::bool().to_string()
-                    }
-                    .into(),
-                    9..14
-                ),
-            ]),
-            results
-        );
-    }
-
-    #[test]
-    fn no_errors() {
-        let results = parse("(a: number): number => { a };", 0)
-            .and_then(|mut module| verify_module(&mut module));
-
-        assert_eq!(Ok(()), results);
-    }
+    verifier_test!(no_errors, r#"(a: number): number => { a };"#, Ok(()));
 
     // TODO
     // #[test]
@@ -2425,23 +2351,18 @@ a = b;"#,
     //     );
     // }
 
-    #[test]
-    fn errors_when_calling_number() {
-        let results = parse("123456();", 0).and_then(|mut module| verify_module(&mut module));
+    verifier_test!(
+        errors_when_calling_number,
+        r#"123456();"#,
+        Err(vec![(
+            EgonTypeError::NotCallable("number".to_string()).into(),
+            0..6
+        )])
+    );
 
-        assert_eq!(
-            Err(vec![(
-                EgonTypeError::NotCallable("number".to_string()).into(),
-                0..6
-            )]),
-            results
-        );
-    }
-
-    #[test]
-    fn errors_when_call_fn_stmt_with_calls_as_args_but_type_mismatched() {
-        let results = parse(
-            r#"
+    verifier_test!(
+        errors_when_call_fn_stmt_with_calls_as_args_but_type_mismatched,
+        r#"
         fn sum (a: number, b: number): number => {
             a + b
         }
@@ -2450,28 +2371,86 @@ a = b;"#,
 
         sum(empty_string(), empty_string());
         "#,
-            0,
-        )
-        .and_then(|mut module| verify_module(&mut module));
+        Err(vec![
+            (
+                EgonError::TypeError(EgonTypeError::MismatchType {
+                    expected: "number".to_string(),
+                    actual: "string".to_string()
+                }),
+                139..153
+            ),
+            (
+                EgonError::TypeError(EgonTypeError::MismatchType {
+                    expected: "number".to_string(),
+                    actual: "string".to_string()
+                }),
+                155..169
+            )
+        ])
+    );
 
-        assert_eq!(
-            Err(vec![
-                (
-                    EgonError::TypeError(EgonTypeError::MismatchType {
-                        expected: "number".to_string(),
-                        actual: "string".to_string()
-                    }),
-                    139..153
-                ),
-                (
-                    EgonError::TypeError(EgonTypeError::MismatchType {
-                        expected: "number".to_string(),
-                        actual: "string".to_string()
-                    }),
-                    155..169
+    #[test]
+    fn should_be_able_to_get_types_from_type_cache_after_verify() {
+        let mut module = parse("let a = 123; { let b = false; }; let b = ();", 0).expect("...");
+        let mut type_env = ::egonlang_types::type_env::TypeEnv::new();
+        let mut type_cache: crate::VerifierExprTypeCache =
+            HashMap::<::egonlang_core::ast::ExprS, Type>::new();
+
+        {
+            let mut verifier = Verifier::new(&mut type_env, &mut type_cache).with_default_rules();
+            let _ = verifier.verify(&mut module);
+        };
+
+        {
+            let nodes = module.get_by_index(9);
+            let number_expr_node = nodes.last().unwrap();
+            assert_eq!(
+                &AstNode::Expr((
+                    Expr::Literal(ast::ExprLiteral::Number(123f64)).into(),
+                    8..11
+                )),
+                number_expr_node
+            );
+
+            if let AstNode::Expr((e, s)) = number_expr_node {
+                assert_eq!(
+                    Some(&Type::number()),
+                    type_cache.get(&(e.clone(), s.clone()))
                 )
-            ]),
-            results
-        );
+            } else {
+                panic!("FAILED!")
+            }
+        };
+
+        {
+            let nodes = module.get_by_index(26);
+            let bool_expr_node = nodes.last().unwrap();
+            assert_eq!(
+                &AstNode::Expr((Expr::Literal(ast::ExprLiteral::Bool(false)).into(), 23..28)),
+                bool_expr_node
+            );
+
+            if let AstNode::Expr((e, s)) = bool_expr_node {
+                assert_eq!(Some(&Type::bool()), type_cache.get(&(e.clone(), s.clone())))
+            } else {
+                panic!("FAILED!")
+            }
+        };
+    }
+
+    #[test]
+    fn should_be_able_to_get_types_from_type_env_after_verify() {
+        let mut module = parse("let a = 123; { let b = false; }; let b = ();", 0).expect("...");
+        let mut type_env = ::egonlang_types::type_env::TypeEnv::new();
+        let mut type_cache: crate::VerifierExprTypeCache =
+            HashMap::<::egonlang_core::ast::ExprS, Type>::new();
+
+        {
+            let mut verifier = Verifier::new(&mut type_env, &mut type_cache).with_default_rules();
+            let _ = verifier.verify(&mut module);
+        };
+
+        assert_eq!(Some(&Type::number()), type_env.get_variable("a"));
+        assert_eq!(Some(&Type::unit()), type_env.get_variable("b"));
     }
 }

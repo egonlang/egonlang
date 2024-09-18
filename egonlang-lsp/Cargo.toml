@@ -13,5 +13,6 @@ codespan-reporting = "0.11.1"
 egonlang-core = { path = "../egonlang-core" }
 egonlang-verifier = { path = "../egonlang-verifier" }
 egonlang-diagnostics = { path = "../egonlang-diagnostics" }
+egonlang-types = { path = "../egonlang-types" }
 str-idxpos = { path = "../str-idxpos" }
 span = { path = "../span" }

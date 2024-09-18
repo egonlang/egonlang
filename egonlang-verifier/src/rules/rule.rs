@@ -256,7 +256,11 @@ macro_rules! verifier_rule_test {
             let mut module = ::egonlang_core::parser::parse($input, 0)
                 .expect("Unable to parse source to module");
 
-            let mut verifier = $crate::verifier::Verifier::new();
+                let mut type_env = ::egonlang_types::type_env::TypeEnv::new();
+                let mut type_cache: $crate::verifier::VerifierExprTypeCache =
+                    ::std::collections::HashMap::<::egonlang_core::ast::ExprS, ::egonlang_types::Type>::new();
+                let mut verifier =
+                    $crate::Verifier::new(&mut type_env, &mut type_cache);
 
             verifier.add_rule($rule);
 

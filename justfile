@@ -48,7 +48,7 @@ fix:
 # Format cargo crates code
 format:
     cargo fmt --all
-    cargo clippy --fix --all-targets --no-deps --workspace
+    cargo clippy --fix --all-targets --no-deps --workspace 
 
 # Lint cargo crates code
 lint:

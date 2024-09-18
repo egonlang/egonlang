@@ -1,9 +1,11 @@
+use std::collections::HashMap;
 use std::io::Write;
 use std::path::PathBuf;
 use std::{fs, str};
 
+use ::egonlang_types::type_env::TypeEnv;
+use ::egonlang_verifier::{Verifier, VerifierExprTypeCache};
 use egonlang_core::prelude::parse;
-use egonlang_verifier::prelude::verify_module;
 use pretty_assertions::assert_eq;
 
 #[rstest::rstest]
@@ -31,7 +33,18 @@ fn integration_implemented(path: PathBuf) {
 
     let mut got_output = Vec::new();
 
-    if let Err(e) = parse(&source, 0).and_then(|mut module| verify_module(&mut module)) {
+    let result = match parse(&source, 0) {
+        Ok(mut module) => {
+            let mut type_env = TypeEnv::new();
+            let mut type_cache: VerifierExprTypeCache = HashMap::<_, _>::new();
+            let mut verifier = Verifier::new(&mut type_env, &mut type_cache).with_default_rules();
+
+            verifier.verify(&mut module)
+        }
+        Err(parse_errs) => Err(parse_errs),
+    };
+
+    if let Err(e) = result {
         let m = e
             .into_iter()
             .map(|(e, _)| e.to_string())
@@ -59,9 +72,20 @@ fn integration_todo(#[files("../res/examples/todo/**/*.eg")] path: PathBuf) {
         }
     }
 
+    let result = match parse(&source, 0) {
+        Ok(mut module) => {
+            let mut type_env = TypeEnv::new();
+            let mut type_cache: VerifierExprTypeCache = HashMap::<_, _>::new();
+            let mut verifier = Verifier::new(&mut type_env, &mut type_cache).with_default_rules();
+
+            verifier.verify(&mut module)
+        }
+        Err(parse_errs) => Err(parse_errs),
+    };
+
     let mut got_output = Vec::new();
 
-    if let Err(e) = parse(&source, 0).and_then(|mut module| verify_module(&mut module)) {
+    if let Err(e) = result {
         let m = e
             .into_iter()
             .map(|(e, _)| e.to_string())

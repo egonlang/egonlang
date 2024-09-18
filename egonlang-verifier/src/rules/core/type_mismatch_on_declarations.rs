@@ -110,6 +110,8 @@ stmt_rule!(
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
+
     use super::TypeMismatchOnDeclarationsRule;
     use crate::{verifier_rule_test, Verifier};
     use egonlang_errors::EgonTypeError;
@@ -125,7 +127,10 @@ mod tests {
     fn returns_ok_2if_assignment_type_and_value_type_match() {
         let mut module = ::egonlang_core::parser::parse("const a: number = 123;", 0)
             .expect("Unable to parse source to module");
-        let mut verifier = Verifier::new();
+        let mut type_env = ::egonlang_types::type_env::TypeEnv::new();
+        let mut type_cache: crate::verifier::VerifierExprTypeCache =
+            HashMap::<::egonlang_core::ast::ExprS, Type>::new();
+        let mut verifier = Verifier::new(&mut type_env, &mut type_cache);
         verifier.add_rule(TypeMismatchOnDeclarationsRule);
         let result = verifier.verify(&mut module);
         ::pretty_assertions::assert_eq!((Ok(())), result);
